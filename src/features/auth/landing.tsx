@@ -47,7 +47,6 @@ export function Landing() {
           <Button
             asChild
             variant='outline'
-            variant='outline'
             className='h-14 w-full rounded-full border-2 text-base font-semibold'
           >
             { }
@@ -58,7 +57,6 @@ export function Landing() {
 
           <Button
             asChild
-            variant='outline'
             variant='outline'
             className='h-14 w-full rounded-full border-2 text-base font-semibold'
           >

@@ -186,7 +186,7 @@ export function PartsOrders() {
   const itemsPerPage = 20
   const totalItems = mockOrders.length // 根据实际数据
   const totalPages = Math.ceil(totalItems / itemsPerPage)
-  const [open, setOpen] = useState(false)
+  const [, setOpen] = useState(false)
 
   const getStatusVariant = (
     status: string

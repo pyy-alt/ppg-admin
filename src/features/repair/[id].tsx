@@ -13,7 +13,7 @@ export function RepairOrderDetail() {
     useState(false)
   const [isAddPartsOrderDialogOpen, setIsAddPartsOrderDialogOpen] =
     useState(false)
-  const [initialPartsOrderData, setInitialPartsOrderData] =
+  const [initialPartsOrderData] =
     useState<PartsOrderData | null>({
       shopRo: '805',
       customer: 'Brian Cooper',

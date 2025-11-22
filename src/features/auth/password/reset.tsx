@@ -165,7 +165,6 @@ export function ResetPassword() {
             <div className='flex justify-center gap-4'>
               <Link
                 to='/password/forgot'
-                variant='default'
                 className='rounded-full px-4 py-2 transition-colors'
               >
                 Request New Link
