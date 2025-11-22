@@ -1,0 +1,12 @@
+[
+  {
+    "swaggerUrl": "https://audi-api.ppg.dev.quasidea.com/ppg/swagger",
+    "clientsDestination": "src/js/clients",
+    "modelsDestination": "src/js/models",
+    "baseClassName": "PpgApiClient",
+    "requestInterceptor": "src/js/clients/interceptors/request.ts",
+    "responseInterceptor": "src/js/clients/interceptors/response.ts",
+    "useReactHooks": true,
+    "generateHookNames": true
+  }
+]
