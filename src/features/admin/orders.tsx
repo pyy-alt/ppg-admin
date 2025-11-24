@@ -27,8 +27,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { DatePicker } from '@/components/date-picker'
 import { DataTablePagination } from '@/components/data-table-pagination'
+import { DatePicker } from '@/components/date-picker'
 
 // 模拟数据（保持不变）
 const mockOrders = [
@@ -205,7 +205,9 @@ export function Orders() {
       {/* Header */}
       <div className='bg-background'>
         <div className='flex items-center justify-between px-6 py-4'>
-          <h1 className='text-2xl font-bold text-foreground'>Parts Order List</h1>
+          <h1 className='text-foreground text-2xl font-bold'>
+            Parts Order List
+          </h1>
           <Button variant='default'>
             <Download className='mr-2 h-4 w-4' />
             Report
@@ -217,7 +219,7 @@ export function Orders() {
         {/* Search + Checkbox */}
         <div className='mb-6 flex flex-col gap-4 lg:flex-row lg:items-center'>
           <div className='relative max-w-md flex-1'>
-            <Search className='absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
+            <Search className='text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2' />
             <Input
               placeholder='Filter by RO#, Sales Order #, VIN, Shop, Dealer'
               className='pl-10'
@@ -331,33 +333,41 @@ export function Orders() {
         </div>
 
         {/* Table */}
-        <div className='overflow-hidden rounded-lg border bg-card shadow-sm'>
+        <div className='bg-card overflow-hidden rounded-lg border shadow-sm'>
           <Table>
             <TableHeader>
               <TableRow className='bg-muted'>
-                <TableHead className='font-semibold text-foreground'>RO #</TableHead>
-                <TableHead className='font-semibold text-foreground'>
+                <TableHead className='text-foreground font-semibold'>
+                  RO #
+                </TableHead>
+                <TableHead className='text-foreground font-semibold'>
                   Sales #
                 </TableHead>
-                <TableHead className='font-semibold text-foreground'>Type</TableHead>
-                <TableHead className='font-semibold text-foreground'>VIN</TableHead>
-                <TableHead className='font-semibold text-foreground'>
+                <TableHead className='text-foreground font-semibold'>
+                  Type
+                </TableHead>
+                <TableHead className='text-foreground font-semibold'>
+                  VIN
+                </TableHead>
+                <TableHead className='text-foreground font-semibold'>
                   Year/Make/Model
                 </TableHead>
-                <TableHead className='font-semibold text-foreground'>
+                <TableHead className='text-foreground font-semibold'>
                   Status
                 </TableHead>
-                <TableHead className='font-semibold text-foreground'>Shop</TableHead>
-                <TableHead className='font-semibold text-foreground'>
+                <TableHead className='text-foreground font-semibold'>
+                  Shop
+                </TableHead>
+                <TableHead className='text-foreground font-semibold'>
                   Dealer
                 </TableHead>
-                <TableHead className='font-semibold text-foreground'>
+                <TableHead className='text-foreground font-semibold'>
                   CSR Region
                 </TableHead>
-                <TableHead className='font-semibold text-foreground'>
+                <TableHead className='text-foreground font-semibold'>
                   Date Completed
                 </TableHead>
-                <TableHead className='font-semibold text-foreground'>
+                <TableHead className='text-foreground font-semibold'>
                   Date Closed
                 </TableHead>
               </TableRow>
@@ -368,7 +378,7 @@ export function Orders() {
                   key={`${order.ro}-${order.salesOrder}`}
                   className='hover:bg-muted/50'
                 >
-                  <TableCell className='font-medium text-primary'>
+                  <TableCell className='text-primary font-medium'>
                     {order.ro}
                   </TableCell>
                   <TableCell>{order.salesOrder}</TableCell>

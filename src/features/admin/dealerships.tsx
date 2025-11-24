@@ -133,7 +133,7 @@ const itemsPerPage = 20
 const totalItems = mockDealers.length // 根据实际数据
 const totalPages = Math.ceil(totalItems / itemsPerPage)
   return (
-    <div className='min-h-screen bg-background text-foreground'>
+    <div className='min-h-screen bg-background'>
       {/* Header */}
       <div className='border-b bg-background'>
         <div className='flex items-center justify-between px-6 py-4'>
@@ -143,7 +143,6 @@ const totalPages = Math.ceil(totalItems / itemsPerPage)
             Report
           </Button>
         </div>
-      </div>
 
       <div className='px-6 py-6'>
         {/* Search */}
@@ -152,16 +151,16 @@ const totalPages = Math.ceil(totalItems / itemsPerPage)
             <Search className='absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
             <Input
               placeholder='Filter by Name, #, City'
-              className='pl-10'
+              className='border-gray-300 pl-10'
             />
           </div>
         </div>
 
         {/* Table */}
-        <div className='overflow-hidden rounded-lg border bg-card text-card-foreground shadow-sm'>
+        <div className='overflow-hidden rounded-lg border bg-background shadow-sm'>
           <Table>
             <TableHeader>
-              <TableRow className='bg-muted hover:bg-muted'>
+              <TableRow className='bg-muted'>
                 <TableHead className='font-semibold text-foreground'>Name</TableHead>
                 <TableHead className='font-semibold text-foreground'>
                   Number
@@ -183,8 +182,8 @@ const totalPages = Math.ceil(totalItems / itemsPerPage)
             </TableHeader>
             <TableBody>
               {mockDealers.map((dealer) => (
-                <TableRow key={dealer.number} className='hover:bg-muted/50'>
-                  <TableCell className='cursor-pointer font-medium text-primary hover:underline'>
+                <TableRow key={dealer.number} className='hover:bg-background'>
+                  <TableCell className='cursor-pointer font-medium text-blue-600 hover:underline'>
                     {dealer.name}
                   </TableCell>
                   <TableCell>{dealer.number}</TableCell>
@@ -214,6 +213,7 @@ const totalPages = Math.ceil(totalItems / itemsPerPage)
           onPageChange={setCurrentPage}
         />
       </div>
+    </div>
     </div>
   )
 }

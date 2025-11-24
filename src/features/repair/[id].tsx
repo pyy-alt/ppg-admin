@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { AlertTriangle, Check, Pencil, Plus } from 'lucide-react'
 import navImg from '@/assets/img/repair/nav.png'
 import { Button } from '@/components/ui/button'
@@ -13,7 +13,7 @@ export function RepairOrderDetail() {
     useState(false)
   const [isAddPartsOrderDialogOpen, setIsAddPartsOrderDialogOpen] =
     useState(false)
-  const [initialPartsOrderData] =
+  const [initialPartsOrderData, setInitialPartsOrderData] =
     useState<PartsOrderData | null>({
       shopRo: '805',
       customer: 'Brian Cooper',
@@ -41,6 +41,11 @@ export function RepairOrderDetail() {
       alternateDealerName: '',
       alternateDealerId: '',
     })
+  useEffect(() => {
+    if (initialPartsOrderData) {
+      setInitialPartsOrderData(initialPartsOrderData)
+    }
+  }, [initialPartsOrderData])
   return (
     <div className='bg-background text-foreground'>
       <div className='mt-8 h-full w-full'>

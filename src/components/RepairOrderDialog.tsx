@@ -174,7 +174,7 @@ export default function RepairOrderDialog({
       return undefined
     }
 
-    const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
       accept: getAcceptConfig(),
       multiple: true,
       onDrop: (acceptedFiles) => {
@@ -195,8 +195,8 @@ export default function RepairOrderDialog({
           }`}
         >
           <input {...getInputProps()} />
-          <Icon className='mx-auto h-12 w-12 text-muted-foreground' />
-          <p className='mt-2 text-sm text-muted-foreground'>
+          <Icon className='text-muted-foreground mx-auto h-12 w-12' />
+          <p className='text-muted-foreground mt-2 text-sm'>
             {isDragActive ? (
               <>Drop your {title.toLowerCase()} here...</>
             ) : (
@@ -208,27 +208,28 @@ export default function RepairOrderDialog({
               </>
             )}
           </p>
-          <Button
-            variant='ghost'
-            size='sm'
-            className='mt-4'
-            type='button'
-            onClick={(e) => {
-              e.stopPropagation()
-              // 可以在这里添加打开相机的逻辑
-            }}
-          >
-            <Camera className='mr-2 h-4 w-4' />
-            Open camera
-          </Button>
         </div>
+        <Button
+          variant='outline'
+          className='bg-muted hover:bg-muted/80'
+          size='sm'
+          onClick={(e) => {
+            e.preventDefault()
+            // 可以在这里添加打开相机的逻辑
+            // 暂时使用选择文件
+            open()
+          }}
+        >
+          <Camera className='mr-2 h-4 w-4' />
+          Open camera
+        </Button>
 
         {files.length > 0 && (
           <div className='space-y-2'>
             {files.map((file, i) => (
               <div
                 key={`${file.name}-${i}-${file.size}`}
-                className='flex items-center justify-between rounded-md bg-muted px-3 py-2 transition-colors hover:bg-muted/80'
+                className='bg-muted hover:bg-muted/80 flex items-center justify-between rounded-md px-3 py-2 transition-colors'
               >
                 <div className='flex items-center gap-2'>
                   {title.includes('Photo') ? (
@@ -236,10 +237,10 @@ export default function RepairOrderDialog({
                   ) : (
                     <FileText className='h-4 w-4' />
                   )}
-                  <span className='max-w-48 truncate text-sm text-primary'>
+                  <span className='text-primary max-w-48 truncate text-sm'>
                     {file.name}
                   </span>
-                  <span className='text-xs text-muted-foreground'>
+                  <span className='text-muted-foreground text-xs'>
                     {(file.size / 1024 / 1024).toFixed(1)} MB
                   </span>
                 </div>
@@ -249,7 +250,7 @@ export default function RepairOrderDialog({
                     e.stopPropagation()
                     onFilesChange(files.filter((_, idx) => idx !== i))
                   }}
-                  className='rounded p-1 text-destructive transition-colors hover:bg-destructive/10 hover:text-destructive focus:ring-2 focus:ring-destructive focus:ring-offset-1 focus:outline-none'
+                  className='text-destructive hover:bg-destructive/10 hover:text-destructive focus:ring-destructive rounded p-1 transition-colors focus:ring-2 focus:ring-offset-1 focus:outline-none'
                   aria-label={`Remove ${file.name}`}
                 >
                   <X className='h-4 w-4' />
@@ -289,7 +290,7 @@ export default function RepairOrderDialog({
               {/* Repair Order Information */}
               <div className='space-y-6'>
                 <div className='flex items-center gap-2'>
-                  <FileText className='h-5 w-5 text-foreground' />
+                  <FileText className='text-foreground h-5 w-5' />
                   <h3 className='text-lg font-medium'>
                     Repair Order Information
                   </h3>
@@ -304,7 +305,7 @@ export default function RepairOrderDialog({
                         <FormLabel>
                           Shop RO #{' '}
                           {isEdit && (
-                            <span className='text-xs text-muted-foreground'>
+                            <span className='text-muted-foreground text-xs'>
                               (Read-only)
                             </span>
                           )}
@@ -470,13 +471,13 @@ export default function RepairOrderDialog({
               {/* Attachments */}
               <div className='space-y-8'>
                 <div className='flex items-center gap-2'>
-                  <Upload className='h-5 w-5 text-foreground' />
+                  <Upload className='text-foreground h-5 w-5' />
                   <h3 className='text-lg font-medium'>Attachments</h3>
                 </div>
 
                 <div className='grid gap-8 md:grid-cols-2'>
                   <DropZone
-                    title='Structural Measurements'
+                    title='Structural IMeasurements'
                     icon={FileText}
                     files={measurementsFiles}
                     onFilesChange={setMeasurementsFiles}

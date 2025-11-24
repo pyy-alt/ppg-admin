@@ -18,8 +18,10 @@ import { handleServerError } from '@/lib/handle-server-error'
 import { DirectionProvider } from './context/direction-provider'
 import { FontProvider } from './context/font-provider'
 import { ThemeProvider } from './context/theme-provider'
+import { shouldRedirectToLoginOn404 } from './lib/api-404-config'
 // Generated Routes
 import { routeTree } from './routeTree.gen'
+// import { useGlobal404Store } from './stores/global-404-store'
 // Styles
 import './styles/index.css'
 
@@ -80,12 +82,30 @@ function InitAuthInner() {
     refreshUserData().catch((error) => {
       // 网络错误等，不清除状态（可能是临时网络问题）
       // 404/401 错误已经在 refreshUserData 中处理了
-       
+
+      // 如果是 404 错误（No session found），检查是否有 dialog 打开
+      if (error.message === 'No session found') {
+        // 动态导入检查 dialog 状态
+        import('@/stores/global-404-store').then(({ useGlobal404Store }) => {
+          setTimeout(() => {
+            const { isOpen } = useGlobal404Store.getState()
+            // 如果 dialog 已经打开，不跳转，让 dialog 处理跳转
+            if (!isOpen) {
+              // Dialog 没有打开，可能是其他原因，正常跳转
+              if (import.meta.env.DEV) {
+                console.log('InitAuth: 无法获取用户数据', error)
+                const redirect = window.location.href
+                window.location.href = `/login?redirect=${encodeURIComponent(redirect)}`
+              }
+            }
+          }, 100) // 给 dialog 一点时间打开
+        })
+        return
+      }
       if (import.meta.env.DEV) {
         console.log('InitAuth: 无法获取用户数据', error)
-        const redirect = `${router.history.location.href}`
-
-        router.navigate({ to: '/login', search: { redirect } })
+        const redirect = window.location.href
+        window.location.href = `/login?redirect=${encodeURIComponent(redirect)}`
       }
     })
   }, [location.pathname]) // 只依赖路径，不依赖 auth 对象
@@ -133,14 +153,59 @@ const queryClient = new QueryClient({
         if (error.response?.status === 401) {
           toast.error('Session expired!')
           useAuthStore.getState().auth.reset()
-          const redirect = `${router.history.location.href}`
-          router.navigate({ to: '/login', search: { redirect } })
+          // 使用 window.location 因为 router 还没创建
+          const redirect = window.location.href
+          window.location.href = `/login?redirect=${encodeURIComponent(redirect)}`
+        }
+        // 添加 404 处理
+        if (error.response?.status === 404) {
+          // 直接跳转登录页面
+          const requestUrl =
+            error.config?.url || error.response?.config?.url || ''
+
+          // 只对特定接口的 404 进行处理
+          if (requestUrl && shouldRedirectToLoginOn404(requestUrl)) {
+            // 检查当前路径是否是未认证路由，如果是就不跳转（避免循环）
+            const currentPath = window.location.pathname
+            const unauthenticatedRoutes = [
+              '/login',
+              '/password/forgot',
+              '/password/reset',
+              '/registration/shop',
+              '/registration/dealership',
+              '/registration/complete',
+              '/registrationResult',
+            ]
+            const isUnauthenticatedRoute = unauthenticatedRoutes.some(
+              (route) =>
+                currentPath === route || currentPath.startsWith(route + '/')
+            )
+
+            if (isUnauthenticatedRoute) {
+              return // 在未认证路由页面，404 是正常的，不跳转
+            }
+
+            // 直接跳转到登录页
+            useAuthStore.getState().auth.reset()
+            const redirect = window.location.href
+            window.location.href = `/login?redirect=${encodeURIComponent(redirect)}`
+          }
+          // 先弹窗用户确认
+          // const requestUrl =
+          //   error.config?.url || error.response?.config?.url || ''
+          // if (requestUrl && shouldRedirectToLoginOn404(requestUrl)) {
+          //   const message =
+          //     error.response?.data?.message ||
+          //     error.response?.data?.error ||
+          //     null
+          //   useGlobal404Store.getState().open(message, requestUrl)
+          // }
         }
         if (error.response?.status === 500) {
           toast.error('Internal Server Error!')
           // Only navigate to error page in production to avoid disrupting HMR in development
           if (import.meta.env.PROD) {
-            router.navigate({ to: '/500' })
+            window.location.href = '/500'
           }
         }
         if (error.response?.status === 403) {

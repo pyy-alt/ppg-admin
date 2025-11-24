@@ -154,7 +154,7 @@ export function Shops() {
   const totalPages = Math.ceil(totalItems / itemsPerPage)
 
   return (
-    <div className='min-h-screen bg-background text-foreground'>
+    <div className='min-h-screen bg-background'>
       {/* Header */}
       <div className='border-b bg-background'>
         <div className='flex items-center justify-between px-6 py-4'>
@@ -173,13 +173,13 @@ export function Shops() {
             <Search className='absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
             <Input
               placeholder='Filter by Name, #, City'
-              className='pl-10'
+              className='border-gray-300 pl-10'
             />
           </div>
 
           <div className='flex flex-wrap gap-3'>
             <Select defaultValue='all'>
-              <SelectTrigger className='bg-muted'>
+              <SelectTrigger className='w-48 bg-muted'>
                 <SelectValue placeholder='Status' />
               </SelectTrigger>
               <SelectContent>
@@ -192,7 +192,7 @@ export function Shops() {
             </Select>
 
             <Select defaultValue='all'>
-              <SelectTrigger className='bg-muted'>
+              <SelectTrigger className='w-48 bg-muted'>
                 <SelectValue placeholder='Certification' />
               </SelectTrigger>
               <SelectContent>
@@ -204,7 +204,7 @@ export function Shops() {
             </Select>
 
             <Select defaultValue='all'>
-              <SelectTrigger className='bg-muted'>
+              <SelectTrigger className='w-48 bg-muted'>
                 <SelectValue placeholder='CSR Region' />
               </SelectTrigger>
               <SelectContent>
@@ -219,10 +219,10 @@ export function Shops() {
         </div>
 
         {/* Table */}
-        <div className='overflow-hidden rounded-lg border bg-card text-card-foreground shadow-sm'>
+        <div className='overflow-hidden rounded-lg border bg-background shadow-sm'>
           <Table>
             <TableHeader>
-              <TableRow className='bg-muted hover:bg-muted'>
+              <TableRow className='bg-muted'>
                 <TableHead className='font-semibold text-foreground'>Name</TableHead>
                 <TableHead className='font-semibold text-foreground'>
                   Number
@@ -262,8 +262,8 @@ export function Shops() {
             </TableHeader>
             <TableBody>
               {mockShops.map((shop) => (
-                <TableRow key={shop.number} className='hover:bg-muted/50'>
-                  <TableCell className='cursor-pointer font-medium text-primary hover:underline'>
+                <TableRow key={shop.number} className='hover:bg-background'>
+                  <TableCell className='cursor-pointer font-medium text-blue-600 hover:underline'>
                     {shop.name}
                   </TableCell>
                   <TableCell>{shop.number}</TableCell>
@@ -279,13 +279,13 @@ export function Shops() {
                   <TableCell>
                     <Badge
                       variant='default'
-                      className='bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900 dark:text-green-100 dark:hover:bg-green-800'
+                      className='bg-green-100 text-green-800 hover:bg-green-200'
                     >
                       {shop.status}
                     </Badge>
                   </TableCell>
                   <TableCell>{shop.certification}</TableCell>
-                  <TableCell className='text-muted-foreground'>
+                  <TableCell className='text-sm text-muted-foreground'>
                     {shop.address}
                   </TableCell>
                   <TableCell>{shop.city}</TableCell>

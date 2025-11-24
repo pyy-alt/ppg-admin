@@ -15,6 +15,8 @@ import {
 } from '@/components/ui/dropdown-menu'
 import EditProfileDialog from '@/components/EditProfileDialog'
 import { LanguageDropdown } from '../LanguageDropdown'
+import ViewDealerTeamDialog from '../ViewDealerTeamDialog'
+import ViewAdminTeamDialog from '../AdminViewTeamDialog'
 
 type HeaderProps = React.HTMLAttributes<HTMLElement> & {
   fixed?: boolean
@@ -30,14 +32,18 @@ export function Header({
   const router = useRouter()
   const { auth } = useAuthStore()
   const [open, setOpen] = useState(false)
+  const [isShowTeam, setIsShowTeam] = useState(false)
+  const [isShowAdminTeam, setIsShowAdminTeam] = useState(false)
 
   const handleSelect = (item: 'team' | 'profile' | 'logout') => {
     switch (item) {
       case 'team':
-        router.navigate({ to: '/users' } as any)
+        
+        // setIsShowTeam(true)
+        // 管理员
+        setIsShowAdminTeam(true)
         break
       case 'profile':
-        // router.navigate({ to: '/settings/account' } as any)
         setOpen(true)
         break
       case 'logout':
@@ -60,7 +66,7 @@ export function Header({
   return (
     <>
       <header
-        className={`fixed top-0 right-0 left-0 z-50 flex h-16 w-full items-center justify-between  bg-[#0A0A0A]  px-6 text-primary-foreground ${className || ''} `}
+        className={`text-primary-foreground fixed top-0 right-0 left-0 z-50 flex h-16 w-full items-center justify-between bg-[#0A0A0A] px-6 ${className || ''} `}
         {...props}
       >
         {/* Left: Logo + Title */}
@@ -68,7 +74,7 @@ export function Header({
           <img src={logoImg} alt='Audi' className='h-20 w-20 object-contain' />
           <div>
             <span className='mr-2 text-sm font-medium text-red-500'>Audi</span>
-            <span className='text-sm font-medium   text-white'>
+            <span className='text-sm font-medium text-white'>
               Restricted Parts Tracker.
             </span>
           </div>
@@ -80,7 +86,7 @@ export function Header({
           {isShowUser && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className='flex justify-center items-center gap-3 rounded-full pr-2 transition-colors hover:bg-white/10'>
+                <button className='flex items-center justify-center gap-3 rounded-full pr-2 transition-colors hover:bg-white/10'>
                   <div className='text-left text-white'>
                     <p className='text-sm leading-none font-medium'>
                       {auth.user
@@ -165,12 +171,14 @@ export function Header({
           )}
 
           {/* Language Globe */}
-          <div className='rounded-full p-2 transition-colors hover:bg-white/10 text-white'>
+          <div className='rounded-full p-2 text-white transition-colors hover:bg-white/10'>
             <LanguageDropdown />
           </div>
         </div>
       </header>
       <EditProfileDialog open={open} onOpenChange={setOpen} />
+      <ViewDealerTeamDialog open={isShowTeam} onOpenChange={setIsShowTeam} />
+      <ViewAdminTeamDialog open={isShowAdminTeam} onOpenChange={setIsShowAdminTeam} />
     </>
   )
 }

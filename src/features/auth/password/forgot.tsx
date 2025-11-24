@@ -25,12 +25,6 @@ export function ForgotPassword() {
   const { isLoading: isCheckingAuth, LoadingComponent } =
     useRedirectIfAuthenticated()
 
-  // 如果正在检查认证状态或已登录，显示加载状态
-  if (isCheckingAuth && LoadingComponent) {
-    return <LoadingComponent />
-  }
-  //============end------======================
-
   // 组件挂载时调用 logout() 清除会话
   // 根据路由规范：访问 /password/forgot 时需要调用 AuthenticationApi::sessionLogout()
   // 注意：authApi.logout() 就是 AuthenticationApi::sessionLogout() 的实现
@@ -77,6 +71,13 @@ export function ForgotPassword() {
       setIsLoading(false)
     }
   }
+
+  // 如果正在检查认证状态或已登录，显示加载状态
+  // 这段代码必须放在后面 因为React Hook的规则要求Hook必须在组件的顶层调用
+  if (isCheckingAuth && LoadingComponent) {
+    return <LoadingComponent />
+  }
+  //============end------======================
 
   return (
     <div className='flex min-h-screen flex-col bg-background'>
