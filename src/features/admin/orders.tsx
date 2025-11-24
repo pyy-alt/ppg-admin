@@ -215,7 +215,7 @@ export function Orders() {
         </div>
       </div>
 
-      <div className='px-6 py-6'>
+      <div className='px-6 py-1'>
         {/* Search + Checkbox */}
         <div className='mb-6 flex flex-col gap-4 lg:flex-row lg:items-center'>
           <div className='relative max-w-md flex-1'>
