@@ -188,7 +188,7 @@ export function Login() {
         {/* 下部：登录表单 */}
         <div className='flex flex-1 items-start justify-center  px-1 py-2 lg:py-12'>
           <div className='w-full max-w-md p-8 lg:p-10'>
-            <h2 className='mb-10 text-center text-3xl font-bold text-muted-foreground lg:text-4xl'>
+            <h2 className='mb-10 text-center text-3xl font-bold text-primary lg:text-4xl'>
               Login
             </h2>
             <form className='space-y-7' onSubmit={handleSubmit}>
