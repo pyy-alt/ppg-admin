@@ -30,7 +30,7 @@ export function ResetPassword() {
 
   const { id, guid, hash }: ResetPasswordProps = Route.useParams()
 
-  console.log(id, guid, hash)
+  // console.log(id, guid, hash)
 
   const [isLoading, setIsLoading] = useState(false)
   const [isValidating, setIsValidating] = useState(true) // 正在验证链接
@@ -151,11 +151,11 @@ export function ResetPassword() {
   // 如果链接无效，显示错误信息
   if (!isLinkValid) {
     return (
-      <div className='flex min-h-screen flex-col bg-background'>
+      <div className='bg-background flex min-h-screen flex-col'>
         <Header isShowUser={false} />
         <div className='flex flex-1 flex-col items-center justify-center px-4 py-8'>
           <div className='w-full max-w-md space-y-6 text-center'>
-            <h1 className='text-2xl font-bold text-foreground'>
+            <h1 className='text-foreground text-2xl font-bold'>
               Invalid Reset Link
             </h1>
             <p className='text-muted-foreground'>
@@ -171,7 +171,7 @@ export function ResetPassword() {
               </Link>
               <Link
                 to='/login'
-                className='rounded-full border  px-4 py-2 text-foreground transition-colors hover:bg-muted/50'
+                className='text-foreground hover:bg-muted/50 rounded-full border px-4 py-2 transition-colors'
               >
                 Back to Login
               </Link>
@@ -183,7 +183,7 @@ export function ResetPassword() {
   }
 
   return (
-    <div className='flex min-h-screen flex-col bg-background'>
+    <div className='bg-background flex min-h-screen flex-col'>
       {/* 复用 Header（隐藏用户下拉） */}
       <Header isShowUser={false} />
 
@@ -211,7 +211,7 @@ export function ResetPassword() {
         <div className='w-full max-w-md space-y-10'>
           {/* 下部：重置密码表单 */}
           <div className='space-y-8'>
-            <h1 className='text-center text-3xl font-bold text-foreground'>
+            <h1 className='text-foreground text-center text-3xl font-bold'>
               Change Password
             </h1>
 
@@ -220,17 +220,17 @@ export function ResetPassword() {
               <div className='space-y-2'>
                 <Label
                   htmlFor='password'
-                  className='text-sm font-medium text-foreground'
+                  className='text-foreground text-sm font-medium'
                 >
                   New Password
                 </Label>
                 <div className='relative'>
-                  <Lock className='absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-muted-foreground' />
+                  <Lock className='text-muted-foreground absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2' />
                   <Input
                     id='password'
                     type='password'
                     placeholder='Enter new password'
-                    className='h-12 rounded-full  pl-11 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100'
+                    className='h-12 rounded-full pl-11 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100'
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -243,17 +243,17 @@ export function ResetPassword() {
               <div className='space-y-2'>
                 <Label
                   htmlFor='confirm'
-                  className='text-sm font-medium text-foreground'
+                  className='text-foreground text-sm font-medium'
                 >
                   Confirm Password
                 </Label>
                 <div className='relative'>
-                  <Lock className='absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-muted-foreground' />
+                  <Lock className='text-muted-foreground absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2' />
                   <Input
                     id='confirm'
                     type='password'
                     placeholder='Confirm new password'
-                    className='h-12 rounded-full  pl-11 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100'
+                    className='h-12 rounded-full pl-11 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100'
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required

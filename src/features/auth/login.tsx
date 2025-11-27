@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState  } from 'react'
 import { useNavigate, useSearch, Link } from '@tanstack/react-router'
 import AuthenticationApi from '@/js/clients/base/AuthenticationApi'
 import LoginRequest from '@/js/models/LoginRequest'
@@ -8,17 +8,19 @@ import { toast } from 'sonner'
 import bg from '@/assets/img/login/bg.png'
 import { useAuthStore } from '@/stores/auth-store'
 import useBrandLogo from '@/hooks/use-bran-logo'
+import { useRedirectIfAuthenticated } from '@/hooks/use-redirect-if-authenticated'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Header } from '@/components/layout/header'
-import { useRedirectIfAuthenticated } from '@/hooks/use-redirect-if-authenticated'
 
 export function Login() {
-  const logoSrc = useBrandLogo('login', '_a.png')
+  const { redirect, region } = useSearch({ from: '/(auth)/login' })
+  // 根据 region 选择正确的后缀：america -> '_a.png', canada -> '_c.png'
+  const suffix = region === 'canada' ? '_c.png' : '_a.png'
+  const logoSrc = useBrandLogo('login', suffix as string)
   const navigate = useNavigate()
-  const { redirect } = useSearch({ from: '/(auth)/login' })
   const { auth } = useAuthStore()
   const [isLoading, setIsLoading] = useState(false)
   const [email, setEmail] = useState('')
@@ -26,22 +28,13 @@ export function Login() {
   const [showPassword, setShowPassword] = useState(false)
 
   // 使用 hook 处理已登录用户重定向
-  const { isLoading: isCheckingAuth, LoadingComponent } = useRedirectIfAuthenticated()
-
-  // 只在组件首次加载时检查认证状态
-  const [initialCheckDone, setInitialCheckDone] = useState(false)
+  const { isLoading: isCheckingAuth, LoadingComponent } =
+    useRedirectIfAuthenticated()
 
   const [isSubmitting, setIsSubmitting] = useState(false) // 添加提交状态标记
 
-
-  useEffect(() => {
-    if (!initialCheckDone && !isCheckingAuth) {
-      setInitialCheckDone(true)
-    }
-  }, [isCheckingAuth, initialCheckDone])
-
-  // 如果正在检查认证状态或已登录，显示加载状态
-  if (isCheckingAuth && !initialCheckDone && LoadingComponent) {
+   // 如果正在检查认证状态，显示加载状态
+   if (isCheckingAuth && LoadingComponent) {
     return <LoadingComponent />
   }
 
@@ -133,9 +126,8 @@ export function Login() {
           },
 
           error: (err: Error) => {
-            // eslint-disable-next-line no-console
-            console.error('Login error:', err)
-            toast.error('Network error, please try again')
+            // console.error('Login error:', err)
+            toast.error(`Network error, please try again ${err.message}`)
             setIsLoading(false)
             setIsSubmitting(false)
           },
@@ -159,7 +151,7 @@ export function Login() {
   }
 
   return (
-    <div className='flex min-h-screen flex-col bg-background'>
+    <div className='bg-background flex min-h-screen flex-col'>
       {/* 直接复用 Header 组件（包含用户下拉 + 地球语言） */}
       <Header isShowUser={false} />
 
@@ -186,9 +178,9 @@ export function Login() {
         </div>
 
         {/* 下部：登录表单 */}
-        <div className='flex flex-1 items-start justify-center  px-1 py-2 lg:py-12'>
+        <div className='flex flex-1 items-start justify-center px-1 py-2 lg:py-12'>
           <div className='w-full max-w-md p-8 lg:p-10'>
-            <h2 className='mb-10 text-center text-3xl font-bold text-primary lg:text-4xl'>
+            <h2 className='text-primary mb-10 text-center text-3xl font-bold lg:text-4xl'>
               Login
             </h2>
             <form className='space-y-7' onSubmit={handleSubmit}>
@@ -196,17 +188,17 @@ export function Login() {
               <div className='space-y-3'>
                 <Label
                   htmlFor='email'
-                  className='text-base font-medium text-muted-foreground'
+                  className='text-muted-foreground text-base font-medium'
                 >
                   Email Address
                 </Label>
                 <div className='relative'>
-                  <Mail className='absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-muted-foreground' />
+                  <Mail className='text-muted-foreground absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2' />
                   <Input
                     id='email'
                     type='email'
                     placeholder='Enter your email'
-                    className='h-14 rounded-full text-muted-foreground border-gray-300 pl-12 text-base focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100'
+                    className='text-muted-foreground h-14 rounded-full border-gray-300 pl-12 text-base focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100'
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -219,7 +211,7 @@ export function Login() {
               <div className='space-y-3'>
                 <Label
                   htmlFor='password'
-                  className='text-base font-medium text-muted-foreground'
+                  className='text-muted-foreground text-base font-medium'
                 >
                   Password
                 </Label>
@@ -229,7 +221,7 @@ export function Login() {
                     id='password'
                     type={showPassword ? 'text' : 'password'}
                     placeholder='Enter your password'
-                    className='h-14 rounded-full text-muted-foreground border-gray-300 pr-12 pl-12 text-base focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100'
+                    className='text-muted-foreground h-14 rounded-full border-gray-300 pr-12 pl-12 text-base focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100'
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -239,7 +231,7 @@ export function Login() {
                   <button
                     type='button'
                     onClick={() => setShowPassword(!showPassword)}
-                    className='absolute top-1/2 right-4 -translate-y-1/2  hover:text-gray-700'
+                    className='absolute top-1/2 right-4 -translate-y-1/2 hover:text-gray-700'
                     disabled={isLoading}
                   >
                     {showPassword ? (
@@ -254,7 +246,11 @@ export function Login() {
               {/* Remember + Forgot */}
               <div className='flex items-center justify-between text-sm'>
                 <div className='flex items-center space-x-2'>
-                  <Checkbox id='remember' disabled={isLoading} className='cursor-pointer bg-muted' />
+                  <Checkbox
+                    id='remember'
+                    disabled={isLoading}
+                    className='bg-muted cursor-pointer'
+                  />
                   <Label
                     htmlFor='remember'
                     className='cursor-pointer font-normal text-gray-600'
@@ -273,7 +269,7 @@ export function Login() {
               {/* Submit */}
               <Button
                 type='submit'
-                className='h-14 w-full rounded-full   text-base font-semibold text-muted shadow-md transition-all hover:bg-gray-900'
+                className='text-muted h-14 w-full rounded-full text-base font-semibold shadow-md transition-all hover:bg-gray-900'
                 disabled={isLoading}
               >
                 {isLoading ? 'Logging in...' : 'Log in'}

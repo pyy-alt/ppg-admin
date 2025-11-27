@@ -81,7 +81,7 @@ export function Timeline() {
                   </Badge>
                 )}
                 {item.status === 'pending' && (
-                  <Badge className='bg-gray-500 text-black'>Pending CSR</Badge>
+                  <Badge className='bg-orange-400 text-muted'>Pending CSR</Badge>
                 )}
                 {item.status === 'rejected' && (
                   <Badge className='bg-purple-500 text-white'>

@@ -1,9 +1,12 @@
-'use client'
-
+import { useEffect } from 'react'
 import { z } from 'zod'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import PersonApi from '@/js/clients/base/PersonApi'
+import PersonCreateModel from '@/js/models/Person'
+import Person from '@/js/models/Person'
 import { X } from 'lucide-react'
+import { useTranslation } from '@/context/i18n-provider'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
@@ -23,6 +26,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import {
   Select,
   SelectContent,
@@ -31,13 +35,16 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
+import { PersonType } from '@/js/models/enum/PersonTypeEnum'
+import { toast } from 'sonner'
 
 const formSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
   lastName: z.string().min(1, 'Last name is required'),
   email: z.string().email('Invalid email address'),
   role: z
-    .enum(['Admin', 'CSR', 'Field Staff'])
+    .enum(['ProgramAdministrator', 'Csr', 'FieldStaff'])
+    .optional()
     .refine((val) => val !== undefined, {
       message: 'Please select a role',
     }),
@@ -49,13 +56,17 @@ type FormValues = z.infer<typeof formSchema>
 interface AddNetworkUserDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  initialValues?: Person | null
   onSuccess?: (data: FormValues) => void
+  onError?: (error: Error) => void
 }
 
 export default function AddNetworkUserDialog({
   open,
   onOpenChange,
+  initialValues,
   onSuccess,
+  onError,
 }: AddNetworkUserDialogProps) {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -68,13 +79,41 @@ export default function AddNetworkUserDialog({
     },
   })
 
-  const selectedRole = form.watch('role')
-  const showRegionSelector = selectedRole === 'CSR'
-  const onSubmit = (data: FormValues) => {
-    console.log('Creating user:', data)
-    onSuccess?.(data)
-    onOpenChange(false)
-    form.reset() // 自动重置表单
+  // 使用 useWatch 代替 form.watch()
+  const selectedRole = useWatch({
+    control: form.control,
+    name: 'role',
+  })
+  const showRegionSelector = selectedRole === 'FieldStaff'
+  const showCsrRegionSelector = selectedRole === 'Csr'
+  const onSubmit = async (data: FormValues) => {
+    try {
+      if (initialValues) {
+      } else {
+        const request = PersonCreateModel.create({
+          firstName: data.firstName,
+          lastName: data.lastName,
+          email: data.email,
+          type: data.role as PersonType,
+        })
+        const personApi = new PersonApi()
+        await personApi.createNetworkUser(request, {
+          status200: (response) => {
+            onSuccess?.(response)
+            toast.success('Users fetched successfully',{
+              position: 'top-right',
+            })
+          },
+          error: (error) => {
+            onError?.(error)
+          },
+        })
+        onOpenChange(false)
+        form.reset()
+      }
+    } catch (error) {
+      onError?.(error as Error)
+    }
   }
 
   const handleOpenChange = (isOpen: boolean) => {
@@ -83,15 +122,24 @@ export default function AddNetworkUserDialog({
       form.reset() // 关闭时自动重置
     }
   }
+  // 当角色切换时，清空 regions 字段
+  useEffect(() => {
+    if (selectedRole) {
+      form.setValue('regions', [])
+    }
+  }, [selectedRole, form])
+  const { t } = useTranslation()
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className='sm:max-w-lg'>
-        <DialogHeader>
-          <DialogTitle className='text-xl font-semibold'>
-            Add Network User
+        {/* 固定头部 - 统一风格 */}
+        <DialogHeader className='shrink-0'>
+          <DialogTitle className='px-6 py-4 text-2xl font-semibold'>
+            {initialValues ? 'Edit Network User' : 'Add Network User'}
           </DialogTitle>
           <Separator />
+
           <button
             onClick={() => handleOpenChange(false)}
             className='ring-offset-background focus:ring-ring absolute top-4 right-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-none'
@@ -112,7 +160,7 @@ export default function AddNetworkUserDialog({
                 name='firstName'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>First Name</FormLabel>
+                    <FormLabel>{t('user.firstName')}</FormLabel>
                     <FormControl>
                       <Input placeholder='Enter first name' {...field} />
                     </FormControl>
@@ -160,15 +208,15 @@ export default function AddNetworkUserDialog({
                 <FormItem>
                   <FormLabel>Role</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
+                    <FormControl className='w-full'>
                       <SelectTrigger>
                         <SelectValue placeholder='Select role' />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value='Admin'>Admin</SelectItem>
-                      <SelectItem value='CSR'>CSR</SelectItem>
-                      <SelectItem value='Field Staff'>Field Staff</SelectItem>
+                      <SelectItem value='ProgramAdministrator'>Admin</SelectItem>
+                      <SelectItem value='Csr'>CSR</SelectItem>
+                      <SelectItem value='FieldStaff'>Field Staff</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -179,7 +227,7 @@ export default function AddNetworkUserDialog({
             {showRegionSelector && (
               <div className='space-y-3'>
                 <Label>CSR Region(s)</Label>
-                <div className='space-y-3 rounded-md border bg-muted p-4'>
+                <div className='bg-muted space-y-3 rounded-md border p-4'>
                   {['Eastern US', 'Central US', 'Western US', 'Canada'].map(
                     (region) => (
                       <FormField
@@ -192,12 +240,12 @@ export default function AddNetworkUserDialog({
                               <Checkbox
                                 checked={field.value?.includes(region)}
                                 onCheckedChange={(checked) => {
-                                  const value = checked
+                                  const newValue = checked
                                     ? [...(field.value || []), region]
-                                    : field.value?.filter(
-                                        (r) => r !== region
-                                      ) || []
-                                  field.onChange(value)
+                                    : (field.value || []).filter(
+                                        (r: string) => r !== region
+                                      )
+                                  field.onChange(newValue)
                                 }}
                               />
                             </FormControl>
@@ -213,20 +261,65 @@ export default function AddNetworkUserDialog({
               </div>
             )}
 
-            <DialogFooter className='mt-4 gap-3 border-t pt-4'>
+            {showCsrRegionSelector && (
+              <div className='space-y-3'>
+                <Label>CSR Region</Label>
+                <div className='bg-muted space-y-3 rounded-md border p-4'>
+                  <FormField
+                    control={form.control}
+                    name='regions'
+                    render={({ field }) => (
+                      <RadioGroup
+                        value={field.value?.[0] || ''}
+                        onValueChange={(value) => {
+                          // 将字符串转换为数组（单选，所以数组只有一个元素）
+                          field.onChange([value])
+                        }}
+                      >
+                        {[
+                          'Eastern US',
+                          'Central US',
+                          'Western US',
+                          'Canada',
+                        ].map((region) => (
+                          <FormItem
+                            key={region}
+                            className='flex items-center space-y-0 space-x-3'
+                          >
+                            <FormControl>
+                              <RadioGroupItem value={region} id={region} />
+                            </FormControl>
+                            <FormLabel
+                              htmlFor={region}
+                              className='cursor-pointer font-normal'
+                            >
+                              {region}
+                            </FormLabel>
+                          </FormItem>
+                        ))}
+                      </RadioGroup>
+                    )}
+                  />
+                </div>
+              </div>
+            )}
+
+            <DialogFooter className='mt-4 gap-3 pt-4'>
               <Button
                 type='button'
                 variant='outline'
                 onClick={() => handleOpenChange(false)}
               >
-                Cancel
+                {t('common.cancel')}
               </Button>
               <Button
                 type='submit'
                 variant='default'
                 disabled={form.formState.isSubmitting}
               >
-                {form.formState.isSubmitting ? 'Creating...' : 'Create'}
+                {form.formState.isSubmitting
+                  ? t('common.creating')
+                  : t('common.create')}
               </Button>
             </DialogFooter>
           </form>

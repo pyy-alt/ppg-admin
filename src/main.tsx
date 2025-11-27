@@ -17,6 +17,7 @@ import { refreshUserData } from '@/lib/auth'
 import { handleServerError } from '@/lib/handle-server-error'
 import { DirectionProvider } from './context/direction-provider'
 import { FontProvider } from './context/font-provider'
+import { I18nProvider } from './context/i18n-provider'
 import { ThemeProvider } from './context/theme-provider'
 import { shouldRedirectToLoginOn404 } from './lib/api-404-config'
 // Generated Routes
@@ -53,6 +54,16 @@ function InitAuthInner() {
       (route) =>
         location.pathname === route || location.pathname.startsWith(route + '/')
     )
+
+
+    // 特殊处理：如果路径是根路径 `/`，且未认证，不调用 API
+    // 因为 _authenticated/route.tsx 会显示 WelcomeGate，不需要验证会话
+    if (location.pathname === '/' && auth.loginStatus !== 'authenticated') {
+      if (auth.loginStatus === 'checking') {
+        auth.setLoginStatus('unauthenticated')
+      }
+      return
+    }
 
     // 如果在未认证页面，直接设置为未登录状态，不调用 API
     if (isUnauthenticatedRoute) {
@@ -93,7 +104,34 @@ function InitAuthInner() {
             if (!isOpen) {
               // Dialog 没有打开，可能是其他原因，正常跳转
               if (import.meta.env.DEV) {
-                console.log('InitAuth: 无法获取用户数据', error)
+                // console.log('InitAuth: 无法获取用户数据', error)
+
+
+                      // 检查当前路径是否是未认证路由
+                      const currentPath = window.location.pathname
+                      const unauthenticatedRoutes = [
+                        '/login',
+                        '/password/forgot',
+                        '/password/reset',
+                        '/registration/shop',
+                        '/registration/dealership',
+                        '/registration/complete',
+                        '/registrationResult',
+                      ]
+                      
+                      const isUnauthenticatedRoute = unauthenticatedRoutes.some(
+                        (route) =>
+                          currentPath === route || currentPath.startsWith(route + '/')
+                      )
+      
+                      // 如果在未认证路由页面，不跳转
+                      if (isUnauthenticatedRoute) {
+                        return
+                      }
+      
+                      // 如果不在未认证路由列表中，说明是受保护路由
+                      // 父路由已经处理了未认证情况，会显示 WelcomeGate，不需要跳转到登录页
+                      return
                 const redirect = window.location.href
                 window.location.href = `/login?redirect=${encodeURIComponent(redirect)}`
               }
@@ -103,7 +141,7 @@ function InitAuthInner() {
         return
       }
       if (import.meta.env.DEV) {
-        console.log('InitAuth: 无法获取用户数据', error)
+        // console.log('InitAuth: 无法获取用户数据', error)
         const redirect = window.location.href
         window.location.href = `/login?redirect=${encodeURIComponent(redirect)}`
       }
@@ -153,7 +191,7 @@ const queryClient = new QueryClient({
         if (error.response?.status === 401) {
           toast.error('Session expired!')
           useAuthStore.getState().auth.reset()
-          // 使用 window.location 因为 router 还没创建
+          // ❌ 这里直接跳转到 /login，绕过了 WelcomeGate
           const redirect = window.location.href
           window.location.href = `/login?redirect=${encodeURIComponent(redirect)}`
         }
@@ -185,6 +223,9 @@ const queryClient = new QueryClient({
               return // 在未认证路由页面，404 是正常的，不跳转
             }
 
+            // 如果不在未认证路由列表中，说明是受保护路由
+            // 父路由已经处理了未认证情况，会显示 WelcomeGate，不需要跳转到登录页
+            return
             // 直接跳转到登录页
             useAuthStore.getState().auth.reset()
             const redirect = window.location.href
@@ -238,13 +279,15 @@ if (!rootElement.innerHTML) {
   root.render(
     <StrictMode>
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider>
-          <FontProvider>
-            <DirectionProvider>
-              <RouterProvider router={router} />
-            </DirectionProvider>
-          </FontProvider>
-        </ThemeProvider>
+        <I18nProvider>
+          <ThemeProvider>
+            <FontProvider>
+              <DirectionProvider>
+                <RouterProvider router={router} />
+              </DirectionProvider>
+            </FontProvider>
+          </ThemeProvider>
+        </I18nProvider>
       </QueryClientProvider>
     </StrictMode>
   )

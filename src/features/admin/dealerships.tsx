@@ -135,7 +135,7 @@ const totalPages = Math.ceil(totalItems / itemsPerPage)
   return (
     <div className='min-h-screen bg-background'>
       {/* Header */}
-      <div className='border-b bg-background'>
+      <div className='bg-background'>
         <div className='flex items-center justify-between px-6 py-4'>
           <h1 className='text-2xl font-bold text-foreground'>Manage Dealers</h1>
           <Button>
@@ -157,7 +157,7 @@ const totalPages = Math.ceil(totalItems / itemsPerPage)
         </div>
 
         {/* Table */}
-        <div className='overflow-hidden rounded-lg border bg-background shadow-sm'>
+        <div className='overflow-hidden rounded-lg  bg-background shadow-sm'>
           <Table>
             <TableHeader>
               <TableRow className='bg-muted'>

@@ -3,6 +3,7 @@ import { AlertTriangle, Check, Pencil, Plus } from 'lucide-react'
 import navImg from '@/assets/img/repair/nav.png'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { MarkRepairAsCompleteDialog } from '@/components/MarkRepairAsCompleteDialog'
 import { PartsOrderDialog } from '@/components/PartsOrderDialog'
 import { type PartsOrderData } from '@/components/PartsOrderDialog'
 import { Timeline } from '@/components/Timeline'
@@ -41,6 +42,10 @@ export function RepairOrderDetail() {
       alternateDealerName: '',
       alternateDealerId: '',
     })
+  const [
+    isMarkRepairAsCompleteDialogOpen,
+    setIsMarkRepairAsCompleteDialogOpen,
+  ] = useState(false)
   useEffect(() => {
     if (initialPartsOrderData) {
       setInitialPartsOrderData(initialPartsOrderData)
@@ -63,8 +68,9 @@ export function RepairOrderDetail() {
             </h1>
             <div className='flex gap-3'>
               <Button
+                onClick={() => setIsMarkRepairAsCompleteDialogOpen(true)}
                 size='sm'
-                className='h-8 bg-green-600 text-xs font-medium'
+                className='h-9 bg-green-600 text-xs font-medium'
               >
                 <Check className='mr-1.5 h-3.5 w-3.5' />
                 Mark Repair as Complete
@@ -72,7 +78,7 @@ export function RepairOrderDetail() {
               <Button
                 size='sm'
                 variant='outline'
-                className='h-8 text-xs font-medium'
+                className='h-9 text-xs font-medium'
               >
                 <Pencil className='mr-1.5 h-3.5 w-3.5' />
                 Edit Repair Order
@@ -182,7 +188,7 @@ export function RepairOrderDetail() {
               onClick={() => setIsAddPartsOrderDialogOpen(true)}
               variant='outline'
               size='sm'
-              className='h-8 rounded-lg font-medium'
+              className='h-9 rounded-lg font-medium'
             >
               <Plus className='mr-1.5 h-3.5 w-3.5' />
               Supplemental Parts Order
@@ -206,7 +212,7 @@ export function RepairOrderDetail() {
                       onClick={() => setIsEditPartsOrderDialogOpen(true)}
                       size='sm'
                       variant='outline'
-                      className='h-7 px-2 text-xs'
+                      className='h-9 px-4 text-xs'
                     >
                       <Pencil className='h-3.5 w-3.5' />
                       Edit Parts Order
@@ -262,6 +268,10 @@ export function RepairOrderDetail() {
         mode='edit'
         initialData={initialPartsOrderData}
         defaultDealership='Pacific VW Motors | 111111 (Assigned Dealer)'
+      />
+      <MarkRepairAsCompleteDialog
+        open={isMarkRepairAsCompleteDialogOpen}
+        onOpenChange={setIsMarkRepairAsCompleteDialogOpen}
       />
     </div>
   )

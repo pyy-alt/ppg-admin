@@ -13,12 +13,14 @@ type DatePickerProps = {
   selected: Date | undefined
   onSelect: (date: Date | undefined) => void
   placeholder?: string
+  disabled?: boolean
 }
 
 export function DatePicker({
   selected,
   onSelect,
   placeholder = 'Pick a date',
+  disabled = true,
 }: DatePickerProps) {
   // 移除 showClearButton 状态和 useEffect，直接依赖 selected 状态
 
@@ -49,7 +51,7 @@ export function DatePicker({
           </span>
 
           {/* 2. CalendarIcon 和 ClearButton 互斥显示在最右边 */}
-          {selected ? (
+          {selected && !disabled  ? (
             <span
               role='button'
               tabIndex={0}
@@ -59,8 +61,10 @@ export function DatePicker({
               <XIcon className='h-4 w-4' />
             </span>
           ) : (
-            // 🚨 当没有日期时，显示 CalendarIcon
-            <CalendarIcon className='h-4 w-4 opacity-50' />
+             (
+              // 🚨 当没有日期时，显示 CalendarIcon
+              <CalendarIcon className='h-4 w-4 opacity-50' />
+            )
           )}
         </Button>
       </PopoverTrigger>
@@ -72,7 +76,7 @@ export function DatePicker({
           selected={selected}
           onSelect={onSelect}
           disabled={(date: Date) =>
-            date > new Date() || date < new Date('1900-01-01')
+            date > new Date() || date < new Date('1900-01-01') || disabled
           }
         />
       </PopoverContent>

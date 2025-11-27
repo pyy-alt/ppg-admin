@@ -55,7 +55,7 @@ export function DataTablePagination({
   const finalEndItem = startItem <= endItem ? endItem : startItem
 
   return (
-    <div className='mt-6 flex items-center justify-between'>
+    <div className='mt-6 flex items-center justify-between '>
       <p className='text-sm text-gray-600 flex-1'>
         {totalItems === 0
           ? 'No items to display'

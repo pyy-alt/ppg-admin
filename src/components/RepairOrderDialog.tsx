@@ -2,8 +2,12 @@ import { useState, useEffect } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import RequestApi from '@/js/clients/base/OrderApi'
+import RepairOrderCreateModel from '@/js/models/RepairOrderCreateRequest'
+import FileAssetFileAssetTypeEnum from '@/js/models/enum/FileAssetFileAssetTypeEnum'
 import { X, Upload, Camera, FileText, Image as ImageIcon } from 'lucide-react'
 import { useDropzone } from 'react-dropzone'
+import { convertFilesToFileAssets } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -32,7 +36,7 @@ import {
 import { Separator } from '@/components/ui/separator'
 
 const formSchema = z.object({
-  shopRO: z.string().min(1, 'Shop RO # is required'),
+  roNumber: z.string().min(1, 'Shop RO # is required'),
   customer: z.string().min(1, 'Customer name is required'),
   vin: z
     .string()
@@ -49,22 +53,25 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>
 
 export interface RepairOrderData {
-  shopRO: string
+  roNumber: string
   customer: string
   orderFromDealership: string
   vin?: string
   make?: string
   year?: string
   model?: string
-  measurementsFiles?: File[]
-  photoFiles?: File[]
+  structuralMeasurementFileAssets?: File[]
+  preRepairPhotoFileAssets?: File[]
 }
 
 interface RepairOrderDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSuccess?: (
-    data: FormValues & { measurementsFiles: File[]; photoFiles: File[] }
+    data: FormValues & {
+      structuralMeasurementFileAssets: File[]
+      preRepairPhotoFileAssets: File[]
+    }
   ) => void
   // 编辑模式时传入已有数据
   initialData?: RepairOrderData
@@ -78,13 +85,16 @@ export default function RepairOrderDialog({
 }: RepairOrderDialogProps) {
   const isEdit = !!initialData
 
-  const [measurementsFiles, setMeasurementsFiles] = useState<File[]>([])
-  const [photoFiles, setPhotoFiles] = useState<File[]>([])
+  const [structuralMeasurementFileAssets, setStructuralMeasurementFileAssets] =
+    useState<File[]>([])
+  const [preRepairPhotoFileAssets, setPreRepairPhotoFileAssets] = useState<
+    File[]
+  >([])
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      shopRO: '',
+      roNumber: '',
       customer: '',
       vin: '',
       make: '',
@@ -98,7 +108,7 @@ export default function RepairOrderDialog({
   useEffect(() => {
     if (initialData) {
       form.reset({
-        shopRO: initialData.shopRO,
+        roNumber: initialData.roNumber,
         customer: initialData.customer,
         vin: initialData.vin || '',
         make: initialData.make || '',
@@ -106,29 +116,94 @@ export default function RepairOrderDialog({
         model: initialData.model || '',
         orderFromDealership: initialData.orderFromDealership || '',
       })
-      setMeasurementsFiles(initialData.measurementsFiles || [])
-      setPhotoFiles(initialData.photoFiles || [])
+      setStructuralMeasurementFileAssets(
+        initialData.structuralMeasurementFileAssets || []
+      )
+      setPreRepairPhotoFileAssets(initialData.preRepairPhotoFileAssets || [])
     } else {
       form.reset({
-        shopRO: '',
+        roNumber: '',
         customer: '',
         vin: '',
         make: '',
         year: '',
         model: '',
       })
-      setMeasurementsFiles([])
-      setPhotoFiles([])
+      setStructuralMeasurementFileAssets([])
+      setPreRepairPhotoFileAssets([])
     }
   }, [initialData, form])
 
-  const onSubmit = (data: FormValues) => {
-    console.log(isEdit ? 'Updated Repair Order:' : 'New Repair Order:', data, {
-      measurementsFiles,
-      photoFiles,
-    })
-    onSuccess?.({ ...data, measurementsFiles, photoFiles })
-    handleClose()
+  const onSubmit = async (data: FormValues) => {
+    try {
+      const api = new RequestApi()
+
+      // 转换文件为 FileAsset 数组
+      const structuralMeasurementFiles = await convertFilesToFileAssets(
+        structuralMeasurementFileAssets,
+        FileAssetFileAssetTypeEnum.STRUCTURAL_MEASUREMENT
+      )
+
+      const preRepairPhotoFiles = await convertFilesToFileAssets(
+        preRepairPhotoFileAssets,
+        FileAssetFileAssetTypeEnum.PRE_REPAIR_PHOTO
+      )
+
+      const model = RepairOrderCreateModel.create({
+        repairOrder: {
+          roNumber: data.roNumber,
+          customer: data.customer,
+          vin: data.vin,
+          make: data.make,
+          year: data.year,
+          model: data.model,
+          orderFromDealership: data.orderFromDealership,
+          structuralMeasurementFileAssets:
+            structuralMeasurementFiles.length > 0
+              ? structuralMeasurementFiles
+              : undefined,
+          preRepairPhotoFileAssets:
+            preRepairPhotoFiles.length > 0 ? preRepairPhotoFiles : undefined,
+          dealership: {
+            id: 300,
+          },
+          shop: null,
+        },
+
+        // partsOrder 可以为 undefined 或 null
+        partsOrder: null,
+      })
+      api.repairOrderCreate(model, {
+        status200: (response) => {
+          console.log('Repair Order created successfully:', response)
+          onSuccess?.({
+            ...data,
+            structuralMeasurementFileAssets,
+            preRepairPhotoFileAssets,
+          })
+          handleClose()
+        },
+        status403: (error) => {
+          console.error('Error creating repair order:', error)
+        },
+        status404: (error) => {
+          console.error('Error creating repair order:', error)
+        },
+      })
+
+      // console.log(
+      //   isEdit ? 'Updated Repair Order:' : 'New Repair Order:',
+      //   data,
+      //   {
+      //     structuralMeasurementFileAssets,
+      //     preRepairPhotoFileAssets,
+      //   }
+      // )
+
+      handleClose()
+    } catch (error) {
+      console.error('Error submitting repair order:', error)
+    }
   }
 
   const handleClose = () => {
@@ -136,8 +211,8 @@ export default function RepairOrderDialog({
     // 延迟重置，避免关闭动画时看到表单清空
     setTimeout(() => {
       form.reset()
-      setMeasurementsFiles([])
-      setPhotoFiles([])
+      setStructuralMeasurementFileAssets([])
+      setPreRepairPhotoFileAssets([])
     }, 200)
   }
 
@@ -229,20 +304,20 @@ export default function RepairOrderDialog({
             {files.map((file, i) => (
               <div
                 key={`${file.name}-${i}-${file.size}`}
-                className='bg-muted hover:bg-muted/80 flex items-center justify-between rounded-md px-3 py-2 transition-colors'
+                className='flex items-center justify-between rounded-md px-3 py-2 transition-colors'
               >
-                <div className='flex items-center gap-2'>
+                <div className='flex items-center gap-2 text-blue-500'>
                   {title.includes('Photo') ? (
                     <ImageIcon className='h-4 w-4' />
                   ) : (
                     <FileText className='h-4 w-4' />
                   )}
-                  <span className='text-primary max-w-48 truncate text-sm'>
+                  <span className='max-w-48 truncate text-sm text-blue-500 hover:underline'>
                     {file.name}
                   </span>
-                  <span className='text-muted-foreground text-xs'>
+                  {/* <span className='text-muted-foreground text-xs'>
                     {(file.size / 1024 / 1024).toFixed(1)} MB
-                  </span>
+                  </span> */}
                 </div>
                 <button
                   type='button'
@@ -266,7 +341,7 @@ export default function RepairOrderDialog({
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className='flex max-h-[90vh] flex-col sm:max-w-4xl'>
-        <DialogHeader className='flex-shrink-0'>
+        <DialogHeader className='shrink-0'>
           <DialogTitle className='text-2xl font-semibold'>
             {isEdit ? 'Edit Repair Order' : 'New Repair Order'}
           </DialogTitle>
@@ -299,7 +374,7 @@ export default function RepairOrderDialog({
                 <div className='grid grid-cols-1 gap-4 md:grid-cols-3'>
                   <FormField
                     control={form.control}
-                    name='shopRO'
+                    name='roNumber'
                     render={({ field }) => (
                       <FormItem className='flex flex-col space-y-1'>
                         <FormLabel>
@@ -479,16 +554,16 @@ export default function RepairOrderDialog({
                   <DropZone
                     title='Structural IMeasurements'
                     icon={FileText}
-                    files={measurementsFiles}
-                    onFilesChange={setMeasurementsFiles}
+                    files={structuralMeasurementFileAssets}
+                    onFilesChange={setStructuralMeasurementFileAssets}
                     accept='.pdf,.doc,.docx'
                   />
 
                   <DropZone
                     title='Pre-Repair Photos'
                     icon={ImageIcon}
-                    files={photoFiles}
-                    onFilesChange={setPhotoFiles}
+                    files={preRepairPhotoFileAssets}
+                    onFilesChange={setPreRepairPhotoFileAssets}
                     accept='image/*'
                   />
                 </div>

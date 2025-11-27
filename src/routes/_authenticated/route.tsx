@@ -5,11 +5,11 @@ import {
   useLocation,
   useNavigate,
 } from '@tanstack/react-router'
-import { useAuthStore } from '@/stores/auth-store'
-import type { AuthUser } from '@/stores/auth-store'
+import  { type AuthUser,useAuthStore } from '@/stores/auth-store'
 import { Loading } from '@/components/Loading'
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout'
 import { HeaderOnlyLayout } from '@/components/layout/header-only-layout'
+import WelcomeGate from '@/features/auth/welcomeGate'
 
 declare global {
   interface Window {
@@ -93,8 +93,10 @@ function AuthenticatedRouteComponent() {
     return <Loading />
   }
 
+  // 没有认证，显示 WelcomeGate
   if (auth.loginStatus !== 'authenticated') {
-    return <Outlet />
+    // return <Outlet />
+    return <WelcomeGate />
   }
 
   // 提前返回：正在重定向

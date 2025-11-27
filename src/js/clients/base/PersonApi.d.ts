@@ -1,8 +1,8 @@
-import ClientBaseClass from './ClientBaseClass'
-import Person from '../../models/Person'
-import PersonSearchRequest from '../../models/PersonSearchRequest'
+import type Person from '../../models/Person'
+import type PersonEditStatusRequest from '../../models/PersonEditStatusRequest'
+import type PersonSearchRequest from '../../models/PersonSearchRequest'
 import PersonSearchResponse from '../../models/PersonSearchResponse'
-import PersonEditStatusRequest from '../../models/PersonEditStatusRequest'
+import ClientBaseClass from './ClientBaseClass'
 import type ClientOptions from './ClientOptions'
 
 interface ResponseHandler {

@@ -55,19 +55,21 @@ export function ForgotPassword() {
     e.preventDefault()
     setIsLoading(true)
     try {
-      const request = ForgotPasswordRequest.create({ email })
+      const request = new  ForgotPasswordRequest()
+      request.email = email
       authApi.forgotPassword(request, {
         status200: () => {
           toast.success(`Password reset link has been sent to ${email}`)
           navigate({ to: '/login' })
+          setIsLoading(false)
         },
         error: () => {
           toast.error('Failed to send reset link. Please try again.')
+          setIsLoading(false)
         },
       })
     } catch (error) {
       toast.error('Failed to send reset link. Please try again.')
-    } finally {
       setIsLoading(false)
     }
   }

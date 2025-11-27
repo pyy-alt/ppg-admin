@@ -159,8 +159,10 @@ export function PartsOrderDialog({
         parts: parts.length > 0 ? parts : [{ number: '' }],
       })
 
-      // 如果有文件，设置文件（注意：实际场景中可能需要从 URL 加载文件）
-      setEstimateFiles(initialData.estimateFiles || [])
+      // 使用 setTimeout 将 setState 移到下一个事件循环
+      setTimeout(() => {
+        setEstimateFiles(initialData.estimateFiles || [])
+      }, 0)
     } else if (open && mode === 'create') {
       // 新增模式：重置为默认值
       form.reset({
@@ -173,7 +175,8 @@ export function PartsOrderDialog({
   const onSubmit = (data: FormValues) => {
     // 验证附件是否已上传（新增模式或编辑模式但还没有文件时）
     if (
-      estimateFiles && estimateFiles.length === 0 &&
+      estimateFiles &&
+      estimateFiles.length === 0 &&
       (mode === 'create' || !initialData?.estimateFiles?.length)
     ) {
       form.setError('_estimateFile', {
@@ -251,10 +254,10 @@ export function PartsOrderDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className='flex max-h-[90vh] flex-col sm:max-w-4xl'>
+      <DialogContent className='flex max-h-[90vh] flex-col p-0 sm:max-w-4xl'>
         {/* 固定头部 - 统一风格 */}
         <DialogHeader className='flex-shrink-0'>
-          <DialogTitle className='pr-10 text-2xl font-semibold'>
+          <DialogTitle className='px-6 py-4 text-2xl font-semibold'>
             {getDialogTitle()}
           </DialogTitle>
           <Separator />
@@ -444,23 +447,32 @@ export function PartsOrderDialog({
                     >
                       <input {...getInputProps()} />
                       <Upload className='text-muted-foreground mb-3 h-12 w-12' />
-                      {estimateFiles && estimateFiles.length > 0 ? (
+
+                      <p className='text-muted-foreground text-sm'>
+                        Drop your PDF files here or{' '}
+                        <span className='text-primary hover:underline'>
+                          click to browse
+                        </span>
+                      </p>
+                    </div>
+                    <div>
+                      {estimateFiles && estimateFiles.length > 0 && (
                         <div className='w-full space-y-2'>
                           {estimateFiles.map((file, index) => (
                             <div
                               key={`${file.name}-${index}`}
-                              className='bg-muted/50 flex items-center justify-between rounded-md border p-2'
+                              className='flex items-center justify-between rounded-md p-1.5'
                             >
                               <div
                                 className='flex-1 truncate'
                                 title={file.name}
                               >
-                                <p className='text-foreground truncate text-sm font-medium'>
+                                <p className='cursor-pointer truncate text-sm font-medium text-blue-500 hover:underline'>
                                   {file.name}
                                 </p>
-                                <p className='text-muted-foreground text-xs'>
+                                {/* <p className='text-muted-foreground text-xs'>
                                   {(file.size / 1024).toFixed(2)} KB
-                                </p>
+                                </p> */}
                               </div>
                               <button
                                 type='button'
@@ -474,20 +486,7 @@ export function PartsOrderDialog({
                               </button>
                             </div>
                           ))}
-                          <p className='text-muted-foreground mt-2 text-xs'>
-                            Drop more PDF files here or{' '}
-                            <span className='text-primary hover:underline'>
-                              click to browse
-                            </span>
-                          </p>
                         </div>
-                      ) : (
-                        <p className='text-muted-foreground text-sm'>
-                          Drop your PDF files here or{' '}
-                          <span className='text-primary hover:underline'>
-                            click to browse
-                          </span>
-                        </p>
                       )}
                     </div>
                     {/* 显示错误信息 */}
@@ -502,7 +501,7 @@ export function PartsOrderDialog({
             </div>
 
             {/* 固定底部 - 统一风格 */}
-            <DialogFooter className='bg-muted/50 flex-shrink-0 border-t px-6 py-4 backdrop-blur'>
+            <DialogFooter className='bg-muted/50 w-full flex-shrink-0 border-t px-6 py-4 backdrop-blur'>
               <div className='flex w-full justify-end gap-3'>
                 <Button type='button' variant='outline' onClick={handleClose}>
                   Cancel

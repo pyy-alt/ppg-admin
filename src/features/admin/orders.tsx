@@ -174,7 +174,7 @@ const mockOrders = [
   },
 ]
 
-export function Orders() {
+export function PartOrders() {
   const [onlyMyOrders, setOnlyMyOrders] = useState(true)
   const [fromDate, setFromDate] = useState<Date | undefined>(undefined)
   const [toDate, setToDate] = useState<Date | undefined>(undefined)
@@ -182,7 +182,6 @@ export function Orders() {
   const [typeOfOrder, setTypeOfOrder] = useState<string>('all')
   const [status, setStatus] = useState<string>('all')
   const [csrRegion, setCsrRegion] = useState<string>('all')
-  // 添加状态
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 20
   const totalItems = mockOrders.length // 根据实际数据
@@ -208,228 +207,239 @@ export function Orders() {
           <h1 className='text-foreground text-2xl font-bold'>
             Parts Order List
           </h1>
-          <Button variant='default'>
+          <Button>
             <Download className='mr-2 h-4 w-4' />
             Report
           </Button>
         </div>
-      </div>
 
-      <div className='px-6 py-1'>
-        {/* Search + Checkbox */}
-        <div className='mb-6 flex flex-col gap-4 lg:flex-row lg:items-center'>
-          <div className='relative max-w-md flex-1'>
-            <Search className='text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2' />
-            <Input
-              placeholder='Filter by RO#, Sales Order #, VIN, Shop, Dealer'
-              className='pl-10'
-            />
+        <div className='px-6 py-6'>
+          {/* Search + Checkbox */}
+          <div className='mb-6 flex flex-col gap-4 lg:flex-row lg:items-center'>
+            <div className='relative max-w-md flex-1'>
+              <Search className='text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2' />
+              <Input
+                placeholder='Filter by RO#, Sales Order #, VIN, Shop, Dealer'
+                className='pl-10'
+              />
+            </div>
+            {/* 只有当使用者的身分是 Dealer 或 CSR 时才会出现 这个按钮 */}
+            <div className='flex items-center gap-3'>
+              <Checkbox
+                id='my-orders'
+                checked={onlyMyOrders}
+                onCheckedChange={(checked) =>
+                  setOnlyMyOrders(checked as boolean)
+                }
+                className='bg-muted rounded-full'
+              />
+              <Label
+                htmlFor='my-orders'
+                className='flex cursor-pointer items-center gap-2 text-sm font-medium'
+              >
+                {/* <AlertCircle className="h-4 w-4 text-gray-600" /> */}
+                Only View Parts Orders that are waiting On Me
+              </Label>
+            </div>
           </div>
-          <div className='flex items-center gap-3'>
-            <Checkbox
-              id='my-orders'
-              checked={onlyMyOrders}
-              onCheckedChange={(checked) => setOnlyMyOrders(checked as boolean)}
-              className='rounded-full'
-            />
-            <Label
-              htmlFor='my-orders'
-              className='flex cursor-pointer items-center gap-2 text-sm font-medium'
-            >
-              {/* <AlertCircle className="h-4 w-4 text-gray-600" /> */}
-              Only View Parts Orders that are waiting On Me
-            </Label>
-          </div>
-        </div>
 
-        {/* 完整筛选条件 */}
-        <div className='mb-6 flex flex-wrap items-center gap-3'>
-          <Select
-            defaultValue={typeOfOrder}
-            onValueChange={(value) => setTypeOfOrder(value)}
-          >
-            <SelectTrigger className='w-48'>
-              <SelectValue placeholder='Type of Order' />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value='all'>All Types</SelectItem>
-              <SelectItem value='parts'>Parts Order</SelectItem>
-              <SelectItem value='supplement1'>Supplement 1</SelectItem>
-              <SelectItem value='supplement2'>Supplement 2</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select
-            defaultValue={status}
-            onValueChange={(value) => setStatus(value)}
-          >
-            <SelectTrigger className='w-48'>
-              <SelectValue placeholder='Status' />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value='all'>All Status</SelectItem>
-              <SelectItem value=' csr-Review'>CSR Review</SelectItem>
-              <SelectItem value=' csr-rejected'>CSR Rejected</SelectItem>
-              <SelectItem value=' dealer-processing'>
-                Dealer Processing
-              </SelectItem>
-              <SelectItem value='dealer-shipped'>Dealer Shipped</SelectItem>
-              <SelectItem value='shop-received'>Shop Received</SelectItem>
-              <SelectItem value='repair-completed'>Repair Completed</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select
-            defaultValue={csrRegion}
-            onValueChange={(value) => setCsrRegion(value)}
-          >
-            <SelectTrigger className='w-48'>
-              <SelectValue placeholder='CSR Region' />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value='all'>All Regions</SelectItem>
-              <SelectItem value='western'>Western US</SelectItem>
-              <SelectItem value='canada'>Canada</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <div className='flex items-center gap-2'>
-            <span className='text-sm font-medium'>Date Submitted Range</span>
+          {/* 完整筛选条件 */}
+          <div className='mb-6 flex flex-wrap items-center gap-3'>
             <Select
-              defaultValue={dateSubmittedRange}
-              onValueChange={(value) => setDateSubmittedRange(value)}
+              defaultValue={typeOfOrder}
+              onValueChange={(value) => setTypeOfOrder(value)}
             >
-              <SelectTrigger className='w-48'>
-                <SelectValue placeholder='ALL Dates' />
+              <SelectTrigger className='bg-muted w-48'>
+                <SelectValue placeholder='Type of Order' />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value='7'>Past 7 Days</SelectItem>
-                <SelectItem value='30'>Past 30 Days</SelectItem>
-                <SelectItem value='month-to-date'>Month-To-Date</SelectItem>
-                <SelectItem value='quarter-to-date'>Quarter-To-Date</SelectItem>
-                <SelectItem value='year-to-date'>Year-To-Date</SelectItem>
-                <SelectItem value='last-month'>Last Month</SelectItem>
-                <SelectItem value='last-quarter'>Last Quarter</SelectItem>
-                <SelectItem value='last-year'>Last Year</SelectItem>
+                <SelectItem value='all'>All Types</SelectItem>
+                <SelectItem value='parts'>Parts Order</SelectItem>
+                <SelectItem value='supplement1'>Supplement 1</SelectItem>
+                <SelectItem value='supplement2'>Supplement 2</SelectItem>
               </SelectContent>
             </Select>
+
+            <Select
+              defaultValue={status}
+              onValueChange={(value) => setStatus(value)}
+            >
+              <SelectTrigger className='bg-muted w-48'>
+                <SelectValue placeholder='Status' />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value='all'>All Status</SelectItem>
+                <SelectItem value=' csr-Review'>CSR Review</SelectItem>
+                <SelectItem value=' csr-rejected'>CSR Rejected</SelectItem>
+                <SelectItem value=' dealer-processing'>
+                  Dealer Processing
+                </SelectItem>
+                <SelectItem value='dealer-shipped'>Dealer Shipped</SelectItem>
+                <SelectItem value='shop-received'>Shop Received</SelectItem>
+                <SelectItem value='repair-completed'>
+                  Repair Completed
+                </SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select
+              defaultValue={csrRegion}
+              onValueChange={(value) => setCsrRegion(value)}
+            >
+              <SelectTrigger className='bg-muted w-48'>
+                <SelectValue placeholder='CSR Region' />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value='all'>All Regions</SelectItem>
+                <SelectItem value='western'>Western US</SelectItem>
+                <SelectItem value='canada'>Canada</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <div className='flex items-center gap-2'>
+              <span className='text-sm font-medium'>Date Submitted Range</span>
+              <Select
+                defaultValue={dateSubmittedRange}
+                onValueChange={(value) => setDateSubmittedRange(value)}
+              >
+                <SelectTrigger className='bg-muted w-48'>
+                  <SelectValue placeholder='ALL Dates' />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value='7'>Past 7 days</SelectItem>
+                  <SelectItem value='30'>Past 30 Days</SelectItem>
+                  <SelectItem value='month-to-date'>Month-To-Date</SelectItem>
+                  <SelectItem value='quarter-to-date'>
+                    Quarter-To-Date
+                  </SelectItem>
+                  <SelectItem value='year-to-date'>Year-To-Date</SelectItem>
+                  <SelectItem value='last-month'>Last Month</SelectItem>
+                  <SelectItem value='last-quarter'>Last Quarter</SelectItem>
+                  <SelectItem value='last-year'>Last Year</SelectItem>
+                  <SelectItem value='custom'>Custom</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* 日期范围选择 */}
+            <div className='flex items-center gap-2'>
+              <span className='text-sm font-medium'>From</span>
+              <DatePicker
+                disabled={dateSubmittedRange != 'custom'}
+                selected={fromDate}
+                onSelect={(date) => setFromDate(date)}
+                placeholder='Select from date'
+              />
+              <span className='text-sm font-medium'>To</span>
+              <DatePicker
+                disabled={dateSubmittedRange != 'custom'}
+                selected={toDate}
+                onSelect={(date) => setToDate(date)}
+                placeholder='Select to date'
+              />
+            </div>
           </div>
 
-          {/* 日期范围选择 */}
-          <div className='flex items-center gap-2'>
-            <span className='text-sm font-medium'>From</span>
-            <DatePicker
-              selected={fromDate}
-              onSelect={(date) => setFromDate(date)}
-              placeholder='Select from date'
-            />
-            <span className='text-sm font-medium'>To</span>
-            <DatePicker
-              selected={toDate}
-              onSelect={(date) => setToDate(date)}
-              placeholder='Select to date'
-            />
-          </div>
-        </div>
-
-        {/* Table */}
-        <div className='bg-card overflow-hidden rounded-lg border shadow-sm'>
-          <Table>
-            <TableHeader>
-              <TableRow className='bg-muted'>
-                <TableHead className='text-foreground font-semibold'>
-                  RO #
-                </TableHead>
-                <TableHead className='text-foreground font-semibold'>
-                  Sales #
-                </TableHead>
-                <TableHead className='text-foreground font-semibold'>
-                  Type
-                </TableHead>
-                <TableHead className='text-foreground font-semibold'>
-                  VIN
-                </TableHead>
-                <TableHead className='text-foreground font-semibold'>
-                  Year/Make/Model
-                </TableHead>
-                <TableHead className='text-foreground font-semibold'>
-                  Status
-                </TableHead>
-                <TableHead className='text-foreground font-semibold'>
-                  Shop
-                </TableHead>
-                <TableHead className='text-foreground font-semibold'>
-                  Dealer
-                </TableHead>
-                <TableHead className='text-foreground font-semibold'>
-                  CSR Region
-                </TableHead>
-                <TableHead className='text-foreground font-semibold'>
-                  Date Completed
-                </TableHead>
-                <TableHead className='text-foreground font-semibold'>
-                  Date Closed
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {mockOrders.map((order) => (
-                <TableRow
-                  key={`${order.ro}-${order.salesOrder}`}
-                  className='hover:bg-muted/50'
-                >
-                  <TableCell className='text-primary font-medium'>
-                    {order.ro}
-                  </TableCell>
-                  <TableCell>{order.salesOrder}</TableCell>
-                  <TableCell>{order.type}</TableCell>
-                  <TableCell className='font-mono text-xs'>
-                    {order.vin}
-                  </TableCell>
-                  <TableCell>{order.yearMakeModel}</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={getStatusVariant(order.status)}
-                      className='whitespace-nowrap'
-                    >
-                      {order.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className='text-sm'>{order.shop}</TableCell>
-                  <TableCell>
-                    <div className='flex items-center gap-2'>
-                      {order.hasNote && (
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <AlertCircle className='h-4 w-4 cursor-help text-yellow-600' />
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Ordered from an alternate dealer</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      )}
-                      <span className='text-sm'>{order.dealer}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>{order.region}</TableCell>
-                  <TableCell>{order.dateCompleted}</TableCell>
-                  <TableCell>{order.dateClosed || '--'}</TableCell>
+          {/* Table */}
+          <div className='bg-background overflow-hidden rounded-lg border shadow-sm'>
+            <Table>
+              <TableHeader>
+                <TableRow className='bg-muted'>
+                  <TableHead className='text-foreground font-semibold'>
+                    RO #
+                  </TableHead>
+                  <TableHead className='text-foreground font-semibold'>
+                    Sales #
+                  </TableHead>
+                  <TableHead className='text-foreground font-semibold'>
+                    Type
+                  </TableHead>
+                  <TableHead className='text-foreground font-semibold'>
+                    VIN
+                  </TableHead>
+                  <TableHead className='text-foreground font-semibold'>
+                    Year/Make/Model
+                  </TableHead>
+                  <TableHead className='text-foreground font-semibold'>
+                    Status
+                  </TableHead>
+                  <TableHead className='text-foreground font-semibold'>
+                    Shop
+                  </TableHead>
+                  <TableHead className='text-foreground font-semibold'>
+                    Dealer
+                  </TableHead>
+                  <TableHead className='text-foreground font-semibold'>
+                    CSR Region
+                  </TableHead>
+                  <TableHead className='text-foreground font-semibold'>
+                    Date Completed
+                  </TableHead>
+                  <TableHead className='text-foreground font-semibold'>
+                    Date Closed
+                  </TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+              </TableHeader>
+              <TableBody>
+                {mockOrders.map((order) => (
+                  <TableRow
+                    key={`${order.ro}-${order.salesOrder}`}
+                    className='hover:bg-muted/50'
+                  >
+                    <TableCell className='text-primary font-medium'>
+                      {order.ro}
+                    </TableCell>
+                    <TableCell>{order.salesOrder}</TableCell>
+                    <TableCell>{order.type}</TableCell>
+                    <TableCell className='font-mono text-xs'>
+                      {order.vin}
+                    </TableCell>
+                    <TableCell>{order.yearMakeModel}</TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={getStatusVariant(order.status)}
+                        className='whitespace-nowrap'
+                      >
+                        {order.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className='text-sm'>{order.shop}</TableCell>
+                    <TableCell>
+                      <div className='flex items-center gap-2'>
+                        {order.hasNote && (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <AlertCircle className='h-4 w-4 cursor-help text-yellow-600' />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Ordered from an alternate dealer</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        )}
+                        <span className='text-sm'>{order.dealer}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>{order.region}</TableCell>
+                    <TableCell>{order.dateCompleted}</TableCell>
+                    <TableCell>{order.dateClosed || '--'}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
 
-        {/* Pagination */}
-        <DataTablePagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          totalItems={totalItems}
-          itemsPerPage={itemsPerPage}
-          onPageChange={setCurrentPage}
-        />
+          {/* Pagination */}
+          {/* Pagination */}
+          <DataTablePagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={totalItems}
+            itemsPerPage={itemsPerPage}
+            onPageChange={setCurrentPage}
+          />
+        </div>
       </div>
     </div>
   )

@@ -226,6 +226,7 @@ export function PartsOrders() {
                 className='pl-10'
               />
             </div>
+            {/* 只有当使用者的身分是 Dealer 或 CSR 时才会出现 这个按钮 */}
             <div className='flex items-center gap-3'>
               <Checkbox
                 id='my-orders'
@@ -308,7 +309,7 @@ export function PartsOrders() {
                   <SelectValue placeholder='ALL Dates' />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value='7'>Past 7 Days</SelectItem>
+                  <SelectItem value='7'>Past 7 days</SelectItem>
                   <SelectItem value='30'>Past 30 Days</SelectItem>
                   <SelectItem value='month-to-date'>Month-To-Date</SelectItem>
                   <SelectItem value='quarter-to-date'>
@@ -318,6 +319,7 @@ export function PartsOrders() {
                   <SelectItem value='last-month'>Last Month</SelectItem>
                   <SelectItem value='last-quarter'>Last Quarter</SelectItem>
                   <SelectItem value='last-year'>Last Year</SelectItem>
+                  <SelectItem value='custom'>Custom</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -326,12 +328,14 @@ export function PartsOrders() {
             <div className='flex items-center gap-2'>
               <span className='text-sm font-medium'>From</span>
               <DatePicker
+                disabled={dateSubmittedRange != 'custom'}
                 selected={fromDate}
                 onSelect={(date) => setFromDate(date)}
                 placeholder='Select from date'
               />
               <span className='text-sm font-medium'>To</span>
               <DatePicker
+                disabled={dateSubmittedRange != 'custom'}
                 selected={toDate}
                 onSelect={(date) => setToDate(date)}
                 placeholder='Select to date'

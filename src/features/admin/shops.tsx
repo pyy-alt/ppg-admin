@@ -1,5 +1,4 @@
-'use client'
-
+import { useState } from 'react'
 import { Search, Download } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -20,145 +19,46 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { DataTablePagination } from '@/components/data-table-pagination'
-import { useState } from 'react'
 
 // 真实模拟店铺数据（已覆盖所有状态和地区）
-const mockShops = [
-  {
-    name: 'Bay Area Auto Care',
-    number: '4127',
-    pendingOrders: 4,
-    activeUsers: 5,
-    pendingUsers: 2,
-    status: 'Certified',
-    certification: 'Audi Ultra',
-    address: '101 Mission St',
-    city: 'San Francisco',
-    state: 'CA',
-    dealer: 'VW San Francisco',
-    dealerNumber: '65478',
-    region: 'Western US',
-  },
-  {
-    name: 'Boston Performance',
-    number: '5289',
-    pendingOrders: 3,
-    activeUsers: 7,
-    pendingUsers: 1,
-    status: 'Certified',
-    certification: 'Audi Ultra',
-    address: '222 Commonwealth Ave',
-    city: 'Boston',
-    state: 'MA',
-    dealer: 'Audi of Boston',
-    dealerNumber: '37219',
-    region: 'Eastern US',
-  },
-  {
-    name: 'Chicago Car Specialists',
-    number: '3098',
-    pendingOrders: 1,
-    activeUsers: 3,
-    pendingUsers: 0,
-    status: 'Certified',
-    certification: 'Volkswagen',
-    address: '789 Wacker Dr',
-    city: 'Chicago',
-    state: 'IL',
-    dealer: 'Audi of Chicago',
-    dealerNumber: '76532',
-    region: 'Central US',
-  },
-  {
-    name: 'Dallas Pro Shop',
-    number: '6345',
-    pendingOrders: 7,
-    activeUsers: 6,
-    pendingUsers: 3,
-    status: 'Certified',
-    certification: 'Audi Hybrid',
-    address: '353 Elm St',
-    city: 'Dallas',
-    state: 'TX',
-    dealer: 'VW Dallas',
-    dealerNumber: '98123',
-    region: 'Central US',
-  },
-  {
-    name: 'LA Performance Garage',
-    number: '1032',
-    pendingOrders: 3,
-    activeUsers: 2,
-    pendingUsers: 2,
-    status: 'Certified',
-    certification: 'Audi Hybrid',
-    address: '777 Sunset Blvd',
-    city: 'Los Angeles',
-    state: 'CA',
-    dealer: 'Audi Los Angeles',
-    dealerNumber: '89176',
-    region: 'Western US',
-  },
-  {
-    name: 'NYC Car Center',
-    number: '9234',
-    pendingOrders: 2,
-    activeUsers: 8,
-    pendingUsers: 0,
-    status: 'Certified',
-    certification: 'Volkswagen',
-    address: '666 5th Ave',
-    city: 'New York',
-    state: 'NY',
-    dealer: 'VW of New York',
-    dealerNumber: '67895',
-    region: 'Eastern US',
-  },
-  {
-    name: 'Santa Monica Service',
-    number: '2045',
-    pendingOrders: 5,
-    activeUsers: 5,
-    pendingUsers: 1,
-    status: 'Certified',
-    certification: 'Volkswagen',
-    address: '456 Ocean Ave',
-    city: 'Santa Monica',
-    state: 'CA',
-    dealer: 'VW Santa Monica',
-    dealerNumber: '92341',
-    region: 'Western US',
-  },
-  {
-    name: 'Vancouver Car Experts',
-    number: '7456',
-    pendingOrders: 2,
-    activeUsers: 6,
-    pendingUsers: 2,
-    status: 'Certified',
-    certification: 'Audi Hybrid',
-    address: '444 Granville St',
-    city: 'Vancouver',
-    state: 'BC',
-    dealer: 'Audi Vancouver',
-    dealerNumber: '56784',
-    region: 'Canada',
-  },
-]
+// 动态生成数据
+const mockShops = Array.from({ length: 100 }, (_, index) => ({
+  name: `Shop ${index + 1}`,
+  number: `1234567890${index + 1}`,
+  pendingOrders: Math.floor(Math.random() * 100),
+  activeUsers: Math.floor(Math.random() * 100),
+  pendingUsers: Math.floor(Math.random() * 100),
+  status: Math.random() > 0.5 ? 'certified' : 'pending',
+  certification: Math.random() > 0.5 ? 'Audi Ultra' : 'Audi Hybrid',
+  address: `123 Main St, ${index + 1}`,
+  city: `City ${index + 1}`,
+  state: `State ${index + 1}`,
+  dealer: `Dealer ${index + 1}`,
+  dealerNumber: `1234567890${index + 1}`,
+  region: `Region ${index + 1}`,
+}))
+
 
 export function Shops() {
-  // 添加状态
-  const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 20
-  const totalItems = mockShops.length // 根据实际数据
-  const totalPages = Math.ceil(totalItems / itemsPerPage)
+
+   // 添加状态
+   const [currentPage, setCurrentPage] = useState(1)
+   const itemsPerPage = 20
+   const totalItems = mockShops.length // 根据实际数据
+   const totalPages = Math.ceil(totalItems / itemsPerPage)
+
+      // 计算当前页应该显示的数据
+      const startIndex = (currentPage - 1) * itemsPerPage
+      const endIndex = startIndex + itemsPerPage
+      const paginatedShops = mockShops.slice(startIndex, endIndex)
+   
 
   return (
-    <div className='min-h-screen bg-background'>
+    <div className='bg-background min-h-screen'>
       {/* Header */}
-      <div className='border-b bg-background'>
+      <div className='bg-background'>
         <div className='flex items-center justify-between px-6 py-4'>
-          <h1 className='text-2xl font-bold text-foreground'>Manage Shops</h1>
+          <h1 className='text-foreground text-2xl font-bold'>Manage Shops</h1>
           <Button>
             <Download className='mr-2 h-4 w-4' />
             Report
@@ -166,20 +66,17 @@ export function Shops() {
         </div>
       </div>
 
-      <div className='px-6 py-6'>
+      <div className='px-6 py-1'>
         {/* Search + Filters */}
         <div className='mb-6 flex flex-col gap-4 lg:flex-row lg:items-center'>
           <div className='relative max-w-md flex-1'>
-            <Search className='absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
-            <Input
-              placeholder='Filter by Name, #, City'
-              className='border-gray-300 pl-10'
-            />
+            <Search className='text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2' />
+            <Input placeholder='Filter by Name, #, City' className='pl-10' />
           </div>
 
           <div className='flex flex-wrap gap-3'>
             <Select defaultValue='all'>
-              <SelectTrigger className='w-48 bg-muted'>
+              <SelectTrigger className='bg-muted w-48'>
                 <SelectValue placeholder='Status' />
               </SelectTrigger>
               <SelectContent>
@@ -192,7 +89,7 @@ export function Shops() {
             </Select>
 
             <Select defaultValue='all'>
-              <SelectTrigger className='w-48 bg-muted'>
+              <SelectTrigger className='bg-muted w-48'>
                 <SelectValue placeholder='Certification' />
               </SelectTrigger>
               <SelectContent>
@@ -204,7 +101,7 @@ export function Shops() {
             </Select>
 
             <Select defaultValue='all'>
-              <SelectTrigger className='w-48 bg-muted'>
+              <SelectTrigger className='bg-muted w-48'>
                 <SelectValue placeholder='CSR Region' />
               </SelectTrigger>
               <SelectContent>
@@ -219,52 +116,59 @@ export function Shops() {
         </div>
 
         {/* Table */}
-        <div className='overflow-hidden rounded-lg border bg-background shadow-sm'>
+        <div className='bg-background overflow-hidden rounded-lg border shadow-sm'>
           <Table>
             <TableHeader>
               <TableRow className='bg-muted'>
-                <TableHead className='font-semibold text-foreground'>Name</TableHead>
-                <TableHead className='font-semibold text-foreground'>
+                <TableHead className='text-foreground font-semibold'>
+                  Name
+                </TableHead>
+                <TableHead className='text-foreground font-semibold'>
                   Number
                 </TableHead>
-                <TableHead className='font-semibold text-foreground'>
+                <TableHead className='text-foreground font-semibold'>
                   # of Pending Orders
                 </TableHead>
-                <TableHead className='font-semibold text-foreground'>
+                <TableHead className='text-foreground font-semibold'>
                   # of Active Users
                 </TableHead>
-                <TableHead className='font-semibold text-foreground'>
+                <TableHead className='text-foreground font-semibold'>
                   # of Pending Users
                 </TableHead>
-                <TableHead className='font-semibold text-foreground'>
+                <TableHead className='text-foreground font-semibold'>
                   Status
                 </TableHead>
-                <TableHead className='font-semibold text-foreground'>
+                <TableHead className='text-foreground font-semibold'>
                   Certification
                 </TableHead>
-                <TableHead className='font-semibold text-foreground'>
+                <TableHead className='text-foreground font-semibold'>
                   Address
                 </TableHead>
-                <TableHead className='font-semibold text-foreground'>City</TableHead>
-                <TableHead className='font-semibold text-foreground'>
+                <TableHead className='text-foreground font-semibold'>
+                  City
+                </TableHead>
+                <TableHead className='text-foreground font-semibold'>
                   State
                 </TableHead>
-                <TableHead className='font-semibold text-foreground'>
+                <TableHead className='text-foreground font-semibold'>
                   Dealer
                 </TableHead>
-                <TableHead className='font-semibold text-foreground'>
+                <TableHead className='text-foreground font-semibold'>
                   Dealer #
                 </TableHead>
-                <TableHead className='font-semibold text-foreground'>
+                <TableHead className='text-foreground font-semibold'>
                   Region
                 </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {mockShops.map((shop) => (
+              {paginatedShops.map((shop) => (
                 <TableRow key={shop.number} className='hover:bg-background'>
-                  <TableCell className='cursor-pointer font-medium text-blue-600 hover:underline'>
-                    {shop.name}
+                  <TableCell className='font-medium text-blue-600'>
+                    <span className='cursor-pointer hover:underline'>
+                      {' '}
+                      {shop.name}
+                    </span>
                   </TableCell>
                   <TableCell>{shop.number}</TableCell>
                   <TableCell className='text-center font-medium'>
@@ -285,7 +189,7 @@ export function Shops() {
                     </Badge>
                   </TableCell>
                   <TableCell>{shop.certification}</TableCell>
-                  <TableCell className='text-sm text-muted-foreground'>
+                  <TableCell className='text-muted-foreground text-sm'>
                     {shop.address}
                   </TableCell>
                   <TableCell>{shop.city}</TableCell>

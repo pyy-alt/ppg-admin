@@ -14,9 +14,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import EditProfileDialog from '@/components/EditProfileDialog'
+import ViewAdminTeamDialog from '../AdminViewTeamDialog'
 import { LanguageDropdown } from '../LanguageDropdown'
 import ViewDealerTeamDialog from '../ViewDealerTeamDialog'
-import ViewAdminTeamDialog from '../AdminViewTeamDialog'
 
 type HeaderProps = React.HTMLAttributes<HTMLElement> & {
   fixed?: boolean
@@ -38,7 +38,6 @@ export function Header({
   const handleSelect = (item: 'team' | 'profile' | 'logout') => {
     switch (item) {
       case 'team':
-        
         // setIsShowTeam(true)
         // 管理员
         setIsShowAdminTeam(true)
@@ -66,7 +65,7 @@ export function Header({
   return (
     <>
       <header
-        className={`text-primary-foreground fixed top-0 right-0 left-0 z-50 flex h-16 w-full items-center justify-between bg-[#0A0A0A] px-6 ${className || ''} `}
+        className={`bg-header fixed top-0 right-0 left-0 z-50 flex h-16 w-full items-center justify-between px-6 text-white ${className || ''} `}
         {...props}
       >
         {/* Left: Logo + Title */}
@@ -178,7 +177,10 @@ export function Header({
       </header>
       <EditProfileDialog open={open} onOpenChange={setOpen} />
       <ViewDealerTeamDialog open={isShowTeam} onOpenChange={setIsShowTeam} />
-      <ViewAdminTeamDialog open={isShowAdminTeam} onOpenChange={setIsShowAdminTeam} />
+      <ViewAdminTeamDialog
+        open={isShowAdminTeam}
+        onOpenChange={setIsShowAdminTeam}
+      />
     </>
   )
 }

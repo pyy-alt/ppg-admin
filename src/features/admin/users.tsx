@@ -1,11 +1,19 @@
-'use client'
-
 import { useState } from 'react'
-import { Search, Plus, User } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
+import PersonApi from '@/js/clients/base/PersonApi'
+import Person from '@/js/models/Person'
+import PersonSearchRequest from '@/js/models/PersonSearchRequest'
+import { PersonSearchRequestType } from '@/js/models/enum/PersonSearchRequestTypeEnum'
+import { Search, Plus, TableIcon, Pencil } from 'lucide-react'
+import { useDebouncedEffect } from '@/hooks/use-debounce'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Input } from '@/components/ui/input'
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyDescription,
+  EmptyTitle,
+} from '@/components/ui/empty'
 import { Label } from '@/components/ui/label'
 import {
   Select,
@@ -23,140 +31,75 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import AddNetworkUserDialog from '@/components/AddNetworkUserDialog'
+import { ClearableInput } from '@/components/clearable-input'
 import { DataTablePagination } from '@/components/data-table-pagination'
-
-const mockUsers = [
-  {
-    firstName: 'Abigail',
-    lastName: 'Thomas',
-    email: 'athomas@vwgoa.com',
-    role: 'Admin',
-    region: 'All Regions',
-    dateAdded: '8/22/2024',
-    lastAccessed: '9/19/2025',
-    status: 'Active',
-    pendingRegistration: false,
-  },
-  {
-    firstName: 'Alexander',
-    lastName: 'Lee',
-    email: 'alee@vwgoa.com',
-    role: 'Field Staff',
-    region: 'Canada',
-    dateAdded: '9/5/2024',
-    lastAccessed: '9/22/2025',
-    status: 'Active',
-    pendingRegistration: false,
-  },
-  {
-    firstName: 'Ava',
-    lastName: 'Moore',
-    email: 'amoore@vwgoa.com',
-    role: 'Field Staff',
-    region: 'Canada',
-    dateAdded: '8/12/2024',
-    lastAccessed: '8/15/2025',
-    status: 'Inactive',
-    pendingRegistration: false,
-  },
-  {
-    firstName: 'Benjamin',
-    lastName: 'Harris',
-    email: 'bharris@vwgoa.com',
-    role: 'Admin',
-    region: 'All Regions',
-    dateAdded: '8/18/2024',
-    lastAccessed: '9/21/2025',
-    status: 'Active',
-    pendingRegistration: false,
-  },
-  {
-    firstName: 'Charlotte',
-    lastName: 'King',
-    email: 'cking@vwgoa.com',
-    role: 'Field Staff',
-    region: 'Eastern US',
-    dateAdded: '8/10/2024',
-    lastAccessed: '9/23/2025',
-    status: 'Active',
-    pendingRegistration: false,
-  },
-  {
-    firstName: 'Daniel',
-    lastName: 'Martinez',
-    email: 'dmartinez@vwgoa.com',
-    role: 'CSR',
-    region: 'Canada',
-    dateAdded: '6/30/2024',
-    lastAccessed: '9/19/2025',
-    status: 'Active',
-    pendingRegistration: false,
-  },
-  {
-    firstName: 'Daniel',
-    lastName: 'Scott',
-    email: 'dscott@vwgoa.com',
-    role: 'CSR',
-    region: 'Western US',
-    dateAdded: '9/7/2024',
-    lastAccessed: '9/20/2025',
-    status: 'Active',
-    pendingRegistration: false,
-  },
-  {
-    firstName: 'Emily',
-    lastName: 'Carter',
-    email: 'ecarter@vwgoa.com',
-    role: 'CSR',
-    region: 'Eastern US',
-    dateAdded: '8/12/2024',
-    lastAccessed: '9/12/2025',
-    status: 'Active',
-    pendingRegistration: false,
-  },
-  {
-    firstName: 'Matthew',
-    lastName: 'White',
-    email: 'mwhite@vwgoa.com',
-    role: 'Field Staff',
-    region: 'Western US',
-    dateAdded: '9/03/2024',
-    lastAccessed: '9/18/2025',
-    status: 'Active',
-    pendingRegistration: false,
-  },
-  {
-    firstName: 'Pending Registration',
-    lastName: 'Pending Registration',
-    email: 'mnguyen@vwgoa.com',
-    role: 'Field Staff',
-    region: 'Western US',
-    dateAdded: '9/11/2025',
-    lastAccessed: null,
-    status: 'Pending Registration',
-    pendingRegistration: true,
-  },
-]
 
 export function Users() {
   const [isAddUserOpen, setIsAddUserOpen] = useState(false)
+  const [users, setUsers] = useState<Person[]>([])
+  const [editUser] = useState<Person | null>(null)
+  const [totalItems, setTotalItems] = useState(0)
   // 添加状态
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 20
-  const totalItems = mockUsers.length // 根据实际数据
   const totalPages = Math.ceil(totalItems / itemsPerPage)
 
+  // 筛选条件状态
+  const [smartFilter, setSmartFilter] = useState('')
+  const [type, setType] = useState<PersonSearchRequestType>('Network')
+  const [, setFilterByRegion] = useState('all')
+  const [includeInactiveFlag, setIncludeInactiveFlag] = useState(false)
+
+  const getUsers = (
+    smartFilter: string = '',
+    includeInactiveFlag: boolean = false,
+    type: PersonSearchRequestType = 'Network'
+    // filterByRegion: string = 'all' // 待后端确认字段
+  ) => {
+    try {
+      const request = PersonSearchRequest.create({
+        //Shop, Dealership, Network
+        smartFilter,
+        includeInactiveFlag,
+        type,
+      })
+      const personApi = new PersonApi() // 创建 PersonApi 实例
+
+      personApi.search(request, {
+        status200: (response) => {
+          setUsers(response.persons)
+          setTotalItems(response.totalItemCount)
+        },
+        error: (error) => {
+          console.error(error)
+        },
+      })
+    } catch (error) {}
+  }
+
+  // TODO======
+  // const getUserDetails = (id: number) => {
+  //   try {
+  //   } catch (error) {}
+  // }
+
+  // 筛选条件变化：使用防抖
+  useDebouncedEffect(
+    () => {
+      getUsers(smartFilter, includeInactiveFlag, type)
+    },
+    [smartFilter, includeInactiveFlag, type],
+    1000
+  )
   return (
-    <div className='min-h-screen bg-background text-foreground'>
+    <div className='bg-background text-foreground min-h-screen'>
       {/* Header */}
-      <div className='border-b bg-background'>
+      <div className='bg-background border-b'>
         <div className='flex items-center justify-between px-6 py-4'>
-          <h1 className='text-2xl font-bold text-foreground'>
+          <h1 className='text-foreground text-2xl font-bold'>
             Manage Network Users
           </h1>
-          <Button
-            onClick={() => setIsAddUserOpen(true)}
-          >
+          <Button onClick={() => setIsAddUserOpen(true)}>
             <Plus className='mr-2 h-4 w-4' />
             Add New User
           </Button>
@@ -166,34 +109,51 @@ export function Users() {
       <AddNetworkUserDialog
         open={isAddUserOpen}
         onOpenChange={setIsAddUserOpen}
+        initialValues={editUser}
+        onSuccess={(data) => {
+          console.log(data)
+          getUsers()
+        }}
+        onError={(error) => {
+          console.log(error)
+        }}
       />
 
       <div className='px-6 py-6'>
         {/* Filters */}
         <div className='mb-6 flex flex-col gap-4 lg:flex-row lg:items-center'>
           <div className='relative max-w-md flex-1'>
-            <Search className='absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
-            <Input
+            <Search className='text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2' />
+            <ClearableInput
               placeholder='Filter by First Name, Last Name, Email'
-              className=' pl-10'
+              value={smartFilter}
+              onChange={(e) => setSmartFilter(e.target.value)}
+              className='pl-10'
             />
           </div>
 
           <div className='flex flex-wrap items-center gap-3'>
-            <Select defaultValue='all'>
-              <SelectTrigger className='w-48 bg-muted'>
+            <Select
+              defaultValue='Network'
+              onValueChange={(value) =>
+                setType(value as PersonSearchRequestType)
+              }
+            >
+              <SelectTrigger className='bg-muted w-48'>
                 <SelectValue placeholder='Role' />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value='all'>All Roles</SelectItem>
-                <SelectItem value='admin'>Admin</SelectItem>
-                <SelectItem value='csr'>CSR</SelectItem>
-                <SelectItem value='field'>Field Staff</SelectItem>
+                <SelectItem value='Shop'>Shop</SelectItem>
+                <SelectItem value='Dealership'>Dealership</SelectItem>
+                <SelectItem value='Network'>Network</SelectItem>
               </SelectContent>
             </Select>
 
-            <Select defaultValue='all'>
-              <SelectTrigger className='w-48 bg-muted'>
+            <Select
+              defaultValue='all'
+              onValueChange={(value) => setFilterByRegion(value)}
+            >
+              <SelectTrigger className='bg-muted w-48'>
                 <SelectValue placeholder='CSR Region' />
               </SelectTrigger>
               <SelectContent>
@@ -207,7 +167,12 @@ export function Users() {
             </Select>
 
             <div className='flex items-center gap-3'>
-              <Checkbox id='show-inactive' />
+              <Checkbox
+                id='show-inactive'
+                onCheckedChange={(checked) =>
+                  setIncludeInactiveFlag(checked as boolean)
+                }
+              />
               <Label
                 htmlFor='show-inactive'
                 className='cursor-pointer text-sm font-medium'
@@ -217,105 +182,156 @@ export function Users() {
             </div>
           </div>
         </div>
-
-        {/* Table */}
-        <div className='overflow-hidden rounded-lg border bg-background shadow-sm'>
-          <Table>
-            <TableHeader>
-              <TableRow className='bg-muted'>
-                <TableHead className='font-semibold text-foreground'>
-                  First Name
-                </TableHead>
-                <TableHead className='font-semibold text-foreground'>
-                  Last Name
-                </TableHead>
-                <TableHead className='font-semibold text-foreground'>
-                  Email
-                </TableHead>
-                <TableHead className='font-semibold text-foreground'>Role</TableHead>
-                <TableHead className='font-semibold text-foreground'>
-                  Region
-                </TableHead>
-                <TableHead className='font-semibold text-foreground'>
-                  Date Added
-                </TableHead>
-                <TableHead className='font-semibold text-foreground'>
-                  Date Last Accessed
-                </TableHead>
-                <TableHead className='font-semibold text-foreground'>
-                  Status
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {mockUsers.map((user) => (
-                <TableRow key={user.email} className='hover:bg-background'>
-                  <TableCell className='font-medium'>
-                    <div className='flex items-center gap-3'>
-                      {user.pendingRegistration ? (
-                        <div className='flex h-8 w-8 items-center justify-center rounded-full bg-orange-100'>
-                          <User className='h-5 w-5 text-orange-600' />
+        {users.length === 0 ? (
+          <div>
+            <Empty>
+              <EmptyHeader>
+                <EmptyMedia variant='icon'>
+                  <TableIcon className='h-4 w-4' />
+                </EmptyMedia>
+                <EmptyTitle>No data to display</EmptyTitle>
+                <EmptyDescription>
+                  There are no records in this table yet. Add your first entry
+                  to get started.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          </div>
+        ) : (
+          <div>
+            {/* Table */}
+            <div className='bg-background overflow-hidden rounded-lg border shadow-sm'>
+              <Table>
+                <TableHeader>
+                  <TableRow className='bg-muted'>
+                    <TableHead className='text-foreground font-semibold'>
+                      First Name
+                    </TableHead>
+                    <TableHead className='text-foreground font-semibold'>
+                      Last Name
+                    </TableHead>
+                    <TableHead className='text-foreground font-semibold'>
+                      Email
+                    </TableHead>
+                    <TableHead className='text-foreground font-semibold'>
+                      Role
+                    </TableHead>
+                    <TableHead className='text-foreground font-semibold'>
+                      Region
+                    </TableHead>
+                    <TableHead className='text-foreground font-semibold'>
+                      Date Added
+                    </TableHead>
+                    <TableHead className='text-foreground font-semibold'>
+                      Date Last Accessed
+                    </TableHead>
+                    <TableHead className='text-foreground font-semibold'>
+                      Status
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {users.map((user) => (
+                    <TableRow key={user.email} className='hover:bg-background'>
+                      <TableCell className='font-medium'>
+                        <div className='flex items-center gap-1'>
+                          <Pencil className='h-4 w-4' />
+                          <span
+                            className={
+                              user.status === 'Pending'
+                                ? 'cursor-pointer text-orange-600 hover:underline'
+                                : user.status === 'Inactive'
+                                  ? 'text-gray-300'
+                                  : 'text-foreground cursor-pointer hover:underline'
+                            }
+                            // onClick={() => getUserDetails(user.id)}
+                          >
+                            {user.firstName}
+                          </span>
                         </div>
-                      ) : (
-                        <div className='flex h-8 w-8 items-center justify-center rounded-full bg-blue-100'>
-                          <User className='h-5 w-5 text-blue-600' />
-                        </div>
-                      )}
-                      <span
+                      </TableCell>
+                      <TableCell
                         className={
-                          user.pendingRegistration
-                            ? 'text-orange-600'
-                            : 'text-foreground'
+                          user.status === 'Inactive'
+                            ? 'text-gray-300'
+                            : user.status === 'Pending'
+                              ? 'text-orange-600'
+                              : ''
                         }
                       >
-                        {user.firstName}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell
-                    className={
-                      user.pendingRegistration ? 'text-orange-600' : ''
-                    }
-                  >
-                    {user.lastName}
-                  </TableCell>
-                  <TableCell className='text-sm'>{user.email}</TableCell>
-                  <TableCell>{user.role}</TableCell>
-                  <TableCell>{user.region}</TableCell>
-                  <TableCell>{user.dateAdded}</TableCell>
-                  <TableCell>{user.lastAccessed || '--'}</TableCell>
-                  <TableCell>
-                    {user.pendingRegistration ? (
-                      <Badge
-                        variant='destructive'
-                        className='bg-orange-100 text-orange-800 hover:bg-orange-200'
-                      >
-                        Pending Registration
-                      </Badge>
-                    ) : (
-                      <Badge
-                        variant={
-                          user.status === 'Active' ? 'default' : 'secondary'
+                        {user.lastName}
+                      </TableCell>
+                      <TableCell className='text-sm'>
+                        {user.status === 'Inactive' ? (
+                          <span className='text-gray-300'>{user.email}</span>
+                        ) : (
+                          user.email
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {user.status === 'Inactive' ? (
+                          <span className='text-gray-300'>{user.type}</span>
+                        ) : (
+                          user.type
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {user.status === 'Inactive' ? (
+                          <span className='text-gray-300'>缺少字段region</span>
+                        ) : (
+                          '缺少字段region'
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {user.status === 'Inactive' ? (
+                          <span className='text-gray-300'>
+                            {(user.dateCreated &&
+                              new Date(
+                                user.dateCreated
+                              ).toLocaleDateString()) ||
+                              '--'}
+                          </span>
+                        ) : (
+                          (user.dateCreated &&
+                            new Date(user.dateCreated).toLocaleDateString()) ||
+                          '--'
+                        )}
+                      </TableCell>
+                      <TableCell
+                        className={
+                          user.status === 'Inactive'
+                            ? 'text-gray-300'
+                            : user.status === 'Pending'
+                              ? 'text-orange-600'
+                              : ''
                         }
                       >
-                        {user.status}
-                      </Badge>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+                        {user.dateLastAccess &&
+                          new Date(user.dateLastAccess).toLocaleDateString() || '--'}
+                      </TableCell>
+                      <TableCell>
+                        {user.status === 'Inactive' ? (
+                          <span className='text-gray-300'>{user.status}</span>
+                        ) : (
+                          <span>{user.status}</span>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
 
-        {/* Pagination */}
-        <DataTablePagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          totalItems={totalItems}
-          itemsPerPage={itemsPerPage}
-          onPageChange={setCurrentPage}
-        />
+            {/* Pagination */}
+            <DataTablePagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={totalItems}
+              itemsPerPage={itemsPerPage}
+              onPageChange={setCurrentPage}
+            />
+          </div>
+        )}
       </div>
     </div>
   )

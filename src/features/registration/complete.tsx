@@ -8,8 +8,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Header } from '@/components/layout/header'
 
-// ← 顶部 banner（含 Audi 技师）
-
 export function RegistrationComplete() {
   const navigate = useNavigate()
   const [isLoading, setIsLoading] = useState(false)
@@ -23,7 +21,8 @@ export function RegistrationComplete() {
     password: '',
     confirmPassword: '',
   })
-
+  // 查询参数
+  // const { id, hash, guid }:{ id:string,hash:string,guid:string } = useSearch({ from: '/registration/complete' })
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
@@ -64,7 +63,7 @@ export function RegistrationComplete() {
       <Header isShowUser={false} />
 
       {/* Banner 顶部 */}
-      <div className='bg-primary text-primary-foreground relative h-32 lg:h-40 mt-12'>
+      <div className='bg-primary text-primary-foreground relative mt-12 h-32 lg:h-40'>
         <img
           src={bannerImg}
           alt='New Shop User Registration'
