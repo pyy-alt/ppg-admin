@@ -1,30 +1,115 @@
-import { useState } from 'react'
-import { useNavigate } from '@tanstack/react-router'
+import { useEffect, useRef, useState } from 'react'
+import { useNavigate, useParams } from '@tanstack/react-router'
+import AuthenticationApi from '@/js/clients/base/AuthenticationApi'
+import CompleteRegistrationRequest from '@/js/models/CompleteRegistrationRequest'
+import Session from '@/js/models/Session'
 import { User, Store, Lock, MapPin, EyeOff, Eye } from 'lucide-react'
 import { toast } from 'sonner'
 import bannerImg from '@/assets/img/registration/banner.png'
+import { useAuthStore } from '@/stores/auth-store'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Loading } from '@/components/Loading'
 import { Header } from '@/components/layout/header'
 
 export function RegistrationComplete() {
   const navigate = useNavigate()
   const [isLoading, setIsLoading] = useState(false)
   const [form, setForm] = useState({
-    email: 'jake.renshaw@sunsetauto.com',
-    firstName: 'Jake',
-    lastName: 'Renshaw',
-    shopName: 'Sunset Auto Collision',
-    shopNumber: '2458',
-    shopAddress: '7820 Sunset Blvd Los Angeles, CA 90046',
+    email: '',
+    firstName: '',
+    lastName: '',
+    shopName: '',
+    shopNumber: '',
+    shopAddress: '',
     password: '',
     confirmPassword: '',
   })
   // 查询参数
-  // const { id, hash, guid }:{ id:string,hash:string,guid:string } = useSearch({ from: '/registration/complete' })
+  const { id, hash, guid } = useParams({
+    from: '/registration/complete/$id/$guid/$hash',
+  })
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [isValidating, setIsValidating] = useState(true) // 正在验证链接
+
+  const authApi = new AuthenticationApi()
+  const { auth } = useAuthStore()
+
+  // ✅ 添加 ref 防止重复调用
+  const hasValidatedRef = useRef(false)
+  useEffect(() => {
+    // ✅ 如果已经验证过，不再重复调用
+    if (hasValidatedRef.current) {
+      return
+    }
+    // ✅ 添加参数验证
+    if (!id || !guid || !hash) {
+      toast.error('Invalid registration link parameters.')
+      setIsValidating(false)
+      return
+    }
+
+    // ✅ 标记为已开始验证
+    hasValidatedRef.current = true
+    // 调用 sessionCreate API 验证邮件链接并创建临时会话
+    // 如果用户已经登录，这个调用会创建新的临时会话并覆盖之前的会话
+    authApi.sessionCreate(
+      id,
+      guid,
+      hash,
+      {
+        status200: (session: Session) => {
+          if (session) {
+            auth.setUser(session) // setUser 会自动设置 loginStatus 为 'authenticated'
+
+            // ✅ 构建完整地址（包含 city, state, zip）
+            const organization =
+              session.person?.shop || session.person?.dealership
+            const addressParts = [
+              organization?.address,
+              organization?.city,
+              organization?.state,
+              organization?.zip,
+            ].filter(Boolean) // 过滤掉空值
+            const fullAddress = addressParts.join(', ')
+
+            // ✅ 更新表单数据，使用从 API 获取的真实数据
+            setForm({
+              email: session.person?.email || '',
+              firstName: session.person?.firstName || '',
+              lastName: session.person?.lastName || '',
+              shopName: organization?.name || '',
+              shopNumber:
+                session.person?.shop?.shopNumber ||
+                session.person?.dealership?.dealershipNumber ||
+                '',
+              shopAddress: fullAddress || '',
+              password: '',
+              confirmPassword: '',
+            })
+          }
+          setIsValidating(false)
+        },
+        status404: () => {
+          // 链接无效或已过期
+          toast.error('Registration link is invalid or has expired.')
+          setIsValidating(false)
+          // 不立即重定向，让用户看到错误提示
+          // 用户可以选择手动返回或重新申请重置链接
+        },
+        error: () => {
+          // 网络错误等
+          toast.error('Failed to validate reset link. Please try again.')
+          setIsValidating(false)
+          // ✅ 错误时重置 ref，允许重试
+          hasValidatedRef.current = false
+        },
+      },
+      null
+    )
+  }, [id, guid, hash]) // 只在组件挂载时执行一次
 
   const handleChange = (field: keyof typeof form, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -46,15 +131,45 @@ export function RegistrationComplete() {
     setIsLoading(true)
 
     try {
-      // 模拟最终注册提交
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-      toast.success('Registration completed successfully!')
-      navigate({ to: '/' })
-    } catch {
-      toast.error('Registration failed. Please try again.')
-    } finally {
+      // 调用 updatePassword API 更新密码
+      // 注意：由于会话是通过邮件链接创建的，不需要提供 currentPassword
+      const request = CompleteRegistrationRequest.create({
+        firstName: form.firstName,
+        lastName: form.lastName,
+        newPassword: form.password,
+      })
+      authApi.registrationComplete(request, {
+        status200: () => {
+          // ✅ 注册完成后，清除用户状态（因为要跳转到登录页）
+          auth.reset()
+
+          toast.success('Registration completed successfully!')
+
+          // ✅ 跳转到登录页，使用 replace: true 避免返回
+          navigate({
+            to: '/login',
+            replace: true,
+          })
+
+          setIsLoading(false)
+        },
+        // ✅ 409 错误：全局已显示 toast.warning，这里只需重置 loading
+        status409: () => {
+          setIsLoading(false)
+        },
+        // ✅ 其他错误：全局已显示 toast.error，这里只需重置 loading
+        error: () => {
+          setIsLoading(false)
+        },
+      })
+    } catch (error) {
+      toast.error('Failed to reset password. Please try again.')
       setIsLoading(false)
     }
+  }
+  // 如果正在验证链接，显示加载状态
+  if (isValidating) {
+    return <Loading />
   }
 
   return (

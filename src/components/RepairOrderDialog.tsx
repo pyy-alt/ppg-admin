@@ -8,6 +8,7 @@ import FileAssetFileAssetTypeEnum from '@/js/models/enum/FileAssetFileAssetTypeE
 import { X, Upload, Camera, FileText, Image as ImageIcon } from 'lucide-react'
 import { useDropzone } from 'react-dropzone'
 import { convertFilesToFileAssets } from '@/lib/utils'
+import { useDialogWithConfirm } from '@/hooks/use-dialog-with-confirm'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -77,6 +78,12 @@ interface RepairOrderDialogProps {
   initialData?: RepairOrderData
 }
 
+// 获取当前年份
+const currentYear = new Date().getFullYear()
+// 计算列表长度
+const listLength = currentYear + 1 - 1949
+// 计算起始年份 (明年)
+const startYear = currentYear + 1
 export default function RepairOrderDialog({
   open,
   onOpenChange,
@@ -104,6 +111,42 @@ export default function RepairOrderDialog({
     },
   })
 
+  // ✅ 修复：实际执行关闭的函数（不检查未保存更改）
+  const performClose: () => void = () => {
+    onOpenChange(false)
+    // 延迟重置，避免关闭动画时看到表单清空
+    setTimeout(() => {
+      form.reset()
+      setStructuralMeasurementFileAssets([])
+      setPreRepairPhotoFileAssets([])
+    }, 200)
+  }
+
+  // 使用确认 hook
+  const { handleCloseRequest, ConfirmDialogComponent } =
+    useDialogWithConfirm({
+      form,
+      hasUnsavedFiles:
+        structuralMeasurementFileAssets.length > 0 ||
+        preRepairPhotoFileAssets.length > 0,
+      onClose: performClose, // ✅ 修复：直接传入关闭函数，不调用 handleClose
+      title: 'Discard Changes?',
+      description:
+        'You have unsaved changes. Are you sure you want to close? All your changes will be lost.',
+    })
+
+  const handleClose = () => {
+    handleCloseRequest() // 这会检查是否有未保存更改，如果有则显示确认对话框
+  }
+
+  // 修改 Dialog 的 onOpenChange
+  const handleDialogOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
+      // 尝试关闭，会检查是否有未保存更改
+      handleCloseRequest()
+    }
+    return true
+  }
   // 当 initialData 变化时，更新表单和文件
   useEffect(() => {
     if (initialData) {
@@ -206,16 +249,6 @@ export default function RepairOrderDialog({
     }
   }
 
-  const handleClose = () => {
-    onOpenChange(false)
-    // 延迟重置，避免关闭动画时看到表单清空
-    setTimeout(() => {
-      form.reset()
-      setStructuralMeasurementFileAssets([])
-      setPreRepairPhotoFileAssets([])
-    }, 200)
-  }
-
   const DropZone = ({
     title,
     icon: Icon,
@@ -259,6 +292,7 @@ export default function RepairOrderDialog({
 
     return (
       <div className='space-y-4'>
+        {ConfirmDialogComponent}
         <Label className='text-base font-medium'>{title}</Label>
 
         <div
@@ -339,7 +373,7 @@ export default function RepairOrderDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
+    <Dialog open={open} onOpenChange={handleDialogOpenChange}>
       <DialogContent className='flex max-h-[90vh] flex-col sm:max-w-4xl'>
         <DialogHeader className='shrink-0'>
           <DialogTitle className='text-2xl font-semibold'>
@@ -434,7 +468,7 @@ export default function RepairOrderDialog({
                             <SelectItem value='Pacific VW Motors'>
                               Pacific VW Motors | 88321 (Assigned Dealer)
                             </SelectItem>
-                            <SelectItem value='Pacific VW Motors'>
+                            <SelectItem value='smamsasmlkas'>
                               Pacific VW Motors | 88321 (Assigned Dealer)
                             </SelectItem>
                           </SelectContent>
@@ -478,8 +512,12 @@ export default function RepairOrderDialog({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value='audi'>Audi</SelectItem>
-                            <SelectItem value='vw'>Volkswagen</SelectItem>
+                            <SelectItem value='Volkswagen' key='Volkswagen'>
+                              Volkswagen
+                            </SelectItem>
+                            <SelectItem value='Audi' key='Audi'>
+                              Audi
+                            </SelectItem>
                           </SelectContent>
                         </Select>
                       </FormItem>
@@ -502,11 +540,18 @@ export default function RepairOrderDialog({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {Array.from({ length: 25 }, (_, i) => (
-                              <SelectItem key={i} value={`${2025 - i}`}>
-                                {2025 - i}
-                              </SelectItem>
-                            ))}
+                            {/* 核心逻辑：生成年份列表 */}
+                            {Array.from({ length: listLength }, (_, i) => {
+                              const yearValue = startYear - i // 从明年开始递减
+                              return (
+                                <SelectItem
+                                  key={yearValue}
+                                  value={`${yearValue}`} // Select 的 value 最好是字符串
+                                >
+                                  {yearValue}
+                                </SelectItem>
+                              )
+                            })}
                           </SelectContent>
                         </Select>
                       </FormItem>
@@ -520,21 +565,10 @@ export default function RepairOrderDialog({
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Model</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder='Select' />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value='q5'>Q5</SelectItem>
-                            <SelectItem value='a4'>A4</SelectItem>
-                            <SelectItem value='tt'>TT</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <FormControl>
+                          <Input placeholder='Enter Model' {...field} />
+                        </FormControl>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />

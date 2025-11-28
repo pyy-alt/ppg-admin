@@ -4,6 +4,7 @@ import Person from '@/js/models/Person'
 import PersonSearchRequest from '@/js/models/PersonSearchRequest'
 import { PersonSearchRequestType } from '@/js/models/enum/PersonSearchRequestTypeEnum'
 import { Search, Plus, TableIcon, Pencil } from 'lucide-react'
+import { useAuthStore } from '@/stores/auth-store'
 import { useDebouncedEffect } from '@/hooks/use-debounce'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -30,14 +31,14 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import AddNetworkUserDialog from '@/components/AddNetworkUserDialog'
+import NetworkUserDialog from '@/components/NetworkUserDialog'
 import { ClearableInput } from '@/components/clearable-input'
 import { DataTablePagination } from '@/components/data-table-pagination'
 
 export function Users() {
-  const [isAddUserOpen, setIsAddUserOpen] = useState(false)
+  const [userOpen, setUserOpen] = useState(false)
   const [users, setUsers] = useState<Person[]>([])
-  const [editUser] = useState<Person | null>(null)
+  const [initUser, setInitUser] = useState<Person | null>(null)
   const [totalItems, setTotalItems] = useState(0)
   // 添加状态
   const [currentPage, setCurrentPage] = useState(1)
@@ -47,14 +48,24 @@ export function Users() {
   // 筛选条件状态
   const [smartFilter, setSmartFilter] = useState('')
   const [type, setType] = useState<PersonSearchRequestType>('Network')
-  const [, setFilterByRegion] = useState('all')
+  const [filterByRegion, setFilterByRegion] = useState<{
+    id: number
+    name: string
+  } | null>(null)
   const [includeInactiveFlag, setIncludeInactiveFlag] = useState(false)
+  const [filterByRegionId, setFilterByRegionId] = useState<number>()
 
+  const regions = useAuthStore((state) => state.auth.user?.regions || [])
+
+  if (filterByRegion) {
+    setFilterByRegionId(filterByRegion.id)
+  }
   const getUsers = (
     smartFilter: string = '',
     includeInactiveFlag: boolean = false,
-    type: PersonSearchRequestType = 'Network'
-    // filterByRegion: string = 'all' // 待后端确认字段
+    type: PersonSearchRequestType = 'Network',
+    filterByRegionId: number | undefined,
+    organizationId: number = 2
   ) => {
     try {
       const request = PersonSearchRequest.create({
@@ -62,6 +73,8 @@ export function Users() {
         smartFilter,
         includeInactiveFlag,
         type,
+        filterByRegionId,
+        organizationId,
       })
       const personApi = new PersonApi() // 创建 PersonApi 实例
 
@@ -77,18 +90,21 @@ export function Users() {
     } catch (error) {}
   }
 
-  // TODO======
-  // const getUserDetails = (id: number) => {
-  //   try {
-  //   } catch (error) {}
-  // }
+  const getUserDetails = (user: Person) => {
+    try {
+      setInitUser(user)
+      setUserOpen(true)
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   // 筛选条件变化：使用防抖
   useDebouncedEffect(
     () => {
-      getUsers(smartFilter, includeInactiveFlag, type)
+      getUsers(smartFilter, includeInactiveFlag, type, filterByRegionId)
     },
-    [smartFilter, includeInactiveFlag, type],
+    [smartFilter, includeInactiveFlag, type, filterByRegionId],
     1000
   )
   return (
@@ -99,20 +115,21 @@ export function Users() {
           <h1 className='text-foreground text-2xl font-bold'>
             Manage Network Users
           </h1>
-          <Button onClick={() => setIsAddUserOpen(true)}>
+          <Button onClick={() => setUserOpen(true)}>
             <Plus className='mr-2 h-4 w-4' />
             Add New User
           </Button>
         </div>
       </div>
 
-      <AddNetworkUserDialog
-        open={isAddUserOpen}
-        onOpenChange={setIsAddUserOpen}
-        initialValues={editUser}
+      <NetworkUserDialog
+        open={userOpen}
+        onOpenChange={setUserOpen}
+        initialValues={initUser}
+        filterByRegion={filterByRegion}
         onSuccess={(data) => {
           console.log(data)
-          getUsers()
+          getUsers(smartFilter, includeInactiveFlag, type, filterByRegionId)
         }}
         onError={(error) => {
           console.log(error)
@@ -151,23 +168,28 @@ export function Users() {
 
             <Select
               defaultValue='all'
-              onValueChange={(value) => setFilterByRegion(value)}
+              onValueChange={(value) =>
+                setFilterByRegion(
+                  JSON.parse(value) as { id: number; name: string }
+                )
+              }
             >
               <SelectTrigger className='bg-muted w-48'>
                 <SelectValue placeholder='CSR Region' />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value='all'>All Regions</SelectItem>
-                <SelectItem value='western'>Western US</SelectItem>
-                <SelectItem value='eastern'>Eastern US</SelectItem>
-                <SelectItem value='central'>Central US</SelectItem>
-                <SelectItem value='canada'>Canada</SelectItem>
-                <SelectItem value='all-regions'>All Regions</SelectItem>
+                {regions.map((region: any) => (
+                  <SelectItem key={region.id} value={region}>
+                    {region.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
 
             <div className='flex items-center gap-3'>
               <Checkbox
+                className='rounded-full'
                 id='show-inactive'
                 onCheckedChange={(checked) =>
                   setIncludeInactiveFlag(checked as boolean)
@@ -234,8 +256,11 @@ export function Users() {
                   {users.map((user) => (
                     <TableRow key={user.email} className='hover:bg-background'>
                       <TableCell className='font-medium'>
-                        <div className='flex items-center gap-1'>
-                          <Pencil className='h-4 w-4' />
+                        <div
+                          className='flex items-center gap-1'
+                          onClick={() => getUserDetails(user)}
+                        >
+                          <Pencil className='h-4 w-4 hover:underline' />
                           <span
                             className={
                               user.status === 'Pending'
@@ -244,7 +269,6 @@ export function Users() {
                                   ? 'text-gray-300'
                                   : 'text-foreground cursor-pointer hover:underline'
                             }
-                            // onClick={() => getUserDetails(user.id)}
                           >
                             {user.firstName}
                           </span>
@@ -275,12 +299,20 @@ export function Users() {
                           user.type
                         )}
                       </TableCell>
-                      <TableCell>
-                        {user.status === 'Inactive' ? (
-                          <span className='text-gray-300'>缺少字段region</span>
-                        ) : (
-                          '缺少字段region'
-                        )}
+                      <TableCell
+                        className={
+                          user.status === 'Inactive' ? 'text-gray-300' : ''
+                        }
+                      >
+                        {user.type === 'Csr'
+                          ? user.csrRegion?.name || '--'
+                          : user.type === 'FieldStaff'
+                            ? user.fieldStaffRegions
+                                ?.map((region: any) => region.name)
+                                .join(', ') || '--'
+                            : user.type === 'ProgramAdministrator'
+                              ? 'All Regions'
+                              : '--'}
                       </TableCell>
                       <TableCell>
                         {user.status === 'Inactive' ? (
@@ -306,8 +338,9 @@ export function Users() {
                               : ''
                         }
                       >
-                        {user.dateLastAccess &&
-                          new Date(user.dateLastAccess).toLocaleDateString() || '--'}
+                        {(user.dateLastAccess &&
+                          new Date(user.dateLastAccess).toLocaleDateString()) ||
+                          '--'}
                       </TableCell>
                       <TableCell>
                         {user.status === 'Inactive' ? (

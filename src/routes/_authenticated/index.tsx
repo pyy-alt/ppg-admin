@@ -8,7 +8,6 @@ function AuthenticatedIndex() {
   const { loginStatus, user } = useAuthStore((state) => state.auth)
   const navigate = useNavigate()
   const [hasChecked, setHasChecked] = useState(false)
-  const isAdmin = user?.type === 'ProgramAdministrator'
 
   // 等待 InitAuth 完成验证
   useEffect(() => {
@@ -31,16 +30,20 @@ function AuthenticatedIndex() {
     return () => clearTimeout(timer)
   }, [loginStatus])
 
-  // 已登录用户，根据用户类型重定向到对应页面
+  // ✅ 已登录用户，根据用户类型重定向到对应页面
   useEffect(() => {
-    if (loginStatus === 'authenticated' && hasChecked) {
-      if (isAdmin) {
+    if (loginStatus === 'authenticated' && hasChecked && user?.person?.type) {
+      // ✅ 根据用户类型跳转到不同页面
+      if (user.person.type === 'ProgramAdministrator') {
         navigate({ to: '/admin/parts_orders', replace: true })
+      } else if (user.person.type === 'Shop') {
+        navigate({ to: '/repair_orders', replace: true })
       } else {
+        // Dealership, Csr, FieldStaff 跳转到 /parts_orders
         navigate({ to: '/parts_orders', replace: true })
       }
     }
-  }, [loginStatus, hasChecked, isAdmin, navigate])
+  }, [loginStatus, hasChecked, user?.person?.type, navigate])
 
   // 如果正在检查认证状态，显示加载状态
   if (!hasChecked || loginStatus === 'checking') {

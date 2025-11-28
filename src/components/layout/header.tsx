@@ -89,18 +89,18 @@ export function Header({
                   <div className='text-left text-white'>
                     <p className='text-sm leading-none font-medium'>
                       {auth.user
-                        ? `${auth.user.firstName} ${auth.user.lastName}`.trim() ||
-                          auth.user.email
+                        ? `${auth.user.person?.firstName} ${auth.user.person?.lastName}`.trim() ||
+                          auth.user.person?.email
                         : 'User'}
                     </p>
                     <p className='text-xs text-gray-400'>
                       {auth.user
-                        ? auth.user.shopName && auth.user.shopNumber
-                          ? `${auth.user.shopName}(${auth.user.shopNumber}) | ${auth.user.type}`
-                          : auth.user.dealershipName &&
-                              auth.user.dealershipNumber
-                            ? `${auth.user.dealershipName}(${auth.user.dealershipNumber}) | ${auth.user.type}`
-                            : auth.user.type
+                        ? auth.user.person?.shop?.name && auth.user.person?.shop?.shopNumber
+                          ? `${auth.user.person?.shop?.name}(${auth.user.person?.shop?.shopNumber}) | ${auth.user.person?.type}`
+                          : auth.user.person?.dealership?.name &&
+                              auth.user.person?.dealership?.dealershipNumber
+                            ? `${auth.user.person?.dealership?.name}(${auth.user.person?.dealership?.dealershipNumber}) | ${auth.user.person?.type}`
+                            : auth.user.person?.type
                         : 'Not logged in'}
                     </p>
                   </div>
@@ -126,18 +126,18 @@ export function Header({
                   <div className='flex flex-col space-y-1'>
                     <p className='text-sm font-medium'>
                       {auth.user
-                        ? `${auth.user.firstName} ${auth.user.lastName}`.trim() ||
-                          auth.user.email
+                        ? `${auth.user.person?.firstName} ${auth.user.person?.lastName}`.trim() ||
+                          auth.user.person?.email
                         : 'User'}
                     </p>
                     <p className='text-muted-foreground text-xs'>
                       {auth.user
-                        ? auth.user.shopName && auth.user.shopNumber
-                          ? `${auth.user.shopName}(${auth.user.shopNumber}) | ${auth.user.type}`
-                          : auth.user.dealershipName &&
-                              auth.user.dealershipNumber
-                            ? `${auth.user.dealershipName}(${auth.user.dealershipNumber}) | ${auth.user.type}`
-                            : auth.user.type
+                        ? auth.user.person?.shop?.name && auth.user.person?.shop?.shopNumber
+                          ? `${auth.user.person?.shop?.name}(${auth.user.person?.shop?.shopNumber}) | ${auth.user.person?.type}`
+                          : auth.user.person?.dealership?.name &&
+                              auth.user.person?.dealership?.dealershipNumber
+                            ? `${auth.user.person?.dealership?.name}(${auth.user.person?.dealership?.dealershipNumber}) | ${auth.user.person?.type}`
+                            : auth.user.person?.type
                         : 'Not logged in'}
                     </p>
                   </div>

@@ -5,7 +5,9 @@ import {
   useLocation,
   useNavigate,
 } from '@tanstack/react-router'
-import  { type AuthUser,useAuthStore } from '@/stores/auth-store'
+import type Session from '@/js/models/Session'
+import { PersonType } from '@/js/models/enum/PersonTypeEnum'
+import { useAuthStore } from '@/stores/auth-store'
 import { Loading } from '@/components/Loading'
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout'
 import { HeaderOnlyLayout } from '@/components/layout/header-only-layout'
@@ -13,8 +15,8 @@ import WelcomeGate from '@/features/auth/welcomeGate'
 
 declare global {
   interface Window {
-    switchUserType?: (type: AuthUser['type']) => void
-    getUserType?: () => AuthUser['type'] | undefined
+    switchUserType?: (type: PersonType) => void
+    getUserType?: () => PersonType | undefined
   }
 }
 
@@ -22,16 +24,55 @@ declare global {
 const ROUTES_WITHOUT_SIDEBAR = ['/parts_orders', '/repair_orders'] as const
 
 // 重定向逻辑函数
-const getRedirectTarget = (path: string, isAdmin: boolean): string | null => {
-  if (isAdmin) {
+const getRedirectTarget = (
+  path: string,
+  userType: PersonType | undefined
+): string | null => {
+  // 如果没有用户类型，不重定向
+  if (!userType) return null
+
+  // 管理员（ProgramAdministrator）保持原逻辑
+  if (userType === 'ProgramAdministrator') {
     if (path === '/parts_orders') return '/admin/parts_orders'
     if (path === '/') return '/admin/parts_orders'
-  } else {
+    return null
+  }
+
+  // Shop 用户跳转到 /repair_orders
+  if (userType === 'Shop') {
+    // ✅ 如果访问 /parts_orders，重定向到 /repair_orders
+    if (path === '/parts_orders' || path.startsWith('/parts_orders/')) {
+      return '/repair_orders'
+    }
+    if (path.startsWith('/admin/')) {
+      return '/repair_orders'
+    }
+    if (path === '/') return '/repair_orders'
+    return null
+  }
+
+  // Dealership 用户跳转到 /parts_orders
+  if (
+    userType === 'Dealership' ||
+    userType === 'Csr' ||
+    userType === 'FieldStaff'
+  ) {
+    // ✅ 如果访问 /repair_orders，重定向到 /parts_orders
+    if (path === '/repair_orders' || path.startsWith('/repair_orders/')) {
+      return '/parts_orders'
+    }
     if (path.startsWith('/admin/')) {
       return '/parts_orders'
     }
     if (path === '/') return '/parts_orders'
+    return null
   }
+
+  // 其他角色保持原逻辑，跳转到 /parts_orders
+  if (path.startsWith('/admin/')) {
+    return '/parts_orders'
+  }
+  if (path === '/') return '/parts_orders'
   return null
 }
 
@@ -40,7 +81,7 @@ function AuthenticatedRouteComponent() {
   const location = useLocation()
   const navigate = useNavigate()
 
-  const isAdmin = auth.user?.type === 'ProgramAdministrator'
+  const isAdmin = auth.user?.person?.type === 'ProgramAdministrator'
 
   // 扩展 Window 接口以支持开发模式下的调试函数
 
@@ -48,14 +89,29 @@ function AuthenticatedRouteComponent() {
   useEffect(() => {
     if (!import.meta.env.DEV || !auth.user) return
 
-    window.switchUserType = (type: AuthUser['type']) => {
-      auth.setUser({ ...auth.user!, type })
-      console.log(`已切换用户类型为: ${type}`)
+    window.switchUserType = (type: PersonType) => {
+      // ✅ 如果当前有 user，需要创建一个新的 Session 对象来更新 type
+      // 注意：这只是一个开发工具，实际应用中不应该这样修改用户类型
+      if (auth.user?.person) {
+        // 创建一个新的 Person 对象，只修改 type
+        const updatedPerson = {
+          ...auth.user.person,
+          type: type,
+        }
+        // 创建一个模拟的 Session 对象
+        const mockSession = {
+          guid: auth.user.guid,
+          person: updatedPerson,
+          hash: auth.user.hash,
+        } as Session
+        auth.setUser(mockSession)
+        console.log(`已切换用户类型为: ${type}`)
+      }
     }
 
     window.getUserType = () => {
-      console.log('当前用户类型:', auth.user?.type)
-      return auth.user?.type
+      console.log('当前用户类型:', auth.user?.person?.type)
+      return auth.user?.person?.type
     }
   }, [auth.user])
 
@@ -68,7 +124,10 @@ function AuthenticatedRouteComponent() {
       return
     }
 
-    const redirectTarget = getRedirectTarget(location.pathname, isAdmin)
+    const redirectTarget = getRedirectTarget(
+      location.pathname,
+      auth.user?.person?.type
+    )
     if (redirectTarget) {
       navigate({ to: redirectTarget, replace: true })
     }
@@ -77,7 +136,9 @@ function AuthenticatedRouteComponent() {
   // 计算是否需要重定向（使用 useMemo 优化性能）
   const isRedirecting = useMemo(() => {
     if (auth.loginStatus !== 'authenticated') return false
-    return getRedirectTarget(location.pathname, isAdmin) !== null
+    return (
+      getRedirectTarget(location.pathname, auth.user?.person?.type) !== null
+    )
   }, [auth.loginStatus, location.pathname, isAdmin])
 
   // 计算是否需要侧边栏（使用 useMemo 优化性能）

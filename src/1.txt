@@ -1,0 +1,99 @@
+[
+  {
+    // 生产环境
+    // "swaggerUrl": "https://audi-api.ppg.dev.quasidea.com/ppg/swagger",
+    // 本地开发环境
+    "swaggerUrl": "http://www.domain.localhost/ppg/swagger/v2/swagger.json",
+    "clientsDestination": "src/js/clients/base",
+    "modelsDestination": "src/js/models/base",
+    "baseClassName": "PpgApiClient",
+    "requestInterceptor": "src/js/clients/base/interceptors/request.ts",
+    "responseInterceptor": "src/js/clients/base/interceptors/response.ts",
+    "useReactHooks": true,
+    "generateHookNames": true
+  }
+]
+
+
+
+好的，这是将您提供的 “Notes”（说明）内容翻译成纯文本格式 (TXT) 的结果：
+
+[订单追踪器说明 (Notes)]
+
+    每个零件订单 (Parts Order) 都会有一个状态，并作为其通过追踪器流程（Tracker Process）的一部分。下面是订单在每个阶段可能拥有的状态：
+
+    订单审核 (Order Review)
+
+        CSR 审核 (CSR Review)
+
+        CSR 拒绝 (CSR Rejected)
+
+    订单履行 (Order Fulfillment)
+
+        经销商处理中 (Dealer Processing)
+
+        经销商已发货 (Dealer Shipped)
+
+    订单已接收 (Order Received)
+
+        修理厂已接收 (Shop Received)
+
+    维修已完成 (Repair Completed)
+
+        维修完成 (Repair Completed)
+
+一旦一个简单的维修工单（没有补充订单）完成，并且上传了维修后的照片，它的状态和阶段将变更为 “维修完成 (Repair Completed)”。
+
+如果一个维修工单有补充订单 (supplemental orders)，则在所有补充订单都已关闭之前，主工单不会进入 “维修完成 (Repair Completed)” 状态。
+
+    如果一个维修工单有多个补充订单，这些订单的不同状态将用一个数字在旁边列出，以表明有多少订单处于不同的状态。这些状态将按阶段/状态的顺序（即在工作流中）列出。
+
+    “状态 (Status)” 下拉列表将包含 #1 中列出的所有不同状态，以及针对任何需要用户操作的维修工单的状态 “等待您的操作 (Waiting on You)”。
+
+    日期范围筛选器 (Date Range Filters):
+
+    过去 7 天 (past 7 days)
+
+    过去 30 天 (past 30 days)
+
+    月至今 (month-to-date)
+
+    季度至今 (quarter-to-date)
+
+    年至今 (year-to-date)
+
+    上个月 (last month)
+
+    上一季度 (last quarter)
+
+    去年 (last year)
+
+    自定义 (custom)（此选项将允许手动选择 “从 (from)” 和 “到 (to)” 日期）
+
+    点击维修工单 (Repair Order) 将把用户带到 3.1 零件订单追踪器 (Parts Order Tracker)。
+
+    根据用户，红色三角形图标 (red triangle icon) 将出现在下一个需要该用户采取行动的维修订单旁边。
+
+    “新建 + 零件请求 (New + Parts Request)” 按钮 将引导至 3.0.1 (M) 新增/编辑零件订单 (New/Edit Parts Orders) 页面。
+
+    以下是负责在特定阶段采取行动的角色：
+
+    订单审核 (Order Review) - CSRs
+
+    订单审核 (Order Review) - 修理厂 (Shops)
+
+    订单履行 (Order Fulfillment) - 经销商 (Dealers)
+
+    订单已发货 (Order Shipped) - 经销商 (Dealers)
+
+    订单已接收 (Order Received) - 修理厂 (Shops)
+
+    维修已完成 (Repair Completed) - 修理厂 (Shops)
+
+注： 如果某个订单已创建 7 天，并且修理厂尚未完成（该订单处于未完成状态），一个标记 (flag) 将出现在 修理厂零件订单列表 (Shop Parts Order List) 上，提醒修理厂完成请求并将其标记为已完成。
+
+    订单将按提交时间的倒序（最新在前）排列。
+
+    点击 “查看团队 (View Team)” 按钮 将引导至 3.0.3 (M) 查看团队成员列表 (View Team Members List) 页面。
+
+    修理厂 (Shops) 会进入 维修工单列表 (Repair Order List) 页面，而 经销商 (Dealers) 和 CSRs 则会进入 零件订单列表 (Parts Order List) 页面。

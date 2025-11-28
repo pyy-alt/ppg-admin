@@ -34,31 +34,8 @@ export async function refreshUserData(): Promise<void> {
     authApi.sessionGetCurrent(
       {
         status200: (session: Session) => {
-          // 会话有效，更新用户信息
-          const person = session.person
-          if (person) {
-            const userInfo = {
-              id: person.id || 0,
-              email: person.email || '',
-              firstName: person.firstName || '',
-              lastName: person.lastName || '',
-              type: (person.type || 'Shop') as
-                | 'Shop'
-                | 'Dealership'
-                | 'Csr'
-                | 'FieldStaff'
-                | 'ProgramAdministrator',
-              status: (person.status || 'Active') as
-                | 'Active'
-                | 'Inactive'
-                | 'RegistrationRequested'
-                | 'Pending',
-              shopName: person.shop?.name,
-              shopNumber: person.shop?.shopNumber,
-              dealershipName: person.dealership?.name,
-              dealershipNumber: person.dealership?.dealershipNumber,
-            }
-            auth.setUser(userInfo) // setUser 会自动设置 loginStatus 为 'authenticated'
+          if (session) {
+            auth.setUser(session) // setUser 会自动设置 loginStatus 为 'authenticated'
             isRefreshing = false
             refreshPromise = null
             resolve()

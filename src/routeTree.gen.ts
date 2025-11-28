@@ -15,7 +15,6 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as RegistrationShopRouteImport } from './routes/registration/shop'
 import { Route as RegistrationDealershipRouteImport } from './routes/registration/dealership'
-import { Route as RegistrationCompleteRouteImport } from './routes/registration/complete'
 import { Route as PasswordForgotRouteImport } from './routes/password/forgot'
 import { Route as AuthenticatedRepair_ordersRouteImport } from './routes/_authenticated/repair_orders'
 import { Route as AuthenticatedParts_ordersRouteImport } from './routes/_authenticated/parts_orders'
@@ -43,6 +42,9 @@ import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminShopsRouteImport } from './routes/_authenticated/admin/shops'
 import { Route as AuthenticatedAdminParts_ordersRouteImport } from './routes/_authenticated/admin/parts_orders'
 import { Route as AuthenticatedAdminDealershipsRouteImport } from './routes/_authenticated/admin/dealerships'
+import { Route as NewRegistrationIdGuidHashRouteImport } from './routes/new-registration/$id/$guid/$hash'
+import { Route as ForgotPasswordIdGuidHashRouteImport } from './routes/forgot-password/$id/$guid/$hash'
+import { Route as RegistrationCompleteIdGuidHashRouteImport } from './routes/registration/complete/$id/$guid/$hash'
 import { Route as PasswordResetIdGuidHashRouteImport } from './routes/password/reset/$id/$guid/$hash'
 
 const RegistrationResultRoute = RegistrationResultRouteImport.update({
@@ -72,11 +74,6 @@ const RegistrationShopRoute = RegistrationShopRouteImport.update({
 const RegistrationDealershipRoute = RegistrationDealershipRouteImport.update({
   id: '/registration/dealership',
   path: '/registration/dealership',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RegistrationCompleteRoute = RegistrationCompleteRouteImport.update({
-  id: '/registration/complete',
-  path: '/registration/complete',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PasswordForgotRoute = PasswordForgotRouteImport.update({
@@ -225,6 +222,24 @@ const AuthenticatedAdminDealershipsRoute =
     path: '/admin/dealerships',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const NewRegistrationIdGuidHashRoute =
+  NewRegistrationIdGuidHashRouteImport.update({
+    id: '/new-registration/$id/$guid/$hash',
+    path: '/new-registration/$id/$guid/$hash',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ForgotPasswordIdGuidHashRoute =
+  ForgotPasswordIdGuidHashRouteImport.update({
+    id: '/forgot-password/$id/$guid/$hash',
+    path: '/forgot-password/$id/$guid/$hash',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const RegistrationCompleteIdGuidHashRoute =
+  RegistrationCompleteIdGuidHashRouteImport.update({
+    id: '/registration/complete/$id/$guid/$hash',
+    path: '/registration/complete/$id/$guid/$hash',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const PasswordResetIdGuidHashRoute = PasswordResetIdGuidHashRouteImport.update({
   id: '/password/reset/$id/$guid/$hash',
   path: '/password/reset/$id/$guid/$hash',
@@ -235,7 +250,6 @@ export interface FileRoutesByFullPath {
   '/clerk': typeof ClerkAuthenticatedRouteRoute
   '/registrationResult': typeof RegistrationResultRoute
   '/settings': typeof AuthenticatedSettingsRouteRouteWithChildren
-  '/clerk/': typeof ClerkauthRouteRouteWithChildren
   '/login': typeof authLoginRoute
   '/401': typeof errors401Route
   '/403': typeof errors403Route
@@ -245,7 +259,6 @@ export interface FileRoutesByFullPath {
   '/parts_orders': typeof AuthenticatedParts_ordersRoute
   '/repair_orders': typeof AuthenticatedRepair_ordersRouteWithChildren
   '/password/forgot': typeof PasswordForgotRoute
-  '/registration/complete': typeof RegistrationCompleteRoute
   '/registration/dealership': typeof RegistrationDealershipRoute
   '/registration/shop': typeof RegistrationShopRoute
   '/': typeof AuthenticatedIndexRoute
@@ -264,11 +277,14 @@ export interface FileRoutesByFullPath {
   '/help-center': typeof AuthenticatedHelpCenterIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
   '/tasks': typeof AuthenticatedTasksIndexRoute
+  '/forgot-password/$id/$guid/$hash': typeof ForgotPasswordIdGuidHashRoute
+  '/new-registration/$id/$guid/$hash': typeof NewRegistrationIdGuidHashRoute
   '/password/reset/$id/$guid/$hash': typeof PasswordResetIdGuidHashRoute
+  '/registration/complete/$id/$guid/$hash': typeof RegistrationCompleteIdGuidHashRoute
 }
 export interface FileRoutesByTo {
-  '/registrationResult': typeof RegistrationResultRoute
   '/clerk': typeof ClerkAuthenticatedRouteRoute
+  '/registrationResult': typeof RegistrationResultRoute
   '/login': typeof authLoginRoute
   '/401': typeof errors401Route
   '/403': typeof errors403Route
@@ -278,7 +294,6 @@ export interface FileRoutesByTo {
   '/parts_orders': typeof AuthenticatedParts_ordersRoute
   '/repair_orders': typeof AuthenticatedRepair_ordersRouteWithChildren
   '/password/forgot': typeof PasswordForgotRoute
-  '/registration/complete': typeof RegistrationCompleteRoute
   '/registration/dealership': typeof RegistrationDealershipRoute
   '/registration/shop': typeof RegistrationShopRoute
   '/': typeof AuthenticatedIndexRoute
@@ -297,7 +312,10 @@ export interface FileRoutesByTo {
   '/help-center': typeof AuthenticatedHelpCenterIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
   '/tasks': typeof AuthenticatedTasksIndexRoute
+  '/forgot-password/$id/$guid/$hash': typeof ForgotPasswordIdGuidHashRoute
+  '/new-registration/$id/$guid/$hash': typeof NewRegistrationIdGuidHashRoute
   '/password/reset/$id/$guid/$hash': typeof PasswordResetIdGuidHashRoute
+  '/registration/complete/$id/$guid/$hash': typeof RegistrationCompleteIdGuidHashRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -316,7 +334,6 @@ export interface FileRoutesById {
   '/_authenticated/parts_orders': typeof AuthenticatedParts_ordersRoute
   '/_authenticated/repair_orders': typeof AuthenticatedRepair_ordersRouteWithChildren
   '/password/forgot': typeof PasswordForgotRoute
-  '/registration/complete': typeof RegistrationCompleteRoute
   '/registration/dealership': typeof RegistrationDealershipRoute
   '/registration/shop': typeof RegistrationShopRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
@@ -335,7 +352,10 @@ export interface FileRoutesById {
   '/_authenticated/help-center/': typeof AuthenticatedHelpCenterIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
   '/_authenticated/tasks/': typeof AuthenticatedTasksIndexRoute
+  '/forgot-password/$id/$guid/$hash': typeof ForgotPasswordIdGuidHashRoute
+  '/new-registration/$id/$guid/$hash': typeof NewRegistrationIdGuidHashRoute
   '/password/reset/$id/$guid/$hash': typeof PasswordResetIdGuidHashRoute
+  '/registration/complete/$id/$guid/$hash': typeof RegistrationCompleteIdGuidHashRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -343,7 +363,6 @@ export interface FileRouteTypes {
     | '/clerk'
     | '/registrationResult'
     | '/settings'
-    | '/clerk/'
     | '/login'
     | '/401'
     | '/403'
@@ -353,7 +372,6 @@ export interface FileRouteTypes {
     | '/parts_orders'
     | '/repair_orders'
     | '/password/forgot'
-    | '/registration/complete'
     | '/registration/dealership'
     | '/registration/shop'
     | '/'
@@ -372,11 +390,14 @@ export interface FileRouteTypes {
     | '/help-center'
     | '/settings/'
     | '/tasks'
+    | '/forgot-password/$id/$guid/$hash'
+    | '/new-registration/$id/$guid/$hash'
     | '/password/reset/$id/$guid/$hash'
+    | '/registration/complete/$id/$guid/$hash'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/registrationResult'
     | '/clerk'
+    | '/registrationResult'
     | '/login'
     | '/401'
     | '/403'
@@ -386,7 +407,6 @@ export interface FileRouteTypes {
     | '/parts_orders'
     | '/repair_orders'
     | '/password/forgot'
-    | '/registration/complete'
     | '/registration/dealership'
     | '/registration/shop'
     | '/'
@@ -405,7 +425,10 @@ export interface FileRouteTypes {
     | '/help-center'
     | '/settings'
     | '/tasks'
+    | '/forgot-password/$id/$guid/$hash'
+    | '/new-registration/$id/$guid/$hash'
     | '/password/reset/$id/$guid/$hash'
+    | '/registration/complete/$id/$guid/$hash'
   id:
     | '__root__'
     | '/_authenticated'
@@ -423,7 +446,6 @@ export interface FileRouteTypes {
     | '/_authenticated/parts_orders'
     | '/_authenticated/repair_orders'
     | '/password/forgot'
-    | '/registration/complete'
     | '/registration/dealership'
     | '/registration/shop'
     | '/_authenticated/'
@@ -442,7 +464,10 @@ export interface FileRouteTypes {
     | '/_authenticated/help-center/'
     | '/_authenticated/settings/'
     | '/_authenticated/tasks/'
+    | '/forgot-password/$id/$guid/$hash'
+    | '/new-registration/$id/$guid/$hash'
     | '/password/reset/$id/$guid/$hash'
+    | '/registration/complete/$id/$guid/$hash'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -456,10 +481,12 @@ export interface RootRouteChildren {
   errors500Route: typeof errors500Route
   errors503Route: typeof errors503Route
   PasswordForgotRoute: typeof PasswordForgotRoute
-  RegistrationCompleteRoute: typeof RegistrationCompleteRoute
   RegistrationDealershipRoute: typeof RegistrationDealershipRoute
   RegistrationShopRoute: typeof RegistrationShopRoute
+  ForgotPasswordIdGuidHashRoute: typeof ForgotPasswordIdGuidHashRoute
+  NewRegistrationIdGuidHashRoute: typeof NewRegistrationIdGuidHashRoute
   PasswordResetIdGuidHashRoute: typeof PasswordResetIdGuidHashRoute
+  RegistrationCompleteIdGuidHashRoute: typeof RegistrationCompleteIdGuidHashRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -504,13 +531,6 @@ declare module '@tanstack/react-router' {
       path: '/registration/dealership'
       fullPath: '/registration/dealership'
       preLoaderRoute: typeof RegistrationDealershipRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/registration/complete': {
-      id: '/registration/complete'
-      path: '/registration/complete'
-      fullPath: '/registration/complete'
-      preLoaderRoute: typeof RegistrationCompleteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/password/forgot': {
@@ -585,8 +605,8 @@ declare module '@tanstack/react-router' {
     }
     '/clerk/(auth)': {
       id: '/clerk/(auth)'
-      path: '/'
-      fullPath: '/clerk/'
+      path: ''
+      fullPath: '/clerk'
       preLoaderRoute: typeof ClerkauthRouteRouteImport
       parentRoute: typeof ClerkRouteRoute
     }
@@ -701,6 +721,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/dealerships'
       preLoaderRoute: typeof AuthenticatedAdminDealershipsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/new-registration/$id/$guid/$hash': {
+      id: '/new-registration/$id/$guid/$hash'
+      path: '/new-registration/$id/$guid/$hash'
+      fullPath: '/new-registration/$id/$guid/$hash'
+      preLoaderRoute: typeof NewRegistrationIdGuidHashRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password/$id/$guid/$hash': {
+      id: '/forgot-password/$id/$guid/$hash'
+      path: '/forgot-password/$id/$guid/$hash'
+      fullPath: '/forgot-password/$id/$guid/$hash'
+      preLoaderRoute: typeof ForgotPasswordIdGuidHashRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/registration/complete/$id/$guid/$hash': {
+      id: '/registration/complete/$id/$guid/$hash'
+      path: '/registration/complete/$id/$guid/$hash'
+      fullPath: '/registration/complete/$id/$guid/$hash'
+      preLoaderRoute: typeof RegistrationCompleteIdGuidHashRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/password/reset/$id/$guid/$hash': {
       id: '/password/reset/$id/$guid/$hash'
@@ -819,10 +860,12 @@ const rootRouteChildren: RootRouteChildren = {
   errors500Route: errors500Route,
   errors503Route: errors503Route,
   PasswordForgotRoute: PasswordForgotRoute,
-  RegistrationCompleteRoute: RegistrationCompleteRoute,
   RegistrationDealershipRoute: RegistrationDealershipRoute,
   RegistrationShopRoute: RegistrationShopRoute,
+  ForgotPasswordIdGuidHashRoute: ForgotPasswordIdGuidHashRoute,
+  NewRegistrationIdGuidHashRoute: NewRegistrationIdGuidHashRoute,
   PasswordResetIdGuidHashRoute: PasswordResetIdGuidHashRoute,
+  RegistrationCompleteIdGuidHashRoute: RegistrationCompleteIdGuidHashRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

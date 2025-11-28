@@ -36,22 +36,6 @@ import RepairOrderDialog from '@/components/RepairOrderDialog'
 import { DataTablePagination } from '@/components/data-table-pagination'
 import { DatePicker } from '@/components/date-picker'
 
-// const repairOrders = [
-//   ...Array(50)
-//     .fill(0)
-//     .map((_, index) => ({
-//       ro: `810-${index}`,
-//       orders: [`SO-1045-${index}`],
-//       vin: `AUDIZZZ3BZWE123456-${index}`,
-//       vehicle: `2024 Audi Q5-${index}`,
-//       status: `CSR Review-${index}`,
-//       customer: `Mark Stevenson-${index}`,
-//       submitted: `02/27/2025-${index}`,
-//       completed: `--`,
-//       hasAlert: true,
-//     })),
-// ]
-
 const getStatusVariant = (status: string) => {
   if (status.includes('Rejected')) return 'destructive'
   if (status.includes('Review')) return 'secondary'
@@ -80,11 +64,6 @@ export function RepairOrderList() {
   const endIndex = startIndex + itemsPerPage
   const currentPageData = repairOrders.slice(startIndex, endIndex)
 
-  // 🚨 添加调试日志
-  // console.log(`Current Page: ${currentPage}`)
-  // console.log(`Data Length to Render: ${currentPageData.length}`)
-  // console.log(`Total Items: ${totalItems}`)
-
   const [isOpen, setOpen] = useState(false)
   const [showRepairCompleted, setShowRepairCompleted] = useState(false)
   const [filterByStatus, setFilterByStatus] = useState('all')
@@ -97,16 +76,16 @@ export function RepairOrderList() {
       const api = new RequestApi()
       let shopId: number | null = null
 
-      if (user?.type === 'Shop') {
+      if (user?.person?.type === 'Shop') {
         // Shop 用户：使用自己的 roNumber
         // shopId = parseInt(user.roNumber, 10)
-        shopId = 10
-      } else if (user?.type === 'ProgramAdministrator') {
-        // 管理员用户：尝试传入 0（可能需要根据后端实际行为调整）
-        shopId = 300
+        shopId = user.person?.shop?.id
       }
       if (shopId === null) {
-        console.error('Unable to determine shopId for user type:', user?.type)
+        console.error(
+          'Unable to determine shopId for user type:',
+          user?.person?.type
+        )
         return
       }
 

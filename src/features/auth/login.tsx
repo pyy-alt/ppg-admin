@@ -69,42 +69,14 @@ export function Login() {
             // 后端已经通过 Set-Cookie 自动设置了 JWT，前端不需要处理 Cookie
 
             // 从 session.person 构建用户信息（完全依赖后端返回的数据）
-            const person = session.person
-            if (!person) {
+            if (!session) {
               toast.error('Invalid session data')
               setIsLoading(false)
               setIsSubmitting(false)
               return
             }
-
-            // 构建用户信息（根据后端实际返回的数据结构）
-            const userInfo = {
-              id: person.id || 0,
-              email: person.email || email,
-              firstName: person.firstName || '',
-              lastName: person.lastName || '',
-              type: (person.type || 'Shop') as
-                | 'Shop'
-                | 'Dealership'
-                | 'Csr'
-                | 'FieldStaff'
-                | 'ProgramAdministrator',
-              status: (person.status || 'Active') as
-                | 'Active'
-                | 'Inactive'
-                | 'RegistrationRequested'
-                | 'Pending',
-              // 可选字段（根据后端返回的数据）
-              shopName: person.shop?.name,
-              shopNumber: person.shop?.shopNumber,
-              dealershipName: person.dealership?.name,
-              dealershipNumber: person.dealership?.dealershipNumber,
-            }
-
-            // 更新用户信息和认证状态
-            auth.setUser(userInfo) // setUser 会自动设置 loginStatus 为 'authenticated'
-
-            toast.success(`Welcome back, ${person.firstName || email}!`)
+            auth.setUser(session) // setUser 会自动设置 loginStatus 为 'authenticated'
+            toast.success(`Welcome back, ${session.person?.firstName || email}!`)
 
             setIsLoading(false)
             setIsSubmitting(false)
