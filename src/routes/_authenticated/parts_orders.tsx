@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { HeaderOnlyLayout } from '@/components/layout/header-only-layout'
-import { PartsOrders } from '@/features/part/orders'
+import { PartOrders } from '@/features/part/orders'
 import { useAuthenticated } from '@/hooks/use-authenticated'
 import { Loading } from '@/components/Loading'
 
@@ -12,7 +12,7 @@ function PartsOrdersComponent() {
   // 如果已登录，使用 HeaderOnlyLayout
   return (
     <HeaderOnlyLayout>
-      <PartsOrders />
+      <PartOrders />
     </HeaderOnlyLayout>
   )
 }

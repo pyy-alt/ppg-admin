@@ -11,6 +11,7 @@ import { X } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/auth-store'
 import { useTranslation } from '@/context/i18n-provider'
+import { useDialogWithConfirm } from '@/hooks/use-dialog-with-confirm'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
@@ -66,6 +67,7 @@ interface NetworkUserDialogProps {
   onSuccess?: (data: FormValues) => void
   onError?: (error: Error) => void
 }
+
 export default function NetworkUserDialog({
   open,
   onOpenChange,
@@ -120,6 +122,17 @@ export default function NetworkUserDialog({
   const showRegionSelector = selectedRole === 'FieldStaff'
   const showCsrRegionSelector = selectedRole === 'Csr'
 
+  const { handleCloseRequest, ConfirmDialogComponent } = useDialogWithConfirm({
+    form,
+    onClose: () => {
+      form.reset()
+      onOpenChange(false)
+    },
+    title: 'Discard Changes?',
+    description:
+      'You have unsaved changes. Are you sure you want to close? All your changes will be lost.',
+  })
+
   const onSubmit = async (data: FormValues) => {
     try {
       const request = PersonCreateModel.create({
@@ -173,10 +186,15 @@ export default function NetworkUserDialog({
   }
 
   const handleOpenChange = (isOpen: boolean) => {
-    onOpenChange(isOpen)
     if (!isOpen) {
-      form.reset() // 关闭时自动重置
+      handleCloseRequest()
+    } else {
+      onOpenChange(true)
     }
+    // onOpenChange(isOpen)
+    // if (!isOpen) {
+    //   form.reset() // 关闭时自动重置
+    // }
   }
   // 当角色切换时，清空 regions 字段
   useEffect(() => {
@@ -188,213 +206,220 @@ export default function NetworkUserDialog({
   const { t } = useTranslation()
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className='sm:max-w-lg'>
-        {/* 固定头部 - 统一风格 */}
-        <DialogHeader className='shrink-0'>
-          <DialogTitle className='px-6 py-4 text-2xl font-semibold'>
-            {initialValues ? 'Edit Network User' : 'Add Network User'}
-          </DialogTitle>
-          <Separator />
+    <>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
+        <DialogContent className='sm:max-w-lg'>
+          {/* 固定头部 - 统一风格 */}
+          <DialogHeader className='shrink-0'>
+            <DialogTitle className='px-6 py-4 text-2xl font-semibold'>
+              {initialValues ? 'Edit Network User' : 'Add Network User'}
+            </DialogTitle>
+            <Separator />
 
-          <button
-            onClick={() => handleOpenChange(false)}
-            className='ring-offset-background focus:ring-ring absolute top-4 right-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-none'
-          >
-            <X className='h-4 w-4' />
-            <span className='sr-only'>Close</span>
-          </button>
-        </DialogHeader>
+            <button
+              onClick={() => handleOpenChange(false)}
+              className='ring-offset-background focus:ring-ring absolute top-4 right-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-none'
+            >
+              <X className='h-4 w-4' />
+              <span className='sr-only'>Close</span>
+            </button>
+          </DialogHeader>
 
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className='grid gap-6 py-4'
-          >
-            <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
-              <FormField
-                control={form.control}
-                name='firstName'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('user.firstName')}</FormLabel>
-                    <FormControl>
-                      <Input placeholder='Enter first name' {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name='lastName'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Last Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder='Enter last name' {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <FormField
-              control={form.control}
-              name='email'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email Address</FormLabel>
-                  <FormControl>
-                    <Input
-                      type='email'
-                      placeholder='user@vwgoa.com'
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name='role'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Role</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl className='w-full'>
-                      <SelectTrigger>
-                        <SelectValue placeholder='Select role' />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value='ProgramAdministrator'>
-                        Admin
-                      </SelectItem>
-                      <SelectItem value='Csr'>CSR</SelectItem>
-                      <SelectItem value='FieldStaff'>Field Staff</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {showRegionSelector && (
-              <div className='space-y-3'>
-                <Label>Field Staff Region(s))</Label>
-                <div className='bg-muted space-y-3 rounded-md border p-4'>
-                  {regions.map((region) => (
-                    <FormField
-                      key={region.id}
-                      control={form.control}
-                      name='fieldStaffRegions'
-                      render={({ field }) => (
-                        <FormItem className='flex items-center space-x-3'>
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value?.some(
-                                (r: Region) => r.id === region.id
-                              )}
-                              onCheckedChange={(checked) => {
-                                const newValue = checked
-                                  ? [
-                                      ...(field.value || []),
-                                      { id: region.id, name: region.name },
-                                    ]
-                                  : (field.value || []).filter(
-                                      (r: { id: number; name: string }) =>
-                                        r.id !== region.id
-                                    )
-                                field.onChange(newValue)
-                              }}
-                            />
-                          </FormControl>
-                          <FormLabel className='cursor-pointer font-normal'>
-                            {region.name}
-                          </FormLabel>
-                        </FormItem>
-                      )}
-                    />
-                  ))}
-                </div>
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className='grid gap-6 py-4'
+            >
+              <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
+                <FormField
+                  control={form.control}
+                  name='firstName'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('user.firstName')}</FormLabel>
+                      <FormControl>
+                        <Input placeholder='Enter first name' {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name='lastName'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Last Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder='Enter last name' {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
-            )}
 
-            {showCsrRegionSelector && (
-              <div className='space-y-3'>
-                <Label>CSR Region</Label>
-                <div className='bg-muted space-y-3 rounded-md border p-4'>
-                  <FormField
-                    control={form.control}
-                    name='csrRegion'
-                    render={({ field }) => (
-                      <RadioGroup
-                        value={field.value?.id?.toString() || ''}
-                        onValueChange={(value) => {
-                          const selectedRegion = regions.find(
-                            (r) => r.id?.toString() === value
-                          )
-                          field.onChange(
-                            selectedRegion
-                              ? {
-                                  id: selectedRegion.id,
-                                  name: selectedRegion.name,
-                                }
-                              : undefined
-                          )
-                        }}
-                      >
-                        {regions.map((region) => (
-                          <FormItem
-                            key={region.id}
-                            className='flex items-center space-y-0 space-x-3'
-                          >
+              <FormField
+                control={form.control}
+                name='email'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email Address</FormLabel>
+                    <FormControl>
+                      <Input
+                        type='email'
+                        placeholder='user@vwgoa.com'
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='role'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Role</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl className='w-full'>
+                        <SelectTrigger>
+                          <SelectValue placeholder='Select role' />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value='ProgramAdministrator'>
+                          Admin
+                        </SelectItem>
+                        <SelectItem value='Csr'>CSR</SelectItem>
+                        <SelectItem value='FieldStaff'>Field Staff</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {showRegionSelector && (
+                <div className='space-y-3'>
+                  <Label>Field Staff Region(s))</Label>
+                  <div className='bg-muted space-y-3 rounded-md border p-4'>
+                    {regions.map((region) => (
+                      <FormField
+                        key={region.id}
+                        control={form.control}
+                        name='fieldStaffRegions'
+                        render={({ field }) => (
+                          <FormItem className='flex items-center space-x-3'>
                             <FormControl>
-                              <RadioGroupItem
-                                value={region.id?.toString() || ''}
-                                id={region.id?.toString() || ''}
+                              <Checkbox
+                                checked={field.value?.some(
+                                  (r: Region) => r.id === region.id
+                                )}
+                                onCheckedChange={(checked) => {
+                                  const newValue = checked
+                                    ? [
+                                        ...(field.value || []),
+                                        { id: region.id, name: region.name },
+                                      ]
+                                    : (field.value || []).filter(
+                                        (r: { id: number; name: string }) =>
+                                          r.id !== region.id
+                                      )
+                                  field.onChange(newValue)
+                                }}
                               />
                             </FormControl>
-                            <FormLabel
-                              htmlFor={region.id?.toString() || ''}
-                              className='cursor-pointer font-normal'
-                            >
+                            <FormLabel className='cursor-pointer font-normal'>
                               {region.name}
                             </FormLabel>
                           </FormItem>
-                        ))}
-                      </RadioGroup>
-                    )}
-                  />
+                        )}
+                      />
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            <DialogFooter className='mt-4 gap-3 pt-4'>
-              <Button
-                type='button'
-                variant='outline'
-                onClick={() => handleOpenChange(false)}
-              >
-                {t('common.cancel')}
-              </Button>
-              <Button
-                type='submit'
-                variant='default'
-                disabled={form.formState.isSubmitting}
-              >
-                {form.formState.isSubmitting
-                  ? t('common.creating')
-                  : t('common.create')}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+              {showCsrRegionSelector && (
+                <div className='space-y-3'>
+                  <Label>CSR Region</Label>
+                  <div className='bg-muted space-y-3 rounded-md border p-4'>
+                    <FormField
+                      control={form.control}
+                      name='csrRegion'
+                      render={({ field }) => (
+                        <RadioGroup
+                          value={field.value?.id?.toString() || ''}
+                          onValueChange={(value) => {
+                            const selectedRegion = regions.find(
+                              (r) => r.id?.toString() === value
+                            )
+                            field.onChange(
+                              selectedRegion
+                                ? {
+                                    id: selectedRegion.id,
+                                    name: selectedRegion.name,
+                                  }
+                                : undefined
+                            )
+                          }}
+                        >
+                          {regions.map((region) => (
+                            <FormItem
+                              key={region.id}
+                              className='flex items-center space-y-0 space-x-3'
+                            >
+                              <FormControl>
+                                <RadioGroupItem
+                                  value={region.id?.toString() || ''}
+                                  id={region.id?.toString() || ''}
+                                />
+                              </FormControl>
+                              <FormLabel
+                                htmlFor={region.id?.toString() || ''}
+                                className='cursor-pointer font-normal'
+                              >
+                                {region.name}
+                              </FormLabel>
+                            </FormItem>
+                          ))}
+                        </RadioGroup>
+                      )}
+                    />
+                  </div>
+                </div>
+              )}
+
+              <DialogFooter className='mt-4 gap-3 pt-4'>
+                <Button
+                  type='button'
+                  variant='outline'
+                  onClick={() => handleOpenChange(false)}
+                >
+                  {t('common.cancel')}
+                </Button>
+                <Button
+                  type='submit'
+                  variant='default'
+                  disabled={form.formState.isSubmitting}
+                >
+                  {initialValues
+                    ? form.formState.isSubmitting
+                      ? t('common.submiting')
+                      : t('common.submit')
+                    : form.formState.isSubmitting
+                      ? t('common.creating')
+                      : t('common.create')}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+      {ConfirmDialogComponent} {/* 添加这一行 */}
+    </>
   )
 }

@@ -1,7 +1,18 @@
-import { useState } from 'react'
-import { Search, Download } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import OrganizationApi from '@/js/clients/base/OrganizationApi'
+import OrganizationSearchRequest from '@/js/models/OrganizationSearchRequest'
+import ResultParameter from '@/js/models/ResultParameter'
+import { Search, Download, TableIcon } from 'lucide-react'
+import { useAuthStore } from '@/stores/auth-store'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/components/ui/empty'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -20,38 +31,106 @@ import {
 } from '@/components/ui/table'
 import { DataTablePagination } from '@/components/data-table-pagination'
 
-// 真实模拟店铺数据（已覆盖所有状态和地区）
-// 动态生成数据
-const mockShops = Array.from({ length: 100 }, (_, index) => ({
-  name: `Shop ${index + 1}`,
-  number: `1234567890${index + 1}`,
-  pendingOrders: Math.floor(Math.random() * 100),
-  activeUsers: Math.floor(Math.random() * 100),
-  pendingUsers: Math.floor(Math.random() * 100),
-  status: Math.random() > 0.5 ? 'certified' : 'pending',
-  certification: Math.random() > 0.5 ? 'Audi Ultra' : 'Audi Hybrid',
-  address: `123 Main St, ${index + 1}`,
-  city: `City ${index + 1}`,
-  state: `State ${index + 1}`,
-  dealer: `Dealer ${index + 1}`,
-  dealerNumber: `1234567890${index + 1}`,
-  region: `Region ${index + 1}`,
-}))
-
-
 export function Shops() {
+  const { user } = useAuthStore((state) => state.auth)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [smartFilter, setSmartFilter] = useState('')
+  const [filterByShopStatus, setFilterByShopStatus] = useState<string>('all')
+  const [filterByShopCertification, setFilterByShopCertification] =
+    useState<string>('all')
+  const [filterByRegionId, setFilterByRegionId] = useState<string>('all')
+  const [shops, setShops] = useState<any[]>([])
+  const [totalItems, setTotalItems] = useState(0)
+  const [loading, setLoading] = useState(false)
+  const itemsPerPage = 20
+  const totalPages = Math.ceil(totalItems / itemsPerPage)
 
-   // 添加状态
-   const [currentPage, setCurrentPage] = useState(1)
-   const itemsPerPage = 20
-   const totalItems = mockShops.length // 根据实际数据
-   const totalPages = Math.ceil(totalItems / itemsPerPage)
+  // 获取店铺数据
+  const fetchShops = async () => {
+    if (!user) return
 
-      // 计算当前页应该显示的数据
-      const startIndex = (currentPage - 1) * itemsPerPage
-      const endIndex = startIndex + itemsPerPage
-      const paginatedShops = mockShops.slice(startIndex, endIndex)
-   
+    setLoading(true)
+    try {
+      const api = new OrganizationApi()
+
+      // 构建请求参数
+      const requestParams: any = {
+        type: 'Shop', // 必须设置为 'Shop' 来搜索店铺
+        smartFilter: smartFilter,
+        filterByRegionId: filterByRegionId && parseInt(filterByRegionId),
+      }
+
+      // 处理状态筛选
+      if (filterByShopStatus !== 'all') {
+        requestParams.filterByShopStatus = filterByShopStatus
+      }
+
+      // 处理认证筛选
+      if (filterByShopCertification !== 'all') {
+        requestParams.filterByShopCertification = filterByShopCertification
+      }
+
+      // 添加分页参数
+      const resultParameter = ResultParameter.create({
+        resultsLimitOffset: (currentPage - 1) * itemsPerPage,
+        resultsLimitCount: itemsPerPage,
+        resultsOrderBy: 'Name', // 可以根据需要调整排序字段
+        resultsOrderAscending: true,
+      })
+      requestParams.resultParameter = resultParameter
+
+      const request = OrganizationSearchRequest.create(requestParams)
+
+      api.search(request, {
+        status200: (response: any) => {
+          setShops(response.organizations || [])
+          setTotalItems(response.totalItemCount || 0)
+          setLoading(false)
+        },
+        error: (error: any) => {
+          console.error('获取店铺列表失败:', error)
+          setLoading(false)
+        },
+        status403: (message: string) => {
+          console.error('权限不足:', message)
+          setLoading(false)
+        },
+      })
+    } catch (error) {
+      console.error('API 调用错误:', error)
+      setLoading(false)
+    }
+  }
+
+  // 当筛选条件改变时，重置页码并调用 API
+  useEffect(() => {
+    if (!user) return
+
+    // 重置到第一页
+    setCurrentPage(1)
+
+    // 调用 API（对于文本输入，使用防抖）
+    const timeoutId = setTimeout(
+      () => {
+        fetchShops()
+      },
+      smartFilter ? 500 : 0
+    )
+
+    return () => clearTimeout(timeoutId)
+  }, [
+    smartFilter,
+    filterByShopStatus,
+    filterByShopCertification,
+    filterByRegionId,
+    user,
+  ])
+
+  // 当页码改变时，重新获取数据
+  useEffect(() => {
+    if (!user) return
+    fetchShops()
+  }, [currentPage])
 
   return (
     <div className='bg-background min-h-screen'>
@@ -66,151 +145,212 @@ export function Shops() {
         </div>
       </div>
 
-      <div className='px-6 py-1'>
+      <div className='px-6 py-6'>
         {/* Search + Filters */}
         <div className='mb-6 flex flex-col gap-4 lg:flex-row lg:items-center'>
           <div className='relative max-w-md flex-1'>
             <Search className='text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2' />
-            <Input placeholder='Filter by Name, #, City' className='pl-10' />
+            <Input
+              value={smartFilter}
+              onChange={(e) => setSmartFilter(e.target.value)}
+              placeholder='Filter by Name, #, City'
+              className='pl-10'
+            />
           </div>
 
           <div className='flex flex-wrap gap-3'>
-            <Select defaultValue='all'>
+            <Select
+              value={filterByShopStatus}
+              onValueChange={(value) => setFilterByShopStatus(value)}
+            >
               <SelectTrigger className='bg-muted w-48'>
                 <SelectValue placeholder='Status' />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value='all'>All Status</SelectItem>
-                <SelectItem value='certified'>Certified</SelectItem>
-                <SelectItem value='pending'>
-                  Pending Approval Pending
-                </SelectItem>
+                <SelectItem value='Certified'>Certified</SelectItem>
+                <SelectItem value='Closed'>Closed</SelectItem>
+                <SelectItem value='InProcess'>In-Process</SelectItem>
+                <SelectItem value='Suspended'>Suspended</SelectItem>
+                <SelectItem value='Terminated'>Terminated</SelectItem>
               </SelectContent>
             </Select>
 
-            <Select defaultValue='all'>
+            <Select
+              value={filterByShopCertification}
+              onValueChange={(value) => setFilterByShopCertification(value)}
+            >
               <SelectTrigger className='bg-muted w-48'>
                 <SelectValue placeholder='Certification' />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value='all'>All Certifications</SelectItem>
-                <SelectItem value='audi-ultra'>Audi Ultra</SelectItem>
-                <SelectItem value='audi-hybrid'>Audi Hybrid</SelectItem>
-                <SelectItem value='vw'>Volkswagen</SelectItem>
+                <SelectItem value='AudiUltra'>Audi Ultra</SelectItem>
+                <SelectItem value='AudiHybrid'>Audi Hybrid</SelectItem>
+                <SelectItem value='VW'>Volkswagen</SelectItem>
               </SelectContent>
             </Select>
 
-            <Select defaultValue='all'>
+            <Select
+              value={filterByRegionId}
+              onValueChange={(value) => setFilterByRegionId(value)}
+            >
               <SelectTrigger className='bg-muted w-48'>
                 <SelectValue placeholder='CSR Region' />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value='all'>All Regions</SelectItem>
-                <SelectItem value='western'>Western US</SelectItem>
-                <SelectItem value='eastern'>Eastern US</SelectItem>
-                <SelectItem value='central'>Central US</SelectItem>
-                <SelectItem value='canada'>Canada</SelectItem>
+                {user?.regions?.map((region) => (
+                  <SelectItem
+                    key={region.id}
+                    value={region.id?.toString() || ''}
+                  >
+                    {region.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
         </div>
 
         {/* Table */}
-        <div className='bg-background overflow-hidden rounded-lg border shadow-sm'>
-          <Table>
-            <TableHeader>
-              <TableRow className='bg-muted'>
-                <TableHead className='text-foreground font-semibold'>
-                  Name
-                </TableHead>
-                <TableHead className='text-foreground font-semibold'>
-                  Number
-                </TableHead>
-                <TableHead className='text-foreground font-semibold'>
-                  # of Pending Orders
-                </TableHead>
-                <TableHead className='text-foreground font-semibold'>
-                  # of Active Users
-                </TableHead>
-                <TableHead className='text-foreground font-semibold'>
-                  # of Pending Users
-                </TableHead>
-                <TableHead className='text-foreground font-semibold'>
-                  Status
-                </TableHead>
-                <TableHead className='text-foreground font-semibold'>
-                  Certification
-                </TableHead>
-                <TableHead className='text-foreground font-semibold'>
-                  Address
-                </TableHead>
-                <TableHead className='text-foreground font-semibold'>
-                  City
-                </TableHead>
-                <TableHead className='text-foreground font-semibold'>
-                  State
-                </TableHead>
-                <TableHead className='text-foreground font-semibold'>
-                  Dealer
-                </TableHead>
-                <TableHead className='text-foreground font-semibold'>
-                  Dealer #
-                </TableHead>
-                <TableHead className='text-foreground font-semibold'>
-                  Region
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedShops.map((shop) => (
-                <TableRow key={shop.number} className='hover:bg-background'>
-                  <TableCell className='font-medium text-blue-600'>
-                    <span className='cursor-pointer hover:underline'>
-                      {' '}
-                      {shop.name}
-                    </span>
-                  </TableCell>
-                  <TableCell>{shop.number}</TableCell>
-                  <TableCell className='text-center font-medium'>
-                    {shop.pendingOrders}
-                  </TableCell>
-                  <TableCell className='text-center'>
-                    {shop.activeUsers}
-                  </TableCell>
-                  <TableCell className='text-center'>
-                    {shop.pendingUsers}
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant='default'
-                      className='bg-green-100 text-green-800 hover:bg-green-200'
-                    >
-                      {shop.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{shop.certification}</TableCell>
-                  <TableCell className='text-muted-foreground text-sm'>
-                    {shop.address}
-                  </TableCell>
-                  <TableCell>{shop.city}</TableCell>
-                  <TableCell>{shop.state}</TableCell>
-                  <TableCell>{shop.dealer}</TableCell>
-                  <TableCell>{shop.dealerNumber}</TableCell>
-                  <TableCell>{shop.region}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+        {loading ? (
+          <div className='bg-background overflow-hidden rounded-lg border shadow-sm'>
+            <div className='flex items-center justify-center py-12'>
+              <div className='text-muted-foreground'>loading...</div>
+            </div>
+          </div>
+        ) : shops.length === 0 ? (
+          <div className='bg-background overflow-hidden rounded-lg border shadow-sm'>
+            <Empty>
+              <EmptyHeader>
+                <EmptyMedia variant='icon'>
+                  <TableIcon className='h-4 w-4' />
+                </EmptyMedia>
+                <EmptyTitle>No data to display</EmptyTitle>
+                <EmptyDescription>
+                  There are no records in this table yet. Add your first entry
+                  to get started.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          </div>
+        ) : (
+          <>
+            <div className='bg-background overflow-hidden rounded-lg border shadow-sm'>
+              <Table>
+                <TableHeader>
+                  <TableRow className='bg-muted'>
+                    <TableHead className='text-foreground font-semibold'>
+                      Name
+                    </TableHead>
+                    <TableHead className='text-foreground font-semibold'>
+                      Number
+                    </TableHead>
+                    <TableHead className='text-foreground font-semibold'>
+                      # of Pending Orders
+                    </TableHead>
+                    <TableHead className='text-foreground font-semibold'>
+                      # of Active Users
+                    </TableHead>
+                    <TableHead className='text-foreground font-semibold'>
+                      # of Pending Users
+                    </TableHead>
+                    <TableHead className='text-foreground font-semibold'>
+                      Status
+                    </TableHead>
+                    <TableHead className='text-foreground font-semibold'>
+                      Certification
+                    </TableHead>
+                    <TableHead className='text-foreground font-semibold'>
+                      Address
+                    </TableHead>
+                    <TableHead className='text-foreground font-semibold'>
+                      City
+                    </TableHead>
+                    <TableHead className='text-foreground font-semibold'>
+                      State
+                    </TableHead>
+                    <TableHead className='text-foreground font-semibold'>
+                      Dealer
+                    </TableHead>
+                    <TableHead className='text-foreground font-semibold'>
+                      Dealer #
+                    </TableHead>
+                    <TableHead className='text-foreground font-semibold'>
+                      Region
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {shops.map((shop: any) => {
+                    const dealer = shop.sponsorDealership
+                    const dealerName = dealer?.name || '--'
+                    const dealerNumber = dealer?.dealershipNumber || '--'
+                    const region = shop.region?.name || '--'
+                    const statusValue = shop.filterByShopStatus || '--'
+                    const certificationValue =
+                      shop.filterByShopCertification || '--'
 
-        {/* Pagination */}
-        <DataTablePagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          totalItems={totalItems}
-          itemsPerPage={itemsPerPage}
-          onPageChange={setCurrentPage}
-        />
+                    return (
+                      <TableRow key={shop.id} className='hover:bg-background'>
+                        <TableCell className='font-medium text-blue-600'>
+                          <span className='cursor-pointer hover:underline'>
+                            {shop.name || '--'}
+                          </span>
+                        </TableCell>
+                        <TableCell>{shop.shopNumber || '--'}</TableCell>
+                        <TableCell className='text-center font-medium'>
+                          {shop.countPendingOrders ?? 0}
+                        </TableCell>
+                        <TableCell className='text-center'>
+                          {shop.countActiveUsers ?? 0}
+                        </TableCell>
+                        <TableCell className='text-center'>
+                          {shop.countPendingUsers ?? 0}
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={
+                              statusValue === 'certified'
+                                ? 'default'
+                                : 'secondary'
+                            }
+                            className={
+                              statusValue === 'certified'
+                                ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                                : ''
+                            }
+                          >
+                            {statusValue}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{certificationValue}</TableCell>
+                        <TableCell className='text-muted-foreground text-sm'>
+                          {shop.address || '--'}
+                        </TableCell>
+                        <TableCell>{shop.city || '--'}</TableCell>
+                        <TableCell>{shop.state || '--'}</TableCell>
+                        <TableCell>{dealerName}</TableCell>
+                        <TableCell>{dealerNumber}</TableCell>
+                        <TableCell>{region}</TableCell>
+                      </TableRow>
+                    )
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Pagination */}
+            <DataTablePagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={totalItems}
+              itemsPerPage={itemsPerPage}
+              onPageChange={setCurrentPage}
+            />
+          </>
+        )}
       </div>
     </div>
   )

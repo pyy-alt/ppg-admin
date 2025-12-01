@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import PersonApi from '@/js/clients/base/PersonApi'
 import Person from '@/js/models/Person'
 import PersonSearchRequest from '@/js/models/PersonSearchRequest'
@@ -35,6 +35,7 @@ import NetworkUserDialog from '@/components/NetworkUserDialog'
 import { ClearableInput } from '@/components/clearable-input'
 import { DataTablePagination } from '@/components/data-table-pagination'
 
+type filterByNetworkRoleType = 'Csr' | 'FieldStaff' | 'ProgramAdministrator'
 export function Users() {
   const [userOpen, setUserOpen] = useState(false)
   const [users, setUsers] = useState<Person[]>([])
@@ -47,7 +48,9 @@ export function Users() {
 
   // 筛选条件状态
   const [smartFilter, setSmartFilter] = useState('')
-  const [type, setType] = useState<PersonSearchRequestType>('Network')
+  const [filterByNetworkRole, setFilterByNetworkRole] = useState<
+    filterByNetworkRoleType | undefined
+  >(undefined)
   const [filterByRegion, setFilterByRegion] = useState<{
     id: number
     name: string
@@ -57,24 +60,25 @@ export function Users() {
 
   const regions = useAuthStore((state) => state.auth.user?.regions || [])
 
-  if (filterByRegion) {
-    setFilterByRegionId(filterByRegion.id)
-  }
+  useEffect(() => {
+    if (filterByRegion) {
+      setFilterByRegionId(filterByRegion.id)
+    }
+  }, [filterByRegion])
+
   const getUsers = (
     smartFilter: string = '',
     includeInactiveFlag: boolean = false,
-    type: PersonSearchRequestType = 'Network',
     filterByRegionId: number | undefined,
-    organizationId: number = 2
+    filterByNetworkRole?: filterByNetworkRoleType
   ) => {
     try {
       const request = PersonSearchRequest.create({
-        //Shop, Dealership, Network
         smartFilter,
         includeInactiveFlag,
-        type,
+        type: 'Network' as PersonSearchRequestType,
         filterByRegionId,
-        organizationId,
+        filterByNetworkRole,
       })
       const personApi = new PersonApi() // 创建 PersonApi 实例
 
@@ -102,9 +106,14 @@ export function Users() {
   // 筛选条件变化：使用防抖
   useDebouncedEffect(
     () => {
-      getUsers(smartFilter, includeInactiveFlag, type, filterByRegionId)
+      getUsers(
+        smartFilter,
+        includeInactiveFlag,
+        filterByRegionId,
+        filterByNetworkRole
+      )
     },
-    [smartFilter, includeInactiveFlag, type, filterByRegionId],
+    [smartFilter, includeInactiveFlag, filterByRegionId, filterByNetworkRole],
     1000
   )
   return (
@@ -115,7 +124,10 @@ export function Users() {
           <h1 className='text-foreground text-2xl font-bold'>
             Manage Network Users
           </h1>
-          <Button onClick={() => setUserOpen(true)}>
+          <Button onClick={() => {
+            setInitUser(null) // 清除之前的用户数据
+            setUserOpen(true)
+          }}>
             <Plus className='mr-2 h-4 w-4' />
             Add New User
           </Button>
@@ -127,9 +139,13 @@ export function Users() {
         onOpenChange={setUserOpen}
         initialValues={initUser}
         filterByRegion={filterByRegion}
-        onSuccess={(data) => {
-          console.log(data)
-          getUsers(smartFilter, includeInactiveFlag, type, filterByRegionId)
+        onSuccess={() => {
+          getUsers(
+            smartFilter,
+            includeInactiveFlag,
+            filterByRegionId,
+            filterByNetworkRole
+          )
         }}
         onError={(error) => {
           console.log(error)
@@ -151,28 +167,39 @@ export function Users() {
 
           <div className='flex flex-wrap items-center gap-3'>
             <Select
-              defaultValue='Network'
+              defaultValue='all'
               onValueChange={(value) =>
-                setType(value as PersonSearchRequestType)
+                setFilterByNetworkRole(
+                  value === 'all'
+                    ? undefined
+                    : (value as filterByNetworkRoleType)
+                )
               }
             >
               <SelectTrigger className='bg-muted w-48'>
                 <SelectValue placeholder='Role' />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value='Shop'>Shop</SelectItem>
-                <SelectItem value='Dealership'>Dealership</SelectItem>
-                <SelectItem value='Network'>Network</SelectItem>
+                <SelectItem value='all'>All Roles</SelectItem>
+                <SelectItem value='Csr'>Csr</SelectItem>
+                <SelectItem value='FieldStaff'>FieldStaff</SelectItem>
+                <SelectItem value='ProgramAdministrator'>
+                  ProgramAdministrator
+                </SelectItem>
               </SelectContent>
             </Select>
 
             <Select
               defaultValue='all'
-              onValueChange={(value) =>
-                setFilterByRegion(
-                  JSON.parse(value) as { id: number; name: string }
-                )
-              }
+              onValueChange={(value) => {
+                if (value === 'all') {
+                  setFilterByRegionId(undefined)
+                } else {
+                  if (typeof value === 'object') {
+                    setFilterByRegion(value)
+                  }
+                }
+              }}
             >
               <SelectTrigger className='bg-muted w-48'>
                 <SelectValue placeholder='CSR Region' />
