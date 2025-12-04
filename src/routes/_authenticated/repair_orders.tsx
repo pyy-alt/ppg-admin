@@ -1,10 +1,12 @@
-import { createFileRoute, Outlet } from '@tanstack/react-router'
+import { createFileRoute, Outlet, useLocation } from '@tanstack/react-router'
 import { useAuthenticated } from '@/hooks/use-authenticated'
 import { Loading } from '@/components/Loading'
 import { RepairOrderList } from '@/features/repair/orders'
 
 function RepairOrdersComponent() {
   const { isAuthenticated, isLoading } = useAuthenticated()
+  const location = useLocation()  // ✅ 添加这行
+
 
   if (isLoading || !isAuthenticated) {
     return <Loading />

@@ -70,7 +70,7 @@ export function Header({
       >
         {/* Left: Logo + Title */}
         <div className='flex items-center gap-4'>
-          <img src={logoImg} alt='Audi' className='h-20 w-20 object-contain' />
+          <img src={logoImg} alt='Audi' className='h-20 w-20 object-contain hover: cursor-pointer' onClick={() => router.navigate({ to: '/' })}/>
           <div>
             <span className='mr-2 text-sm font-medium text-red-500'>Audi</span>
             <span className='text-sm font-medium text-white'>

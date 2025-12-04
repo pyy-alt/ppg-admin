@@ -75,8 +75,6 @@ export default class DefaultClientOptions {
    */
 
   static onApiProcessResponse(url, method, response) {
-    console.log(response)
-    console.log('[API Process Response] ' + method.toUpperCase() + ' ' + url)
     try {
       // 统一处理所有非 200 状态码
       if (response.status !== 200) {

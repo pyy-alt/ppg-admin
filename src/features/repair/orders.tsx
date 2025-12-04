@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import RequestApi from '@/js/clients/base/OrderApi'
+import RepairOrder from '@/js/models/RepairOrder'
 import RepairOrderSearchRequest from '@/js/models/RepairOrderSearchRequest'
 import { Plus, Search, AlertTriangle, TableIcon } from 'lucide-react'
 import navImg from '@/assets/img/repair/nav.png'
@@ -32,7 +34,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import RepairOrderDialog from '@/components/RepairOrderDialog'
+import RepairOrderDialog, {
+  RepairOrderData,
+} from '@/components/RepairOrderDialog'
 import { DataTablePagination } from '@/components/data-table-pagination'
 import { DatePicker } from '@/components/date-picker'
 
@@ -65,22 +69,19 @@ export function RepairOrderList() {
   const currentPageData = repairOrders.slice(startIndex, endIndex)
 
   const [isOpen, setOpen] = useState(false)
-  const [showRepairCompleted, setShowRepairCompleted] = useState(false)
+  const [showRepairCompleted, setShowRepairCompleted] = useState(true)
   const [filterByStatus, setFilterByStatus] = useState('all')
   const [smartFilter, setSmartFilter] = useState('')
   const [dateRangePreset, setDateRangePreset] = useState('all')
-  // 当点击了列表ID之后设置isEdit=true
-  const [isEdit] = useState(false)
+
+  const [initialData, setInitialData] = useState<RepairOrder | undefined>(
+    undefined
+  )
   const getRepairOrders = async () => {
     try {
       const api = new RequestApi()
-      let shopId: number | null = null
+      const shopId = user?.person?.shop?.id
 
-      if (user?.person?.type === 'Shop') {
-        // Shop 用户：使用自己的 roNumber
-        // shopId = parseInt(user.roNumber, 10)
-        shopId = user.person?.shop?.id
-      }
       if (shopId === null) {
         console.error(
           'Unable to determine shopId for user type:',
@@ -125,6 +126,7 @@ export function RepairOrderList() {
       console.error(e)
     }
   }
+  const navigate = useNavigate()
 
   // 当搜索条件改变时，重置页码并调用 API
   useEffect(() => {
@@ -175,7 +177,10 @@ export function RepairOrderList() {
           </h1>
           <Button
             variant='default'
-            onClick={() => setOpen(true)}
+            onClick={() => {
+              setOpen(true)
+              setInitialData(undefined)
+            }}
             // onClick={() => setOpenEdit(true)}
           >
             <Plus className='mr-2 h-4 w-4' />
@@ -188,25 +193,10 @@ export function RepairOrderList() {
         open={isOpen}
         onOpenChange={setOpen}
         onSuccess={(data) => {
-          console.log('RO created!', data)
-          // 刷新列表或跳转详情页
+          console.log('RO successfully!', data)
+          getRepairOrders()
         }}
-        initialData={
-          isEdit
-            ? {
-                roNumber: '805',
-                customer: 'Brian Cooper',
-                vin: 'WVWZZZ5CZKK246801',
-                make: 'audi',
-                year: '2017',
-                model: 's3',
-                structuralMeasurementFileAssets: [], // 如果有已上传的文件
-                preRepairPhotoFileAssets: [],
-                orderFromDealership:
-                  'Pacific VW Motors | 88321 (Assigned Dealer)',
-              }
-            : undefined
-        }
+        initialData={initialData as RepairOrderData}
       />
       <div className='px-6 py-6'>
         {/* Filters */}
@@ -349,7 +339,6 @@ export function RepairOrderList() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {/* ✅ 修复：使用分页后的数据 currentPageData */}
                   {currentPageData.map((order) => {
                     // 使用类型断言访问属性，因为类型定义可能不完整
                     const orderAny = order as any
@@ -358,7 +347,6 @@ export function RepairOrderList() {
                       orderAny.year && orderAny.make && orderAny.model
                         ? `${orderAny.year} ${orderAny.make} ${orderAny.model}`
                         : '--'
-
                     return (
                       <TableRow
                         key={orderAny.id || orderAny.roNumber}
@@ -370,7 +358,15 @@ export function RepairOrderList() {
                             {orderAny.hasAlert && (
                               <AlertTriangle className='text-destructive h-4 w-4' />
                             )}
-                            <span className='text-primary cursor-pointer hover:underline'>
+                            <span
+                              className='cursor-pointer text-blue-600 hover:underline'
+                              onClick={() => {
+                                navigate({
+                                  to: '/repair_orders/$id',
+                                  params: { id: orderAny.id.toString() },
+                                })
+                              }}
+                            >
                               {orderAny.roNumber || '--'}
                             </span>
                           </div>
@@ -398,9 +394,11 @@ export function RepairOrderList() {
                           </Badge>
                         </TableCell>
                         <TableCell>{orderAny.customer || '--'}</TableCell>
-                        <TableCell>{orderAny.dateLastSubmitted}</TableCell>
+                        <TableCell>
+                          {formatDateOnly(orderAny.dateLastSubmitted)}
+                        </TableCell>
                         <TableCell className='text-muted-foreground'>
-                          {orderAny.dateClosed}
+                          {formatDateOnly(orderAny.dateClosed)}
                         </TableCell>
                       </TableRow>
                     )

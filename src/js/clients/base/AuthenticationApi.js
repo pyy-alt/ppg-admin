@@ -445,11 +445,30 @@ export default class AuthenticationApi extends ClientBaseClass {
 				switch (response.status) {
 				case 200:
 					if (responseHandler.status200) {
-						response.json()
-							.then(responseJson => {
-								responseHandler.status200(Session.create(responseJson));
+						// ✅ 先克隆 response，避免被读取后无法再次读取
+						const clonedResponse = response.clone()
+						
+						// ✅ 先尝试读取文本，判断是否是 JSON
+						response.text()
+							.then(text => {
+								try {
+									// ✅ 尝试解析为 JSON
+									const responseJson = JSON.parse(text)
+									const session = Session.create(responseJson)
+									// ✅ 调用回调，传入 Session
+									responseHandler.status200(session)
+								} catch (jsonError) {
+									// ✅ 如果不是 JSON（如 "successful operation"），直接调用 status200，不传参数
+									// ✅ 注册完成接口可能返回纯文本，直接调用成功回调
+									responseHandler.status200()
+								}
 							})
-							.catch(responseHandler.error);
+							.catch(error => {
+								console.error('[registrationComplete] Text read error:', error)
+								if (responseHandler.error) {
+									responseHandler.error(error)
+								}
+							});
 						return;
 					}
 					break;
@@ -470,7 +489,10 @@ export default class AuthenticationApi extends ClientBaseClass {
 				this.handleUnhandledResponse(response, responseHandler);
 			})
 			.catch(error => {
-				responseHandler.error(error);
+				console.error('[registrationComplete] Network error:', error)
+				if (responseHandler.error) {
+					responseHandler.error(error);
+				}
 			});
 	}
 

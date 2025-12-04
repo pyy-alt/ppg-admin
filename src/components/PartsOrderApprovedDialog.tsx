@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Check, X, FileText, Package, NotebookPen } from 'lucide-react'
+import { Check, X, FileText, Package, NotebookPen, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -11,36 +12,80 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { Textarea } from './ui/textarea'
+import RepairOrder from '@/js/models/RepairOrder'
+import { formatDateOnly } from '@/lib/utils'
 
 interface PartsOrderApprovedDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onApprove?: (salesOrderNumber: string) => void
+  onReject?: (comment: string) => void
+  isReject?: boolean,
+  initRepaitOrderData?: RepairOrder
 }
 
 export default function PartsOrderApprovedDialog({
   open,
   onOpenChange,
   onApprove,
+  isReject = false,
+  onReject,
+  initRepaitOrderData
 }: PartsOrderApprovedDialogProps) {
-  const handleApprove = () => {
-    const salesOrder = (
-      document.getElementById('sales-order') as HTMLInputElement
-    )?.value?.trim()
-    if (!salesOrder) return
-    onApprove?.(salesOrder)
-    onOpenChange(false)
-  }
-
-  const [isReject, ] = useState(true)
+  const [salesOrder, setSalesOrder] = useState('')
   const [reasonForRejection, setReasonForRejection] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleApprove = () => {
+    return new Promise(async (resolve) => {
+      try {
+        if (isReject) {
+          if (!reasonForRejection) {
+            toast.error('Reason for rejection is required')
+            return
+          }
+          // onReject?.(reasonForRejection)
+        } else {
+          if (!salesOrder) {
+            toast.error('Sales order number is required')
+            return
+          }
+          // onApprove?.(salesOrder)
+        }
+        setIsLoading(true)
+
+        if (isReject) {
+          await onReject?.(reasonForRejection)
+          resolve(void 0)
+        } else {
+          await onApprove?.(salesOrder)
+          resolve(void 0)
+        }
+        setReasonForRejection('')
+        setSalesOrder('')
+        onOpenChange(false)
+        resolve(void 0)
+      } catch (error) {
+        toast.error(
+          `Failed to ${isReject ? 'reject' : 'approve'} parts order ${error}|`
+        )
+        resolve(void 0)
+      } finally {
+        setIsLoading(false)
+      }
+    })
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className='max-h-screen overflow-y-auto sm:max-w-5xl'>
         <DialogHeader>
           <DialogTitle className='flex items-center gap-3 text-2xl font-semibold'>
-            {isReject ? <X className='h-7 w-7 rounded-full bg-red-500 p-1 text-white' /> : <Check className='h-7 w-7 rounded-full bg-green-500 p-1 text-white' />}
+            {isReject ? (
+              <X className='h-7 w-7 rounded-full bg-red-500 p-1 text-white' />
+            ) : (
+              <Check className='h-7 w-7 rounded-full bg-green-500 p-1 text-white' />
+            )}
             {isReject ? 'Parts Order Rejected' : 'Parts Order Approved'}
           </DialogTitle>
           <Separator />
@@ -63,33 +108,33 @@ export default function PartsOrderApprovedDialog({
             <div className='grid grid-cols-1 gap-x-12 gap-y-6 text-sm sm:grid-cols-3'>
               <div>
                 <Label className='text-muted-foreground'>Shop RO#</Label>
-                <p className='text-foreground mt-1.5 font-medium'>805</p>
+                <p className='text-foreground mt-1.5 font-medium'>{initRepaitOrderData?.roNumber || '--'}</p>
               </div>
               <div>
                 <Label className='text-muted-foreground'>
                   Ordered From Dealership
                 </Label>
                 <p className='text-foreground mt-1.5 font-medium'>
-                  Pacific Motors (98321)
+                  {initRepaitOrderData?.dealership?.name || '--'}
                 </p>
               </div>
               <div>
                 <Label className='text-muted-foreground'>Customer</Label>
                 <p className='text-foreground mt-1.5 font-medium'>
-                  Brian Cooper
+                  {initRepaitOrderData?.customer || '--'}
                 </p>
               </div>
 
               <div>
                 <Label className='text-muted-foreground'>VIN</Label>
                 <p className='text-foreground mt-1.5 font-mono'>
-                  AUDIZZ5CZKK246801
+                  {initRepaitOrderData?.vin || '--'}
                 </p>
               </div>
               <div>
                 <Label className='text-muted-foreground'>Year/Make/Model</Label>
                 <p className='text-foreground mt-1.5 font-medium'>
-                  2017 Audi S3 Sedan
+                 {initRepaitOrderData?.year}/{initRepaitOrderData?.make}/{initRepaitOrderData?.model}
                 </p>
               </div>
             </div>
@@ -106,17 +151,17 @@ export default function PartsOrderApprovedDialog({
             <div className='grid grid-cols-1 gap-x-12 gap-y-6 text-sm sm:grid-cols-3'>
               <div>
                 <Label className='text-muted-foreground'>Order Submitted</Label>
-                <p className='mt-1.5'>2/15/2025 4:01 PM by Jake Renshaw</p>
+                <p className='mt-1.5'>{formatDateOnly(initRepaitOrderData?.dateLastSubmitted as Date) || '--'}</p>
               </div>
               <div>
                 <Label className='text-muted-foreground'>Order Approved</Label>
                 <p className='mt-1.5 font-medium'>
-                  2/24/2025 4:01 PM by Michael Reynolds
+                  {formatDateOnly(initRepaitOrderData?.dateClosed as Date) || '--'}
                 </p>
               </div>
               <div>
                 <Label className='text-muted-foreground'>Order Shipped</Label>
-                <p className='text-muted-foreground mt-1.5'>---</p>
+                <p className='text-muted-foreground mt-1.5'>{initRepaitOrderData?.dealership.name|| '--'}</p>
               </div>
             </div>
           </section>
@@ -152,6 +197,8 @@ export default function PartsOrderApprovedDialog({
                   id='sales-order'
                   placeholder='Enter sales order number (e.g. SO-174)'
                   className='mt-2 h-11'
+                  value={salesOrder}
+                  onChange={(e) => setSalesOrder(e.target.value.trim())}
                 />
               </div>
             </section>
@@ -169,10 +216,22 @@ export default function PartsOrderApprovedDialog({
           </Button>
           <Button
             size='lg'
-            className='bg-black px-8 font-medium text-white hover:bg-black/90'
+            className={
+              isReject
+                ? 'bg-red-600 hover:bg-red-700'
+                : 'bg-green-600 hover:bg-green-700'
+            }
             onClick={handleApprove}
+            disabled={isLoading}
           >
-            Approve
+             {isLoading ? (
+              <>
+                <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                {isReject ? 'Rejecting...' : 'Approving...'}
+              </>
+            ) : (
+              isReject ? 'Reject' : 'Approve'
+            )}
           </Button>
         </div>
       </DialogContent>

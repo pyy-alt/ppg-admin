@@ -5,6 +5,8 @@ import OrganizationSearchResponseBase from './base/OrganizationSearchResponseBas
  * @extends OrganizationSearchResponseBase
  */
 declare class OrganizationSearchResponse extends OrganizationSearchResponseBase {
+  organizations?: Organization[];
+  totalItemCount?: number;
   static create(data: {
     organizations?: any[];
     totalItemCount?: number;

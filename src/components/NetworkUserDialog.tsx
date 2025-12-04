@@ -150,38 +150,52 @@ export default function NetworkUserDialog({
       })
       const personApi = new PersonApi()
 
-      // ✅ 修复：分别调用，不使用 await（因为这些方法返回 void）
-      if (initialValues) {
-        personApi.edit(request, {
-          status200: (response) => {
-            onSuccess?.(response)
-            toast.success('User updated successfully', {
-              position: 'top-right',
-            })
-            onOpenChange(false)
-            form.reset()
-          },
-          error: (error) => {
-            onError?.(error)
-          },
-        })
-      } else {
-        personApi.createNetworkUser(request, {
-          status200: (response) => {
-            onSuccess?.(response)
-            toast.success('User created successfully', {
-              position: 'top-right',
-            })
-            onOpenChange(false)
-            form.reset()
-          },
-          error: (error) => {
-            onError?.(error)
-          },
-        })
-      }
-    } catch (error) {
+      await new Promise((resolve) => {
+        // ✅ 修复：分别调用，不使用 await（因为这些方法返回 void）
+        if (initialValues) {
+          personApi.edit(request, {
+            status200: (response) => {
+              onSuccess?.(response)
+              toast.success('User updated successfully', {
+                position: 'top-right',
+              })
+              onOpenChange(false)
+              form.reset()
+              resolve(true)
+            },
+            error: (error) => {
+              onError?.(error)
+              resolve(false)
+            },
+            else: (_statusCode: number, responseText: string) => {
+              toast.error(responseText)
+              resolve(false)
+            },
+          })
+        } else {
+          personApi.createNetworkUser(request, {
+            status200: (response) => {
+              onSuccess?.(response)
+              toast.success('User created successfully', {
+                position: 'top-right',
+              })
+              onOpenChange(false)
+              form.reset()
+              resolve(true)
+            },
+            error: (error) => {
+              onError?.(error)
+              resolve(false)
+            },
+            else: () => {
+              resolve(false)
+            },
+          })
+        }
+      })
+    } catch (error: unknown) {
       onError?.(error as Error)
+      throw error
     }
   }
 

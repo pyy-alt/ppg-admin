@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import OrderApi from '@/js/clients/base/OrderApi'
 import PartsOrderSearchRequest from '@/js/models/PartsOrderSearchRequest'
 import { Search, Download, AlertCircle, TableIcon } from 'lucide-react'
@@ -44,7 +45,7 @@ import { DatePicker } from '@/components/date-picker'
 
 export function PartOrders() {
   const { user } = useAuthStore((state) => state.auth)
-  const [filterByWaitingOnMe, setOnlyMyOrders] = useState(true)
+  const [filterByWaitingOnMe, setOnlyMyOrders] = useState<boolean>(true)
   const [dateSubmittedFrom, setFromDate] = useState<Date | undefined>(undefined)
   const [dateSubmittedTo, setToDate] = useState<Date | undefined>(undefined)
   const [dateSubmittedRange, setDateSubmittedRange] = useState<string>('7')
@@ -58,6 +59,7 @@ export function PartOrders() {
   const [loading, setLoading] = useState(false)
   const itemsPerPage = 20
   const totalPages = Math.ceil(totalItems / itemsPerPage)
+  const navigate = useNavigate()
 
   const getStatusVariant = (
     status: string
@@ -90,6 +92,7 @@ export function PartOrders() {
       const requestParams: any = {
         smartFilter,
         filterByWaitingOnMe,
+        filterByDealershipId: user?.person?.type === 'Dealership' ?  user?.person?.dealership.id : undefined,
       }
       // 处理订单类型筛选
       if (filterByPartsOrderNumber !== 'all') {
@@ -144,12 +147,8 @@ export function PartOrders() {
     }
   }
 
-  // 当筛选条件改变时，重置页码并调用 API
   useEffect(() => {
     if (!user) return
-
-    // 重置到第一页
-    setCurrentPage(1)
 
     // 调用 API（对于文本输入，使用防抖）
     const timeoutId = setTimeout(
@@ -164,19 +163,27 @@ export function PartOrders() {
     smartFilter,
     filterByWaitingOnMe,
     filterByPartsOrderNumber,
-    status,
+    filterByStatus,
     filterByRegionId,
     dateSubmittedRange,
     dateSubmittedFrom,
     dateSubmittedTo,
+    currentPage,
     user,
   ])
 
-  // 当页码改变时，重新获取数据
   useEffect(() => {
-    if (!user) return
-    fetchPartsOrders()
-  }, [currentPage])
+    setCurrentPage(1)
+  }, [
+    smartFilter,
+    filterByWaitingOnMe,
+    filterByPartsOrderNumber,
+    filterByStatus,
+    filterByRegionId,
+    dateSubmittedRange,
+    dateSubmittedFrom,
+    dateSubmittedTo,
+  ])
 
   // 当预设范围改变时，自动计算日期
   useEffect(() => {
@@ -184,8 +191,6 @@ export function PartOrders() {
       const { from, to } = calculateDateRange(dateSubmittedRange)
       setFromDate(from)
       setToDate(to)
-    } else {
-      // 如果是自定义，不清空日期，让用户自己选择
     }
   }, [dateSubmittedRange])
 
@@ -237,7 +242,7 @@ export function PartOrders() {
             </div>
             {/* 只有 CSRs（客户服务代表） 和 经销商 (Dealers) 才能看到并使用 */}
             {user?.person?.type === 'Csr' ||
-              user?.person?.type === 'FieldStaff' && (
+              (user?.person?.type === 'FieldStaff' && (
                 <div className='flex items-center gap-3'>
                   <Checkbox
                     id='my-orders'
@@ -254,7 +259,7 @@ export function PartOrders() {
                     Only View Parts Orders that are waiting On Me
                   </Label>
                 </div>
-              )}
+              ))}
           </div>
 
           {/* 完整筛选条件 */}
@@ -444,7 +449,7 @@ export function PartOrders() {
                       ? `${repairOrder.dealership.name || ''} (${repairOrder.dealership.id || ''})`
                       : '--'
                     const region = repairOrder?.region || '--'
-                    const dateCompleted = formatDate(order.dateReceived)
+                    const dateCompleted = formatDate(order.dateCreated)
                     const dateClosed = formatDate(repairOrder?.dateClosed)
                     // 判断是否有备注（从备用经销商订购）
                     const hasNote =
@@ -452,7 +457,15 @@ export function PartOrders() {
 
                     return (
                       <TableRow key={order.id} className='hover:bg-muted/50'>
-                        <TableCell className='text-primary font-medium'>
+                        <TableCell
+                          className='cursor-pointer text-blue-600 hover:underline'
+                          onClick={() => {
+                            navigate({
+                              to: '/repair_orders/$id',
+                              params: { id: order.repairOrder.id.toString() },
+                            })
+                          }}
+                        >
                           {roNumber}
                         </TableCell>
                         <TableCell>{salesOrder}</TableCell>

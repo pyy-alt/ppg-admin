@@ -158,7 +158,28 @@ export function RegistrationComplete() {
           setIsLoading(false)
         },
         // ✅ 其他错误：全局已显示 toast.error，这里只需重置 loading
-        error: () => {
+        error: (error: Error) => {
+            // ✅ 检查是否是 JSON 解析错误（API 返回纯文本 "successful operation"）
+            const errorMessage = error?.message || String(error)
+            if (
+              errorMessage.includes('JSON.parse') ||
+              errorMessage.includes('unexpected character') ||
+              errorMessage.includes('successful operation')
+            ) {
+              // ✅ 如果是 JSON 解析错误，说明 API 返回了纯文本成功消息，当作成功处理
+              console.log('[registrationComplete] API returned plain text, treating as success')
+              auth.reset()
+              toast.success('Registration completed successfully!')
+              navigate({
+                to: '/login',
+                replace: true,
+              })
+              setIsLoading(false)
+              return
+            }
+  
+            // ✅ 其他错误正常处理
+            console.error('Registration complete error:', error)
           setIsLoading(false)
         },
       })

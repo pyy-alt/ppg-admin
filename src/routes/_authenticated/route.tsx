@@ -51,10 +51,29 @@ const getRedirectTarget = (
     return null
   }
 
+  // Csr 用户
+  if (userType === 'Csr') {
+    // 允许访问详情页 /repair_orders/:id，不重定向
+    if (path.startsWith('/repair_orders/')) {
+      return null
+    }
+    // 其他情况跳到 /parts_orders
+    if (path === '/repair_orders') return '/parts_orders'
+    if (path === '/' || path.startsWith('/admin/')) return '/parts_orders'
+    return null
+  }
+  if( userType === 'Dealership'){
+     if (path.startsWith('/repair_orders/')) {
+      return null
+    }
+    // 其他情况跳到 /parts_orders
+    if (path === '/repair_orders') return '/parts_orders'
+    if (path === '/' || path.startsWith('/admin/')) return '/parts_orders'
+    return null
+  }
+
   // Dealership 用户跳转到 /parts_orders
   if (
-    userType === 'Dealership' ||
-    userType === 'Csr' ||
     userType === 'FieldStaff'
   ) {
     // ✅ 如果访问 /repair_orders，重定向到 /parts_orders
@@ -68,6 +87,8 @@ const getRedirectTarget = (
     return null
   }
 
+
+
   // 其他角色保持原逻辑，跳转到 /parts_orders
   if (path.startsWith('/admin/')) {
     return '/parts_orders'
@@ -75,6 +96,8 @@ const getRedirectTarget = (
   if (path === '/') return '/parts_orders'
   return null
 }
+
+
 
 function AuthenticatedRouteComponent() {
   const { auth } = useAuthStore()

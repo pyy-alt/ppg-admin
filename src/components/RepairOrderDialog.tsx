@@ -3,10 +3,16 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import RequestApi from '@/js/clients/base/OrderApi'
+import OrganizationApi from '@/js/clients/base/OrganizationApi'
+import OrganizationSearchRequest from '@/js/models/OrganizationSearchRequest'
+import OrganizationSearchResponse from '@/js/models/OrganizationSearchResponse'
+import RepairOrder from '@/js/models/RepairOrder'
 import RepairOrderCreateModel from '@/js/models/RepairOrderCreateRequest'
 import FileAssetFileAssetTypeEnum from '@/js/models/enum/FileAssetFileAssetTypeEnum'
 import { X, Upload, Camera, FileText, Image as ImageIcon } from 'lucide-react'
 import { useDropzone } from 'react-dropzone'
+import { toast } from 'sonner'
+import { useAuthStore } from '@/stores/auth-store'
 import { convertFilesToFileAssets } from '@/lib/utils'
 import { useDialogWithConfirm } from '@/hooks/use-dialog-with-confirm'
 import { Button } from '@/components/ui/button'
@@ -48,21 +54,23 @@ const formSchema = z.object({
   make: z.string().optional(),
   year: z.string().optional(),
   model: z.string().optional(),
-  orderFromDealership: z.string().min(1, 'Order From Dealership is required'),
+  orderFromDealershipId: z.string().min(1, 'Order From Dealership is required'),
 })
 
 type FormValues = z.infer<typeof formSchema>
 
 export interface RepairOrderData {
+  dealership: { id: number; name: string; number: string; [key: string]: any }
   roNumber: string
   customer: string
-  orderFromDealership: string
+  orderFromDealershipId: string
   vin?: string
   make?: string
   year?: string
   model?: string
   structuralMeasurementFileAssets?: File[]
   preRepairPhotoFileAssets?: File[]
+  [key: string]: any
 }
 
 interface RepairOrderDialogProps {
@@ -107,10 +115,11 @@ export default function RepairOrderDialog({
       make: '',
       year: '',
       model: '',
-      orderFromDealership: '',
+      orderFromDealershipId: '',
     },
   })
-
+  const [orderFromDealerships, setOrderFromDealerships] = useState<any[]>([])
+  const user = useAuthStore((state) => state.auth.user)
   // ✅ 修复：实际执行关闭的函数（不检查未保存更改）
   const performClose: () => void = () => {
     onOpenChange(false)
@@ -123,17 +132,16 @@ export default function RepairOrderDialog({
   }
 
   // 使用确认 hook
-  const { handleCloseRequest, ConfirmDialogComponent } =
-    useDialogWithConfirm({
-      form,
-      hasUnsavedFiles:
-        structuralMeasurementFileAssets.length > 0 ||
-        preRepairPhotoFileAssets.length > 0,
-      onClose: performClose, // ✅ 修复：直接传入关闭函数，不调用 handleClose
-      title: 'Discard Changes?',
-      description:
-        'You have unsaved changes. Are you sure you want to close? All your changes will be lost.',
-    })
+  const { handleCloseRequest, ConfirmDialogComponent } = useDialogWithConfirm({
+    form,
+    hasUnsavedFiles:
+      structuralMeasurementFileAssets.length > 0 ||
+      preRepairPhotoFileAssets.length > 0,
+    onClose: performClose, // ✅ 修复：直接传入关闭函数，不调用 handleClose
+    title: 'Discard Changes?',
+    description:
+      'You have unsaved changes. Are you sure you want to close? All your changes will be lost.',
+  })
 
   const handleClose = () => {
     handleCloseRequest() // 这会检查是否有未保存更改，如果有则显示确认对话框
@@ -147,8 +155,28 @@ export default function RepairOrderDialog({
     }
     return true
   }
+
+  const getOrderFromDealership = async () => {
+    try {
+      const api = new OrganizationApi()
+      const request = OrganizationSearchRequest.create({
+        type: 'Dealership',
+      })
+      api.search(request, {
+        status200: (response: OrganizationSearchResponse) => {
+          console.log('Order from dealership:', response)
+          setOrderFromDealerships(response.organizations || [])
+        },
+      })
+    } catch (error) {
+      console.error('Error getting order from dealership:', error)
+      return []
+    }
+  }
   // 当 initialData 变化时，更新表单和文件
   useEffect(() => {
+    getOrderFromDealership()
+    console.log(initialData)
     if (initialData) {
       form.reset({
         roNumber: initialData.roNumber,
@@ -157,7 +185,7 @@ export default function RepairOrderDialog({
         make: initialData.make || '',
         year: initialData.year || '',
         model: initialData.model || '',
-        orderFromDealership: initialData.orderFromDealership || '',
+        orderFromDealershipId: initialData.dealership?.id?.toString() || '',
       })
       setStructuralMeasurementFileAssets(
         initialData.structuralMeasurementFileAssets || []
@@ -171,6 +199,7 @@ export default function RepairOrderDialog({
         make: '',
         year: '',
         model: '',
+        orderFromDealershipId: undefined,
       })
       setStructuralMeasurementFileAssets([])
       setPreRepairPhotoFileAssets([])
@@ -192,60 +221,90 @@ export default function RepairOrderDialog({
         FileAssetFileAssetTypeEnum.PRE_REPAIR_PHOTO
       )
 
-      const model = RepairOrderCreateModel.create({
-        repairOrder: {
-          roNumber: data.roNumber,
-          customer: data.customer,
-          vin: data.vin,
-          make: data.make,
-          year: data.year,
-          model: data.model,
-          orderFromDealership: data.orderFromDealership,
-          structuralMeasurementFileAssets:
-            structuralMeasurementFiles.length > 0
-              ? structuralMeasurementFiles
-              : undefined,
-          preRepairPhotoFileAssets:
-            preRepairPhotoFiles.length > 0 ? preRepairPhotoFiles : undefined,
-          dealership: {
-            id: 300,
-          },
-          shop: null,
-        },
+      const dealership = orderFromDealerships.find(
+        (dealership) => dealership.id === Number(data.orderFromDealershipId)
+      )
+      const repairOrderPayload = {
+        ...(initialData ?? {}), // 包含 id 等原始字段（编辑模式）
+        roNumber: data.roNumber,
+        customer: data.customer,
+        vin: data.vin,
+        make: data.make,
+        year: data.year,
+        model: data.model,
+        structuralMeasurementFileAssets:
+          structuralMeasurementFiles.length > 0
+            ? structuralMeasurementFiles
+            : initialData?.structuralMeasurementFileAssets,
+        preRepairPhotoFileAssets:
+          preRepairPhotoFiles.length > 0
+            ? preRepairPhotoFiles
+            : initialData?.preRepairPhotoFileAssets,
+        dealership,
+        shop: user?.person?.shop || initialData?.shop || null,
+      }
 
-        // partsOrder 可以为 undefined 或 null
-        partsOrder: null,
-      })
-      api.repairOrderCreate(model, {
-        status200: (response) => {
-          console.log('Repair Order created successfully:', response)
-          onSuccess?.({
-            ...data,
-            structuralMeasurementFileAssets,
-            preRepairPhotoFileAssets,
+      await new Promise((resolve) => {
+        if (isEdit) {
+          const repairOrder = (RepairOrder as any).create(repairOrderPayload)
+          api.repairOrderSave(repairOrder, {
+            status200: () => {
+              performClose()
+              toast.success('Repair Order saved successfully')
+              onSuccess?.({
+                ...data,
+                structuralMeasurementFileAssets,
+                preRepairPhotoFileAssets,
+              })
+              resolve(true)
+            },
+            else: (_statusCode: number, responseText: string) => {
+              toast.error(responseText)
+              // 所有非 200（包括 404、403、409 等）最终会走到这里
+              resolve(false) // 只负责结束 Promise，恢复按钮状态
+            },
+            error: (error) => {
+              console.error('Error saving repair order:', error)
+              toast.error('Error saving repair order:', error)
+              resolve(false)
+            },
           })
-          handleClose()
-        },
-        status403: (error) => {
-          console.error('Error creating repair order:', error)
-        },
-        status404: (error) => {
-          console.error('Error creating repair order:', error)
-        },
+        } else {
+          const model = RepairOrderCreateModel.create({
+            repairOrder: repairOrderPayload,
+            partsOrder: {
+              parts: [],
+            },
+          })
+
+          api.repairOrderCreate(model, {
+            status200: (response) => {
+              console.log('Repair Order created successfully:', response)
+              onSuccess?.({
+                ...data,
+                structuralMeasurementFileAssets,
+                preRepairPhotoFileAssets,
+              })
+              performClose()
+              toast.success('Repair Order created successfully')
+              resolve(true)
+            },
+            else: (_statusCode: number, responseText: string) => {
+              // 所有非 200（包括 404、403、409 等）最终会走到这里
+              toast.error(responseText)
+              resolve(false) // 只负责结束 Promise，恢复按钮状态
+            },
+            error: (error) => {
+              console.error('Error creating repair order:', error)
+              toast.error('Error creating repair order:', error)
+              resolve(false)
+            },
+          })
+        }
       })
-
-      // console.log(
-      //   isEdit ? 'Updated Repair Order:' : 'New Repair Order:',
-      //   data,
-      //   {
-      //     structuralMeasurementFileAssets,
-      //     preRepairPhotoFileAssets,
-      //   }
-      // )
-
-      handleClose()
     } catch (error) {
       console.error('Error submitting repair order:', error)
+      throw error // ✅ 重新抛出错误，让 React Hook Form 知道提交失败
     }
   }
 
@@ -451,7 +510,7 @@ export default function RepairOrderDialog({
                   />
                   <FormField
                     control={form.control}
-                    name='orderFromDealership'
+                    name='orderFromDealershipId'
                     render={({ field }) => (
                       <FormItem className='flex flex-col space-y-1'>
                         <FormLabel>Order From Dealership</FormLabel>
@@ -465,12 +524,15 @@ export default function RepairOrderDialog({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value='Pacific VW Motors'>
-                              Pacific VW Motors | 88321 (Assigned Dealer)
-                            </SelectItem>
-                            <SelectItem value='smamsasmlkas'>
-                              Pacific VW Motors | 88321 (Assigned Dealer)
-                            </SelectItem>
+                            {orderFromDealerships.map((dealership) => (
+                              <SelectItem
+                                key={dealership.id}
+                                value={dealership.id?.toString() || ''}
+                              >
+                                {dealership.name} | {dealership.number}{' '}
+                                (Assigned Dealer)
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                         <div className='flex min-h-[20px] items-start'>

@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react'
 import { z } from 'zod'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import RequestApi from '@/js/clients/base/OrderApi'
+import PartsOrder from '@/js/models/PartsOrder'
+import RepairOrder from '@/js/models/RepairOrder'
 import {
   X,
   Package,
@@ -10,8 +13,12 @@ import {
   Plus,
   Trash2,
   AlertTriangle,
+  Loader2,
+  NotebookPen,
 } from 'lucide-react'
 import { useDropzone } from 'react-dropzone'
+import { toast } from 'sonner'
+import { formatDateOnly } from '@/lib/utils'
 import { useDialogWithConfirm } from '@/hooks/use-dialog-with-confirm'
 import { Button } from '@/components/ui/button'
 import {
@@ -37,6 +44,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { useAuthStore } from '@/stores/auth-store'
+import { PersonType } from '@/js/models/enum/PersonTypeEnum'
 
 const formSchema = z.object({
   parts: z.array(
@@ -50,6 +59,7 @@ type FormValues = z.infer<typeof formSchema>
 
 // 定义初始数据类型
 export type PartsOrderData = {
+  id?: number
   parts?: string[]
   shopRo?: string
   orderFromDealership?: string
@@ -64,23 +74,32 @@ export type PartsOrderData = {
   alternateDealerName?: string // 备用经销商名称
   alternateDealerId?: string // 备用经销商ID
   status?: string // 订单状态，用于判断是否已批准/拒绝
-  estimateFiles?: File[] | null
+  estimateFileAssets?: File[] | null
+  [key: string]: any
 }
 
 type PartsOrderDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   mode?: 'create' | 'edit'
-  initialData?: PartsOrderData | null
+  initialData?: PartsOrderData | undefined
   defaultDealership?: string // 默认经销商名称
+  initRepaitOrderData?: RepairOrder
+  onSuccess?: () => void
+  isReject?: boolean
+  onHandleResubmit?: (comment: string) => void
 }
 
 export function PartsOrderDialog({
   open,
   onOpenChange,
-  initialData = null,
+  isReject = false,
+  initialData,
   mode = 'create',
   defaultDealership,
+  initRepaitOrderData,
+  onSuccess,
+  onHandleResubmit,
 }: PartsOrderDialogProps) {
   const [estimateFiles, setEstimateFiles] = useState<File[]>([])
   const form = useForm<FormValues>({
@@ -89,20 +108,27 @@ export function PartsOrderDialog({
       parts: [{ number: '' }, { number: '' }, { number: '' }, { number: '' }],
     },
   })
+  const [loading, setLoading] = useState(false)
+  const [comment, setComment] = useState('')
   // 使用确认 hook
-  const { handleCloseRequest, ConfirmDialogComponent } =
-    useDialogWithConfirm({
-      form,
-      hasUnsavedFiles: estimateFiles.length > 0, // 检查是否有文件
-      onClose: () => {
-        form.reset()
-        setEstimateFiles([])
-        onOpenChange(false)
-      },
-      title: 'Discard Changes?',
-      description:
-        'You have unsaved changes. Are you sure you want to close? All your changes will be lost.',
-    })
+  const { handleCloseRequest, ConfirmDialogComponent } = useDialogWithConfirm({
+    form,
+    hasUnsavedFiles: estimateFiles.length > 0, // 检查是否有文件
+    onClose: () => {
+      form.reset()
+      setEstimateFiles([])
+      onOpenChange(false)
+    },
+    title: 'Discard Changes?',
+    description:
+      'You have unsaved changes. Are you sure you want to close? All your changes will be lost.',
+  })
+
+  // ✅ 获取当前用户角色
+  const { auth } = useAuthStore()
+  const userType = auth.user?.person?.type as PersonType | undefined
+  // TODO=======
+  // const [salesOrderNumber, setSalesOrderNumber] = useState(initialData?.salesOrderNumber || '')
 
   // 修改 handleClose 使用新的逻辑
   const handleClose = () => {
@@ -138,17 +164,20 @@ export function PartsOrderDialog({
 
   // 根据模式生成标题
   const getDialogTitle = () => {
+    if (isReject) {
+      return 'Resubmit Parts Order'
+    }
     if (isSupplement) {
       // 补充订单
       const supplementNum = initialData?.partsOrderNumber || 1
-      if (mode === 'edit') {
+      if (initialData.parts && initialData.parts?.length > 0) {
         return `Edit Supplement #${supplementNum}`
       } else {
         return `New Supplement #${supplementNum}`
       }
     } else {
       // 原始零件订单
-      if (mode === 'edit') {
+      if (initialData && initialData?.id) {
         return 'Edit Parts Order'
       } else {
         return 'New Parts Order'
@@ -166,14 +195,6 @@ export function PartsOrderDialog({
     }
   }
 
-  // 获取按钮文本
-  const getSubmitButtonText = () => {
-    if (mode === 'edit' && canEdit) {
-      return 'Update'
-    }
-    return 'Save'
-  }
-
   // 当 initialData 变化时，重置表单
   useEffect(() => {
     if (open && initialData) {
@@ -189,7 +210,7 @@ export function PartsOrderDialog({
 
       // 使用 setTimeout 将 setState 移到下一个事件循环
       setTimeout(() => {
-        setEstimateFiles(initialData.estimateFiles || [])
+        setEstimateFiles(initialData.estimateFileAssets || [])
       }, 0)
     } else if (open && mode === 'create') {
       // 新增模式：重置为默认值
@@ -202,31 +223,56 @@ export function PartsOrderDialog({
 
   const onSubmit = (data: FormValues) => {
     // 验证附件是否已上传（新增模式或编辑模式但还没有文件时）
-    if (
-      estimateFiles &&
-      estimateFiles.length === 0 &&
-      (mode === 'create' || !initialData?.estimateFiles?.length)
-    ) {
-      form.setError('_estimateFile', {
-        type: 'manual',
-        message: 'Estimate PDF is required',
+    // if (
+    //   estimateFiles &&
+    //   estimateFiles.length === 0 &&
+    //   (mode === 'create' || !initialData?.estimateFileAssets?.length)
+    // ) {
+    //   form.setError('_estimateFile', {
+    //     type: 'manual',
+    //     message: 'Estimate PDF is required',
+    //   })
+    //   // 滚动到错误位置
+    //   const errorElement = document.querySelector('[data-estimate-error]')
+    //   if (errorElement) {
+    //     errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    //   }
+    //   return
+    // }
+    try {
+      const api = new RequestApi()
+      const partsOrder = (PartsOrder as any).create({
+        ...initialData,
+        parts: data.parts.map((part) => part.number),
+        estimateFileAssets: estimateFiles,
+        repairOrder: initRepaitOrderData,
       })
-      // 滚动到错误位置
-      const errorElement = document.querySelector('[data-estimate-error]')
-      if (errorElement) {
-        errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      }
-      return
+      setLoading(true)
+      return new Promise((resolve, reject) => {
+        api.partsOrderSave(partsOrder, {
+          status200: () => {
+            toast.success('Parts Order saved successfully')
+            onOpenChange(false)
+            onSuccess?.()
+            setLoading(false)
+            resolve(void 0)
+          },
+          error: (error) => {
+            toast.error('Error saving parts order:', error)
+            setLoading(false)
+            reject(void 0)
+          },
+          else: (_statusCode: number, responseText: string) => {
+            toast.error(responseText)
+            setLoading(false)
+            reject(void 0)
+          },
+        })
+      })
+    } catch (error: unknown) {
+      setLoading(false)
+      toast.error('Error saving parts order:', error as any)
     }
-
-    console.log('Submitted:', {
-      mode,
-      data,
-      estimateFiles,
-      isSupplement,
-      partsOrderNumber: initialData?.partsOrderNumber,
-    })
-    onOpenChange(false)
   }
   // 修改 useDropzone 以支持多个文件
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -316,37 +362,41 @@ export function PartsOrderDialog({
                         Shop RO #
                       </Label>
                       <p className='font-medium'>
-                        {initialData?.shopRo || '---'}
+                        {initRepaitOrderData?.roNumber || '---'}
                       </p>
                     </div>
                     <div>
                       <Label className='text-muted-foreground text-xs'>
                         Order From Dealership
                       </Label>
-                      {getDealershipDisplay()}
+                      {initRepaitOrderData?.dealership.name || '---'}
                     </div>
                     <div>
                       <Label className='text-muted-foreground text-xs'>
                         Customer
                       </Label>
                       <p className='font-medium'>
-                        {initialData?.customer || '---'}
+                        {initRepaitOrderData?.customer || '---'}
                       </p>
                     </div>
                     <div>
                       <Label className='text-muted-foreground text-xs'>
                         VIN
                       </Label>
-                      <p className='font-medium'>{initialData?.vin || '---'}</p>
+                      <p className='font-medium'>
+                        {initRepaitOrderData?.vin || '---'}
+                      </p>
                     </div>
                     <div>
                       <Label className='text-muted-foreground text-xs'>
                         Year/Make/Model
                       </Label>
                       <p className='font-medium'>
-                        {initialData?.year || '---'}{' '}
-                        {initialData?.make || '---'}{' '}
-                        {initialData?.model || '---'}
+                        {initRepaitOrderData?.year &&
+                          initRepaitOrderData?.make &&
+                          initRepaitOrderData?.model
+                          ? `${initRepaitOrderData?.year} ${initRepaitOrderData?.make} ${initRepaitOrderData?.model}`
+                          : '---'}
                       </p>
                     </div>
                   </div>
@@ -367,28 +417,47 @@ export function PartsOrderDialog({
                       <Label className='text-muted-foreground'>
                         Order Submitted
                       </Label>
-                      <p className='mt-1 font-medium'>---</p>
+                      <p className='mt-1 font-medium'>
+                        {initialData?.dateSubmitted
+                          ? formatDateOnly(initialData?.dateSubmitted)
+                          : '---'}
+                      </p>
                     </div>
                     <div>
                       <Label className='text-muted-foreground'>
                         Order Approved
                       </Label>
-                      <p className='mt-1 font-medium'>---</p>
+                      <p className='mt-1 font-medium'>
+                        {initialData?.dateReviewed
+                          ? formatDateOnly(initialData?.dateReviewed)
+                          : '---'}
+                      </p>
                     </div>
                     <div>
                       <Label className='text-muted-foreground'>
                         Order Shipped
                       </Label>
-                      <p className='mt-1 font-medium'>---</p>
+                      <p className='mt-1 font-medium'>
+                        {initialData?.dateShipped
+                          ? formatDateOnly(initialData?.dateShipped)
+                          : '---'}
+                      </p>
                     </div>
                     {/* 编辑模式下显示 Sales Order Number */}
-                    {mode === 'edit' && initialData?.salesOrderNumber && (
+                    {initialData?.id && initialData?.salesOrderNumber && (
                       <div>
                         <Label className='text-muted-foreground'>
                           Sales Order #
                         </Label>
                         <p className='mt-1 font-medium'>
-                          {initialData.salesOrderNumber}
+
+                          {initialData.salesOrderNumber || '---'}
+                          {/* // TODO======== */}
+                          {/* {
+                            initialData?.status === 'DealershipProcessing' &&userType === 'Csr' && initialData.stage !== 'RepairCompleted' ? (<Input type='text' value={initialData.salesOrderNumber}
+                           onChange={(e) => setSalesOrderNumber(e.target.value)}
+                              />) : initialData.salesOrderNumber
+                          } */}
                         </p>
                       </div>
                     )}
@@ -414,6 +483,7 @@ export function PartsOrderDialog({
                             Part {i + 1}
                           </span>
                           <FormField
+                            disabled={initialData?.status === 'DealershipProcessing'}
                             control={form.control}
                             name={`parts.${i}.number`}
                             render={({ field }) => (
@@ -430,6 +500,7 @@ export function PartsOrderDialog({
                           />
                           {fields.length > 1 && (
                             <Button
+                              disabled={initialData?.status === 'DealershipProcessing'}
                               type='button'
                               variant='ghost'
                               size='icon'
@@ -441,6 +512,7 @@ export function PartsOrderDialog({
                         </div>
                       ))}
                       <Button
+                        disabled={initialData?.status === 'DealershipProcessing'}
                         type='button'
                         variant='outline'
                         size='sm'
@@ -464,15 +536,15 @@ export function PartsOrderDialog({
                         Estimate
                         {/* 新增模式或编辑模式但还没有文件时才必填 */}
                         {(mode === 'create' ||
-                          !initialData?.estimateFiles?.length) && (
-                          <span className='text-destructive'>*</span>
-                        )}
+                          !initialData?.estimateFileAssets?.length) && (
+                            <span className='text-destructive'>*</span>
+                          )}
                       </Label>
                       <div
                         {...getRootProps()}
                         className={`flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-10 text-center transition-all ${isDragActive ? 'border-primary bg-muted' : 'border-border hover:border-primary'}`}
                       >
-                        <input {...getInputProps()} />
+                        <input {...getInputProps()} disabled={initialData?.status === 'DealershipProcessing'} />
                         <Upload className='text-muted-foreground mb-3 h-12 w-12' />
 
                         <p className='text-muted-foreground text-sm'>
@@ -525,6 +597,24 @@ export function PartsOrderDialog({
                     </div>
                   </section>
                 </div>
+                <div>
+                  {/* 如果是isRejece 要填写comment信息 */}
+                  {isReject && (
+                    <div className='mt-6'>
+                      <h3 className='flex items-center gap-3 text-lg font-medium'>
+                        <NotebookPen className='text-muted-foreground h-5 w5' />
+                        Comment
+                      </h3>
+                      <Input
+                        type='textarea'
+                        placeholder='Enter comment'
+                        value={comment}
+                        className='mt-2 h-11'
+                        onChange={(e) => setComment(e.target.value)}
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* 固定底部 - 统一风格 */}
@@ -533,9 +623,45 @@ export function PartsOrderDialog({
                   <Button type='button' variant='outline' onClick={handleClose}>
                     Cancel
                   </Button>
-                  <Button type='submit' variant='default'>
-                    {getSubmitButtonText()}
-                  </Button>
+                  {isReject ? (
+                    <Button
+                      type='button'
+                      onClick={async () => {
+                        setLoading(true)
+                        await onSubmit(form.getValues() as FormValues)
+                        await onHandleResubmit?.(comment)
+                        setLoading(false)
+                      }}
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                          Resubmitting...
+                        </>
+                      ) : (
+                        'Resubmit'
+                      )}
+                      Resubmit
+                    </Button>
+                  ) : (
+                    <Button
+                      type='submit'
+                      variant='default'
+                      disabled={loading || form.formState.isSubmitting}
+                    >
+                      {loading || form.formState.isSubmitting ? (
+                        <>
+                          <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                          {initialData?.id ? 'Updating...' : 'Saving...'}
+                        </>
+                      ) : initialData?.id ? (
+                        'Update'
+                      ) : (
+                        'Save'
+                      )}
+                    </Button>
+                  )}
                 </div>
               </DialogFooter>
             </form>
