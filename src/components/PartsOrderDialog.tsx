@@ -12,7 +12,6 @@ import {
   Upload,
   Plus,
   Trash2,
-  AlertTriangle,
   Loader2,
   NotebookPen,
 } from 'lucide-react'
@@ -38,14 +37,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
-import { useAuthStore } from '@/stores/auth-store'
-import { PersonType } from '@/js/models/enum/PersonTypeEnum'
+// import { PersonType } from '@/js/models/enum/PersonTypeEnum'
 
 const formSchema = z.object({
   parts: z.array(
@@ -96,7 +88,6 @@ export function PartsOrderDialog({
   isReject = false,
   initialData,
   mode = 'create',
-  defaultDealership,
   initRepaitOrderData,
   onSuccess,
   onHandleResubmit,
@@ -125,8 +116,8 @@ export function PartsOrderDialog({
   })
 
   // ✅ 获取当前用户角色
-  const { auth } = useAuthStore()
-  const userType = auth.user?.person?.type as PersonType | undefined
+  // const { auth } = useAuthStore()
+  // const userType = auth.user?.person?.type as PersonType | undefined
   // TODO=======
   // const [salesOrderNumber, setSalesOrderNumber] = useState(initialData?.salesOrderNumber || '')
 
@@ -155,12 +146,12 @@ export function PartsOrderDialog({
     initialData.partsOrderNumber > 0
 
   // 判断是否来自备用经销商
-  const isFromAlternateDealer = initialData?.isAlternateDealer === true
+  // const isFromAlternateDealer = initialData?.isAlternateDealer === true
 
   // 判断是否在 CSR 批准/拒绝之前（可以编辑）
-  const canEdit =
-    !initialData?.status ||
-    ['CsrReview', 'DealershipProcessing'].includes(initialData.status)
+  // const canEdit =
+  //   !initialData?.status ||
+  //   ['CsrReview', 'DealershipProcessing'].includes(initialData.status)
 
   // 根据模式生成标题
   const getDialogTitle = () => {
@@ -287,35 +278,6 @@ export function PartsOrderDialog({
   // 删除单个文件
   const removeFile = (index: number) => {
     setEstimateFiles((prev) => prev.filter((_, i) => i !== index))
-  }
-  // 获取经销商显示文本
-  const getDealershipDisplay = () => {
-    if (isFromAlternateDealer && initialData?.alternateDealerName) {
-      return (
-        <div className='flex items-center gap-2'>
-          <span className='font-medium'>
-            {initialData.alternateDealerName}
-            {initialData.alternateDealerId &&
-              ` (${initialData.alternateDealerId})`}
-          </span>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <AlertTriangle className='h-4 w-4 text-yellow-500' />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Ordered from an alternate dealer</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-      )
-    }
-    return (
-      <p className='font-medium'>
-        {initialData?.orderFromDealership || defaultDealership || '---'}
-      </p>
-    )
   }
 
   return (

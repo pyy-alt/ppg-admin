@@ -115,6 +115,9 @@ export function Timeline({
   onMarkShipped,
   onApprove,
   onReject,
+
+
+
 }: TimelineProps) {
   // ✅ 获取当前用户角色
   const { auth } = useAuthStore()
@@ -202,9 +205,6 @@ export function Timeline({
 
   // ✅ 根据角色决定显示的节点 - 所有角色都只显示三个阶段
   const getVisibleStagesForRole = (
-    userType: PersonType | undefined,
-    currentStage: Stage,
-    currentStageIndex: number
   ): Stage[] => {
     // ✅ 定义三个阶段的常量
     const THREE_STAGES: Stage[] = [
@@ -244,9 +244,7 @@ export function Timeline({
 
     // ✅ 根据角色过滤应该显示的阶段
     const visibleStages = getVisibleStagesForRole(
-      userType,
-      effectiveStage as Stage,
-      currentStageIndex
+    
     )
 
     visibleStages.forEach((stageName) => {
