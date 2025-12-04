@@ -264,6 +264,35 @@ export function RepairOrderDetail() {
       toast.error(`Failed to mark parts order as received ${error}|`)
     }
   }
+  const handleMarkRepairAsComplete = async (photos: File[]) => {
+    try {
+      await new Promise<boolean>((resolve, reject) => {
+        const api = new RequestApi()
+        const request ={
+          id: (initRepaitOrderData as any).id,
+          preRepairPhotoFileAssets: photos,
+          ...(initRepaitOrderData as any),
+        }
+        api.repairOrderComplete(request, {
+          status200: () => {
+            toast.success('Repair order marked as complete successfully')
+            getRepairOrderDetail() // 刷新数据
+            getPartsOrderDetail()
+            resolve(true)
+          },
+          error: (error) => {
+            toast.error(`Failed to mark repair order as complete ${error}|`)
+            reject(false)
+          },
+          else: () => {
+            reject(false)
+          },
+        })
+      })
+    } catch (error) {
+      toast.error(`Failed to mark repair order as complete ${error}|`)
+    }
+  }
   // ✅ Timeline 的 onApprove 和 onReject 回调
   const handleTimelineApprove = () => {
     setIsApprovalDialogOpen(true)
@@ -306,7 +335,7 @@ export function RepairOrderDetail() {
                 </Button>
               ) : null}
               {
-                userType === 'Shop' ? (
+                userType === 'Shop' && initPartsOrderData?.every((order: any) =>order.status !== 'RepairCompleted') ? (
                   <Button
                     size='sm'
                     variant='outline'
@@ -500,7 +529,7 @@ export function RepairOrderDetail() {
 
             {/* 右侧：新增按钮 */}
             {
-              initPartsOrderData?.every((order: any) => order.status === 'RepairCompleted' || order.status === 'CsrRejected' || order.status === 'RepairCompleted') && userType === 'Shop'
+              initPartsOrderData?.some((order: any) => order.status !== 'RepairCompleted' || order.status === 'CsrRejected' || order.status !== 'RepairCompleted') && userType === 'Shop'
               && (
                 <Button
                   onClick={() => {
@@ -537,7 +566,9 @@ export function RepairOrderDetail() {
                         </CardTitle>
                         {
                           userType === 'Shop' && (selectedPartsOrderData as any)?.stage == 'OrderReview' && (selectedPartsOrderData as any)?.status !== 'DealershipProcessing'
-                            || (userType === 'Csr' && (selectedPartsOrderData as any)?.status !== 'CsrReview' && (selectedPartsOrderData as any)?.status !== 'CsrRejected') ? (
+                            || (userType === 'Csr' && (selectedPartsOrderData as any)?.status !== 'CsrReview' && (selectedPartsOrderData as any)?.status !== 'CsrRejected' 
+                            && (selectedPartsOrderData as any)?.stage !== 'OrderReceived' )
+                            ? (
                             <Button
                               onClick={() => {
                                 setSelectedPartsOrderData(selectedPartsOrderData)
@@ -642,6 +673,8 @@ export function RepairOrderDetail() {
       <MarkRepairAsCompleteDialog
         open={isMarkRepairAsCompleteDialogOpen}
         onOpenChange={setIsMarkRepairAsCompleteDialogOpen}
+        initRepaitOrderData={initRepaitOrderData}
+        onComplete={(photos: File[]) => handleMarkRepairAsComplete(photos)}
       />
       <RepairOrderDialog
         open={isOpen}

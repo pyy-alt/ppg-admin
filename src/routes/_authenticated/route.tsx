@@ -8,6 +8,7 @@ import {
 import type Session from '@/js/models/Session'
 import { PersonType } from '@/js/models/enum/PersonTypeEnum'
 import { useAuthStore } from '@/stores/auth-store'
+import { useLoadingStore } from '@/stores/loading-store'
 import { Loading } from '@/components/Loading'
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout'
 import { HeaderOnlyLayout } from '@/components/layout/header-only-layout'
@@ -62,8 +63,8 @@ const getRedirectTarget = (
     if (path === '/' || path.startsWith('/admin/')) return '/parts_orders'
     return null
   }
-  if( userType === 'Dealership'){
-     if (path.startsWith('/repair_orders/')) {
+  if (userType === 'Dealership') {
+    if (path.startsWith('/repair_orders/')) {
       return null
     }
     // 其他情况跳到 /parts_orders
@@ -73,9 +74,7 @@ const getRedirectTarget = (
   }
 
   // Dealership 用户跳转到 /parts_orders
-  if (
-    userType === 'FieldStaff'
-  ) {
+  if (userType === 'FieldStaff') {
     // ✅ 如果访问 /repair_orders，重定向到 /parts_orders
     if (path === '/repair_orders' || path.startsWith('/repair_orders/')) {
       return '/parts_orders'
@@ -87,8 +86,6 @@ const getRedirectTarget = (
     return null
   }
 
-
-
   // 其他角色保持原逻辑，跳转到 /parts_orders
   if (path.startsWith('/admin/')) {
     return '/parts_orders'
@@ -97,13 +94,11 @@ const getRedirectTarget = (
   return null
 }
 
-
-
 function AuthenticatedRouteComponent() {
   const { auth } = useAuthStore()
   const location = useLocation()
   const navigate = useNavigate()
-
+  const isLoading = useLoadingStore((state) => state.isLoading)
   const isAdmin = auth.user?.person?.type === 'ProgramAdministrator'
 
   // 扩展 Window 接口以支持开发模式下的调试函数
@@ -191,14 +186,32 @@ function AuthenticatedRouteComponent() {
   // 布局选择：不需要侧边栏或普通用户，使用 HeaderOnlyLayout
   if (!needsSidebar || !isAdmin) {
     return (
-      <HeaderOnlyLayout>
-        <Outlet />
-      </HeaderOnlyLayout>
+      <>
+        <HeaderOnlyLayout>
+          <Outlet />
+        </HeaderOnlyLayout>
+        {/* ✅ 全局 loading 覆盖层 */}
+        {isLoading && (
+          <div className='fixed inset-0 z-[9999] flex items-center justify-center bg-black/20 backdrop-blur-sm'>
+            <Loading />
+          </div>
+        )}
+      </>
     )
   }
 
   // 管理员访问需要侧边栏的路由
-  return <AuthenticatedLayout />
+  return (
+    <>
+      <AuthenticatedLayout />
+      {/* ✅ 全局 loading 覆盖层 */}
+      {isLoading && (
+        <div className='fixed inset-0 z-[9999] flex items-center justify-center bg-black/20 backdrop-blur-sm'>
+          <Loading />
+        </div>
+      )}
+    </>
+  )
 }
 
 export const Route = createFileRoute('/_authenticated')({

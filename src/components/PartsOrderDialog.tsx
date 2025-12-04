@@ -37,7 +37,6 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
-// import { PersonType } from '@/js/models/enum/PersonTypeEnum'
 
 const formSchema = z.object({
   parts: z.array(
@@ -145,15 +144,6 @@ export function PartsOrderDialog({
     initialData?.partsOrderNumber !== undefined &&
     initialData.partsOrderNumber > 0
 
-  // 判断是否来自备用经销商
-  // const isFromAlternateDealer = initialData?.isAlternateDealer === true
-
-  // 判断是否在 CSR 批准/拒绝之前（可以编辑）
-  // const canEdit =
-  //   !initialData?.status ||
-  //   ['CsrReview', 'DealershipProcessing'].includes(initialData.status)
-
-  // 根据模式生成标题
   const getDialogTitle = () => {
     if (isReject) {
       return 'Resubmit Parts Order'

@@ -2,6 +2,8 @@
 import { useState } from 'react'
 import { useRouter } from '@tanstack/react-router'
 import AuthenticationApi from '@/js/clients/base/AuthenticationApi'
+import PersonApi from '@/js/clients/base/PersonApi'
+import PersonSearchRequest from '@/js/models/PersonSearchRequest'
 import { LogOut, Users, UserPen } from 'lucide-react'
 import logoImg from '@/assets/img/logo.svg'
 import { useAuthStore } from '@/stores/auth-store'
@@ -16,7 +18,8 @@ import {
 import EditProfileDialog from '@/components/EditProfileDialog'
 import ViewAdminTeamDialog from '../AdminViewTeamDialog'
 import { LanguageDropdown } from '../LanguageDropdown'
-import ViewDealerTeamDialog from '../ViewDealerTeamDialog'
+import ViewTeamDialog, { TeamMember } from '../ViewTeamDialog'
+import PersonTypeEnum from '@/js/models/enum/PersonTypeEnum'
 
 type HeaderProps = React.HTMLAttributes<HTMLElement> & {
   fixed?: boolean
@@ -34,13 +37,49 @@ export function Header({
   const [open, setOpen] = useState(false)
   const [isShowTeam, setIsShowTeam] = useState(false)
   const [isShowAdminTeam, setIsShowAdminTeam] = useState(false)
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
+  const getTeamMembers = async () => {
+    const isAdmin = auth.user?.person?.type === PersonTypeEnum.PROGRAM_ADMINISTRATOR
+   
+    try {
+      const personApi = new PersonApi()
+      const request = PersonSearchRequest.create({
+        // 如果user.person.type是ProgramAdministrator，则type为Network，否则为Shop或Dealership
+        type: isAdmin ? 'Network' : auth.user?.person?.type as 'Shop' | 'Dealership' | 'Network',
+        organizationId:
+          auth.user?.person?.type === 'Shop'
+            ? auth.user?.person?.shop?.id
+            : auth.user?.person?.type === 'Dealership'
+              ? auth.user?.person?.dealership?.id
+              : undefined,
+      })
 
+      personApi.search(request, {
+        status200: (data) => {
+          if (isAdmin) {
+            setIsShowAdminTeam(true)
+          } else {
+            setIsShowTeam(true)
+          }
+          setTeamMembers(data.persons)
+        },
+        error: (error) => {
+          console.error('Person search error:', error)
+        },
+        else: (statusCode, message) => {
+          console.error('Unhandled search response:', statusCode, message)
+        },
+      })
+    } catch (error) {
+      console.error(error)
+    }
+  }
   const handleSelect = (item: 'team' | 'profile' | 'logout') => {
     switch (item) {
       case 'team':
         // setIsShowTeam(true)
         // 管理员
-        setIsShowAdminTeam(true)
+        getTeamMembers()
         break
       case 'profile':
         setOpen(true)
@@ -70,7 +109,12 @@ export function Header({
       >
         {/* Left: Logo + Title */}
         <div className='flex items-center gap-4'>
-          <img src={logoImg} alt='Audi' className='h-20 w-20 object-contain hover: cursor-pointer' onClick={() => router.navigate({ to: '/' })}/>
+          <img
+            src={logoImg}
+            alt='Audi'
+            className='hover: h-20 w-20 cursor-pointer object-contain'
+            onClick={() => router.navigate({ to: '/' })}
+          />
           <div>
             <span className='mr-2 text-sm font-medium text-red-500'>Audi</span>
             <span className='text-sm font-medium text-white'>
@@ -95,7 +139,8 @@ export function Header({
                     </p>
                     <p className='text-xs text-gray-400'>
                       {auth.user
-                        ? auth.user.person?.shop?.name && auth.user.person?.shop?.shopNumber
+                        ? auth.user.person?.shop?.name &&
+                          auth.user.person?.shop?.shopNumber
                           ? `${auth.user.person?.shop?.name}(${auth.user.person?.shop?.shopNumber}) | ${auth.user.person?.type}`
                           : auth.user.person?.dealership?.name &&
                               auth.user.person?.dealership?.dealershipNumber
@@ -132,7 +177,8 @@ export function Header({
                     </p>
                     <p className='text-muted-foreground text-xs'>
                       {auth.user
-                        ? auth.user.person?.shop?.name && auth.user.person?.shop?.shopNumber
+                        ? auth.user.person?.shop?.name &&
+                          auth.user.person?.shop?.shopNumber
                           ? `${auth.user.person?.shop?.name}(${auth.user.person?.shop?.shopNumber}) | ${auth.user.person?.type}`
                           : auth.user.person?.dealership?.name &&
                               auth.user.person?.dealership?.dealershipNumber
@@ -176,10 +222,19 @@ export function Header({
         </div>
       </header>
       <EditProfileDialog open={open} onOpenChange={setOpen} />
-      <ViewDealerTeamDialog open={isShowTeam} onOpenChange={setIsShowTeam} />
+      <ViewTeamDialog
+        teamMembers={teamMembers}
+        open={isShowTeam}
+        onOpenChange={setIsShowTeam}
+      />
       <ViewAdminTeamDialog
+        teamMembers={teamMembers}
         open={isShowAdminTeam}
         onOpenChange={setIsShowAdminTeam}
+        onSuccess={getTeamMembers}
+        onError={(error) => {
+          console.error('Failed to get team members:', error)
+        }}
       />
     </>
   )

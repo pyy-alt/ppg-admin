@@ -4,8 +4,6 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 
-// const stage=['OrderReview', 'OrderFulfillment', 'OrderReceived', 'RepairCompleted']
-// const status=['CsrReview', 'CsrRejected', 'DealershipProcessing', 'DealershipShipped', 'ShopReceived', 'RepairCompleted']
 interface TimelineItem {
   id: number
   title: string

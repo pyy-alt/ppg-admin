@@ -10,17 +10,21 @@ import {
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
+import RepairOrder from '@/js/models/RepairOrder'
+import { toast } from 'sonner'
 
 interface MarkRepairAsCompleteDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onComplete?: (photos: File[]) => void
+  initRepaitOrderData?: RepairOrder
 }
 
 export function MarkRepairAsCompleteDialog({
   open,
   onOpenChange,
   onComplete,
+  initRepaitOrderData
 }: MarkRepairAsCompleteDialogProps) {
   const [photos, setPhotos] = useState<File[]>([
     new File(['file_name.pdf'], 'file_name.pdf', {
@@ -46,7 +50,7 @@ export function MarkRepairAsCompleteDialog({
   }
 
   const handleComplete = () => {
-    if (photos.length === 0) return
+    if (photos.length === 0) return toast.error('Please upload at least one photo')
     onComplete?.(photos)
     onOpenChange(false)
   }
@@ -85,33 +89,33 @@ export function MarkRepairAsCompleteDialog({
             <div className='grid grid-cols-1 gap-x-12 gap-y-6 text-sm sm:grid-cols-3'>
               <div>
                 <Label className='text-muted-foreground'>Shop RO#</Label>
-                <p className='text-foreground mt-1.5 font-medium'>805</p>
+                <p className='text-foreground mt-1.5 font-medium'>{initRepaitOrderData?.roNumber || '--'}</p>
               </div>
               <div>
                 <Label className='text-muted-foreground'>
                   Ordered From Dealership
                 </Label>
                 <p className='text-foreground mt-1.5 font-medium'>
-                  Pacific Motors (98321)
+                  {initRepaitOrderData?.dealership?.name || '--'}
                 </p>
               </div>
               <div>
                 <Label className='text-muted-foreground'>Customer</Label>
                 <p className='text-foreground mt-1.5 font-medium'>
-                  Brian Cooper
+                  {initRepaitOrderData?.customer || '--'}
                 </p>
               </div>
 
               <div>
                 <Label className='text-muted-foreground'>VIN</Label>
                 <p className='text-foreground mt-1.5 font-mono'>
-                  AUDIZZ5CZKK246801
+                  {initRepaitOrderData?.vin || '--'}
                 </p>
               </div>
               <div>
                 <Label className='text-muted-foreground'>Year/Make/Model</Label>
                 <p className='text-foreground mt-1.5 font-medium'>
-                  2017 Audi S3 Sedan
+                 {initRepaitOrderData?.year}/{initRepaitOrderData?.make}/{initRepaitOrderData?.model}
                 </p>
               </div>
             </div>

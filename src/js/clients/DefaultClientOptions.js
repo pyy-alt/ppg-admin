@@ -1,5 +1,5 @@
 import { toast } from 'sonner'
-
+import { useLoadingStore } from '@/stores/loading-store'  
 /**
  * This is the default client options / middleware for ALL client API webservice calls.
  * This file is designed to be altered.
@@ -47,6 +47,10 @@ export default class DefaultClientOptions {
 
   static onApiCall(url, method, request, requestType) {
     console.log('[API Call] ' + method.toUpperCase() + ' ' + url)
+        // ✅ 每次开始请求时 +1
+        try {
+          useLoadingStore.getState().start()
+        } catch {}
   }
 
   /**
@@ -62,6 +66,10 @@ export default class DefaultClientOptions {
 
   static onApiResponse(url, method, request, requestType) {
     console.log('[API Response] ' + method.toUpperCase() + ' ' + url)
+    // ✅ 收到响应时 -1
+    try {
+      useLoadingStore.getState().end()
+    } catch {}
   }
 
   /**
@@ -305,6 +313,10 @@ export default class DefaultClientOptions {
     const responseHandler = {
       error: (error) => {
         console.error(error)
+         // ✅ 出错时也要 -1（防止永远卡 loading）
+         try {
+          useLoadingStore.getState().end()
+        } catch {}
       },
       else: (statusCode, responseText) => {
         console.warn(
