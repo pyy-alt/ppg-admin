@@ -55,14 +55,24 @@ export default function ViewTeamDialog({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className='flex max-h-[90vh] flex-col sm:max-w-4xl'>
         <DialogHeader className='shrink-0'>
-          <DialogTitle className='text-2xl font-semibold'>
-            {teamMembers?.[0].type === PersonTypeEnum.SHOP && 'View Shop Team'}
-            {teamMembers?.[0].type === PersonTypeEnum.DEALERSHIP &&
-              'View Dealer Team'}
-            {teamMembers?.[0].type === PersonTypeEnum.CSR && 'View CSR Team'}
-            {teamMembers?.[0].type === PersonTypeEnum.FIELD_STAFF &&
-              'View Field Staff Team'}
-          </DialogTitle>
+          {teamMembers ? (
+            teamMembers.length > 0 ? (
+              <DialogTitle className='text-2xl font-semibold'>
+                {teamMembers?.[0].type === PersonTypeEnum.SHOP &&
+                  'View Shop Team'}
+                {teamMembers?.[0].type === PersonTypeEnum.DEALERSHIP &&
+                  'View Dealer Team'}
+                {teamMembers?.[0].type === PersonTypeEnum.CSR &&
+                  'View CSR Team'}
+                {teamMembers?.[0].type === PersonTypeEnum.FIELD_STAFF &&
+                  'View Field Staff Team'}
+              </DialogTitle>
+            ) : (
+              <DialogTitle className='text-2xl font-semibold'>
+                View Team
+              </DialogTitle>
+            )
+          ) : null}
           <Separator />
           <button
             onClick={handleClose}
