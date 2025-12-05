@@ -1,4 +1,5 @@
 import PersonStatusEnum from '@/js/models/enum/PersonStatusEnum'
+import PersonTypeEnum, { PersonType } from '@/js/models/enum/PersonTypeEnum'
 import { X, Store, Users } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -26,6 +27,11 @@ export interface TeamMember {
     shopNumber: string
     address: string
   }
+  dealership?: {
+    dealershipNumber: string
+    address: string
+  }
+  type?: PersonType
 }
 
 interface ViewDealerTeamDialogProps {
@@ -50,7 +56,12 @@ export default function ViewTeamDialog({
       <DialogContent className='flex max-h-[90vh] flex-col sm:max-w-4xl'>
         <DialogHeader className='shrink-0'>
           <DialogTitle className='text-2xl font-semibold'>
-            View Dealer Team
+            {teamMembers?.[0].type === PersonTypeEnum.SHOP && 'View Shop Team'}
+            {teamMembers?.[0].type === PersonTypeEnum.DEALERSHIP &&
+              'View Dealer Team'}
+            {teamMembers?.[0].type === PersonTypeEnum.CSR && 'View CSR Team'}
+            {teamMembers?.[0].type === PersonTypeEnum.FIELD_STAFF &&
+              'View Field Staff Team'}
           </DialogTitle>
           <Separator />
           <button
