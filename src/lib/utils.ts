@@ -1,5 +1,5 @@
-import  { type FileAssetType } from '@/js/models/enum/FileAssetFileAssetTypeEnum'
 import FileAsset from '@/js/models/FileAsset'
+import { type FileAssetType } from '@/js/models/enum/FileAssetFileAssetTypeEnum'
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
@@ -206,4 +206,50 @@ export const formatDateOnly = (date: Date | undefined): string | undefined => {
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const day = String(date.getDate()).padStart(2, '0')
   return `${year}-${month}-${day}`
+}
+export const exportCurrentPageToCSV = (
+  data: any[],
+  headers: string[],
+  filename: string = 'Parts_Order'
+) => {
+  if (data.length === 0) {
+    alert('没有数据可导出')
+    return
+  }
+  try {
+    return new Promise((resolve) => {
+      // 转义函数（防止逗号、换行、引号破坏 CSV）
+      const escape = (val: any) => {
+        if (val === null || val === undefined) return ''
+        const str = String(val).trim()
+        return str.includes(',') || str.includes('"') || str.includes('\n')
+          ? `"${str.replace(/"/g, '""')}"`
+          : str
+      }
+
+      // 自动根据 headers 的顺序取数据（key 必须和对象属性一致）
+      const rows = data.map((row) =>
+        headers.map((header) => escape(row[header] ?? '--'))
+      )
+
+      // 组合 CSV 内容（加 BOM 防止 Excel 中文乱码）
+      const csvContent =
+        '\uFEFF' +
+        [headers.join(','), ...rows.map((r) => r.join(','))].join('\r\n')
+
+      // 下载
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `${filename}_${new Date().toISOString().slice(0, 10)}.csv`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+      resolve(true)
+    })
+  } catch (error) {
+    return Promise.reject(error)
+  }
 }

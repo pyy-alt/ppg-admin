@@ -1,0 +1,1 @@
+import{j as t,E as e}from"./index-bZPt74SL.js";function r({fixed:n,className:o,fluid:a,...x}){return t.jsx(t.Fragment,{children:t.jsx("main",{"data-layout":n?"fixed":"auto",className:e("px-4 py-6",n&&"flex grow flex-col overflow-hidden",!a&&"@7xl/content:mx-auto @7xl/content:w-full @7xl/content:max-w-7xl",o),...x})})}export{r as M};

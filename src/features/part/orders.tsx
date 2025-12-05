@@ -1,10 +1,15 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import OrderApi from '@/js/clients/base/OrderApi'
 import PartsOrderSearchRequest from '@/js/models/PartsOrderSearchRequest'
 import { Search, Download, AlertCircle, TableIcon } from 'lucide-react'
+import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/auth-store'
-import { calculateDateRange, formatDateOnly } from '@/lib/utils'
+import {
+  calculateDateRange,
+  exportCurrentPageToCSV,
+  formatDateOnly,
+} from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -61,6 +66,57 @@ export function PartOrders() {
   const totalPages = Math.ceil(totalItems / itemsPerPage)
   const navigate = useNavigate()
 
+  const partsOrderRef = useRef<HTMLTableElement>(null)
+  const [headers, setHeaders] = useState<string[]>([])
+  const getFlattenedCurrentPageData = () => {
+    const startIndex = (currentPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    const pageData = orders.slice(startIndex, endIndex)
+
+    return pageData.map((order: any) => {
+      const ro = order.repairOrder || {}
+      const shop = ro.shop || {}
+      const dealer = ro.dealership || {}
+
+      return {
+        'RO#': ro.roNumber || '--', // ← 必须加引号！
+        'Sales#': order.salesOrderNumber || '--', // ← 必须加引号！
+        Type: getOrderTypeText(order.partsOrderNumber || 0),
+        VIN: ro.vin || '--',
+        'Year/Make/Model':
+          [ro.year, ro.make, ro.model].filter(Boolean).join(' ') || '--',
+        Status: order.status || '--',
+        Shop: shop.name ? `${shop.name} (${shop.id})` : '--',
+        Dealer: dealer.name ? `${dealer.name} (${dealer.id})` : '--',
+        'CSR Region': ro.region || '--',
+        'Date Completed': formatDate(order.dateCreated),
+        'Date Closed': formatDate(ro.dateClosed) || '--',
+      }
+    })
+  }
+  const exportCSV = async () => {
+    try {
+      const flattenedData = getFlattenedCurrentPageData()
+      const result = await exportCurrentPageToCSV(flattenedData, headers)
+      result ? toast.success('Exported successfully') : null
+    } catch (error) {
+      toast.error('Export failed')
+    }
+  }
+
+  useEffect(() => {
+    // 确保组件已挂载且 ref 已连接到 DOM
+    if (partsOrderRef.current) {
+      // 2. 使用原生 DOM API 查找所有 <th> 元素
+      const thElements = partsOrderRef.current.querySelectorAll('thead th')
+
+      // 3. 提取文本内容
+      const headerTexts = Array.from(thElements).map((th) =>
+        th.textContent.trim()
+      )
+      setHeaders(headerTexts)
+    }
+  }, [orders])
   const getStatusVariant = (
     status: string
   ): 'default' | 'secondary' | 'destructive' | 'outline' => {
@@ -92,7 +148,10 @@ export function PartOrders() {
       const requestParams: any = {
         smartFilter,
         filterByWaitingOnMe,
-        filterByDealershipId: user?.person?.type === 'Dealership' ?  user?.person?.dealership.id : undefined,
+        filterByDealershipId:
+          user?.person?.type === 'Dealership'
+            ? user?.person?.dealership.id
+            : undefined,
       }
       // 处理订单类型筛选
       if (filterByPartsOrderNumber !== 'all') {
@@ -133,13 +192,12 @@ export function PartOrders() {
           setLoading(false)
         },
         error: (error: any) => {
-          console.error('获取零件订单失败:', error)
+          toast.error(`Error: ${error || 'Failed to fetch data'}`)
           setLoading(false)
         },
-        status403: (message: string) => {
-          console.error('权限不足:', message)
+        else: () => {
           setLoading(false)
-        },
+        }
       })
     } catch (error) {
       console.error('API 调用错误:', error)
@@ -222,7 +280,7 @@ export function PartOrders() {
           <h1 className='text-foreground text-2xl font-bold'>
             Parts Order List
           </h1>
-          <Button>
+          <Button onClick={exportCSV}>
             <Download className='mr-2 h-4 w-4' />
             Report
           </Button>
@@ -368,14 +426,14 @@ export function PartOrders() {
 
           {/* Table */}
           <div className='bg-background overflow-hidden rounded-lg border shadow-sm'>
-            <Table>
+            <Table ref={partsOrderRef}>
               <TableHeader>
                 <TableRow className='bg-muted'>
                   <TableHead className='text-foreground font-semibold'>
-                    RO #
+                    RO#
                   </TableHead>
                   <TableHead className='text-foreground font-semibold'>
-                    Sales #
+                    Sales#
                   </TableHead>
                   <TableHead className='text-foreground font-semibold'>
                     Type
