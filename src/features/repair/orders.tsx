@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import RequestApi from '@/js/clients/base/OrderApi'
-import RepairOrder from '@/js/models/RepairOrder'
+import type RepairOrder from '@/js/models/RepairOrder'
 import RepairOrderSearchRequest from '@/js/models/RepairOrderSearchRequest'
 import { Plus, Search, AlertTriangle, TableIcon } from 'lucide-react'
 import navImg from '@/assets/img/repair/nav.png'
@@ -35,10 +35,11 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import RepairOrderDialog, {
-  RepairOrderData,
+  type RepairOrderData,
 } from '@/components/RepairOrderDialog'
 import { DataTablePagination } from '@/components/data-table-pagination'
 import { DatePicker } from '@/components/date-picker'
+import ResultParameter from '@/js/models/ResultParameter'
 
 const getStatusVariant = (status: string) => {
   if (status.includes('Rejected')) return 'destructive'
@@ -61,7 +62,7 @@ export function RepairOrderList() {
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 20
 
-  const [totalItems, setTotalItems] = useState(repairOrders.length || 0)
+  const [totalItems, setTotalItems] = useState(0)
   const totalPages = Math.ceil(totalItems / itemsPerPage)
   // 计算当前页应该显示的数据
   const startIndex = (currentPage - 1) * itemsPerPage
@@ -82,11 +83,7 @@ export function RepairOrderList() {
       const api = new RequestApi()
       const shopId = user?.person?.shop?.id
 
-      if (shopId === null) {
-        console.error(
-          'Unable to determine shopId for user type:',
-          user?.person?.type
-        )
+      if (shopId == null) {
         return
       }
 
@@ -113,6 +110,14 @@ export function RepairOrderList() {
           formatDateOnly(dateLastSubmittedTo)
       }
 
+      const resultParameter = ResultParameter.create({
+        resultsLimitOffset: (currentPage - 1) * itemsPerPage,
+        resultsLimitCount: itemsPerPage,
+        resultsOrderBy: 'dateLastSubmitted',
+        resultsOrderAscending: false,
+      })
+      ;(request as any).resultParameter = resultParameter
+
       api.repairOrderSearch(request, {
         status200: (response) => {
           setRepairOrders((response as any).repairOrders)
@@ -128,13 +133,20 @@ export function RepairOrderList() {
   }
   const navigate = useNavigate()
 
-  // 当搜索条件改变时，重置页码并调用 API
   useEffect(() => {
     if (!user) return // 等待用户信息加载
 
-    // 重置到第一页
-    setCurrentPage(1)
-
+    const userType = user?.person?.type
+    // ✅ 新增：Dealership 用户不允许访问修复订单列表
+    if (
+      userType === 'Dealership' ||
+      userType === 'Csr' ||
+      userType === 'FieldStaff'
+    ) {
+      console.warn('Dealership user cannot access repair order list')
+      navigate({ to: '/parts_orders', replace: true })
+      return
+    }
     // 调用 API（对于文本输入，使用防抖）
     const timeoutId = setTimeout(
       () => {
@@ -151,6 +163,7 @@ export function RepairOrderList() {
     dateLastSubmittedFrom,
     dateLastSubmittedTo,
     user,
+    currentPage,
   ])
 
   // 当预设范围改变时，自动计算日期
@@ -192,8 +205,7 @@ export function RepairOrderList() {
       <RepairOrderDialog
         open={isOpen}
         onOpenChange={setOpen}
-        onSuccess={(data) => {
-          console.log('RO successfully!', data)
+        onSuccess={() => {
           getRepairOrders()
         }}
         initialData={initialData as RepairOrderData}
@@ -339,7 +351,7 @@ export function RepairOrderList() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {currentPageData.map((order) => {
+                  {repairOrders.map((order) => {
                     // 使用类型断言访问属性，因为类型定义可能不完整
                     const orderAny = order as any
                     // 组合车辆信息

@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
-import RepairOrder from '@/js/models/RepairOrder'
+import type RepairOrder from '@/js/models/RepairOrder'
 import { toast } from 'sonner'
 
 interface MarkRepairAsCompleteDialogProps {

@@ -6,7 +6,7 @@ import {
   useNavigate,
 } from '@tanstack/react-router'
 import type Session from '@/js/models/Session'
-import { PersonType } from '@/js/models/enum/PersonTypeEnum'
+import { type PersonType } from '@/js/models/enum/PersonTypeEnum'
 import { useAuthStore } from '@/stores/auth-store'
 import { useLoadingStore } from '@/stores/loading-store'
 import { Loading } from '@/components/Loading'
@@ -21,77 +21,127 @@ declare global {
   }
 }
 
+// ============================================================================
 // 常量定义
+// ============================================================================
+
+/** 不需要侧边栏的路由 */
 const ROUTES_WITHOUT_SIDEBAR = ['/parts_orders', '/repair_orders'] as const
 
-// 重定向逻辑函数
-const getRedirectTarget = (
+/** 角色权限配置 */
+type RoleConfig = {
+  /** 访问禁止的路由时的重定向目标 */
+  forbiddenRoute: string
+  /** 访问根路径时的默认重定向目标 */
+  defaultRoute: string
+  /** 允许访问的前缀路由列表 */
+  allowedRoutes: string[]
+}
+
+const ROLE_REDIRECT_CONFIG: Record<PersonType, RoleConfig> = {
+  ProgramAdministrator: {
+    forbiddenRoute: '/admin/parts_orders',
+    defaultRoute: '/admin/parts_orders',
+    allowedRoutes: ['/admin', '/parts_orders'],
+  },
+  Shop: {
+    forbiddenRoute: '/repair_orders',
+    defaultRoute: '/repair_orders',
+    allowedRoutes: ['/repair_orders'],
+  },
+  Csr: {
+    forbiddenRoute: '/parts_orders',
+    defaultRoute: '/parts_orders',
+    allowedRoutes: ['/parts_orders', '/repair_orders'],
+  },
+  Dealership: {
+    forbiddenRoute: '/parts_orders',
+    defaultRoute: '/parts_orders',
+    allowedRoutes: ['/parts_orders','/repair_orders'], // 只允许访问零件订单列表
+    // 注：修复订单详情页 /repair_orders/:id 将通过前置条件验证处理
+  },
+  FieldStaff: {
+    forbiddenRoute: '/parts_orders',
+    defaultRoute: '/parts_orders',
+    allowedRoutes: ['/parts_orders'],
+  },
+}
+
+// ============================================================================
+// 工具函数
+// ============================================================================
+
+/**
+ * 判断路径是否匹配允许列表
+ * @param path 当前路径
+ * @param allowedRoutes 允许的路由前缀列表
+ * @returns 是否允许访问
+ */
+function isPathAllowed(path: string, allowedRoutes: string[]): boolean {
+  if (path === '/') return false // 根路径需要重定向
+  return allowedRoutes.some(
+    (route) => path === route || path.startsWith(route + '/')
+  )
+}
+
+/**
+ * 获取重定向目标
+ * @param path 当前路径
+ * @param userType 用户类型
+ * @returns 重定向目标或 null
+ */
+function getRedirectTarget(
   path: string,
   userType: PersonType | undefined
-): string | null => {
-  // 如果没有用户类型，不重定向
+): string | null {
   if (!userType) return null
 
-  // 管理员（ProgramAdministrator）保持原逻辑
-  if (userType === 'ProgramAdministrator') {
-    if (path === '/parts_orders') return '/admin/parts_orders'
-    if (path === '/') return '/admin/parts_orders'
+  const config = ROLE_REDIRECT_CONFIG[userType]
+
+  // 如果访问根路径，重定向到默认路由
+  if (path === '/') {
+    return config.defaultRoute
+  }
+
+  // 如果路径在允许列表中，不重定向
+  if (isPathAllowed(path, config.allowedRoutes)) {
     return null
   }
 
-  // Shop 用户跳转到 /repair_orders
-  if (userType === 'Shop') {
-    // ✅ 如果访问 /parts_orders，重定向到 /repair_orders
-    if (path === '/parts_orders' || path.startsWith('/parts_orders/')) {
-      return '/repair_orders'
+  // 其他情况都重定向到禁止路由（即默认路由）
+  return config.forbiddenRoute
+}
+
+/**
+ * 设置开发模式下的调试工具
+ * @param auth 认证存储中的用户数据
+ */
+function setupDevTools(auth: any): void {
+  if (!import.meta.env.DEV || !auth.user) return
+
+  window.switchUserType = (type: PersonType) => {
+    if (!auth.user?.person) return
+
+    const updatedPerson = {
+      ...auth.user.person,
+      type: type,
     }
-    if (path.startsWith('/admin/')) {
-      return '/repair_orders'
-    }
-    if (path === '/') return '/repair_orders'
-    return null
+
+    const mockSession = {
+      guid: auth.user.guid,
+      person: updatedPerson,
+      hash: auth.user.hash,
+    } as Session
+
+    auth.setUser(mockSession)
+    console.log(`[DevTools] 用户类型已切换为: ${type}`)
   }
 
-  // Csr 用户
-  if (userType === 'Csr') {
-    // 允许访问详情页 /repair_orders/:id，不重定向
-    if (path.startsWith('/repair_orders/')) {
-      return null
-    }
-    // 其他情况跳到 /parts_orders
-    if (path === '/repair_orders') return '/parts_orders'
-    if (path === '/' || path.startsWith('/admin/')) return '/parts_orders'
-    return null
+  window.getUserType = () => {
+    const type = auth.user?.person?.type
+    console.log('[DevTools] 当前用户类型:', type)
+    return type
   }
-  if (userType === 'Dealership') {
-    if (path.startsWith('/repair_orders/')) {
-      return null
-    }
-    // 其他情况跳到 /parts_orders
-    if (path === '/repair_orders') return '/parts_orders'
-    if (path === '/' || path.startsWith('/admin/')) return '/parts_orders'
-    return null
-  }
-
-  // Dealership 用户跳转到 /parts_orders
-  if (userType === 'FieldStaff') {
-    // ✅ 如果访问 /repair_orders，重定向到 /parts_orders
-    if (path === '/repair_orders' || path.startsWith('/repair_orders/')) {
-      return '/parts_orders'
-    }
-    if (path.startsWith('/admin/')) {
-      return '/parts_orders'
-    }
-    if (path === '/') return '/parts_orders'
-    return null
-  }
-
-  // 其他角色保持原逻辑，跳转到 /parts_orders
-  if (path.startsWith('/admin/')) {
-    return '/parts_orders'
-  }
-  if (path === '/') return '/parts_orders'
-  return null
 }
 
 function AuthenticatedRouteComponent() {
@@ -99,42 +149,21 @@ function AuthenticatedRouteComponent() {
   const location = useLocation()
   const navigate = useNavigate()
   const isLoading = useLoadingStore((state) => state.isLoading)
-  const isAdmin = auth.user?.person?.type === 'ProgramAdministrator'
+  const userType = auth.user?.person?.type
+  const isAdmin = userType === 'ProgramAdministrator'
 
-  // 扩展 Window 接口以支持开发模式下的调试函数
-
-  // 开发模式：添加用户类型切换功能
+  // ============================================================================
+  // 开发模式：设置调试工具
+  // ============================================================================
   useEffect(() => {
-    if (!import.meta.env.DEV || !auth.user) return
+    setupDevTools(auth)
+  }, [auth])
 
-    window.switchUserType = (type: PersonType) => {
-      // ✅ 如果当前有 user，需要创建一个新的 Session 对象来更新 type
-      // 注意：这只是一个开发工具，实际应用中不应该这样修改用户类型
-      if (auth.user?.person) {
-        // 创建一个新的 Person 对象，只修改 type
-        const updatedPerson = {
-          ...auth.user.person,
-          type: type,
-        }
-        // 创建一个模拟的 Session 对象
-        const mockSession = {
-          guid: auth.user.guid,
-          person: updatedPerson,
-          hash: auth.user.hash,
-        } as Session
-        auth.setUser(mockSession)
-        console.log(`已切换用户类型为: ${type}`)
-      }
-    }
-
-    window.getUserType = () => {
-      console.log('当前用户类型:', auth.user?.person?.type)
-      return auth.user?.person?.type
-    }
-  }, [auth.user])
-
+  // ============================================================================
   // 路由重定向逻辑
+  // ============================================================================
   useEffect(() => {
+    // 如果正在检查认证状态或未认证，则不处理重定向
     if (
       auth.loginStatus === 'checking' ||
       auth.loginStatus !== 'authenticated'
@@ -142,24 +171,29 @@ function AuthenticatedRouteComponent() {
       return
     }
 
-    const redirectTarget = getRedirectTarget(
-      location.pathname,
-      auth.user?.person?.type
-    )
+    const redirectTarget = getRedirectTarget(location.pathname, userType)
     if (redirectTarget) {
       navigate({ to: redirectTarget, replace: true })
     }
-  }, [auth.loginStatus, isAdmin, location.pathname, navigate])
+  }, [auth.loginStatus, userType, location.pathname, navigate])
 
-  // 计算是否需要重定向（使用 useMemo 优化性能）
+  // ============================================================================
+  // 计算派生状态
+  // ============================================================================
+
+  /**
+   * 是否正在重定向
+   * 当用户访问非法路由时，会被重定向，此时显示加载界面
+   */
   const isRedirecting = useMemo(() => {
     if (auth.loginStatus !== 'authenticated') return false
-    return (
-      getRedirectTarget(location.pathname, auth.user?.person?.type) !== null
-    )
-  }, [auth.loginStatus, location.pathname, isAdmin])
+    return getRedirectTarget(location.pathname, userType) !== null
+  }, [auth.loginStatus, location.pathname, userType])
 
-  // 计算是否需要侧边栏（使用 useMemo 优化性能）
+  /**
+   * 是否需要侧边栏
+   * 只有特定路由不需要侧边栏
+   */
   const needsSidebar = useMemo(() => {
     return !ROUTES_WITHOUT_SIDEBAR.some(
       (route) =>
@@ -167,46 +201,45 @@ function AuthenticatedRouteComponent() {
     )
   }, [location.pathname])
 
-  // 提前返回：检查认证状态
+  // ============================================================================
+  // 渲染逻辑
+  // ============================================================================
+
+  // 1. 认证状态检查中，显示加载界面
   if (auth.loginStatus === 'checking') {
     return <Loading />
   }
 
-  // 没有认证，显示 WelcomeGate
+  // 2. 未认证，显示登录页
   if (auth.loginStatus !== 'authenticated') {
-    // return <Outlet />
     return <WelcomeGate />
   }
 
-  // 提前返回：正在重定向
+  // 3. 正在重定向，显示加载界面
   if (isRedirecting) {
     return <Loading />
   }
 
-  // 布局选择：不需要侧边栏或普通用户，使用 HeaderOnlyLayout
-  if (!needsSidebar || !isAdmin) {
-    return (
-      <>
+  // ============================================================================
+  // 4. 渲染布局
+  // ============================================================================
+
+  // 确定使用的布局：只有管理员且需要侧边栏的路由才使用完整布局
+  const useFullLayout = isAdmin && needsSidebar
+
+  return (
+    <>
+      {useFullLayout ? (
+        <AuthenticatedLayout />
+      ) : (
         <HeaderOnlyLayout>
           <Outlet />
         </HeaderOnlyLayout>
-        {/* ✅ 全局 loading 覆盖层 */}
-        {isLoading && (
-          <div className='fixed inset-0 z-[9999] flex items-center justify-center bg-black/20 backdrop-blur-sm'>
-            <Loading />
-          </div>
-        )}
-      </>
-    )
-  }
+      )}
 
-  // 管理员访问需要侧边栏的路由
-  return (
-    <>
-      <AuthenticatedLayout />
-      {/* ✅ 全局 loading 覆盖层 */}
+      {/* 全局加载覆盖层 */}
       {isLoading && (
-        <div className='fixed inset-0 z-[9999] flex items-center justify-center bg-black/20 backdrop-blur-sm'>
+        <div className='fixed inset-0 z-9999 flex items-center justify-center bg-black/20 backdrop-blur-sm'>
           <Loading />
         </div>
       )}

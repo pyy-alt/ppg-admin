@@ -1,5 +1,5 @@
-import Person from '@/js/models/Person'
-import Region from '@/js/models/Region'
+import type Person from '@/js/models/Person'
+import type Region from '@/js/models/Region'
 import type Session from '@/js/models/Session'
 import { create } from 'zustand'
 

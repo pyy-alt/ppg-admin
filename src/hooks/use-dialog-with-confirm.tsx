@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { UseFormReturn } from 'react-hook-form'
+import { type UseFormReturn } from 'react-hook-form'
 import { ConfirmDialog } from '@/components/confirm-dialog'
 
 interface UseDialogWithConfirmOptions<T extends Record<string, any>> {

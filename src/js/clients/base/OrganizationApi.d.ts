@@ -1,8 +1,8 @@
 import ClientBaseClass from './ClientBaseClass';
-import ClientOptions from './ClientOptions';
-import OrganizationSearchResponse from '../../models/OrganizationSearchResponse';
-import Organization from '../../models/Organization';
-import OrganizationSearchRequest from '../../models/OrganizationSearchRequest';
+import type ClientOptions from './ClientOptions';
+import type OrganizationSearchResponse from '../../models/OrganizationSearchResponse';
+import type Organization from '../../models/Organization';
+import type OrganizationSearchRequest from '../../models/OrganizationSearchRequest';
 
 export default class OrganizationApi extends ClientBaseClass {
   /**

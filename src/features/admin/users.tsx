@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useMemo, useState } from 'react'
 import PersonApi from '@/js/clients/base/PersonApi'
-import Person from '@/js/models/Person'
+import type Person from '@/js/models/Person'
 import PersonSearchRequest from '@/js/models/PersonSearchRequest'
-import { PersonSearchRequestType } from '@/js/models/enum/PersonSearchRequestTypeEnum'
+import ResultParameter from '@/js/models/ResultParameter'
+import { type PersonSearchRequestType } from '@/js/models/enum/PersonSearchRequestTypeEnum'
 import { Search, Plus, TableIcon, Pencil } from 'lucide-react'
+import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/auth-store'
 import { useDebouncedEffect } from '@/hooks/use-debounce'
 import { Button } from '@/components/ui/button'
@@ -51,26 +53,31 @@ export function Users() {
   const [filterByNetworkRole, setFilterByNetworkRole] = useState<
     filterByNetworkRoleType | undefined
   >(undefined)
-  const [filterByRegion, setFilterByRegion] = useState<{
-    id: number
-    name: string
-  } | null>(null)
   const [includeInactiveFlag, setIncludeInactiveFlag] = useState(false)
-  const [filterByRegionId, setFilterByRegionId] = useState<number>()
+
+  const [selectedRegionId, setSelectedRegionId] = useState<string>('all')
 
   const regions = useAuthStore((state) => state.auth.user?.regions || [])
 
-  useEffect(() => {
-    if (filterByRegion) {
-      setFilterByRegionId(filterByRegion.id)
+  const currentRegionId = useMemo(() => {
+    return selectedRegionId === 'all' ? undefined : Number(selectedRegionId)
+  }, [selectedRegionId])
+
+  const selectedRegion = useMemo(() => {
+    if (selectedRegionId === 'all' || !selectedRegionId) return null
+    const found = regions.find((r) => r.id === Number(selectedRegionId))
+    if (found && found.id !== undefined && found.name) {
+      return { id: found.id, name: found.name } as const
     }
-  }, [filterByRegion])
+    return null
+  }, [selectedRegionId, regions])
 
   const getUsers = (
     smartFilter: string = '',
     includeInactiveFlag: boolean = false,
     filterByRegionId: number | undefined,
-    filterByNetworkRole?: filterByNetworkRoleType
+    filterByNetworkRole?: filterByNetworkRoleType,
+    page: number = 1
   ) => {
     try {
       const request = PersonSearchRequest.create({
@@ -80,7 +87,16 @@ export function Users() {
         filterByRegionId,
         filterByNetworkRole,
       })
-      const personApi = new PersonApi() // 创建 PersonApi 实例
+      // 添加分页参数
+      const resultParameter = ResultParameter.create({
+        resultsLimitOffset: (page - 1) * itemsPerPage,
+        resultsLimitCount: itemsPerPage,
+        resultsOrderBy: 'dateLastAccess',
+        resultsOrderAscending: false,
+      })
+
+      ;(request as any).resultParameter = resultParameter
+      const personApi = new PersonApi()
 
       personApi.search(request, {
         status200: (response) => {
@@ -88,10 +104,16 @@ export function Users() {
           setTotalItems(response.totalItemCount)
         },
         error: (error) => {
-          console.error(error)
+          toast.error(error.message)
         },
       })
-    } catch (error) {}
+    } catch (error) {
+      if (error && typeof error === 'object' && 'message' in error) {
+        toast.error((error as any).message)
+      } else {
+        toast.error('An unexpected error occurred')
+      }
+    }
   }
 
   const getUserDetails = (user: Person) => {
@@ -99,7 +121,11 @@ export function Users() {
       setInitUser(user)
       setUserOpen(true)
     } catch (error) {
-      console.log(error)
+      if (error && typeof error === 'object' && 'message' in error) {
+        toast.error((error as any).message)
+      } else {
+        toast.error('An unexpected error occurred')
+      }
     }
   }
 
@@ -109,13 +135,21 @@ export function Users() {
       getUsers(
         smartFilter,
         includeInactiveFlag,
-        filterByRegionId,
-        filterByNetworkRole
+        currentRegionId,
+        filterByNetworkRole,
+        currentPage
       )
     },
-    [smartFilter, includeInactiveFlag, filterByRegionId, filterByNetworkRole],
+    [
+      smartFilter,
+      includeInactiveFlag,
+      currentRegionId,
+      filterByNetworkRole,
+      currentPage,
+    ],
     1000
   )
+
   return (
     <div className='bg-background text-foreground min-h-screen'>
       {/* Header */}
@@ -124,10 +158,12 @@ export function Users() {
           <h1 className='text-foreground text-2xl font-bold'>
             Manage Network Users
           </h1>
-          <Button onClick={() => {
-            setInitUser(null) // 清除之前的用户数据
-            setUserOpen(true)
-          }}>
+          <Button
+            onClick={() => {
+              setInitUser(null) // 清除之前的用户数据
+              setUserOpen(true)
+            }}
+          >
             <Plus className='mr-2 h-4 w-4' />
             Add New User
           </Button>
@@ -138,17 +174,18 @@ export function Users() {
         open={userOpen}
         onOpenChange={setUserOpen}
         initialValues={initUser}
-        filterByRegion={filterByRegion}
+        filterByRegion={selectedRegion}
         onSuccess={() => {
           getUsers(
             smartFilter,
             includeInactiveFlag,
-            filterByRegionId,
+            currentRegionId,
             filterByNetworkRole
           )
         }}
         onError={(error) => {
-          console.log(error)
+          toast.error(error.message)
+          // console.log(error)
         }}
       />
 
@@ -167,7 +204,7 @@ export function Users() {
 
           <div className='flex flex-wrap items-center gap-3'>
             <Select
-              defaultValue='all'
+              value={filterByNetworkRole ?? 'all'}
               onValueChange={(value) =>
                 setFilterByNetworkRole(
                   value === 'all'
@@ -190,16 +227,8 @@ export function Users() {
             </Select>
 
             <Select
-              defaultValue='all'
-              onValueChange={(value) => {
-                if (value === 'all') {
-                  setFilterByRegionId(undefined)
-                } else {
-                  if (typeof value === 'object') {
-                    setFilterByRegion(value)
-                  }
-                }
-              }}
+              value={selectedRegionId}
+              onValueChange={setSelectedRegionId}
             >
               <SelectTrigger className='bg-muted w-48'>
                 <SelectValue placeholder='CSR Region' />
@@ -207,7 +236,7 @@ export function Users() {
               <SelectContent>
                 <SelectItem value='all'>All Regions</SelectItem>
                 {regions.map((region: any) => (
-                  <SelectItem key={region.id} value={region}>
+                  <SelectItem key={region.id} value={String(region.id)}>
                     {region.name}
                   </SelectItem>
                 ))}

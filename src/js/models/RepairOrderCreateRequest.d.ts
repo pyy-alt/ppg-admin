@@ -1,6 +1,6 @@
 import RepairOrderCreateRequestBase from './base/RepairOrderCreateRequestBase';
-import RepairOrder from './RepairOrder';
-import PartsOrder from './PartsOrder';
+import type RepairOrder from './RepairOrder';
+import type PartsOrder from './PartsOrder';
 
 /**
  * @class RepairOrderCreateRequest

@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import OrderApi from '@/js/clients/base/OrderApi'
 import PartsOrderSearchRequest from '@/js/models/PartsOrderSearchRequest'
+import ResultParameter from '@/js/models/ResultParameter'
 import { Search, Download, AlertCircle, TableIcon } from 'lucide-react'
+import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/auth-store'
 import { calculateDateRange, formatDateOnly } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
@@ -38,23 +40,48 @@ import {
 import { DataTablePagination } from '@/components/data-table-pagination'
 import { DatePicker } from '@/components/date-picker'
 
-// import ResultParameter from '@/js/models/ResultParameter'
-
 export function PartOrders() {
   const { user } = useAuthStore((state) => state.auth)
+  // 筛选条件
   const [dateSubmittedFrom, setFromDate] = useState<Date | undefined>(undefined)
   const [dateSubmittedTo, setToDate] = useState<Date | undefined>(undefined)
   const [dateSubmittedRange, setDateSubmittedRange] = useState<string>('30')
   const [filterByPartsOrderNumber, setTypeOfOrder] = useState<string>('all')
   const [filterByStatus, setFilterByStatus] = useState<string>('all')
   const [filterByRegionId, setCsrRegion] = useState<string>('all')
-  const [currentPage, setCurrentPage] = useState(1)
   const [smartFilter, setSmartFilter] = useState('')
+
+  // 分页状态（只在同一筛选条件下有效）
+  const [currentPage, setCurrentPage] = useState(1)
   const [orders, setOrders] = useState<any[]>([])
   const [totalItems, setTotalItems] = useState(0)
   const [loading, setLoading] = useState(false)
+
   const itemsPerPage = 20
   const totalPages = Math.ceil(totalItems / itemsPerPage)
+
+  const { dateFrom, dateTo } = useMemo(() => {
+    if (dateSubmittedRange === 'custom') {
+      // 自定义范围时，使用用户手动选择的日期
+      return { dateFrom: dateSubmittedFrom, dateTo: dateSubmittedTo }
+    }
+
+    // 预设范围时，自动计算
+    const { from, to } = calculateDateRange(dateSubmittedRange)
+    return { dateFrom: from, dateTo: to }
+  }, [dateSubmittedRange, dateSubmittedFrom, dateSubmittedTo])
+
+  const paginationKey = useMemo(() => {
+    return `${smartFilter}|${filterByPartsOrderNumber}|${filterByStatus}|${filterByRegionId}|${dateSubmittedRange}|${dateFrom?.toISOString()}|${dateTo?.toISOString()}`
+  }, [
+    smartFilter,
+    filterByPartsOrderNumber,
+    filterByStatus,
+    filterByRegionId,
+    dateSubmittedRange,
+    dateFrom,
+    dateTo,
+  ])
 
   const getStatusVariant = (
     status: string
@@ -69,19 +96,16 @@ export function PartOrders() {
   }
 
   // 获取零件订单数据
-  const fetchPartsOrders = async () => {
+  const fetchPartsOrders = useCallback(async () => {
     if (!user) return
 
     setLoading(true)
     try {
       const api = new OrderApi()
 
-      const dateFrom = dateSubmittedFrom
-        ? formatDateOnly(dateSubmittedFrom)
-        : undefined
-      const dateTo = dateSubmittedTo
-        ? formatDateOnly(dateSubmittedTo)
-        : undefined
+      // 关键修改：使用 useMemo 计算出的 dateFrom/dateTo
+      const apiDateFrom = dateFrom ? formatDateOnly(dateFrom) : undefined
+      const apiDateTo = dateTo ? formatDateOnly(dateTo) : undefined
 
       // 构建请求参数
       const requestParams: any = {
@@ -101,23 +125,19 @@ export function PartOrders() {
       if (filterByRegionId !== 'all') {
         requestParams.filterByRegionId = parseInt(filterByRegionId)
       }
-      // // 添加分页参数
-      // const resultParameter = ResultParameter.create({
-      //   resultsLimitOffset: (currentPage - 1) * itemsPerPage,
-      //   resultsLimitCount: itemsPerPage,
-      //   resultsOrderBy: 'DateSubmitted', // 可以根据需要调整排序字段
-      //   resultsOrderAscending: false, // 降序，最新的在前
-      // })
-      // requestParams.resultParameter = resultParameter
-
       const request = PartsOrderSearchRequest.create(requestParams)
-      // 在序列化前，手动将日期字段格式化为字符串（覆盖 ModelBaseClass 的转换）
-      if (dateFrom) {
-        ;(request as any).dateSubmittedFrom = dateFrom
-      }
-      if (dateTo) {
-        ;(request as any).dateSubmittedTo = dateTo
-      }
+      // 使用计算后的日期
+      if (apiDateFrom) (request as any).dateSubmittedFrom = apiDateFrom
+      if (apiDateTo) (request as any).dateSubmittedTo = apiDateTo
+
+      // 添加分页参数（ResultParameter）
+      const resultParameter = ResultParameter.create({
+        resultsLimitOffset: (currentPage - 1) * itemsPerPage, // 第几页
+        resultsLimitCount: itemsPerPage, // 每页20条
+        resultsOrderBy: 'dateSubmitted', // 按提交日期排序
+        resultsOrderAscending: false, // 倒序（最新的在前）
+      })
+      ;(request as any).resultParameter = resultParameter
 
       api.partsOrderSearch(request, {
         status200: (response: any) => {
@@ -126,63 +146,56 @@ export function PartOrders() {
           setLoading(false)
         },
         error: (error: any) => {
-          console.error('获取零件订单失败:', error)
+          toast.error('Error:', error)
           setLoading(false)
         },
-        status403: (message: string) => {
-          console.error('权限不足:', message)
+        else: () => {
           setLoading(false)
         },
       })
     } catch (error) {
-      console.error('API 调用错误:', error)
+      if (error && typeof error === 'object' && 'message' in error) {
+        toast.error((error as any).message)
+      } else {
+        toast.error('Error: get fail')
+      }
       setLoading(false)
     }
-  }
+  }, [
+    user,
+    smartFilter,
+    filterByPartsOrderNumber,
+    filterByStatus,
+    filterByRegionId,
+    dateFrom,
+    dateTo,
+  ])
 
-  // 当筛选条件改变时，重置页码并调用 API
   useEffect(() => {
     if (!user) return
 
-    // 重置到第一页
-    setCurrentPage(1)
+    // 智能防抖：只有 smartFilter 变化时才延迟 500ms，其他筛选立即生效
+    const delay = smartFilter ? 500 : 0
+    const timer = setTimeout(() => {
+      fetchPartsOrders()
+    }, delay)
 
-    // 调用 API（对于文本输入，使用防抖）
-    const timeoutId = setTimeout(
-      () => {
-        fetchPartsOrders()
-      },
-      smartFilter ? 500 : 0
-    )
-
-    return () => clearTimeout(timeoutId)
+    return () => clearTimeout(timer)
   }, [
+    user,
     smartFilter,
     filterByPartsOrderNumber,
-    status,
+    filterByStatus,
     filterByRegionId,
-    dateSubmittedRange,
-    dateSubmittedFrom,
-    dateSubmittedTo,
-    user,
+    dateFrom,
+    dateTo,
   ])
 
-  // 当页码改变时，重新获取数据
+  // ✅ 页码改变时单独调用
   useEffect(() => {
     if (!user) return
     fetchPartsOrders()
-  }, [currentPage])
-
-  // 当预设范围改变时，自动计算日期
-  useEffect(() => {
-    if (dateSubmittedRange !== 'custom') {
-      const { from, to } = calculateDateRange(dateSubmittedRange)
-      setFromDate(from)
-      setToDate(to)
-    } else {
-      // 如果是自定义，不清空日期，让用户自己选择
-    }
-  }, [dateSubmittedRange])
+  }, [currentPage, fetchPartsOrders])
 
   // 格式化日期显示
   const formatDate = (date: Date | string | undefined): string => {
@@ -231,7 +244,6 @@ export function PartOrders() {
                 className='pl-10'
               />
             </div>
-          
           </div>
           {/* 完整筛选条件 */}
           <div className='mb-6 flex flex-wrap items-center gap-3'>
@@ -476,6 +488,7 @@ export function PartOrders() {
 
           {/* Pagination */}
           <DataTablePagination
+            key={paginationKey}
             currentPage={currentPage}
             totalPages={totalPages}
             totalItems={totalItems}

@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useParams } from '@tanstack/react-router'
 import RequestApi from '@/js/clients/base/OrderApi'
-import PartsOrder from '@/js/models/PartsOrder'
+import type PartsOrder from '@/js/models/PartsOrder'
 import PartsOrderWorkflowActionRequest from '@/js/models/PartsOrderWorkflowActionRequest'
-import RepairOrder from '@/js/models/RepairOrder'
+import type RepairOrder from '@/js/models/RepairOrder'
 import { AlertTriangle, Check, Pencil, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import navImg from '@/assets/img/repair/nav.png'
@@ -14,11 +14,11 @@ import { MarkRepairAsCompleteDialog } from '@/components/MarkRepairAsCompleteDia
 import PartsOrderApprovedDialog from '@/components/PartsOrderApprovedDialog'
 import { PartsOrderDialog } from '@/components/PartsOrderDialog'
 import RepairOrderDialog, {
-  RepairOrderData,
+  type RepairOrderData,
 } from '@/components/RepairOrderDialog'
 import { Timeline } from '@/components/Timeline'
 import { useAuthStore } from '@/stores/auth-store'
-import { PersonType } from '@/js/models/enum/PersonTypeEnum'
+import { type PersonType } from '@/js/models/enum/PersonTypeEnum'
 
 // 只改这一个文件，替换掉您之前的页面代码
 export function RepairOrderDetail() {

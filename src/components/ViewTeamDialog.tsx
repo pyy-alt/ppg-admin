@@ -1,5 +1,5 @@
 import PersonStatusEnum from '@/js/models/enum/PersonStatusEnum'
-import PersonTypeEnum, { PersonType } from '@/js/models/enum/PersonTypeEnum'
+import PersonTypeEnum, { type PersonType } from '@/js/models/enum/PersonTypeEnum'
 import { X, Store, Users } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import {

@@ -45,9 +45,7 @@ import {
 } from '@/components/ui/tooltip'
 import { DataTablePagination } from '@/components/data-table-pagination'
 import { DatePicker } from '@/components/date-picker'
-
-// import ResultParameter from '@/js/models/ResultParameter'
-
+import ResultParameter from '@/js/models/ResultParameter'
 export function PartOrders() {
   const { user } = useAuthStore((state) => state.auth)
   const [filterByWaitingOnMe, setOnlyMyOrders] = useState<boolean>(true)
@@ -168,13 +166,13 @@ export function PartOrders() {
         requestParams.filterByRegionId = parseInt(filterByRegionId)
       }
       // // 添加分页参数
-      // const resultParameter = ResultParameter.create({
-      //   resultsLimitOffset: (currentPage - 1) * itemsPerPage,
-      //   resultsLimitCount: itemsPerPage,
-      //   resultsOrderBy: 'DateSubmitted', // 可以根据需要调整排序字段
-      //   resultsOrderAscending: false, // 降序，最新的在前
-      // })
-      // requestParams.resultParameter = resultParameter
+      const resultParameter = ResultParameter.create({
+        resultsLimitOffset: (currentPage - 1) * itemsPerPage,
+        resultsLimitCount: itemsPerPage,
+        resultsOrderBy: 'dateSubmitted', // 可以根据需要调整排序字段
+        resultsOrderAscending: false, // 降序，最新的在前
+      })
+      requestParams.resultParameter = resultParameter
 
       const request = PartsOrderSearchRequest.create(requestParams)
       // 在序列化前，手动将日期字段格式化为字符串（覆盖 ModelBaseClass 的转换）

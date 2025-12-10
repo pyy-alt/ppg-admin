@@ -18,7 +18,7 @@ import {
 import EditProfileDialog from '@/components/EditProfileDialog'
 import ViewAdminTeamDialog from '../AdminViewTeamDialog'
 import { LanguageDropdown } from '../LanguageDropdown'
-import ViewTeamDialog, { TeamMember } from '../ViewTeamDialog'
+import ViewTeamDialog, { type TeamMember } from '../ViewTeamDialog'
 import PersonTypeEnum from '@/js/models/enum/PersonTypeEnum'
 
 type HeaderProps = React.HTMLAttributes<HTMLElement> & {

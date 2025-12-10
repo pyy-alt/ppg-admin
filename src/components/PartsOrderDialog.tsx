@@ -4,7 +4,7 @@ import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import RequestApi from '@/js/clients/base/OrderApi'
 import PartsOrder from '@/js/models/PartsOrder'
-import RepairOrder from '@/js/models/RepairOrder'
+import type RepairOrder from '@/js/models/RepairOrder'
 import {
   X,
   Package,
@@ -37,6 +37,8 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
+// import { useAuthStore } from '@/stores/auth-store'
+// import { type PersonType } from '@/js/models/enum/PersonTypeEnum'
 
 const formSchema = z.object({
   parts: z.array(
@@ -144,6 +146,14 @@ export function PartsOrderDialog({
     initialData?.partsOrderNumber !== undefined &&
     initialData.partsOrderNumber > 0
 
+  // 判断是否来自备用经销商
+  // const isFromAlternateDealer = initialData?.isAlternateDealer === true
+
+  // 判断是否在 CSR 批准/拒绝之前（可以编辑）
+  // const canEdit = !initialData?.status ||
+  //   ['CsrReview', 'DealershipProcessing'].includes(initialData.status)
+
+  // 根据模式生成标题
   const getDialogTitle = () => {
     if (isReject) {
       return 'Resubmit Parts Order'
@@ -278,7 +288,7 @@ export function PartsOrderDialog({
       >
         <DialogContent className='flex max-h-[90vh] flex-col p-0 sm:max-w-4xl'>
           {/* 固定头部 - 统一风格 */}
-          <DialogHeader className='flex-shrink-0'>
+          <DialogHeader className='shrink-0'>
             <DialogTitle className='px-6 py-4 text-2xl font-semibold'>
               {getDialogTitle()}
             </DialogTitle>

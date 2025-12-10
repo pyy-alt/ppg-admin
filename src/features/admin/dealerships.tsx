@@ -1,6 +1,17 @@
 import { useState, useEffect } from 'react'
+import OrganizationApi from '@/js/clients/base/OrganizationApi'
+import OrganizationSearchRequest from '@/js/models/OrganizationSearchRequest'
+import ResultParameter from '@/js/models/ResultParameter'
 import { Search, Download, TableIcon } from 'lucide-react'
+import { useAuthStore } from '@/stores/auth-store'
 import { Button } from '@/components/ui/button'
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/components/ui/empty'
 import { Input } from '@/components/ui/input'
 import {
   Table,
@@ -11,11 +22,6 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { DataTablePagination } from '@/components/data-table-pagination'
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
-import OrganizationApi from '@/js/clients/base/OrganizationApi'
-import OrganizationSearchRequest from '@/js/models/OrganizationSearchRequest'
-import ResultParameter from '@/js/models/ResultParameter'
-import { useAuthStore } from '@/stores/auth-store'
 
 export function Dealerships() {
   const { user } = useAuthStore((state) => state.auth)
@@ -46,30 +52,27 @@ export function Dealerships() {
         resultsLimitOffset: (currentPage - 1) * itemsPerPage,
         resultsLimitCount: itemsPerPage,
         resultsOrderBy: 'Name', // 可以根据需要调整排序字段
-        resultsOrderAscending: true,
+        resultsOrderAscending: false,
       })
       requestParams.resultParameter = resultParameter
 
       const request = OrganizationSearchRequest.create(requestParams)
 
-      api.search(
-        request,
-        {
-          status200: (response: any) => {
-            setDealerships(response.organizations || [])
-            setTotalItems(response.totalItemCount || 0)
-            setLoading(false)
-          },
-          error: (error: any) => {
-            console.error('获取经销商列表失败:', error)
-            setLoading(false)
-          },
-          status403: (message: string) => {
-            console.error('权限不足:', message)
-            setLoading(false)
-          },
-        }
-      )
+      api.search(request, {
+        status200: (response: any) => {
+          setDealerships(response.organizations || [])
+          setTotalItems(response.totalItemCount || 0)
+          setLoading(false)
+        },
+        error: (error: any) => {
+          console.error('获取经销商列表失败:', error)
+          setLoading(false)
+        },
+        status403: (message: string) => {
+          console.error('权限不足:', message)
+          setLoading(false)
+        },
+      })
     } catch (error) {
       console.error('API 调用错误:', error)
       setLoading(false)
@@ -80,10 +83,6 @@ export function Dealerships() {
   useEffect(() => {
     if (!user) return
 
-    // 重置到第一页
-    setCurrentPage(1)
-
-    // 调用 API（对于文本输入，使用防抖）
     const timeoutId = setTimeout(
       () => {
         fetchDealerships()
@@ -92,23 +91,16 @@ export function Dealerships() {
     )
 
     return () => clearTimeout(timeoutId)
-  }, [
-    smartFilter,
-    user,
-  ])
+  }, [smartFilter,currentPage, user])
 
-  // 当页码改变时，重新获取数据
-  useEffect(() => {
-    if (!user) return
-    fetchDealerships()
-  }, [currentPage])
+ 
 
   return (
-    <div className='min-h-screen bg-background'>
+    <div className='bg-background min-h-screen'>
       {/* Header */}
       <div className='bg-background'>
         <div className='flex items-center justify-between px-6 py-4'>
-          <h1 className='text-2xl font-bold text-foreground'>Manage Dealers</h1>
+          <h1 className='text-foreground text-2xl font-bold'>Manage Dealers</h1>
           <Button>
             <Download className='mr-2 h-4 w-4' />
             Report
@@ -119,7 +111,7 @@ export function Dealerships() {
           {/* Search */}
           <div className='mb-6 max-w-md'>
             <div className='relative'>
-              <Search className='absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
+              <Search className='text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2' />
               <Input
                 value={smartFilter}
                 onChange={(e) => setSmartFilter(e.target.value)}
@@ -131,13 +123,13 @@ export function Dealerships() {
 
           {/* Table */}
           {loading ? (
-            <div className='overflow-hidden rounded-lg bg-background shadow-sm'>
+            <div className='bg-background overflow-hidden rounded-lg shadow-sm'>
               <div className='flex items-center justify-center py-12'>
                 <div className='text-muted-foreground'>loading...</div>
               </div>
             </div>
           ) : dealerships.length === 0 ? (
-            <div className='overflow-hidden rounded-lg bg-background shadow-sm'>
+            <div className='bg-background overflow-hidden rounded-lg shadow-sm'>
               <Empty>
                 <EmptyHeader>
                   <EmptyMedia variant='icon'>
@@ -153,29 +145,29 @@ export function Dealerships() {
             </div>
           ) : (
             <>
-              <div className='overflow-hidden rounded-lg bg-background shadow-sm'>
+              <div className='bg-background overflow-hidden rounded-lg shadow-sm'>
                 <Table>
                   <TableHeader>
                     <TableRow className='bg-muted'>
-                      <TableHead className='font-semibold text-foreground'>
+                      <TableHead className='text-foreground font-semibold'>
                         Name
                       </TableHead>
-                      <TableHead className='font-semibold text-foreground'>
+                      <TableHead className='text-foreground font-semibold'>
                         Number
                       </TableHead>
-                      <TableHead className='font-semibold text-foreground'>
+                      <TableHead className='text-foreground font-semibold'>
                         # of Pending Orders
                       </TableHead>
-                      <TableHead className='font-semibold text-foreground'>
+                      <TableHead className='text-foreground font-semibold'>
                         City
                       </TableHead>
-                      <TableHead className='font-semibold text-foreground'>
+                      <TableHead className='text-foreground font-semibold'>
                         State
                       </TableHead>
-                      <TableHead className='font-semibold text-foreground'>
+                      <TableHead className='text-foreground font-semibold'>
                         # of Active Users
                       </TableHead>
-                      <TableHead className='font-semibold text-foreground'>
+                      <TableHead className='text-foreground font-semibold'>
                         # of Pending Users
                       </TableHead>
                     </TableRow>

@@ -75,7 +75,7 @@ export function Shops() {
         resultsLimitOffset: (currentPage - 1) * itemsPerPage,
         resultsLimitCount: itemsPerPage,
         resultsOrderBy: 'Name', // 可以根据需要调整排序字段
-        resultsOrderAscending: true,
+        resultsOrderAscending: false,
       })
       requestParams.resultParameter = resultParameter
 
@@ -126,11 +126,11 @@ export function Shops() {
     user,
   ])
 
-  // 当页码改变时，重新获取数据
+  // ✅ 当页码改变时单独调用（不重置页码）
   useEffect(() => {
-    if (!user) return
+    if (!user || currentPage === 1) return
     fetchShops()
-  }, [currentPage])
+  }, [currentPage, user])
 
   return (
     <div className='bg-background min-h-screen'>

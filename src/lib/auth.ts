@@ -4,7 +4,7 @@
  */
 import AuthenticationApi from '@/js/clients/base/AuthenticationApi'
 import type Session from '@/js/models/Session'
-import { AuthStatus, useAuthStore } from '@/stores/auth-store'
+import { type AuthStatus, useAuthStore } from '@/stores/auth-store'
 
 const authApi = new AuthenticationApi()
 

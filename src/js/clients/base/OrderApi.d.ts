@@ -1,13 +1,13 @@
 import ClientBaseClass from './ClientBaseClass';
-import ClientOptions from './ClientOptions';
-import RepairOrderSearchResponse from '../../models/RepairOrderSearchResponse';
-import RepairOrder from '../../models/RepairOrder';
-import PartsOrderSearchResponse from '../../models/PartsOrderSearchResponse';
-import PartsOrder from '../../models/PartsOrder';
-import RepairOrderSearchRequest from '../../models/RepairOrderSearchRequest';
-import PartsOrderSearchRequest from '../../models/PartsOrderSearchRequest';
-import RepairOrderCreateRequest from '../../models/RepairOrderCreateRequest';
-import PartsOrderWorkflowActionRequest from '../../models/PartsOrderWorkflowActionRequest';
+import type ClientOptions from './ClientOptions';
+import type RepairOrderSearchResponse from '../../models/RepairOrderSearchResponse';
+import type RepairOrder from '../../models/RepairOrder';
+import type PartsOrderSearchResponse from '../../models/PartsOrderSearchResponse';
+import type PartsOrder from '../../models/PartsOrder';
+import type RepairOrderSearchRequest from '../../models/RepairOrderSearchRequest';
+import type PartsOrderSearchRequest from '../../models/PartsOrderSearchRequest';
+import type RepairOrderCreateRequest from '../../models/RepairOrderCreateRequest';
+import type PartsOrderWorkflowActionRequest from '../../models/PartsOrderWorkflowActionRequest';
 
 export default class OrderApi extends ClientBaseClass {
   /**

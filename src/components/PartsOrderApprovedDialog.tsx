@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { Textarea } from './ui/textarea'
-import RepairOrder from '@/js/models/RepairOrder'
+import type RepairOrder from '@/js/models/RepairOrder'
 import { formatDateOnly } from '@/lib/utils'
 
 interface PartsOrderApprovedDialogProps {

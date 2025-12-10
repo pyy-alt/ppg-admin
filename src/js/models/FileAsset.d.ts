@@ -1,5 +1,5 @@
 import FileAssetBase from './base/FileAssetBase'
-import { FileAssetType } from './enum/FileAssetFileAssetTypeEnum'
+import { type FileAssetType } from './enum/FileAssetFileAssetTypeEnum'
 
 /**
  * @class FileAsset

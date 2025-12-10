@@ -1,6 +1,6 @@
 import RepairOrderBase from './base/RepairOrderBase';
-import Organization from './Organization';
-import FileAsset from './FileAsset';
+import type Organization from './Organization';
+import type FileAsset from './FileAsset';
 
 /**
  * @class RepairOrder
