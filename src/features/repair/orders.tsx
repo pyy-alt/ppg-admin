@@ -64,10 +64,6 @@ export function RepairOrderList() {
 
   const [totalItems, setTotalItems] = useState(0)
   const totalPages = Math.ceil(totalItems / itemsPerPage)
-  // 计算当前页应该显示的数据
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const endIndex = startIndex + itemsPerPage
-  const currentPageData = repairOrders.slice(startIndex, endIndex)
 
   const [isOpen, setOpen] = useState(false)
   const [showRepairCompleted, setShowRepairCompleted] = useState(true)
