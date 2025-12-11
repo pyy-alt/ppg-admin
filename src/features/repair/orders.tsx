@@ -242,13 +242,16 @@ export function RepairOrderList() {
           className='h-full w-full object-cover'
         />
         <div className='absolute top-1/2 left-6 -translate-y-1/2'>
-          <p className='text-3xl font-bold text-white'>Sunset Auto Collision</p>
+          <p className='text-3xl font-bold text-white'>
+            {user?.person?.shop?.name ?? '--'}
+          </p>
           <p className='mt-4 flex items-center space-x-4 text-sm text-gray-200'>
             {/* 房子图标 */}
             <Warehouse className='h-5 w-5 text-white' />
             <span>
               Assigned Dealership:{' '}
-              {user?.person?.shop?.sponsorDealership.name ?? '--'}
+              {user?.person?.shop?.sponsorDealership.name ?? '--'}({' '}
+              {user?.person?.shop?.sponsorDealership.dealershipNumber})
             </span>
             <Users className='ml-6 h-5 w-5 text-white' />
             <span>
@@ -396,22 +399,24 @@ export function RepairOrderList() {
             </Select>
 
             {/* 日期范围选择 */}
-            <div className='flex items-center gap-2'>
-              <span className='text-sm font-medium'>From</span>
-              <DatePicker
-                selected={dateLastSubmittedFrom}
-                disabled={dateRangePreset != 'custom'}
-                onSelect={(date) => setFromDate(date)}
-                placeholder='Select from date'
-              />
-              <span className='text-sm font-medium'>To</span>
-              <DatePicker
-                selected={dateLastSubmittedTo}
-                disabled={dateRangePreset != 'custom'}
-                onSelect={(date) => setToDate(date)}
-                placeholder='Select to date'
-              />
-            </div>
+            {dateRangePreset === 'custom' && (
+              <div className='flex items-center gap-2'>
+                <span className='text-sm font-medium'>From</span>
+                <DatePicker
+                  selected={dateLastSubmittedFrom}
+                  disabled={dateRangePreset != 'custom'}
+                  onSelect={(date) => setFromDate(date)}
+                  placeholder='Select from date'
+                />
+                <span className='text-sm font-medium'>To</span>
+                <DatePicker
+                  selected={dateLastSubmittedTo}
+                  disabled={dateRangePreset != 'custom'}
+                  onSelect={(date) => setToDate(date)}
+                  placeholder='Select to date'
+                />
+              </div>
+            )}
           </div>
           <div className='flex items-center justify-end gap-2'>
             <Checkbox

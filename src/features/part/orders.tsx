@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import OrderApi from '@/js/clients/base/OrderApi'
 import PartsOrderSearchRequest from '@/js/models/PartsOrderSearchRequest'
+import ResultParameter from '@/js/models/ResultParameter'
 import { Search, Download, AlertCircle, TableIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/auth-store'
@@ -45,7 +46,7 @@ import {
 } from '@/components/ui/tooltip'
 import { DataTablePagination } from '@/components/data-table-pagination'
 import { DatePicker } from '@/components/date-picker'
-import ResultParameter from '@/js/models/ResultParameter'
+
 export function PartOrders() {
   const { user } = useAuthStore((state) => state.auth)
   const [filterByWaitingOnMe, setOnlyMyOrders] = useState<boolean>(true)
@@ -195,7 +196,7 @@ export function PartOrders() {
         },
         else: () => {
           setLoading(false)
-        }
+        },
       })
     } catch (error) {
       console.error('API 调用错误:', error)
@@ -404,22 +405,24 @@ export function PartOrders() {
             </div>
 
             {/* 日期范围选择 */}
-            <div className='flex items-center gap-2'>
-              <span className='text-sm font-medium'>From</span>
-              <DatePicker
-                disabled={dateSubmittedRange !== 'custom'}
-                selected={dateSubmittedFrom}
-                onSelect={(date) => setFromDate(date)}
-                placeholder='Select from date'
-              />
-              <span className='text-sm font-medium'>To</span>
-              <DatePicker
-                disabled={dateSubmittedRange !== 'custom'}
-                selected={dateSubmittedTo}
-                onSelect={(date) => setToDate(date)}
-                placeholder='Select to date'
-              />
-            </div>
+            {dateSubmittedRange === 'custom' && (
+              <div className='flex items-center gap-2'>
+                <span className='text-sm font-medium'>From</span>
+                <DatePicker
+                  disabled={dateSubmittedRange !== 'custom'}
+                  selected={dateSubmittedFrom}
+                  onSelect={(date) => setFromDate(date)}
+                  placeholder='Select from date'
+                />
+                <span className='text-sm font-medium'>To</span>
+                <DatePicker
+                  disabled={dateSubmittedRange !== 'custom'}
+                  selected={dateSubmittedTo}
+                  onSelect={(date) => setToDate(date)}
+                  placeholder='Select to date'
+                />
+              </div>
+            )}
           </div>
 
           {/* Table */}

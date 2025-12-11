@@ -33,7 +33,22 @@ const useBrandLogo = (directory: string, suffix: string): string | null => {
 
     // 2. 优先从 URL 查询参数读取品牌前缀，如果没有则使用环境变量
     const searchParams = new URLSearchParams(location.search as string)
-    const brandFromUrl = searchParams.get('brand')
+
+    let brandFromUrl = searchParams.get('brand')
+    if (!brandFromUrl) {
+      try {
+        const storedBrand = localStorage.getItem('ppg-selected-brand')
+        if (storedBrand) {
+          const parsed = JSON.parse(storedBrand)
+          brandFromUrl = parsed?.brand
+        }
+      } catch (e) {
+        console.error(
+          '[useBrandLogo] Failed to parse ppg-selected-brand from localStorage:',
+          e
+        )
+      }
+    }
     const BRAND_PREFIX =
       brandFromUrl || import.meta.env.VITE_BRAND_PREFIX || 'audi'
 

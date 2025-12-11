@@ -4,9 +4,8 @@ import RequestApi from '@/js/clients/base/OrderApi'
 import type PartsOrder from '@/js/models/PartsOrder'
 import PartsOrderWorkflowActionRequest from '@/js/models/PartsOrderWorkflowActionRequest'
 import type RepairOrder from '@/js/models/RepairOrder'
-import { AlertTriangle, Check, Pencil, Plus } from 'lucide-react'
+import { AlertTriangle, Check, Map, MapPin, Pencil, Plus, Tag, Users, Warehouse } from 'lucide-react'
 import { toast } from 'sonner'
-import navImg from '@/assets/img/repair/nav.png'
 import { formatDateOnly } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -19,8 +18,8 @@ import RepairOrderDialog, {
 import { Timeline } from '@/components/Timeline'
 import { useAuthStore } from '@/stores/auth-store'
 import { type PersonType } from '@/js/models/enum/PersonTypeEnum'
+import background from '@/assets/img/login/welcome_bg.png'
 
-// 只改这一个文件，替换掉您之前的页面代码
 export function RepairOrderDetail() {
   const [openPartsOrderDialog, setOpenPartsOrderDialog] = useState(false)
   const [initRepaitOrderData, setInitRepaitOrderData] = useState<RepairOrder>()
@@ -40,6 +39,8 @@ export function RepairOrderDetail() {
   // ✅ 获取当前用户角色
   const { auth } = useAuthStore()
   const userType = auth.user?.person?.type as PersonType | undefined
+  const { user } = useAuthStore((state) => state.auth)
+
   const getRepairOrderDetail = async () => {
     try {
       return new Promise((resolve, reject) => {
@@ -310,12 +311,68 @@ export function RepairOrderDetail() {
   }, [])
   return (
     <div className='bg-background text-foreground'>
-      <div className='mt-8 h-full w-full'>
+            <div className='relative h-40 w-full'>
         <img
-          src={navImg}
-          alt='Repair Order List'
+          src={background}
+          alt='Collision repair background'
           className='h-full w-full object-cover'
         />
+        <div className='absolute top-1/2 left-6 -translate-y-1/2'>
+          <p className='text-3xl font-bold text-white'>
+            {user?.person?.shop?.name || user?.person?.csrRegion && user?.person?.csrRegion.name ||  '--'}
+          </p>
+          <p className='mt-4 flex items-center space-x-4 text-sm text-gray-200'>
+            {/* 房子图标 */}
+            <Warehouse className='h-5 w-5 text-white' />
+            <span>
+              Assigned Dealership:{' '}
+              {user?.person?.shop?.sponsorDealership.name ?? '--'}({' '} 
+              { user?.person?.shop?.sponsorDealership.dealershipNumber})
+            </span>
+            <Users className='ml-6 h-5 w-5 text-white' />
+            <span>
+              {' '}
+              Field Support Team: {user?.person?.firstName}{' '}
+              {user?.person?.lastName}
+            </span>
+          </p>
+        </div>
+        <div className='absolute top-1/2 right-6 max-w-[320px] -translate-y-1/2 text-sm text-gray-200'>
+          <div className='grid gap-1'>
+            <div className='grid grid-cols-[24px_1fr] items-center gap-2'>
+              <Tag
+                className='h-5 w-5 justify-self-end text-white'
+                aria-hidden='true'
+              />
+              <span className='truncate'>
+                {user?.person?.shop?.shopNumber ?? '--'}
+              </span>
+            </div>
+
+            <div className='my-1 grid grid-cols-[24px_1fr] items-center gap-2'>
+              <MapPin
+                className='h-5 w-5 justify-self-end text-white'
+                aria-hidden='true'
+              />
+              <span className='truncate'>
+                {user?.person?.shop?.address ?? '--'},
+                {user?.person?.shop?.city ?? '--'},
+                {user?.person?.shop?.state ?? '--'}&nbsp;
+                {user?.person?.shop?.zip ?? '--'}
+              </span>
+            </div>
+
+            <div className='grid grid-cols-[24px_1fr] items-center gap-2'>
+              <Map
+                className='h-5 w-5 justify-self-end text-white'
+                aria-hidden='true'
+              />
+              <span className='truncate'>
+                {user?.person?.shop?.region.name ?? '--'}
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
       <div className='mx-4 my-6 p-3'>
         <div className='flex w-full flex-col rounded-sm border'>

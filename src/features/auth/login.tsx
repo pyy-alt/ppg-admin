@@ -7,9 +7,9 @@ import { Mail, Lock, EyeOff, Eye } from 'lucide-react'
 import { toast } from 'sonner'
 import bg from '@/assets/img/login/bg.png'
 import { useAuthStore } from '@/stores/auth-store'
+import { useBrand } from '@/context/brand-context'
 import useBrandLogo from '@/hooks/use-bran-logo'
 import { useRedirectIfAuthenticated } from '@/hooks/use-redirect-if-authenticated'
-import { useRegionSuffix } from '@/hooks/use-regionsuffix'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
@@ -18,7 +18,8 @@ import { Header } from '@/components/layout/header'
 
 export function Login() {
   const { redirect } = useSearch({ from: '/(auth)/login' })
-  const { suffix } = useRegionSuffix() // ✅ 改为用 Hook
+  const { region } = useBrand() // ← 直接从 Context 读！
+  const suffix = region === 'canada' ? '_c.png' : '_a.png'
   const logoSrc = useBrandLogo('login', suffix)
   const navigate = useNavigate()
   const { auth } = useAuthStore()
