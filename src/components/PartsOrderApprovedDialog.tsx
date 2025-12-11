@@ -1,6 +1,8 @@
 import { useState } from 'react'
+import type RepairOrder from '@/js/models/RepairOrder'
 import { Check, X, FileText, Package, NotebookPen, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { formatDateOnly } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -12,16 +14,15 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { Textarea } from './ui/textarea'
-import type RepairOrder from '@/js/models/RepairOrder'
-import { formatDateOnly } from '@/lib/utils'
 
 interface PartsOrderApprovedDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onApprove?: (salesOrderNumber: string) => void
   onReject?: (comment: string) => void
-  isReject?: boolean,
+  isReject?: boolean
   initRepaitOrderData?: RepairOrder
+  selectPartsOrderData?: any
 }
 
 export default function PartsOrderApprovedDialog({
@@ -30,7 +31,8 @@ export default function PartsOrderApprovedDialog({
   onApprove,
   isReject = false,
   onReject,
-  initRepaitOrderData
+  initRepaitOrderData,
+  selectPartsOrderData,
 }: PartsOrderApprovedDialogProps) {
   const [salesOrder, setSalesOrder] = useState('')
   const [reasonForRejection, setReasonForRejection] = useState('')
@@ -108,7 +110,9 @@ export default function PartsOrderApprovedDialog({
             <div className='grid grid-cols-1 gap-x-12 gap-y-6 text-sm sm:grid-cols-3'>
               <div>
                 <Label className='text-muted-foreground'>Shop RO#</Label>
-                <p className='text-foreground mt-1.5 font-medium'>{initRepaitOrderData?.roNumber || '--'}</p>
+                <p className='text-foreground mt-1.5 font-medium'>
+                  {initRepaitOrderData?.roNumber || '--'}
+                </p>
               </div>
               <div>
                 <Label className='text-muted-foreground'>
@@ -134,7 +138,8 @@ export default function PartsOrderApprovedDialog({
               <div>
                 <Label className='text-muted-foreground'>Year/Make/Model</Label>
                 <p className='text-foreground mt-1.5 font-medium'>
-                 {initRepaitOrderData?.year}/{initRepaitOrderData?.make}/{initRepaitOrderData?.model}
+                  {initRepaitOrderData?.year}/{initRepaitOrderData?.make}/
+                  {initRepaitOrderData?.model}
                 </p>
               </div>
             </div>
@@ -151,17 +156,41 @@ export default function PartsOrderApprovedDialog({
             <div className='grid grid-cols-1 gap-x-12 gap-y-6 text-sm sm:grid-cols-3'>
               <div>
                 <Label className='text-muted-foreground'>Order Submitted</Label>
-                <p className='mt-1.5'>{formatDateOnly(initRepaitOrderData?.dateLastSubmitted as Date) || '--'}</p>
-              </div>
-              <div>
-                <Label className='text-muted-foreground'>Order Approved</Label>
-                <p className='mt-1.5 font-medium'>
-                  {formatDateOnly(initRepaitOrderData?.dateClosed as Date) || '--'}
+                <p className='mt-1.5'>
+                  {formatDateOnly(
+                    initRepaitOrderData?.dateLastSubmitted as Date
+                  ) || '--'}
+                  {' by' + ' '}
+                  {selectPartsOrderData?.submittedByPerson?.firstName +
+                    ' ' +
+                    selectPartsOrderData?.submittedByPerson?.lastName}
                 </p>
               </div>
               <div>
+                <Label className='text-muted-foreground'>Order Approved</Label>
+                {(initRepaitOrderData?.dateClosed && (
+                  <p className='mt-1.5 font-medium'>
+                    {formatDateOnly(initRepaitOrderData?.dateClosed as Date) ||
+                      '--'}
+                    {' by' + ' '}
+                    {selectPartsOrderData?.reviewedByPerson?.firstName +
+                      ' ' +
+                      selectPartsOrderData?.reviewedByPerson?.lastName}
+                  </p>
+                )) || <p className='text-muted-foreground mt-1.5'>--</p>}
+              </div>
+              <div>
                 <Label className='text-muted-foreground'>Order Shipped</Label>
-                <p className='text-muted-foreground mt-1.5'>{initRepaitOrderData?.dealership.name|| '--'}</p>
+                {(selectPartsOrderData?.shippedByPerson?.dateLastAccess && (
+                  <p className='text-muted-foreground mt-1.5'>
+                    {selectPartsOrderData?.shippedByPerson?.dateLastAccess ||
+                      '--'}
+                    {' by' + ' '}
+                    {selectPartsOrderData?.shippedByPerson?.firstName +
+                      ' ' +
+                      selectPartsOrderData?.shippedByPerson?.lastName}
+                  </p>
+                )) || <p className='text-muted-foreground mt-1.5'>--</p>}
               </div>
             </div>
           </section>
@@ -224,13 +253,15 @@ export default function PartsOrderApprovedDialog({
             onClick={handleApprove}
             disabled={isLoading}
           >
-             {isLoading ? (
+            {isLoading ? (
               <>
                 <Loader2 className='mr-2 h-4 w-4 animate-spin' />
                 {isReject ? 'Rejecting...' : 'Approving...'}
               </>
+            ) : isReject ? (
+              'Reject'
             ) : (
-              isReject ? 'Reject' : 'Approve'
+              'Approve'
             )}
           </Button>
         </div>

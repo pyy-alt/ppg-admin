@@ -1,6 +1,8 @@
-import {  useState } from 'react'
+import { useState } from 'react'
+import type RepairOrder from '@/js/models/RepairOrder'
 import { X, FileText, Paperclip, Upload, Camera, Trash2 } from 'lucide-react'
 import { useDropzone } from 'react-dropzone'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -10,8 +12,6 @@ import {
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
-import type RepairOrder from '@/js/models/RepairOrder'
-import { toast } from 'sonner'
 
 interface MarkRepairAsCompleteDialogProps {
   open: boolean
@@ -24,19 +24,9 @@ export function MarkRepairAsCompleteDialog({
   open,
   onOpenChange,
   onComplete,
-  initRepaitOrderData
+  initRepaitOrderData,
 }: MarkRepairAsCompleteDialogProps) {
-  const [photos, setPhotos] = useState<File[]>([
-    new File(['file_name.pdf'], 'file_name.pdf', {
-      type: 'application/pdf',
-    }),
-    new File(['file_name.pdf'], 'file2_name.pdf', {
-      type: 'application/pdf',
-    }),
-    new File(['file_name.pdf'], 'file3_name.pdf', {
-      type: 'application/pdf',
-    }),
-  ])
+  const [photos, setPhotos] = useState<File[]>([])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: { 'image/*': [] },
@@ -50,7 +40,8 @@ export function MarkRepairAsCompleteDialog({
   }
 
   const handleComplete = () => {
-    if (photos.length === 0) return toast.error('Please upload at least one photo')
+    if (photos.length === 0)
+      return toast.error('Please upload at least one photo')
     onComplete?.(photos)
     onOpenChange(false)
   }
@@ -89,7 +80,9 @@ export function MarkRepairAsCompleteDialog({
             <div className='grid grid-cols-1 gap-x-12 gap-y-6 text-sm sm:grid-cols-3'>
               <div>
                 <Label className='text-muted-foreground'>Shop RO#</Label>
-                <p className='text-foreground mt-1.5 font-medium'>{initRepaitOrderData?.roNumber || '--'}</p>
+                <p className='text-foreground mt-1.5 font-medium'>
+                  {initRepaitOrderData?.roNumber || '--'}
+                </p>
               </div>
               <div>
                 <Label className='text-muted-foreground'>
@@ -115,7 +108,8 @@ export function MarkRepairAsCompleteDialog({
               <div>
                 <Label className='text-muted-foreground'>Year/Make/Model</Label>
                 <p className='text-foreground mt-1.5 font-medium'>
-                 {initRepaitOrderData?.year}/{initRepaitOrderData?.make}/{initRepaitOrderData?.model}
+                  {initRepaitOrderData?.year}/{initRepaitOrderData?.make}/
+                  {initRepaitOrderData?.model}
                 </p>
               </div>
             </div>

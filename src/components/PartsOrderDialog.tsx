@@ -17,7 +17,7 @@ import {
 } from 'lucide-react'
 import { useDropzone } from 'react-dropzone'
 import { toast } from 'sonner'
-import { formatDateOnly } from '@/lib/utils'
+import { convertFilesToFileAssets, formatDateOnly } from '@/lib/utils'
 import { useDialogWithConfirm } from '@/hooks/use-dialog-with-confirm'
 import { Button } from '@/components/ui/button'
 import {
@@ -37,6 +37,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
+import FileAssetFileAssetTypeEnum from '@/js/models/enum/FileAssetFileAssetTypeEnum'
 // import { useAuthStore } from '@/stores/auth-store'
 // import { type PersonType } from '@/js/models/enum/PersonTypeEnum'
 
@@ -206,13 +207,13 @@ export function PartsOrderDialog({
     } else if (open && mode === 'create') {
       // 新增模式：重置为默认值
       form.reset({
-        parts: [{ number: '' }, { number: '' }, { number: '' }, { number: '' }],
+        parts: [{ number: '' }],
       })
       setEstimateFiles([])
     }
   }, [open, initialData, mode, form])
 
-  const onSubmit = (data: FormValues) => {
+  const onSubmit = async (data: FormValues) => {
     // 验证附件是否已上传（新增模式或编辑模式但还没有文件时）
     // if (
     //   estimateFiles &&
@@ -230,12 +231,19 @@ export function PartsOrderDialog({
     //   }
     //   return
     // }
+
+     // 转换文件为 FileAsset 数组
+      const estimateFileAssets = await convertFilesToFileAssets(
+        estimateFiles,
+        FileAssetFileAssetTypeEnum.ESTIMATE
+      )
+    
     try {
       const api = new RequestApi()
       const partsOrder = (PartsOrder as any).create({
         ...initialData,
         parts: data.parts.map((part) => part.number),
-        estimateFileAssets: estimateFiles,
+        estimateFileAssets,
         repairOrder: initRepaitOrderData,
       })
       setLoading(true)

@@ -669,6 +669,7 @@ export function RepairOrderDetail() {
         onReject={handleReject}
         isReject={isReject}
         initRepaitOrderData={initRepaitOrderData}
+        selectPartsOrderData={selectedPartsOrderData}
       />
       <MarkRepairAsCompleteDialog
         open={isMarkRepairAsCompleteDialogOpen}

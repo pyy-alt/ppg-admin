@@ -25,6 +25,7 @@ import { routeTree } from './routeTree.gen'
 // import { useGlobal404Store } from './stores/global-404-store'
 // Styles
 import './styles/index.css'
+import { BrandProvider } from './context/brand-context'
 
 /**
  * 初始化认证状态
@@ -283,7 +284,9 @@ if (!rootElement.innerHTML) {
           <ThemeProvider>
             <FontProvider>
               <DirectionProvider>
+                <BrandProvider>
                 <RouterProvider router={router} />
+                </BrandProvider>
               </DirectionProvider>
             </FontProvider>
           </ThemeProvider>

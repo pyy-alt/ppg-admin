@@ -80,6 +80,7 @@ interface RepairOrderDialogProps {
     data: FormValues & {
       structuralMeasurementFileAssets: File[]
       preRepairPhotoFileAssets: File[]
+      [key:string]: any
     }
   ) => void
   // 编辑模式时传入已有数据
@@ -176,7 +177,6 @@ export default function RepairOrderDialog({
   // 当 initialData 变化时，更新表单和文件
   useEffect(() => {
     getOrderFromDealership()
-    console.log(initialData)
     if (initialData) {
       form.reset({
         roNumber: initialData.roNumber,
@@ -284,6 +284,7 @@ export default function RepairOrderDialog({
                 ...data,
                 structuralMeasurementFileAssets,
                 preRepairPhotoFileAssets,
+                id: response.id,
               })
               performClose()
               toast.success('Repair Order created successfully')
@@ -500,7 +501,7 @@ export default function RepairOrderDialog({
                       <FormItem className='flex flex-col space-y-1'>
                         <FormLabel>Customer</FormLabel>
                         <FormControl>
-                          <Input placeholder='Customer name' {...field} />
+                          <Input placeholder='Customer name' {...field}/>
                         </FormControl>
                         <div className='flex min-h-[20px] items-start'>
                           <FormMessage />
@@ -519,7 +520,7 @@ export default function RepairOrderDialog({
                           value={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger className='w-[250px]'>
+                            <SelectTrigger className='min-w-[250px]'>
                               <SelectValue placeholder='Select' />
                             </SelectTrigger>
                           </FormControl>
@@ -528,6 +529,7 @@ export default function RepairOrderDialog({
                               <SelectItem
                                 key={dealership.id}
                                 value={dealership.id?.toString() || ''}
+                                className="whitespace-normal py-2 pr-8 text-left"
                               >
                                 {dealership.name} | {dealership.number}{' '}
                                 (Assigned Dealer)

@@ -1,4 +1,4 @@
-import { useState  } from 'react'
+import { useState } from 'react'
 import { useNavigate, useSearch, Link } from '@tanstack/react-router'
 import AuthenticationApi from '@/js/clients/base/AuthenticationApi'
 import LoginRequest from '@/js/models/LoginRequest'
@@ -9,6 +9,7 @@ import bg from '@/assets/img/login/bg.png'
 import { useAuthStore } from '@/stores/auth-store'
 import useBrandLogo from '@/hooks/use-bran-logo'
 import { useRedirectIfAuthenticated } from '@/hooks/use-redirect-if-authenticated'
+import { useRegionSuffix } from '@/hooks/use-regionsuffix'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
@@ -16,10 +17,9 @@ import { Label } from '@/components/ui/label'
 import { Header } from '@/components/layout/header'
 
 export function Login() {
-  const { redirect, region } = useSearch({ from: '/(auth)/login' })
-  // 根据 region 选择正确的后缀：america -> '_a.png', canada -> '_c.png'
-  const suffix = region === 'canada' ? '_c.png' : '_a.png'
-  const logoSrc = useBrandLogo('login', suffix as string)
+  const { redirect } = useSearch({ from: '/(auth)/login' })
+  const { suffix } = useRegionSuffix() // ✅ 改为用 Hook
+  const logoSrc = useBrandLogo('login', suffix)
   const navigate = useNavigate()
   const { auth } = useAuthStore()
   const [isLoading, setIsLoading] = useState(false)
@@ -33,8 +33,8 @@ export function Login() {
 
   const [isSubmitting, setIsSubmitting] = useState(false) // 添加提交状态标记
 
-   // 如果正在检查认证状态，显示加载状态
-   if (isCheckingAuth && LoadingComponent) {
+  // 如果正在检查认证状态，显示加载状态
+  if (isCheckingAuth && LoadingComponent) {
     return <LoadingComponent />
   }
 
@@ -76,7 +76,9 @@ export function Login() {
               return
             }
             auth.setUser(session) // setUser 会自动设置 loginStatus 为 'authenticated'
-            toast.success(`Welcome back, ${session.person?.firstName || email}!`)
+            toast.success(
+              `Welcome back, ${session.person?.firstName || email}!`
+            )
 
             setIsLoading(false)
             setIsSubmitting(false)
@@ -162,15 +164,15 @@ export function Login() {
                   htmlFor='email'
                   className='text-muted-foreground text-base font-medium'
                 >
-                  Email Address
+                  {/* Email Address */}
                 </Label>
                 <div className='relative'>
                   <Mail className='text-muted-foreground absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2' />
                   <Input
                     id='email'
                     type='email'
-                    placeholder='Enter your email'
-                    className='text-muted-foreground h-14 rounded-full border-gray-300 pl-12 text-base focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100'
+                    placeholder='Email  Address'
+                    className='text-muted-foreground h-12 rounded-full border-gray-300 pl-12 text-base focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100'
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -185,15 +187,15 @@ export function Login() {
                   htmlFor='password'
                   className='text-muted-foreground text-base font-medium'
                 >
-                  Password
+                  {/* Password */}
                 </Label>
                 <div className='relative'>
                   <Lock className='absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-gray-400' />
                   <Input
                     id='password'
                     type={showPassword ? 'text' : 'password'}
-                    placeholder='Enter your password'
-                    className='text-muted-foreground h-14 rounded-full border-gray-300 pr-12 pl-12 text-base focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100'
+                    placeholder='Password'
+                    className='text-muted-foreground h-12 rounded-full border-gray-300 pr-12 pl-12 text-base focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100'
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -232,7 +234,7 @@ export function Login() {
                 </div>
                 <Link
                   to='/password/forgot'
-                  className='font-medium text-red-600 transition-colors hover:text-red-700'
+                  className='font-medium text-red-600 underline transition-colors hover:text-red-700'
                 >
                   Forgot password
                 </Link>
@@ -254,13 +256,13 @@ export function Login() {
               <div className='flex justify-center gap-8'>
                 <a
                   href='/registration/shop'
-                  className='font-medium text-cyan-600 transition-colors hover:text-cyan-700'
+                  className='font-medium text-cyan-600 underline transition-colors hover:text-cyan-700'
                 >
                   Register as Shop
                 </a>
                 <a
                   href='/registration/dealership'
-                  className='font-medium text-cyan-600 transition-colors hover:text-cyan-700'
+                  className='font-medium text-cyan-600 underline transition-colors hover:text-cyan-700'
                 >
                   Register as Dealer
                 </a>

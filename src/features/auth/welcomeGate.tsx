@@ -6,10 +6,12 @@ import audiCanada from '@/assets/img/login/audi_c.png'
 import vwAmerica from '@/assets/img/login/vw_a.png'
 import vwCanada from '@/assets/img/login/vw_c.png'
 import background from '@/assets/img/login/welcome_bg.png'
+import { useBrand } from '@/context/brand-context'
 
 export default function WelcomeGate() {
   const navigate = useNavigate()
   const [selectedCard, setSelectedCard] = useState<string | null>(null)
+  const { setBrand } = useBrand()
 
   const cards = [
     {
@@ -43,6 +45,7 @@ export default function WelcomeGate() {
   ]
 
   const handleCardClick = (card: (typeof cards)[0]) => {
+    setBrand(card.brandPrefix as 'audi' | 'vw', card.region as 'america' | 'canada')
     setSelectedCard(card.id)
     // 跳转到登录页面，通过 URL 参数传递品牌信息
     navigate({
@@ -94,7 +97,7 @@ export default function WelcomeGate() {
         </div>
       </div>
       {/* 底部语言切换 */}
-      <div className='text-white z-10 mt-10 flex items-center justify-center gap-4'>
+      <div className='z-10 mt-10 flex items-center justify-center gap-4 text-white'>
         <Globe className='h-5 w-5' />
         <div className='flex items-center gap-4 text-sm font-medium'>
           <button className='transition hover:text-gray-600'>English</button>

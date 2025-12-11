@@ -1,10 +1,23 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import RequestApi from '@/js/clients/base/OrderApi'
+import PartsOrder from '@/js/models/PartsOrder'
 import type RepairOrder from '@/js/models/RepairOrder'
 import RepairOrderSearchRequest from '@/js/models/RepairOrderSearchRequest'
-import { Plus, Search, AlertTriangle, TableIcon } from 'lucide-react'
-import navImg from '@/assets/img/repair/nav.png'
+import ResultParameter from '@/js/models/ResultParameter'
+import {
+  Plus,
+  Search,
+  AlertTriangle,
+  TableIcon,
+  Users,
+  Warehouse,
+  Tag,
+  MapPin,
+  Map,
+} from 'lucide-react'
+import { toast } from 'sonner'
+import background from '@/assets/img/login/welcome_bg.png'
 import { useAuthStore } from '@/stores/auth-store'
 import { calculateDateRange, formatDateOnly } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
@@ -34,12 +47,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { PartsOrderDialog } from '@/components/PartsOrderDialog'
 import RepairOrderDialog, {
   type RepairOrderData,
 } from '@/components/RepairOrderDialog'
 import { DataTablePagination } from '@/components/data-table-pagination'
 import { DatePicker } from '@/components/date-picker'
-import ResultParameter from '@/js/models/ResultParameter'
 
 const getStatusVariant = (status: string) => {
   if (status.includes('Rejected')) return 'destructive'
@@ -74,6 +87,55 @@ export function RepairOrderList() {
   const [initialData, setInitialData] = useState<RepairOrder | undefined>(
     undefined
   )
+
+  const [openPartsOrderDialog, setOpenPartsOrderDialog] = useState(false)
+  const [selectedPartsOrderData, setSelectedPartsOrderData] =
+    useState<PartsOrder>()
+
+  const [initRepaitOrderData, setInitRepaitOrderData] = useState<RepairOrder>()
+
+  const getRepairOrderDetail = async (id: string) => {
+    try {
+      return new Promise((resolve, reject) => {
+        const api = new RequestApi()
+        api.repairOrderGet(id, {
+          status200: (response) => {
+            setInitRepaitOrderData(response)
+            setOpenPartsOrderDialog(true)
+            resolve(response)
+          },
+          error: (error) => {
+            console.error('Error:', error)
+            reject(error)
+          },
+        })
+      })
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  const getPartsOrderDetail = async (id: string) => {
+    try {
+      return new Promise((resolve, reject) => {
+        const api = new RequestApi()
+        api.partsOrderGetAllForRepairOrder(id, {
+          status200: (response) => {
+            setSelectedPartsOrderData(response)
+            resolve(response)
+          },
+          error: () => {
+            reject()
+          },
+          else: (_statusCode) => {
+            reject()
+          },
+        })
+      })
+    } catch (e) {
+      console.error(e)
+    }
+  }
   const getRepairOrders = async () => {
     try {
       const api = new RequestApi()
@@ -173,11 +235,66 @@ export function RepairOrderList() {
 
   return (
     <div className='bg-background min-h-screen'>
-      <img
-        src={navImg}
-        alt='Repair Order List'
-        className='h-full w-full object-cover'
-      />
+      <div className='relative h-40 w-full'>
+        <img
+          src={background}
+          alt='Collision repair background'
+          className='h-full w-full object-cover'
+        />
+        <div className='absolute top-1/2 left-6 -translate-y-1/2'>
+          <p className='text-3xl font-bold text-white'>Sunset Auto Collision</p>
+          <p className='mt-4 flex items-center space-x-4 text-sm text-gray-200'>
+            {/* 房子图标 */}
+            <Warehouse className='h-5 w-5 text-white' />
+            <span>
+              Assigned Dealership:{' '}
+              {user?.person?.shop?.sponsorDealership.name ?? '--'}
+            </span>
+            <Users className='ml-6 h-5 w-5 text-white' />
+            <span>
+              {' '}
+              Field Support Team: {user?.person?.firstName}{' '}
+              {user?.person?.lastName}
+            </span>
+          </p>
+        </div>
+        <div className='absolute top-1/2 right-6 max-w-[320px] -translate-y-1/2 text-sm text-gray-200'>
+          <div className='grid gap-1'>
+            <div className='grid grid-cols-[24px_1fr] items-center gap-2'>
+              <Tag
+                className='h-5 w-5 justify-self-end text-white'
+                aria-hidden='true'
+              />
+              <span className='truncate'>
+                {user?.person?.shop?.shopNumber ?? '--'}
+              </span>
+            </div>
+
+            <div className='my-1 grid grid-cols-[24px_1fr] items-center gap-2'>
+              <MapPin
+                className='h-5 w-5 justify-self-end text-white'
+                aria-hidden='true'
+              />
+              <span className='truncate'>
+                {user?.person?.shop?.address ?? '--'},
+                {user?.person?.shop?.city ?? '--'},
+                {user?.person?.shop?.state ?? '--'}&nbsp;
+                {user?.person?.shop?.zip ?? '--'}
+              </span>
+            </div>
+
+            <div className='grid grid-cols-[24px_1fr] items-center gap-2'>
+              <Map
+                className='h-5 w-5 justify-self-end text-white'
+                aria-hidden='true'
+              />
+              <span className='truncate'>
+                {user?.person?.shop?.region.name ?? '--'}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
       {/* Header */}
       <div className='bg-background border-b'>
         <div className='flex items-center justify-between px-6 py-4'>
@@ -201,25 +318,40 @@ export function RepairOrderList() {
       <RepairOrderDialog
         open={isOpen}
         onOpenChange={setOpen}
-        onSuccess={() => {
-          getRepairOrders()
+        onSuccess={async (data: any) => {
+          const snapshot = JSON.parse(JSON.stringify(data))
+          console.log('onSuccess data snapshot:', snapshot)
+
+          await getRepairOrders()
+          const id = snapshot.id
+          if (id) {
+            await getPartsOrderDetail(data.id)
+            await getRepairOrderDetail(data.id)
+          } else {
+            toast.error('Repair Order Failed to Create')
+          }
         }}
         initialData={initialData as RepairOrderData}
       />
+      <PartsOrderDialog
+        open={openPartsOrderDialog}
+        onOpenChange={setOpenPartsOrderDialog}
+        initialData={selectedPartsOrderData}
+        initRepaitOrderData={initRepaitOrderData}
+      />
       <div className='px-6 py-6'>
         {/* Filters */}
-        <div className='lg:items-cente mb-6 flex flex-col items-center gap-4 lg:flex-row'>
-          <div className='relative max-w-md'>
-            <Search className='text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2' />
-            <Input
-              value={smartFilter}
-              onChange={(e) => setSmartFilter(e.target.value)}
-              placeholder='Filter by RO#, Order #, VIN, Customer'
-              className='pl-10'
-            />
-          </div>
-
+        <div className='lg:items-cente mb-6 flex flex-col items-center justify-between gap-4 lg:flex-row'>
           <div className='flex flex-wrap items-center gap-3'>
+            <div className='relative w-65'>
+              <Search className='text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2' />
+              <Input
+                value={smartFilter}
+                onChange={(e) => setSmartFilter(e.target.value)}
+                placeholder='Filter by RO#, Order #,VIN,Customer'
+                className='pl-10 text-sm placeholder:text-xs'
+              />
+            </div>
             <Select
               defaultValue='all'
               onValueChange={(value) => setFilterByStatus(value)}
@@ -280,22 +412,22 @@ export function RepairOrderList() {
                 placeholder='Select to date'
               />
             </div>
-            <div className='flex items-center gap-2'>
-              <Checkbox
-                id='show-completed'
-                checked={showRepairCompleted}
-                onCheckedChange={(checked) =>
-                  setShowRepairCompleted(checked as boolean)
-                }
-                className='rounded-full'
-              />
-              <Label
-                htmlFor='show-completed'
-                className='cursor-pointer text-sm font-medium'
-              >
-                Show Repair Completed
-              </Label>
-            </div>
+          </div>
+          <div className='flex items-center justify-end gap-2'>
+            <Checkbox
+              id='show-completed'
+              checked={showRepairCompleted}
+              onCheckedChange={(checked) =>
+                setShowRepairCompleted(checked as boolean)
+              }
+              className='rounded-full'
+            />
+            <Label
+              htmlFor='show-completed'
+              className='cursor-pointer text-sm font-medium'
+            >
+              Show Repair Completed
+            </Label>
           </div>
         </div>
         {repairOrders.length === 0 ? (

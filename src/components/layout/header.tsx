@@ -1,12 +1,14 @@
-// src/components/layout/Header.tsx
 import { useState } from 'react'
 import { useRouter } from '@tanstack/react-router'
 import AuthenticationApi from '@/js/clients/base/AuthenticationApi'
 import PersonApi from '@/js/clients/base/PersonApi'
 import PersonSearchRequest from '@/js/models/PersonSearchRequest'
+import PersonTypeEnum from '@/js/models/enum/PersonTypeEnum'
 import { LogOut, Users, UserPen } from 'lucide-react'
-import logoImg from '@/assets/img/logo.svg'
+import audiLogo from '@/assets/img/audi.svg'
+import vwLogo from '@/assets/img/vw.png'
 import { useAuthStore } from '@/stores/auth-store'
+import { useBrand } from '@/context/brand-context'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,7 +21,6 @@ import EditProfileDialog from '@/components/EditProfileDialog'
 import ViewAdminTeamDialog from '../AdminViewTeamDialog'
 import { LanguageDropdown } from '../LanguageDropdown'
 import ViewTeamDialog, { type TeamMember } from '../ViewTeamDialog'
-import PersonTypeEnum from '@/js/models/enum/PersonTypeEnum'
 
 type HeaderProps = React.HTMLAttributes<HTMLElement> & {
   fixed?: boolean
@@ -38,14 +39,19 @@ export function Header({
   const [isShowTeam, setIsShowTeam] = useState(false)
   const [isShowAdminTeam, setIsShowAdminTeam] = useState(false)
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
+  const { brand } = useBrand()
+  const logo = brand === 'vw' ? vwLogo : audiLogo
   const getTeamMembers = async () => {
-    const isAdmin = auth.user?.person?.type === PersonTypeEnum.PROGRAM_ADMINISTRATOR
-   
+    const isAdmin =
+      auth.user?.person?.type === PersonTypeEnum.PROGRAM_ADMINISTRATOR
+
     try {
       const personApi = new PersonApi()
       const request = PersonSearchRequest.create({
         // 如果user.person.type是ProgramAdministrator，则type为Network，否则为Shop或Dealership
-        type: isAdmin ? 'Network' : auth.user?.person?.type as 'Shop' | 'Dealership' | 'Network',
+        type: isAdmin
+          ? 'Network'
+          : (auth.user?.person?.type as 'Shop' | 'Dealership' | 'Network'),
         organizationId:
           auth.user?.person?.type === 'Shop'
             ? auth.user?.person?.shop?.id
@@ -110,15 +116,25 @@ export function Header({
         {/* Left: Logo + Title */}
         <div className='flex items-center gap-4'>
           <img
-            src={logoImg}
+            src={logo}
             alt='Audi'
-            className='hover: h-20 w-20 cursor-pointer object-contain'
+            className={
+              logo === vwLogo
+                ? 'h-10 w-10 cursor-pointer object-contain'
+                : 'h-20 w-20 cursor-pointer object-contain'
+            }
             onClick={() => router.navigate({ to: '/' })}
           />
           <div>
-            <span className='mr-2 text-sm font-medium text-red-500'>Audi</span>
+            {logo === vwLogo ? (
+              <span className='mr-2 font-medium text-blue-500'>
+                Volkswagen{' '}
+              </span>
+            ) : (
+              <span className='mr-2 font-medium text-red-500'>Audi</span>
+            )}
             <span className='text-sm font-medium text-white'>
-              Restricted Parts Tracker.
+              Restricted Parts Tracker
             </span>
           </div>
         </div>
@@ -145,7 +161,9 @@ export function Header({
                           : auth.user.person?.dealership?.name &&
                               auth.user.person?.dealership?.dealershipNumber
                             ? `${auth.user.person?.dealership?.name}(${auth.user.person?.dealership?.dealershipNumber}) | ${auth.user.person?.type}`
-                            : auth.user.person?.type
+                            : auth.user.person?.csrRegion
+                              ? `${auth.user.person?.csrRegion?.name} | ${auth.user.person?.type}`
+                              : auth.user.person?.type
                         : 'Not logged in'}
                     </p>
                   </div>
