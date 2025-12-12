@@ -199,13 +199,40 @@ export const calculateDateRange = (preset: string) => {
       return { from: undefined, to: undefined }
   }
 }
-// 格式化日期为 YYYY-MM-DD 字符串（date only）
-export const formatDateOnly = (date: Date | undefined): string | undefined => {
+/**
+ * 格式化日期时间 → 02/31/2025 10:33:25 AM（美式月/日/年 + 12小时制 + AM/PM）
+ * @param date Date | string | undefined | null
+ * @param includeSeconds 是否显示秒（默认 true）
+ * @returns string | undefined
+ */
+export const formatDateOnly = (
+  date: Date | string | number | undefined | null,
+  includeSeconds = true
+): string | undefined => {
   if (!date) return undefined
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
+
+  const d = new Date(date)
+
+  // 判断日期是否有效
+  if (isNaN(d.getTime())) return undefined
+
+  const year = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, '0') // 月份从0开始
+  const day = String(d.getDate()).padStart(2, '0')
+
+  let hours = d.getHours()
+  const minutes = String(d.getMinutes()).padStart(2, '0')
+  const seconds = String(d.getSeconds()).padStart(2, '0')
+
+  const ampm = hours >= 12 ? 'PM' : 'AM'
+  hours = hours % 12
+  hours = hours || 12 // 0点显示为12
+
+  const timeStr = includeSeconds
+    ? `${hours}:${minutes}:${seconds} ${ampm}`
+    : `${hours}:${minutes} ${ampm}`
+
+  return `${month}/${day}/${year} ${timeStr}`
 }
 export const exportCurrentPageToCSV = (
   data: any[],
