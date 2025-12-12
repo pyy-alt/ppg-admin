@@ -346,14 +346,14 @@ export function PartOrders() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value='all'>All Status</SelectItem>
-                <SelectItem value='csr-Review'>CSR Review</SelectItem>
-                <SelectItem value='csr-rejected'>CSR Rejected</SelectItem>
-                <SelectItem value='dealer-processing'>
+                <SelectItem value='CsrReview'>CSR Review</SelectItem>
+                <SelectItem value='CsrRejected'>CSR Rejected</SelectItem>
+                <SelectItem value='DealershipProcessing'>
                   Dealer Processing
                 </SelectItem>
-                <SelectItem value='dealer-shipped'>Dealer Shipped</SelectItem>
-                <SelectItem value='shop-received'>Shop Received</SelectItem>
-                <SelectItem value='repair-completed'>
+                <SelectItem value='DealershipShipped'>Dealer Shipped</SelectItem>
+                <SelectItem value='ShopReceived'>Shop Received</SelectItem>
+                <SelectItem value='RepairCompleted'>
                   Repair Completed
                 </SelectItem>
               </SelectContent>
