@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import RequestApi from '@/js/clients/base/OrderApi'
 import PartsOrder from '@/js/models/PartsOrder'
 import type RepairOrder from '@/js/models/RepairOrder'
+import FileAssetFileAssetTypeEnum from '@/js/models/enum/FileAssetFileAssetTypeEnum'
 import {
   X,
   Package,
@@ -37,7 +38,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
-import FileAssetFileAssetTypeEnum from '@/js/models/enum/FileAssetFileAssetTypeEnum'
+
 // import { useAuthStore } from '@/stores/auth-store'
 // import { type PersonType } from '@/js/models/enum/PersonTypeEnum'
 
@@ -116,7 +117,10 @@ export function PartsOrderDialog({
     description:
       'You have unsaved changes. Are you sure you want to close? All your changes will be lost.',
   })
-
+  // 新建完维修单子之后直接编辑原始零件订单 重新赋值
+  if (initialData && Array.isArray(initialData)) {
+    initialData = initialData[0]
+  }
   // ✅ 获取当前用户角色
   // const { auth } = useAuthStore()
   // const userType = auth.user?.person?.type as PersonType | undefined
@@ -162,7 +166,7 @@ export function PartsOrderDialog({
     if (isSupplement) {
       // 补充订单
       const supplementNum = initialData?.partsOrderNumber || 1
-      if (initialData.parts && initialData.parts?.length > 0) {
+      if (initialData?.parts && initialData.parts?.length > 0) {
         return `Edit Supplement #${supplementNum}`
       } else {
         return `New Supplement #${supplementNum}`
@@ -232,12 +236,12 @@ export function PartsOrderDialog({
     //   return
     // }
 
-     // 转换文件为 FileAsset 数组
-      const estimateFileAssets = await convertFilesToFileAssets(
-        estimateFiles,
-        FileAssetFileAssetTypeEnum.ESTIMATE
-      )
-    
+    // 转换文件为 FileAsset 数组
+    const estimateFileAssets = await convertFilesToFileAssets(
+      estimateFiles,
+      FileAssetFileAssetTypeEnum.ESTIMATE
+    )
+
     try {
       const api = new RequestApi()
       const partsOrder = (PartsOrder as any).create({
@@ -363,8 +367,8 @@ export function PartsOrderDialog({
                       </Label>
                       <p className='font-medium'>
                         {initRepaitOrderData?.year &&
-                          initRepaitOrderData?.make &&
-                          initRepaitOrderData?.model
+                        initRepaitOrderData?.make &&
+                        initRepaitOrderData?.model
                           ? `${initRepaitOrderData?.year} ${initRepaitOrderData?.make} ${initRepaitOrderData?.model}`
                           : '---'}
                       </p>
@@ -391,6 +395,10 @@ export function PartsOrderDialog({
                         {initialData?.dateSubmitted
                           ? formatDateOnly(initialData?.dateSubmitted)
                           : '---'}
+                        {'  by ' + '   '}
+                        {initialData?.submittedByPerson.firstName +
+                          ' ' +
+                          initialData?.submittedByPerson.lastName}
                       </p>
                     </div>
                     <div>
@@ -401,6 +409,10 @@ export function PartsOrderDialog({
                         {initialData?.dateReviewed
                           ? formatDateOnly(initialData?.dateReviewed)
                           : '---'}
+                          {initialData?.reviewedByPerson &&  '  by ' + '   '}
+                          {initialData?.reviewedByPerson && initialData?.reviewedByPerson.firstName +
+                            ' ' +
+                            initialData?.reviewedByPerson.lastName}
                       </p>
                     </div>
                     <div>
@@ -411,6 +423,10 @@ export function PartsOrderDialog({
                         {initialData?.dateShipped
                           ? formatDateOnly(initialData?.dateShipped)
                           : '---'}
+                          {initialData?.shippedByPerson &&  '  by ' + '   '}
+                          {initialData?.shippedByPerson && initialData?.shippedByPerson.firstName +
+                            ' ' +
+                            initialData?.shippedByPerson.lastName}
                       </p>
                     </div>
                     {/* 编辑模式下显示 Sales Order Number */}
@@ -420,7 +436,6 @@ export function PartsOrderDialog({
                           Sales Order #
                         </Label>
                         <p className='mt-1 font-medium'>
-
                           {initialData.salesOrderNumber || '---'}
                           {/* // TODO======== */}
                           {/* {
@@ -453,7 +468,9 @@ export function PartsOrderDialog({
                             Part {i + 1}
                           </span>
                           <FormField
-                            disabled={initialData?.status === 'DealershipProcessing'}
+                            disabled={
+                              initialData?.status === 'DealershipProcessing'
+                            }
                             control={form.control}
                             name={`parts.${i}.number`}
                             render={({ field }) => (
@@ -470,7 +487,9 @@ export function PartsOrderDialog({
                           />
                           {fields.length > 1 && (
                             <Button
-                              disabled={initialData?.status === 'DealershipProcessing'}
+                              disabled={
+                                initialData?.status === 'DealershipProcessing'
+                              }
                               type='button'
                               variant='ghost'
                               size='icon'
@@ -482,7 +501,9 @@ export function PartsOrderDialog({
                         </div>
                       ))}
                       <Button
-                        disabled={initialData?.status === 'DealershipProcessing'}
+                        disabled={
+                          initialData?.status === 'DealershipProcessing'
+                        }
                         type='button'
                         variant='outline'
                         size='sm'
@@ -507,14 +528,19 @@ export function PartsOrderDialog({
                         {/* 新增模式或编辑模式但还没有文件时才必填 */}
                         {(mode === 'create' ||
                           !initialData?.estimateFileAssets?.length) && (
-                            <span className='text-destructive'>*</span>
-                          )}
+                          <span className='text-destructive'>*</span>
+                        )}
                       </Label>
                       <div
                         {...getRootProps()}
                         className={`flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-10 text-center transition-all ${isDragActive ? 'border-primary bg-muted' : 'border-border hover:border-primary'}`}
                       >
-                        <input {...getInputProps()} disabled={initialData?.status === 'DealershipProcessing'} />
+                        <input
+                          {...getInputProps()}
+                          disabled={
+                            initialData?.status === 'DealershipProcessing'
+                          }
+                        />
                         <Upload className='text-muted-foreground mb-3 h-12 w-12' />
 
                         <p className='text-muted-foreground text-sm'>
@@ -572,7 +598,7 @@ export function PartsOrderDialog({
                   {isReject && (
                     <div className='mt-6'>
                       <h3 className='flex items-center gap-3 text-lg font-medium'>
-                        <NotebookPen className='text-muted-foreground h-5 w5' />
+                        <NotebookPen className='text-muted-foreground w5 h-5' />
                         Comment
                       </h3>
                       <Input
@@ -610,9 +636,8 @@ export function PartsOrderDialog({
                           Resubmitting...
                         </>
                       ) : (
-                        'Resubmit'
+                        'Resubmit Request'
                       )}
-                      Resubmit
                     </Button>
                   ) : (
                     <Button

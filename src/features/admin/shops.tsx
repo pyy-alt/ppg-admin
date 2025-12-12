@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import OrganizationApi from '@/js/clients/base/OrganizationApi'
 import OrganizationSearchRequest from '@/js/models/OrganizationSearchRequest'
 import ResultParameter from '@/js/models/ResultParameter'
 import { Search, Download, TableIcon } from 'lucide-react'
+import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/auth-store'
+import { exportCurrentPageToCSV } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -44,7 +46,8 @@ export function Shops() {
   const [loading, setLoading] = useState(false)
   const itemsPerPage = 20
   const totalPages = Math.ceil(totalItems / itemsPerPage)
-
+  const [headers, setHeaders] = useState<string[]>([])
+  const shopsOrderRef = useRef<HTMLTableElement>(null)
   // 获取店铺数据
   const fetchShops = async () => {
     if (!user) return
@@ -132,13 +135,60 @@ export function Shops() {
     fetchShops()
   }, [currentPage, user])
 
+  const getFlattenedCurrentPageData = () => {
+    const startIndex = (currentPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    const pageData = shops.slice(startIndex, endIndex)
+
+    return pageData.map((order: any) => {
+      return {
+        Name: order.name,
+        Number: order.shopNumber,
+        '# of Pending Orders': order.countPendingUsers || 0,
+        '# of Active Users': order.countActiveUsers || 0,
+        '# of Pending Users': order.countPendingUsers || 0,
+        Status: order.status || '--',
+        Certification: order.certification || '--',
+        address: order.address || '--',
+        City: order.city || '--',
+        State: order.state || '--',
+        Dealer: order.sponsorDealership.name || '--',
+        "Dealer #": order.sponsorDealership.dealershipNumber || '--',
+        Region: order.region.name || '--',
+      }
+    })
+  }
+  const exportCSV = async () => {
+    try {
+      const flattenedData = getFlattenedCurrentPageData()
+      const result = await exportCurrentPageToCSV(flattenedData, headers,'Manage_Shops')
+      result ? toast.success('Exported successfully') : null
+    } catch (error) {
+      toast.error('Export failed')
+    }
+  }
+
+  useEffect(() => {
+    // 确保组件已挂载且 ref 已连接到 DOM
+    if (shopsOrderRef.current) {
+      // 2. 使用原生 DOM API 查找所有 <th> 元素
+      const thElements = shopsOrderRef.current.querySelectorAll('thead th')
+
+      // 3. 提取文本内容
+      const headerTexts = Array.from(thElements).map((th) =>
+        th.textContent.trim()
+      )
+      setHeaders(headerTexts)
+    }
+  }, [shops])
+
   return (
     <div className='bg-background min-h-screen'>
       {/* Header */}
       <div className='bg-background'>
         <div className='flex items-center justify-between px-6 py-4'>
           <h1 className='text-foreground text-2xl font-bold'>Manage Shops</h1>
-          <Button>
+          <Button onClick={exportCSV}>
             <Download className='mr-2 h-4 w-4' />
             Report
           </Button>
@@ -238,7 +288,7 @@ export function Shops() {
         ) : (
           <>
             <div className='bg-background overflow-hidden rounded-lg border shadow-sm'>
-              <Table>
+              <Table ref={shopsOrderRef}>
                 <TableHeader>
                   <TableRow className='bg-muted'>
                     <TableHead className='text-foreground font-semibold'>

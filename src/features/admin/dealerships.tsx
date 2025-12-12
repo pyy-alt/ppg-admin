@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import OrganizationApi from '@/js/clients/base/OrganizationApi'
 import OrganizationSearchRequest from '@/js/models/OrganizationSearchRequest'
 import ResultParameter from '@/js/models/ResultParameter'
@@ -22,6 +22,8 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { DataTablePagination } from '@/components/data-table-pagination'
+import { exportCurrentPageToCSV } from '@/lib/utils'
+import { toast } from 'sonner'
 
 export function Dealerships() {
   const { user } = useAuthStore((state) => state.auth)
@@ -32,6 +34,8 @@ export function Dealerships() {
   const [loading, setLoading] = useState(false)
   const itemsPerPage = 20
   const totalPages = Math.ceil(totalItems / itemsPerPage)
+  const dealershipsRef =useRef<HTMLTableElement>(null)
+  const [headers, setHeaders] = useState<string[]>([])
 
   // 获取经销商数据
   const fetchDealerships = async () => {
@@ -93,6 +97,46 @@ export function Dealerships() {
     return () => clearTimeout(timeoutId)
   }, [smartFilter,currentPage, user])
 
+  const getFlattenedCurrentPageData = () => {
+    const startIndex = (currentPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    const pageData = dealerships.slice(startIndex, endIndex)
+
+    return pageData.map((order: any) => {
+      return {
+        Name: order.name,
+        Number: order.dealershipNumber,
+        '# of Pending Orders': order.countPendingUsers || 0,
+        City: order.city || '--',
+        State: order.state || '--',
+        '# of Active Users': order.countActiveUsers || 0,
+        '# of Pending Users': order.countPendingUsers || 0,
+      }
+    })
+  }
+  const exportCSV = async () => {
+    try {
+      const flattenedData = getFlattenedCurrentPageData()
+      const result = await exportCurrentPageToCSV(flattenedData, headers,'Manage_Dealers')
+      result ? toast.success('Exported successfully') : null
+    } catch (error) {
+      toast.error('Export failed')
+    }
+  }
+
+  useEffect(() => {
+    // 确保组件已挂载且 ref 已连接到 DOM
+    if (dealershipsRef.current) {
+      // 2. 使用原生 DOM API 查找所有 <th> 元素
+      const thElements = dealershipsRef.current.querySelectorAll('thead th')
+
+      // 3. 提取文本内容
+      const headerTexts = Array.from(thElements).map((th) =>
+        th.textContent.trim()
+      )
+      setHeaders(headerTexts)
+    }
+  }, [dealerships])
  
 
   return (
@@ -101,7 +145,7 @@ export function Dealerships() {
       <div className='bg-background'>
         <div className='flex items-center justify-between px-6 py-4'>
           <h1 className='text-foreground text-2xl font-bold'>Manage Dealers</h1>
-          <Button>
+          <Button onClick={exportCSV}>
             <Download className='mr-2 h-4 w-4' />
             Report
           </Button>
@@ -146,7 +190,7 @@ export function Dealerships() {
           ) : (
             <>
               <div className='bg-background overflow-hidden rounded-lg shadow-sm'>
-                <Table>
+                <Table ref={dealershipsRef}>
                   <TableHeader>
                     <TableRow className='bg-muted'>
                       <TableHead className='text-foreground font-semibold'>

@@ -4,9 +4,24 @@ import RequestApi from '@/js/clients/base/OrderApi'
 import type PartsOrder from '@/js/models/PartsOrder'
 import PartsOrderWorkflowActionRequest from '@/js/models/PartsOrderWorkflowActionRequest'
 import type RepairOrder from '@/js/models/RepairOrder'
-import { AlertTriangle, Check, Map, MapPin, Pencil, Plus, Tag, Users, Warehouse } from 'lucide-react'
+import { type PersonType } from '@/js/models/enum/PersonTypeEnum'
+import {
+  AlertTriangle,
+  Check,
+  Map,
+  MapPin,
+  Pencil,
+  Plus,
+  Tag,
+  Users,
+  Warehouse,
+} from 'lucide-react'
 import { toast } from 'sonner'
+import audiNav from '@/assets/img/repair/audi.png'
+import vwNav from '@/assets/img/repair/vw.png'
+import { useAuthStore } from '@/stores/auth-store'
 import { formatDateOnly } from '@/lib/utils'
+import { useBrand } from '@/context/brand-context'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { MarkRepairAsCompleteDialog } from '@/components/MarkRepairAsCompleteDialog'
@@ -16,9 +31,6 @@ import RepairOrderDialog, {
   type RepairOrderData,
 } from '@/components/RepairOrderDialog'
 import { Timeline } from '@/components/Timeline'
-import { useAuthStore } from '@/stores/auth-store'
-import { type PersonType } from '@/js/models/enum/PersonTypeEnum'
-import background from '@/assets/img/login/welcome_bg.png'
 
 export function RepairOrderDetail() {
   const [openPartsOrderDialog, setOpenPartsOrderDialog] = useState(false)
@@ -40,6 +52,8 @@ export function RepairOrderDetail() {
   const { auth } = useAuthStore()
   const userType = auth.user?.person?.type as PersonType | undefined
   const { user } = useAuthStore((state) => state.auth)
+  const { brand } = useBrand()
+  const navImg = brand === 'vw' ? vwNav : audiNav
 
   const getRepairOrderDetail = async () => {
     try {
@@ -178,7 +192,6 @@ export function RepairOrderDetail() {
   }
   // ✅ 重新提交 Parts Order
   const handleTimelineResubmit = async (comment: string) => {
-
     try {
       await new Promise<boolean>((resolve, reject) => {
         const api = new RequestApi()
@@ -239,14 +252,15 @@ export function RepairOrderDetail() {
     }
   }
   const handleTimelineMarkReceived = async (status: string) => {
+    console.log(status)
     try {
       await new Promise<boolean>((resolve, reject) => {
         const api = new RequestApi()
         const request = PartsOrderWorkflowActionRequest.create({
           partsOrderId: (selectedPartsOrderData as any).id,
-          action: status === 'DealershipShipped' ? 'Unreceived' : 'Received',
+          action: status === 'ShopReceived' ? 'Unreceived' : 'Received',
         })
-        api.partsOrderSubmitWorkflowAction(request, { 
+        api.partsOrderSubmitWorkflowAction(request, {
           status200: () => {
             toast.success('Parts order marked as received successfully')
             getPartsOrderDetail() // 刷新数据
@@ -269,7 +283,7 @@ export function RepairOrderDetail() {
     try {
       await new Promise<boolean>((resolve, reject) => {
         const api = new RequestApi()
-        const request ={
+        const request = {
           id: (initRepaitOrderData as any).id,
           preRepairPhotoFileAssets: photos,
           ...(initRepaitOrderData as any),
@@ -311,24 +325,30 @@ export function RepairOrderDetail() {
   }, [])
   return (
     <div className='bg-background text-foreground'>
-            <div className='relative h-40 w-full'>
+      <div className='relative h-40 w-full'>
         <img
-          src={background}
-          alt='Collision repair background'
-          className='h-full w-full object-cover'
+          src={navImg}
+          alt={brand === 'vw' ? 'VW Navigation' : 'Audi Navigation'}
+          className='mt-6 h-full w-full object-cover'
         />
         <div className='absolute top-1/2 left-6 -translate-y-1/2'>
           <p className='text-3xl font-bold text-white'>
-            {user?.person?.shop?.name || user?.person?.csrRegion && user?.person?.csrRegion.name ||  '--'}
+            {user?.person?.shop?.name ||
+              (user?.person?.csrRegion && user?.person?.csrRegion.name) ||
+              '--'}
           </p>
           <p className='mt-4 flex items-center space-x-4 text-sm text-gray-200'>
             {/* 房子图标 */}
             <Warehouse className='h-5 w-5 text-white' />
-            <span>
+           { user?.person?.shop &&
+             <span>
               Assigned Dealership:{' '}
-              {user?.person?.shop?.sponsorDealership.name ?? '--'}({' '} 
-              { user?.person?.shop?.sponsorDealership.dealershipNumber})
+              { user?.person?.shop?.sponsorDealership.name ?? '--'}( {' '}
+              {user?.person?.shop?.sponsorDealership.dealershipNumber})
             </span>
+
+            || '--'
+           }
             <Users className='ml-6 h-5 w-5 text-white' />
             <span>
               {' '}
@@ -381,7 +401,11 @@ export function RepairOrderDetail() {
               Repair Order # :{initRepaitOrderData?.roNumber || '--'}
             </h1>
             <div className='flex gap-3'>
-              {initPartsOrderData?.every((order: any) => order.status === 'ShopReceived' || order.status === 'CsrRejected') && userType === 'Shop' ? (
+              {initPartsOrderData?.every(
+                (order: any) =>
+                  order.status === 'ShopReceived' ||
+                  order.status === 'CsrRejected'
+              ) && userType === 'Shop' ? (
                 <Button
                   onClick={() => setIsMarkRepairAsCompleteDialogOpen(true)}
                   size='sm'
@@ -391,19 +415,20 @@ export function RepairOrderDetail() {
                   Mark Repair as Complete
                 </Button>
               ) : null}
-              {
-                userType === 'Shop' && initPartsOrderData?.every((order: any) =>order.status !== 'RepairCompleted') ? (
-                  <Button
-                    size='sm'
-                    variant='outline'
-                    className='h-9 text-xs font-medium'
-                    onClick={() => setOpen(true)}
-                  >
-                    <Pencil className='mr-1.5 h-3.5 w-3.5' />
-                    Edit Repair Order
-                  </Button>
-                ) : null
-              }
+              {userType === 'Shop' &&
+              initPartsOrderData?.every(
+                (order: any) => order.status !== 'RepairCompleted'
+              ) ? (
+                <Button
+                  size='sm'
+                  variant='outline'
+                  className='h-9 text-xs font-medium'
+                  onClick={() => setOpen(true)}
+                >
+                  <Pencil className='mr-1.5 h-3.5 w-3.5' />
+                  Edit Repair Order
+                </Button>
+              ) : null}
             </div>
           </div>
           {/* 2. 信息区 - 极简三列，字体 14px 正文感 */}
@@ -436,6 +461,12 @@ export function RepairOrderDetail() {
                   {formatDateOnly(
                     initRepaitOrderData?.dateLastSubmitted as Date
                   ) || '--'}
+                  {' by' + ' '}
+                  {(selectedPartsOrderData as any)?.submittedByPerson
+                    ?.firstName +
+                    ' ' +
+                    (selectedPartsOrderData as any)?.submittedByPerson
+                      ?.lastName}
                 </p>
               </div>
               <div>
@@ -449,6 +480,13 @@ export function RepairOrderDetail() {
                 <p className='text-muted-foreground'>
                   {formatDateOnly(initRepaitOrderData?.dateClosed as Date) ||
                     '--'}
+                  {initRepaitOrderData?.dateClosed && ' by' + ' '}
+                  {initRepaitOrderData?.dateClosed &&
+                    (selectedPartsOrderData as any)?.reviewedByPerson
+                      ?.firstName +
+                      ' ' +
+                      (selectedPartsOrderData as any)?.reviewedByPerson
+                        ?.lastName}
                 </p>
               </div>
             </div>
@@ -458,19 +496,19 @@ export function RepairOrderDetail() {
                 <span className='text-muted-foreground'>Pre-Repair Photos</span>
                 <div className='mt-1 flex flex-wrap gap-2'>
                   {initRepaitOrderData &&
-                    initRepaitOrderData?.preRepairPhotoFileAssets &&
-                    initRepaitOrderData?.preRepairPhotoFileAssets.length > 0
+                  initRepaitOrderData?.preRepairPhotoFileAssets &&
+                  initRepaitOrderData?.preRepairPhotoFileAssets.length > 0
                     ? initRepaitOrderData?.preRepairPhotoFileAssets?.map(
-                      (f) => (
-                        <a
-                          key={f.id}
-                          href={f.downloadUrl}
-                          className='text-blue-700 underline hover:underline'
-                        >
-                          {f.filename}
-                        </a>
+                        (f) => (
+                          <a
+                            key={f.id}
+                            href={f.downloadUrl}
+                            className='text-blue-700 underline hover:underline'
+                          >
+                            {f.filename}
+                          </a>
+                        )
                       )
-                    )
                     : '--'}
                 </div>
               </div>
@@ -481,19 +519,19 @@ export function RepairOrderDetail() {
                 <br />
                 <a href='#' className='text-primary hover:underline'>
                   {initRepaitOrderData?.structuralMeasurementFileAssets &&
-                    initRepaitOrderData?.structuralMeasurementFileAssets.length >
+                  initRepaitOrderData?.structuralMeasurementFileAssets.length >
                     0
                     ? initRepaitOrderData?.structuralMeasurementFileAssets?.map(
-                      (f) => (
-                        <a
-                          key={f.id}
-                          href={f.downloadUrl}
-                          className='text-blue-700 underline hover:underline'
-                        >
-                          {f.filename}
-                        </a>
+                        (f) => (
+                          <a
+                            key={f.id}
+                            href={f.downloadUrl}
+                            className='text-blue-700 underline hover:underline'
+                          >
+                            {f.filename}
+                          </a>
+                        )
                       )
-                    )
                     : '--'}
                 </a>
               </div>
@@ -503,18 +541,18 @@ export function RepairOrderDetail() {
                 </span>
                 <div className='mt-1 flex flex-wrap gap-2'>
                   {initRepaitOrderData?.postRepairPhotoFileAssets &&
-                    initRepaitOrderData?.postRepairPhotoFileAssets.length > 0
+                  initRepaitOrderData?.postRepairPhotoFileAssets.length > 0
                     ? initRepaitOrderData?.postRepairPhotoFileAssets?.map(
-                      (f) => (
-                        <a
-                          key={f.id}
-                          href={f.downloadUrl}
-                          className='text-blue-700 underline hover:underline'
-                        >
-                          {f.filename}
-                        </a>
+                        (f) => (
+                          <a
+                            key={f.id}
+                            href={f.downloadUrl}
+                            className='text-blue-700 underline hover:underline'
+                          >
+                            {f.filename}
+                          </a>
+                        )
                       )
-                    )
                     : '--'}
                 </div>
               </div>
@@ -530,8 +568,8 @@ export function RepairOrderDetail() {
                 <>
                   {/* Parts Order 按钮（第一个，partsOrderNumber === 0） */}
                   <Button
-                   variant={ currentIndex === 0 ? 'default' : 'outline' }
-                   size='sm'
+                    variant={currentIndex === 0 ? 'default' : 'outline'}
+                    size='sm'
                     onClick={() => {
                       const partsOrder = initPartsOrderData.find(
                         (po: any) => po.partsOrderNumber === 0
@@ -552,7 +590,9 @@ export function RepairOrderDetail() {
                     .map((partsOrder: any, index: number) => (
                       <Button
                         key={partsOrder.id || index}
-                        variant={currentIndex === index + 1 ? 'default' : 'outline'}
+                        variant={
+                          currentIndex === index + 1 ? 'default' : 'outline'
+                        }
                         onClick={() => {
                           setSelectedPartsOrderData(partsOrder)
                           setCurrentIndex(index + 1)
@@ -585,15 +625,18 @@ export function RepairOrderDetail() {
             </div>
 
             {/* 右侧：新增按钮 */}
-            {
-              initPartsOrderData?.some((order: any) => order.status !== 'RepairCompleted' || order.status === 'CsrRejected' || order.status !== 'RepairCompleted') && userType === 'Shop'
-              && (
+            {initPartsOrderData?.some(
+              (order: any) =>
+                order.status !== 'RepairCompleted' ||
+                order.status === 'CsrRejected' ||
+                order.status !== 'RepairCompleted'
+            ) &&
+              userType === 'Shop' && (
                 <Button
                   onClick={() => {
                     setSelectedPartsOrderData(undefined)
                     setOpenPartsOrderDialog(true)
                     setIsReject(false)
-
                   }}
                   variant='outline'
                   size='sm'
@@ -602,9 +645,7 @@ export function RepairOrderDetail() {
                   <Plus className='mr-1.5 h-3.5 w-3.5' />
                   Supplemental Parts Order
                 </Button>
-              )
-            }
-
+              )}
           </div>
           {/* 3. 真正的左右布局 */}
           <div className='m-5 flex gap-8'>
@@ -613,79 +654,85 @@ export function RepairOrderDetail() {
                 (initPartsOrderData &&
                   initPartsOrderData.length > 0 &&
                   initPartsOrderData[0])) && (
-                  <Card className='rounded-xl border shadow-sm'>
-                    <CardHeader className='pb-4'>
-                      <div className='flex items-center justify-between'>
-                        <CardTitle className='text-foreground text-base font-semibold'>
-                          Sales Order #{' '}
-                          {(selectedPartsOrderData as any)?.salesOrderNumber ||
-                            '--'}
-                        </CardTitle>
-                        {
-                          userType === 'Shop' && (selectedPartsOrderData as any)?.stage == 'OrderReview' && (selectedPartsOrderData as any)?.status !== 'DealershipProcessing'
-                            || (userType === 'Csr' && (selectedPartsOrderData as any)?.status !== 'CsrReview' && (selectedPartsOrderData as any)?.status !== 'CsrRejected' 
-                            && (selectedPartsOrderData as any)?.stage !== 'OrderReceived' )
-                            ? (
-                            <Button
-                              onClick={() => {
-                                setSelectedPartsOrderData(selectedPartsOrderData)
-                                setOpenPartsOrderDialog(true)
-                              }}
-                              size='sm'
-                              variant='outline'
-                              className='h-9 px-4 text-xs'
-                            >
-                              <Pencil className='h-3.5 w-3.5' />
-                              Edit Parts Order
-                            </Button>
-                          ) : null
-                        }
-                      </div>
-                    </CardHeader>
+                <Card className='rounded-xl border shadow-sm'>
+                  <CardHeader className='pb-4'>
+                    <div className='flex items-center justify-between'>
+                      <CardTitle className='text-foreground text-base font-semibold'>
+                        Sales Order #{' '}
+                        {(selectedPartsOrderData as any)?.salesOrderNumber ||
+                          '--'}
+                      </CardTitle>
+                      {(userType === 'Shop' &&
+                        (selectedPartsOrderData as any)?.stage ==
+                          'OrderReview' &&
+                        (selectedPartsOrderData as any)?.status !==
+                          'DealershipProcessing') ||
+                      (userType === 'Csr' &&
+                        (selectedPartsOrderData as any)?.status !==
+                          'CsrReview' &&
+                        (selectedPartsOrderData as any)?.status !==
+                          'CsrRejected' &&
+                        (selectedPartsOrderData as any)?.stage !==
+                          'OrderReceived') && (selectedPartsOrderData as any)?.status!=='RepairCompleted' ? (
+                        <Button
+                          onClick={() => {
+                            setSelectedPartsOrderData(selectedPartsOrderData)
+                            setOpenPartsOrderDialog(true)
+                          }}
+                          size='sm'
+                          variant='outline'
+                          className='h-9 px-4 text-xs'
+                        >
+                          <Pencil className='h-3.5 w-3.5' />
+                          Edit Parts Order
+                        </Button>
+                      ) : null}
+                    </div>
+                  </CardHeader>
 
-                    <CardContent className='space-y-6 text-sm'>
-                      <div>
-                        <h4 className='text-muted-foreground mb-3 font-medium'>
-                          Requested Parts
-                        </h4>
-                        <ol className='text-foreground/90 space-y-2 pl-5 font-mono'>
-                          {((selectedPartsOrderData as any)?.parts?.length > 0 &&
-                            (selectedPartsOrderData as any)?.parts?.map(
-                              (part: string, idx: number) => (
-                                <li key={part + idx}>
-                                  ({idx + 1}) {part}
-                                </li>
-                              )
-                            )) ||
-                            '-- No parts requested'}
-                        </ol>
-                      </div>
-
-                      <div>
-                        <span className='text-muted-foreground'>
-                          Parts Estimate
-                        </span>
-                        <br />
-                        {(selectedPartsOrderData &&
-                          (selectedPartsOrderData as any).estimateFileAssets &&
-                          (selectedPartsOrderData as any).estimateFileAssets
-                            .length > 0 &&
-                          (selectedPartsOrderData as any).estimateFileAssets.map(
-                            (file: any) => (
-                              <a
-                                key={file.id}
-                                href={file.viewUrl}
-                                className='text-blue-700 underline hover:underline'
-                              >
-                                {file.filename}
-                              </a>
+                  <CardContent className='space-y-6 text-sm'>
+                    <div>
+                      <h4 className='text-muted-foreground mb-3 font-medium'>
+                        Requested Parts
+                      </h4>
+                      <ol className='text-foreground/90 space-y-2 pl-5 font-mono'>
+                        {((selectedPartsOrderData as any)?.parts?.length > 0 &&
+                          (selectedPartsOrderData as any)?.parts?.map(
+                            (part: string, idx: number) => (
+                              <li key={part + idx}>
+                                ({idx + 1}) {part}
+                              </li>
                             )
                           )) ||
-                          '-- No estimate file'}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )) ||
+                          '-- No parts requested'}
+                      </ol>
+                    </div>
+
+                    <div>
+                      <span className='text-muted-foreground'>
+                        Parts Estimate
+                      </span>
+                      <br />
+                      {(selectedPartsOrderData &&
+                        (selectedPartsOrderData as any).estimateFileAssets &&
+                        (selectedPartsOrderData as any).estimateFileAssets
+                          .length > 0 &&
+                        (selectedPartsOrderData as any).estimateFileAssets.map(
+                          (file: any) => (
+                            <a
+                              key={file.id}
+                              href={file.viewUrl}
+                              className='text-blue-700 underline hover:underline'
+                            >
+                              {file.filename}
+                            </a>
+                          )
+                        )) ||
+                        '-- No estimate file'}
+                    </div>
+                  </CardContent>
+                </Card>
+              )) ||
                 '-- No parts order data'}
             </div>
             {/* 右侧：Parts Tracker 时间线（纯文字 + 绿色实线） */}
@@ -701,8 +748,12 @@ export function RepairOrderDetail() {
                 onApprove={handleTimelineApprove}
                 onReject={handleTimelineReject}
                 onResubmit={onResubmit}
-                onMarkShipped={(status: string) => handleTimelineMarkShipped(status)}
-                onMarkReceived={(status: string) => handleTimelineMarkReceived(status)}
+                onMarkShipped={(status: string) =>
+                  handleTimelineMarkShipped(status)
+                }
+                onMarkReceived={(status: string) =>
+                  handleTimelineMarkReceived(status)
+                }
               />
             </div>
           </div>
@@ -738,6 +789,7 @@ export function RepairOrderDetail() {
         open={isOpen}
         onOpenChange={setOpen}
         initialData={initRepaitOrderData as RepairOrderData}
+        onSuccess={getRepairOrderDetail}
       />
     </div>
   )

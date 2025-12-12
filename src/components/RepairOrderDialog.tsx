@@ -80,7 +80,7 @@ interface RepairOrderDialogProps {
     data: FormValues & {
       structuralMeasurementFileAssets: File[]
       preRepairPhotoFileAssets: File[]
-      [key:string]: any
+      [key: string]: any
     }
   ) => void
   // 编辑模式时传入已有数据
@@ -121,6 +121,7 @@ export default function RepairOrderDialog({
   })
   const [orderFromDealerships, setOrderFromDealerships] = useState<any[]>([])
   const user = useAuthStore((state) => state.auth.user)
+
   // ✅ 修复：实际执行关闭的函数（不检查未保存更改）
   const performClose: () => void = () => {
     onOpenChange(false)
@@ -178,6 +179,8 @@ export default function RepairOrderDialog({
   useEffect(() => {
     getOrderFromDealership()
     if (initialData) {
+      if (initialData.year && typeof initialData.year === 'number')
+        initialData.year = String(initialData.year)
       form.reset({
         roNumber: initialData.roNumber,
         customer: initialData.customer,
@@ -501,7 +504,7 @@ export default function RepairOrderDialog({
                       <FormItem className='flex flex-col space-y-1'>
                         <FormLabel>Customer</FormLabel>
                         <FormControl>
-                          <Input placeholder='Customer name' {...field}/>
+                          <Input placeholder='Customer name' {...field} />
                         </FormControl>
                         <div className='flex min-h-[20px] items-start'>
                           <FormMessage />
@@ -529,7 +532,7 @@ export default function RepairOrderDialog({
                               <SelectItem
                                 key={dealership.id}
                                 value={dealership.id?.toString() || ''}
-                                className="whitespace-normal py-2 pr-8 text-left"
+                                className='py-2 pr-8 text-left whitespace-normal'
                               >
                                 {dealership.name} | {dealership.number}{' '}
                                 (Assigned Dealer)

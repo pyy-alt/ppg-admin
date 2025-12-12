@@ -17,9 +17,11 @@ import {
   Map,
 } from 'lucide-react'
 import { toast } from 'sonner'
-import background from '@/assets/img/login/welcome_bg.png'
+import audiNav from '@/assets/img/repair/audi.png'
+import vwNav from '@/assets/img/repair/vw.png'
 import { useAuthStore } from '@/stores/auth-store'
 import { calculateDateRange, formatDateOnly } from '@/lib/utils'
+import { useBrand } from '@/context/brand-context'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -79,7 +81,7 @@ export function RepairOrderList() {
   const totalPages = Math.ceil(totalItems / itemsPerPage)
 
   const [isOpen, setOpen] = useState(false)
-  const [showRepairCompleted, setShowRepairCompleted] = useState(true)
+  const [showRepairCompleted, setShowRepairCompleted] = useState(false)
   const [filterByStatus, setFilterByStatus] = useState('all')
   const [smartFilter, setSmartFilter] = useState('')
   const [dateRangePreset, setDateRangePreset] = useState('all')
@@ -93,6 +95,9 @@ export function RepairOrderList() {
     useState<PartsOrder>()
 
   const [initRepaitOrderData, setInitRepaitOrderData] = useState<RepairOrder>()
+
+  const { brand } = useBrand()
+  const navImg = brand === 'vw' ? vwNav : audiNav
 
   const getRepairOrderDetail = async (id: string) => {
     try {
@@ -237,9 +242,9 @@ export function RepairOrderList() {
     <div className='bg-background min-h-screen'>
       <div className='relative h-40 w-full'>
         <img
-          src={background}
-          alt='Collision repair background'
-          className='h-full w-full object-cover'
+          src={navImg}
+          alt={brand === 'vw' ? 'VW Navigation' : 'Audi Navigation'}
+          className='mt-6 h-full w-full object-cover'
         />
         <div className='absolute top-1/2 left-6 -translate-y-1/2'>
           <p className='text-3xl font-bold text-white'>
@@ -261,7 +266,7 @@ export function RepairOrderList() {
             </span>
           </p>
         </div>
-        <div className='absolute top-1/2 right-6 max-w-[320px] -translate-y-1/2 text-sm text-gray-200'>
+        <div className='absolute top-1/2 right-6 max-w-[320px] -translate-y-1/2 text-sm text-gray-100'>
           <div className='grid gap-1'>
             <div className='grid grid-cols-[24px_1fr] items-center gap-2'>
               <Tag
@@ -323,8 +328,6 @@ export function RepairOrderList() {
         onOpenChange={setOpen}
         onSuccess={async (data: any) => {
           const snapshot = JSON.parse(JSON.stringify(data))
-          console.log('onSuccess data snapshot:', snapshot)
-
           await getRepairOrders()
           const id = snapshot.id
           if (id) {
@@ -341,6 +344,7 @@ export function RepairOrderList() {
         onOpenChange={setOpenPartsOrderDialog}
         initialData={selectedPartsOrderData}
         initRepaitOrderData={initRepaitOrderData}
+        onSuccess={getRepairOrders}
       />
       <div className='px-6 py-6'>
         {/* Filters */}

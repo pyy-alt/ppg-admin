@@ -1,13 +1,19 @@
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import OrderApi from '@/js/clients/base/OrderApi'
 import PartsOrderSearchRequest from '@/js/models/PartsOrderSearchRequest'
 import ResultParameter from '@/js/models/ResultParameter'
 import { Search, Download, AlertCircle, TableIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/auth-store'
-import { calculateDateRange, formatDateOnly } from '@/lib/utils'
+import {
+  calculateDateRange,
+  exportCurrentPageToCSV,
+  formatDateOnly,
+} from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Empty,
   EmptyDescription,
@@ -16,6 +22,7 @@ import {
   EmptyTitle,
 } from '@/components/ui/empty'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
@@ -42,47 +49,73 @@ import { DatePicker } from '@/components/date-picker'
 
 export function PartOrders() {
   const { user } = useAuthStore((state) => state.auth)
-  // 筛选条件
+  const [filterByWaitingOnMe, setOnlyMyOrders] = useState<boolean>(false)
   const [dateSubmittedFrom, setFromDate] = useState<Date | undefined>(undefined)
   const [dateSubmittedTo, setToDate] = useState<Date | undefined>(undefined)
-  const [dateSubmittedRange, setDateSubmittedRange] = useState<string>('30')
+  const [dateSubmittedRange, setDateSubmittedRange] = useState<string>('7')
   const [filterByPartsOrderNumber, setTypeOfOrder] = useState<string>('all')
   const [filterByStatus, setFilterByStatus] = useState<string>('all')
   const [filterByRegionId, setCsrRegion] = useState<string>('all')
-  const [smartFilter, setSmartFilter] = useState('')
-
-  // 分页状态（只在同一筛选条件下有效）
   const [currentPage, setCurrentPage] = useState(1)
+  const [smartFilter, setSmartFilter] = useState('')
   const [orders, setOrders] = useState<any[]>([])
   const [totalItems, setTotalItems] = useState(0)
   const [loading, setLoading] = useState(false)
-
   const itemsPerPage = 20
   const totalPages = Math.ceil(totalItems / itemsPerPage)
+  const navigate = useNavigate()
 
-  const { dateFrom, dateTo } = useMemo(() => {
-    if (dateSubmittedRange === 'custom') {
-      // 自定义范围时，使用用户手动选择的日期
-      return { dateFrom: dateSubmittedFrom, dateTo: dateSubmittedTo }
+  const partsOrderRef = useRef<HTMLTableElement>(null)
+  const [headers, setHeaders] = useState<string[]>([])
+  const getFlattenedCurrentPageData = () => {
+    const startIndex = (currentPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    const pageData = orders.slice(startIndex, endIndex)
+
+    return pageData.map((order: any) => {
+      const ro = order.repairOrder || {}
+      const shop = ro.shop || {}
+      const dealer = ro.dealership || {}
+
+      return {
+        'RO#': ro.roNumber || '--', // ← 必须加引号！
+        'Sales#': order.salesOrderNumber || '--', // ← 必须加引号！
+        Type: getOrderTypeText(order.partsOrderNumber || 0),
+        VIN: ro.vin || '--',
+        'Year/Make/Model':
+          [ro.year, ro.make, ro.model].filter(Boolean).join(' ') || '--',
+        Status: order.status || '--',
+        Shop: shop.name ? `${shop.name} (${shop.id})` : '--',
+        Dealer: dealer.name ? `${dealer.name} (${dealer.id})` : '--',
+        'CSR Region': ro.region || '--',
+        'Date Completed': formatDate(order.dateCreated),
+        'Date Closed': formatDate(ro.dateClosed) || '--',
+      }
+    })
+  }
+  const exportCSV = async () => {
+    try {
+      const flattenedData = getFlattenedCurrentPageData()
+      const result = await exportCurrentPageToCSV(flattenedData, headers)
+      result ? toast.success('Exported successfully') : null
+    } catch (error) {
+      toast.error('Export failed')
     }
+  }
 
-    // 预设范围时，自动计算
-    const { from, to } = calculateDateRange(dateSubmittedRange)
-    return { dateFrom: from, dateTo: to }
-  }, [dateSubmittedRange, dateSubmittedFrom, dateSubmittedTo])
+  useEffect(() => {
+    // 确保组件已挂载且 ref 已连接到 DOM
+    if (partsOrderRef.current) {
+      // 2. 使用原生 DOM API 查找所有 <th> 元素
+      const thElements = partsOrderRef.current.querySelectorAll('thead th')
 
-  const paginationKey = useMemo(() => {
-    return `${smartFilter}|${filterByPartsOrderNumber}|${filterByStatus}|${filterByRegionId}|${dateSubmittedRange}|${dateFrom?.toISOString()}|${dateTo?.toISOString()}`
-  }, [
-    smartFilter,
-    filterByPartsOrderNumber,
-    filterByStatus,
-    filterByRegionId,
-    dateSubmittedRange,
-    dateFrom,
-    dateTo,
-  ])
-
+      // 3. 提取文本内容
+      const headerTexts = Array.from(thElements).map((th) =>
+        th.textContent.trim()
+      )
+      setHeaders(headerTexts)
+    }
+  }, [orders])
   const getStatusVariant = (
     status: string
   ): 'default' | 'secondary' | 'destructive' | 'outline' => {
@@ -96,20 +129,28 @@ export function PartOrders() {
   }
 
   // 获取零件订单数据
-  const fetchPartsOrders = useCallback(async () => {
+  const fetchPartsOrders = async () => {
     if (!user) return
 
     setLoading(true)
     try {
       const api = new OrderApi()
 
-      // 关键修改：使用 useMemo 计算出的 dateFrom/dateTo
-      const apiDateFrom = dateFrom ? formatDateOnly(dateFrom) : undefined
-      const apiDateTo = dateTo ? formatDateOnly(dateTo) : undefined
+      const dateFrom = dateSubmittedFrom
+        ? formatDateOnly(dateSubmittedFrom)
+        : undefined
+      const dateTo = dateSubmittedTo
+        ? formatDateOnly(dateSubmittedTo)
+        : undefined
 
       // 构建请求参数
       const requestParams: any = {
         smartFilter,
+        filterByWaitingOnMe,
+        filterByDealershipId:
+          user?.person?.type === 'Dealership'
+            ? user?.person?.dealership.id
+            : undefined,
       }
       // 处理订单类型筛选
       if (filterByPartsOrderNumber !== 'all') {
@@ -125,19 +166,23 @@ export function PartOrders() {
       if (filterByRegionId !== 'all') {
         requestParams.filterByRegionId = parseInt(filterByRegionId)
       }
-      const request = PartsOrderSearchRequest.create(requestParams)
-      // 使用计算后的日期
-      if (apiDateFrom) (request as any).dateSubmittedFrom = apiDateFrom
-      if (apiDateTo) (request as any).dateSubmittedTo = apiDateTo
-
-      // 添加分页参数（ResultParameter）
+      // // 添加分页参数
       const resultParameter = ResultParameter.create({
-        resultsLimitOffset: (currentPage - 1) * itemsPerPage, // 第几页
-        resultsLimitCount: itemsPerPage, // 每页20条
-        resultsOrderBy: 'dateSubmitted', // 按提交日期排序
-        resultsOrderAscending: false, // 倒序（最新的在前）
+        resultsLimitOffset: (currentPage - 1) * itemsPerPage,
+        resultsLimitCount: itemsPerPage,
+        resultsOrderBy: 'dateSubmitted', // 可以根据需要调整排序字段
+        resultsOrderAscending: false, // 降序，最新的在前
       })
-      ;(request as any).resultParameter = resultParameter
+      requestParams.resultParameter = resultParameter
+
+      const request = PartsOrderSearchRequest.create(requestParams)
+      // 在序列化前，手动将日期字段格式化为字符串（覆盖 ModelBaseClass 的转换）
+      if (dateFrom) {
+        ;(request as any).dateSubmittedFrom = dateFrom
+      }
+      if (dateTo) {
+        ;(request as any).dateSubmittedTo = dateTo
+      }
 
       api.partsOrderSearch(request, {
         status200: (response: any) => {
@@ -146,7 +191,7 @@ export function PartOrders() {
           setLoading(false)
         },
         error: (error: any) => {
-          toast.error('Error:', error)
+          toast.error(`Error: ${error || 'Failed to fetch data'}`)
           setLoading(false)
         },
         else: () => {
@@ -154,48 +199,57 @@ export function PartOrders() {
         },
       })
     } catch (error) {
-      if (error && typeof error === 'object' && 'message' in error) {
-        toast.error((error as any).message)
-      } else {
-        toast.error('Error: get fail')
-      }
+      console.error('API 调用错误:', error)
       setLoading(false)
     }
-  }, [
-    user,
-    smartFilter,
-    filterByPartsOrderNumber,
-    filterByStatus,
-    filterByRegionId,
-    dateFrom,
-    dateTo,
-  ])
+  }
 
   useEffect(() => {
     if (!user) return
 
-    // 智能防抖：只有 smartFilter 变化时才延迟 500ms，其他筛选立即生效
-    const delay = smartFilter ? 500 : 0
-    const timer = setTimeout(() => {
-      fetchPartsOrders()
-    }, delay)
+    // 调用 API（对于文本输入，使用防抖）
+    const timeoutId = setTimeout(
+      () => {
+        fetchPartsOrders()
+      },
+      smartFilter ? 500 : 0
+    )
 
-    return () => clearTimeout(timer)
+    return () => clearTimeout(timeoutId)
   }, [
-    user,
     smartFilter,
+    filterByWaitingOnMe,
     filterByPartsOrderNumber,
     filterByStatus,
     filterByRegionId,
-    dateFrom,
-    dateTo,
+    dateSubmittedRange,
+    dateSubmittedFrom,
+    dateSubmittedTo,
+    currentPage,
+    user,
   ])
 
-  // ✅ 页码改变时单独调用
   useEffect(() => {
-    if (!user) return
-    fetchPartsOrders()
-  }, [currentPage, fetchPartsOrders])
+    setCurrentPage(1)
+  }, [
+    smartFilter,
+    filterByWaitingOnMe,
+    filterByPartsOrderNumber,
+    filterByStatus,
+    filterByRegionId,
+    dateSubmittedRange,
+    dateSubmittedFrom,
+    dateSubmittedTo,
+  ])
+
+  // 当预设范围改变时，自动计算日期
+  useEffect(() => {
+    if (dateSubmittedRange !== 'custom') {
+      const { from, to } = calculateDateRange(dateSubmittedRange)
+      setFromDate(from)
+      setToDate(to)
+    }
+  }, [dateSubmittedRange])
 
   // 格式化日期显示
   const formatDate = (date: Date | string | undefined): string => {
@@ -214,7 +268,6 @@ export function PartOrders() {
     if (partsOrderNumber === 0) return 'Parts Order'
     if (partsOrderNumber === 1) return 'Supplement 1'
     if (partsOrderNumber === 2) return 'Supplement 2'
-    if (partsOrderNumber === 3) return 'Supplement 3'
     return `Supplement ${partsOrderNumber}`
   }
 
@@ -226,7 +279,7 @@ export function PartOrders() {
           <h1 className='text-foreground text-2xl font-bold'>
             Parts Order List
           </h1>
-          <Button>
+          <Button onClick={exportCSV}>
             <Download className='mr-2 h-4 w-4' />
             Report
           </Button>
@@ -244,7 +297,28 @@ export function PartOrders() {
                 className='pl-10'
               />
             </div>
+            {/* 只有 CSRs（客户服务代表） 和 经销商 (Dealers) 才能看到并使用 */}
+            {(user?.person?.type === 'Csr' ||
+              user?.person?.type === 'Dealership') && (
+              <div className='flex items-center gap-3'>
+                <Checkbox
+                  id='my-orders'
+                  checked={filterByWaitingOnMe}
+                  onCheckedChange={(checked) =>
+                    setOnlyMyOrders(checked as boolean)
+                  }
+                  className='bg-muted rounded-full'
+                />
+                <Label
+                  htmlFor='my-orders'
+                  className='flex cursor-pointer items-center gap-2 text-sm font-medium'
+                >
+                  Only View Parts Orders that are waiting On Me
+                </Label>
+              </div>
+            )}
           </div>
+
           {/* 完整筛选条件 */}
           <div className='mb-6 flex flex-wrap items-center gap-3'>
             <Select
@@ -331,34 +405,36 @@ export function PartOrders() {
             </div>
 
             {/* 日期范围选择 */}
-            <div className='flex items-center gap-2'>
-              <span className='text-sm font-medium'>From</span>
-              <DatePicker
-                disabled={dateSubmittedRange !== 'custom'}
-                selected={dateSubmittedFrom}
-                onSelect={(date) => setFromDate(date)}
-                placeholder='Select from date'
-              />
-              <span className='text-sm font-medium'>To</span>
-              <DatePicker
-                disabled={dateSubmittedRange !== 'custom'}
-                selected={dateSubmittedTo}
-                onSelect={(date) => setToDate(date)}
-                placeholder='Select to date'
-              />
-            </div>
+            {dateSubmittedRange === 'custom' && (
+              <div className='flex items-center gap-2'>
+                <span className='text-sm font-medium'>From</span>
+                <DatePicker
+                  disabled={dateSubmittedRange !== 'custom'}
+                  selected={dateSubmittedFrom}
+                  onSelect={(date) => setFromDate(date)}
+                  placeholder='Select from date'
+                />
+                <span className='text-sm font-medium'>To</span>
+                <DatePicker
+                  disabled={dateSubmittedRange !== 'custom'}
+                  selected={dateSubmittedTo}
+                  onSelect={(date) => setToDate(date)}
+                  placeholder='Select to date'
+                />
+              </div>
+            )}
           </div>
 
           {/* Table */}
           <div className='bg-background overflow-hidden rounded-lg border shadow-sm'>
-            <Table>
+            <Table ref={partsOrderRef}>
               <TableHeader>
                 <TableRow className='bg-muted'>
                   <TableHead className='text-foreground font-semibold'>
-                    RO #
+                    RO#
                   </TableHead>
                   <TableHead className='text-foreground font-semibold'>
-                    Sales #
+                    Sales#
                   </TableHead>
                   <TableHead className='text-foreground font-semibold'>
                     Type
@@ -432,7 +508,7 @@ export function PartOrders() {
                       ? `${repairOrder.dealership.name || ''} (${repairOrder.dealership.id || ''})`
                       : '--'
                     const region = repairOrder?.region || '--'
-                    const dateCompleted = formatDate(order.dateReceived)
+                    const dateCompleted = formatDate(order.dateCreated)
                     const dateClosed = formatDate(repairOrder?.dateClosed)
                     // 判断是否有备注（从备用经销商订购）
                     const hasNote =
@@ -440,7 +516,15 @@ export function PartOrders() {
 
                     return (
                       <TableRow key={order.id} className='hover:bg-muted/50'>
-                        <TableCell className='text-primary font-medium'>
+                        <TableCell
+                          className='cursor-pointer text-blue-600 hover:underline'
+                          onClick={() => {
+                            navigate({
+                              to: '/repair_orders/$id',
+                              params: { id: order.repairOrder.id.toString() },
+                            })
+                          }}
+                        >
                           {roNumber}
                         </TableCell>
                         <TableCell>{salesOrder}</TableCell>
@@ -488,7 +572,6 @@ export function PartOrders() {
 
           {/* Pagination */}
           <DataTablePagination
-            key={paginationKey}
             currentPage={currentPage}
             totalPages={totalPages}
             totalItems={totalItems}

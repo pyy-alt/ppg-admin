@@ -61,8 +61,8 @@ interface TimelineProps {
     orderReceivedActivityLogItems?: ActivityLogItem[]
   }
   onResubmit?: () => void | Promise<void>
-  onMarkReceived?: (status: Status) => void | Promise<void>
   onMarkShipped?: (status: Status) => void | Promise<void>
+  onMarkReceived?: (status: Status) => void | Promise<void>
   onApprove?: () => void | Promise<void>
   onReject?: () => void | Promise<void>
 }
@@ -321,6 +321,9 @@ export function Timeline({
             // ✅ 当 stage 是 OrderFulfillment 但 status 是 DealershipShipped 时，OrderReceived 显示为 waiting
             itemStatus = 'waiting'
           }
+          if (status === 'ShopReceived') {
+            itemStatus = 'completed'
+          }
         } else if (stageName === 'RepairCompleted') {
           if (status === 'RepairCompleted') {
             itemStatus = 'completed'
@@ -447,23 +450,19 @@ export function Timeline({
   }
 
   const timelineItems = generateTimelineItems()
-  console.log('timelineItems')
-  console.log(timelineItems)
   return (
     <Card className='p-6'>
       <h2 className='mb-6 text-2xl font-bold'>Parts Tracker</h2>
       <div className='space-y-8'>
         {timelineItems.map((item, index) => {
-          console.log(item.status)
-          console.log(item.stage)
           const isRejected =
             item.stage === 'OrderReview' &&
             item.status === 'rejected' &&
             userType === 'Shop'
           const canResubmit = isRejected
           const canMarkReceived =
-            item.stage === 'OrderReceived' &&
-            item.status === 'waiting' &&
+          (item.stage === 'OrderReceived') &&
+            (item.status === 'completed' || item.status === 'waiting') &&
             onMarkReceived &&
             userType === 'Shop'
           const canMarkShipped =
@@ -480,7 +479,6 @@ export function Timeline({
             userType === 'Csr' &&
             onApprove &&
             onReject
-
           return (
             <div key={item.id} className='flex gap-4'>
               {/* 圆点 + 虚线 */}
@@ -827,15 +825,17 @@ export function Timeline({
                 )}
 
                 {/* 标记为已接收按钮（Shop 角色，OrderReceived 阶段显示） */}
-                {canMarkReceived && (
+                {canMarkReceived && status!=='RepairCompleted' && (
                   <div className='mt-4'>
                     <Button
                       size='sm'
                       variant='outline'
-                      onClick={() => onMarkReceived(item.status as Status)}
+                      onClick={() => onMarkReceived(status as Status)}
                       className='bg-gray-100 hover:bg-gray-200'
                     >
-                      Mark Parts as Received
+                      {status === 'ShopReceived'
+                        ? 'Unmark Parts as Received'
+                        : 'Mark Parts as Received'}
                     </Button>
                   </div>
                 )}

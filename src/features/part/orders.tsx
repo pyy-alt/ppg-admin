@@ -298,8 +298,8 @@ export function PartOrders() {
               />
             </div>
             {/* 只有 CSRs（客户服务代表） 和 经销商 (Dealers) 才能看到并使用 */}
-            {user?.person?.type === 'Csr' ||
-              (user?.person?.type === 'FieldStaff' && (
+            {(user?.person?.type === 'Csr' || user?.person?.type === 'Dealership') &&
+             (
                 <div className='flex items-center gap-3'>
                   <Checkbox
                     id='my-orders'
@@ -316,7 +316,7 @@ export function PartOrders() {
                     Only View Parts Orders that are waiting On Me
                   </Label>
                 </div>
-              ))}
+              )}
           </div>
 
           {/* 完整筛选条件 */}
