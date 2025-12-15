@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from '@tanstack/react-router'
+import { useNavigate, useRouter, useSearch } from '@tanstack/react-router'
 import RequestApi from '@/js/clients/base/OrderApi'
 import PartsOrder from '@/js/models/PartsOrder'
 import type RepairOrder from '@/js/models/RepairOrder'
 import RepairOrderSearchRequest from '@/js/models/RepairOrderSearchRequest'
 import ResultParameter from '@/js/models/ResultParameter'
 import {
-  Plus,
   Search,
   AlertTriangle,
   TableIcon,
@@ -22,7 +21,6 @@ import vwNav from '@/assets/img/repair/vw.png'
 import { useAuthStore } from '@/stores/auth-store'
 import { calculateDateRange, formatDateOnly } from '@/lib/utils'
 import { useBrand } from '@/context/brand-context'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
@@ -56,17 +54,18 @@ import RepairOrderDialog, {
 import { DataTablePagination } from '@/components/data-table-pagination'
 import { DatePicker } from '@/components/date-picker'
 
-const getStatusVariant = (status: string) => {
-  if (status.includes('Rejected')) return 'destructive'
-  if (status.includes('Review')) return 'secondary'
-  if (status.includes('Processing')) return 'outline'
-  if (status.includes('Shipped')) return 'default'
-  return 'secondary'
-}
+// const getStatusVariant = (status: string) => {
+//   if (status.includes('Rejected')) return 'destructive'
+//   if (status.includes('Review')) return 'secondary'
+//   if (status.includes('Processing')) return 'outline'
+//   if (status.includes('Shipped')) return 'default'
+//   return 'secondary'
+// }
 interface RepairOrderListProps {
   repairOrders: []
   totalItems: number
 }
+
 export function RepairOrderList() {
   const { user } = useAuthStore((state) => state.auth)
   const [dateLastSubmittedFrom, setFromDate] = useState<Date | undefined>(
@@ -86,7 +85,7 @@ export function RepairOrderList() {
   const [smartFilter, setSmartFilter] = useState('')
   const [dateRangePreset, setDateRangePreset] = useState('all')
 
-  const [initialData, setInitialData] = useState<RepairOrder | undefined>(
+  const [initialData] = useState<RepairOrder | undefined>(
     undefined
   )
 
@@ -95,6 +94,8 @@ export function RepairOrderList() {
     useState<PartsOrder>()
 
   const [initRepaitOrderData, setInitRepaitOrderData] = useState<RepairOrder>()
+
+  const { id }: any = useSearch({ from: '/_authenticated/repair_orders' })
 
   const { brand } = useBrand()
   const navImg = brand === 'vw' ? vwNav : audiNav
@@ -144,25 +145,23 @@ export function RepairOrderList() {
   const getRepairOrders = async () => {
     try {
       const api = new RequestApi()
-      const shopId = user?.person?.shop?.id
-
+      const shopId = user?.person?.shop?.id || id
       if (shopId == null) {
+        router.history.go(-1)
         return
       }
 
-      // 处理 filterByStatus：如果是 'all'，传 undefined
       const statusFilter = filterByStatus === 'all' ? undefined : filterByStatus
-
       const request = RepairOrderSearchRequest.create({
-        shopId: shopId,
-        smartFilter: smartFilter || undefined, // 空字符串转为 undefined
+        shopId: Number(shopId),
+        smartFilter: smartFilter || undefined,
         filterByStatus: statusFilter,
         showRepairCompleted,
         dateLastSubmittedFrom,
         dateLastSubmittedTo,
       })
 
-      // 在序列化前，手动将日期字段格式化为字符串（覆盖 ModelBaseClass 的转换）
+      // 日期处理保持不变
       if ((request as any).dateLastSubmittedFrom) {
         ;(request as any).dateLastSubmittedFrom = formatDateOnly(
           dateLastSubmittedFrom
@@ -182,19 +181,131 @@ export function RepairOrderList() {
       ;(request as any).resultParameter = resultParameter
 
       api.repairOrderSearch(request, {
-        status200: (response) => {
-          setRepairOrders((response as any).repairOrders)
+        status200: async (response) => {
+          let orders = (response as any).repairOrders || []
+
+          // 并发获取每条记录的零件订单数据
+          const ordersWithParts = await Promise.all(
+            orders.map(async (order: any) => {
+              try {
+                const partsResponse = await getPartsOrderDetail(
+                  order.id.toString()
+                )
+
+                // 统一处理返回（数组或对象）
+                const partsOrders = Array.isArray(partsResponse)
+                  ? partsResponse
+                  : partsResponse
+                    ? [partsResponse]
+                    : []
+
+                // 计算各状态数量
+                const statusCounts = {
+                  CsrReview: 0,
+                  CsrRejected: 0,
+                  DealershipProcessing: 0,
+                  DealershipShipped: 0,
+                  ShopReceived: 0,
+                  RepairCompleted: 0,
+                }
+
+                partsOrders.forEach((part: any) => {
+                  const status = part.status
+                  if (statusCounts.hasOwnProperty(status)) {
+                    statusCounts[status as keyof typeof statusCounts]++
+                  }
+                })
+
+                return {
+                  ...order,
+                  partsOrders, // 完整零件订单数据（可选）
+                  statusCounts, // 各状态数量对象
+                }
+              } catch (err) {
+                console.error(`Failed to load parts for RO ${order.id}:`, err)
+                return {
+                  ...order,
+                  partsOrders: [],
+                  statusCounts: {
+                    CsrReview: 0,
+                    CsrRejected: 0,
+                    DealershipProcessing: 0,
+                    DealershipShipped: 0,
+                    ShopReceived: 0,
+                    RepairCompleted: 0,
+                  },
+                }
+              }
+            })
+          )
+
+          setRepairOrders(ordersWithParts)
           setTotalItems((response as any).totalItemCount || 0)
         },
         error: (error) => {
           console.error('Error:', error)
+          toast.error('Failed to load repair orders')
         },
       })
     } catch (e) {
       console.error(e)
     }
   }
+  // const getRepairOrders = async () => {
+  //   try {
+  //     const api = new RequestApi()
+  //     const shopId = user?.person?.shop?.id || id
+  //     // 需要传递shopId 才能进行查询
+  //     if (shopId == null) {
+  //       router.history.go(-1)
+  //       return
+  //     }
+  //     // 处理 filterByStatus：如果是 'all'，传 undefined
+  //     const statusFilter = filterByStatus === 'all' ? undefined : filterByStatus
+
+  //     const request = RepairOrderSearchRequest.create({
+  //       shopId: Number(shopId),
+  //       smartFilter: smartFilter || undefined, // 空字符串转为 undefined
+  //       filterByStatus: statusFilter,
+  //       showRepairCompleted,
+  //       dateLastSubmittedFrom,
+  //       dateLastSubmittedTo,
+  //     })
+
+  //     // 在序列化前，手动将日期字段格式化为字符串（覆盖 ModelBaseClass 的转换）
+  //     if ((request as any).dateLastSubmittedFrom) {
+  //       ;(request as any).dateLastSubmittedFrom = formatDateOnly(
+  //         dateLastSubmittedFrom
+  //       )
+  //     }
+  //     if ((request as any).dateLastSubmittedTo) {
+  //       ;(request as any).dateLastSubmittedTo =
+  //         formatDateOnly(dateLastSubmittedTo)
+  //     }
+
+  //     const resultParameter = ResultParameter.create({
+  //       resultsLimitOffset: (currentPage - 1) * itemsPerPage,
+  //       resultsLimitCount: itemsPerPage,
+  //       resultsOrderBy: 'dateLastSubmitted',
+  //       resultsOrderAscending: false,
+  //     })
+  //     ;(request as any).resultParameter = resultParameter
+
+  //     api.repairOrderSearch(request, {
+  //       status200: (response) => {
+  //         setRepairOrders((response as any).repairOrders)
+  //         setTotalItems((response as any).totalItemCount || 0)
+  //       },
+  //       error: (error) => {
+  //         console.error('Error:', error)
+  //       },
+  //     })
+  //   } catch (e) {
+  //     console.error(e)
+  //   }
+  // }
   const navigate = useNavigate()
+  const router = useRouter()
 
   useEffect(() => {
     if (!user) return // 等待用户信息加载
@@ -309,17 +420,16 @@ export function RepairOrderList() {
           <h1 className='text-foreground text-2xl font-bold'>
             Repair Order List
           </h1>
-          <Button
-            variant='default'
-            onClick={() => {
-              setOpen(true)
-              setInitialData(undefined)
-            }}
-            // onClick={() => setOpenEdit(true)}
-          >
-            <Plus className='mr-2 h-4 w-4' />
-            New Repair Order
-          </Button>
+          {user?.person?.type === 'Shop' && (
+            <Button
+              variant='outline'
+              onClick={() => {
+                setOpen(true)
+              }}
+            >
+              New Repair Order
+            </Button>
+          )}
         </div>
       </div>
       {/* 新增 or 编辑*/}
@@ -535,12 +645,53 @@ export function RepairOrderList() {
                         </TableCell>
                         <TableCell>{vehicle}</TableCell>
                         <TableCell>
-                          <Badge
+                          {/* <Badge
                             variant={getStatusVariant(orderAny.status || '')}
                             className='whitespace-nowrap'
                           >
                             {orderAny.status || '--'}
-                          </Badge>
+                          </Badge> */}
+                          <div className='space-y-1 text-sm'>
+                            {orderAny.statusCounts.DealershipShipped > 0 && (
+                              <div>
+                                Dealer Shipped (
+                                {orderAny.statusCounts.DealershipShipped})
+                              </div>
+                            )}
+                            {orderAny.statusCounts.ShopReceived > 0 && (
+                              <div>
+                                Shop Received (
+                                {orderAny.statusCounts.ShopReceived})
+                              </div>
+                            )}
+                            {orderAny.statusCounts.CsrReview > 0 && (
+                              <div>
+                                CSR Review ({orderAny.statusCounts.CsrReview})
+                              </div>
+                            )}
+                            {orderAny.statusCounts.CsrRejected > 0 && (
+                              <div>
+                                CSR Rejected (
+                                {orderAny.statusCounts.CsrRejected})
+                              </div>
+                            )}
+                            {orderAny.statusCounts.DealershipProcessing > 0 && (
+                              <div>
+                                Dealer Processing (
+                                {orderAny.statusCounts.DealershipProcessing})
+                              </div>
+                            )}
+                            {orderAny.statusCounts.RepairCompleted > 0 && (
+                              <div>
+                                Repair Completed (
+                                {orderAny.statusCounts.RepairCompleted})
+                              </div>
+                            )}
+                            {/* 如果所有数量为0，显示 -- */}
+                            {Object.values(orderAny.statusCounts).every(
+                              (count) => count === 0
+                            ) && <div>--</div>}
+                          </div>
                         </TableCell>
                         <TableCell>{orderAny.customer || '--'}</TableCell>
                         <TableCell>

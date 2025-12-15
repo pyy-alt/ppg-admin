@@ -5,9 +5,7 @@ import { RepairOrderList } from '@/features/repair/orders'
 
 function RepairOrdersComponent() {
   const { isAuthenticated, isLoading } = useAuthenticated()
-  const location = useLocation()  // ✅ 添加这行
-
-
+  const location = useLocation() // ✅ 添加这行
   if (isLoading || !isAuthenticated) {
     return <Loading />
   }

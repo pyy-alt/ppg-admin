@@ -42,7 +42,7 @@ const ROLE_REDIRECT_CONFIG: Record<PersonType, RoleConfig> = {
   ProgramAdministrator: {
     forbiddenRoute: '/admin/parts_orders',
     defaultRoute: '/admin/parts_orders',
-    allowedRoutes: ['/admin', '/parts_orders'],
+    allowedRoutes: ['/admin', '/parts_orders','/repair_orders'],
   },
   Shop: {
     forbiddenRoute: '/repair_orders',

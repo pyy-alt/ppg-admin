@@ -116,16 +116,32 @@ export function PartOrders() {
       setHeaders(headerTexts)
     }
   }, [orders])
-  const getStatusVariant = (
-    status: string
-  ): 'default' | 'secondary' | 'destructive' | 'outline' => {
-    if (status.includes('Review') || status.includes('Rejected'))
-      return 'destructive'
-    if (status.includes('Shipped') || status.includes('Completed'))
-      return 'default'
-    if (status.includes('Received')) return 'secondary'
-    if (status.includes('Processing')) return 'outline'
-    return 'secondary'
+  // const getStatusVariant = (
+  //   status: string
+  // ): 'default' | 'secondary' | 'destructive' | 'outline' => {
+  //   if (status.includes('Review') || status.includes('Rejected'))
+  //     return 'destructive'
+  //   if (status.includes('Shipped') || status.includes('Completed'))
+  //     return 'default'
+  //   if (status.includes('Received')) return 'secondary'
+  //   if (status.includes('Processing')) return 'outline'
+  //   return 'secondary'
+  // }
+  const getStatusTxt=(status: string)=>{
+    switch (status) {
+      case 'CsrReview':
+        return 'CSR Review'
+      case 'CsrRejected':
+        return 'Csr Rejected'
+      case 'DealershipProcessing':
+        return 'Dealer Processing'
+      case 'DealershipShipped':
+        return 'Dealer Shipped'
+      case 'ShopReceived':
+        return 'Shop Received'
+      case 'RepairCompleted':
+        return 'Repair Completed'
+    }
   }
 
   // 获取零件订单数据
@@ -298,25 +314,25 @@ export function PartOrders() {
               />
             </div>
             {/* 只有 CSRs（客户服务代表） 和 经销商 (Dealers) 才能看到并使用 */}
-            {(user?.person?.type === 'Csr' || user?.person?.type === 'Dealership') &&
-             (
-                <div className='flex items-center gap-3'>
-                  <Checkbox
-                    id='my-orders'
-                    checked={filterByWaitingOnMe}
-                    onCheckedChange={(checked) =>
-                      setOnlyMyOrders(checked as boolean)
-                    }
-                    className='bg-muted rounded-full'
-                  />
-                  <Label
-                    htmlFor='my-orders'
-                    className='flex cursor-pointer items-center gap-2 text-sm font-medium'
-                  >
-                    Only View Parts Orders that are waiting On Me
-                  </Label>
-                </div>
-              )}
+            {(user?.person?.type === 'Csr' ||
+              user?.person?.type === 'Dealership') && (
+              <div className='flex items-center gap-3'>
+                <Checkbox
+                  id='my-orders'
+                  checked={filterByWaitingOnMe}
+                  onCheckedChange={(checked) =>
+                    setOnlyMyOrders(checked as boolean)
+                  }
+                  className='bg-muted rounded-full'
+                />
+                <Label
+                  htmlFor='my-orders'
+                  className='flex cursor-pointer items-center gap-2 text-sm font-medium'
+                >
+                  Only View Parts Orders that are waiting On Me
+                </Label>
+              </div>
+            )}
           </div>
 
           {/* 完整筛选条件 */}
@@ -351,7 +367,9 @@ export function PartOrders() {
                 <SelectItem value='DealershipProcessing'>
                   Dealer Processing
                 </SelectItem>
-                <SelectItem value='DealershipShipped'>Dealer Shipped</SelectItem>
+                <SelectItem value='DealershipShipped'>
+                  Dealer Shipped
+                </SelectItem>
                 <SelectItem value='ShopReceived'>Shop Received</SelectItem>
                 <SelectItem value='RepairCompleted'>
                   Repair Completed
@@ -535,10 +553,11 @@ export function PartOrders() {
                         <TableCell>{yearMakeModel}</TableCell>
                         <TableCell>
                           <Badge
-                            variant={getStatusVariant(filterByStatus)}
+                            // variant={getStatusVariant(filterByStatus)}
+                            variant="secondary"
                             className='whitespace-nowrap'
                           >
-                            {status}
+                            { getStatusTxt(status) }
                           </Badge>
                         </TableCell>
                         <TableCell className='text-sm'>{shop}</TableCell>

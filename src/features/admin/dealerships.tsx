@@ -1,9 +1,14 @@
 import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import OrganizationApi from '@/js/clients/base/OrganizationApi'
+import PersonApi from '@/js/clients/base/PersonApi'
 import OrganizationSearchRequest from '@/js/models/OrganizationSearchRequest'
+import PersonSearchRequest from '@/js/models/PersonSearchRequest'
 import ResultParameter from '@/js/models/ResultParameter'
 import { Search, Download, TableIcon } from 'lucide-react'
+import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/auth-store'
+import { exportCurrentPageToCSV } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
   Empty,
@@ -21,9 +26,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import ViewAdminTeamDialog from '@/components/AdminViewTeamDialog'
+import { TeamMember } from '@/components/ViewTeamDialog'
 import { DataTablePagination } from '@/components/data-table-pagination'
-import { exportCurrentPageToCSV } from '@/lib/utils'
-import { toast } from 'sonner'
 
 export function Dealerships() {
   const { user } = useAuthStore((state) => state.auth)
@@ -34,8 +39,42 @@ export function Dealerships() {
   const [loading, setLoading] = useState(false)
   const itemsPerPage = 20
   const totalPages = Math.ceil(totalItems / itemsPerPage)
-  const dealershipsRef =useRef<HTMLTableElement>(null)
+  const dealershipsRef = useRef<HTMLTableElement>(null)
   const [headers, setHeaders] = useState<string[]>([])
+
+  const [isShowAdminTeam, setIsShowAdminTeam] = useState(false)
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
+  const [organizationId, setOrganizationId] = useState<number>()
+
+  const navigate = useNavigate()
+
+  const getTeamMembers = async (
+    userType: 'Shop' | 'Dealership' | 'Network',
+    organizationId: number | undefined
+  ) => {
+    try {
+      const personApi = new PersonApi()
+      const request = PersonSearchRequest.create({
+        type: userType,
+        organizationId,
+      })
+
+      personApi.search(request, {
+        status200: (data) => {
+          setTeamMembers(data.persons)
+          setIsShowAdminTeam(true)
+        },
+        error: (error) => {
+          console.error('Person search error:', error)
+        },
+        else: (statusCode, message) => {
+          console.error('Unhandled search response:', statusCode, message)
+        },
+      })
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
   // 获取经销商数据
   const fetchDealerships = async () => {
@@ -95,7 +134,7 @@ export function Dealerships() {
     )
 
     return () => clearTimeout(timeoutId)
-  }, [smartFilter,currentPage, user])
+  }, [smartFilter, currentPage, user])
 
   const getFlattenedCurrentPageData = () => {
     const startIndex = (currentPage - 1) * itemsPerPage
@@ -117,7 +156,11 @@ export function Dealerships() {
   const exportCSV = async () => {
     try {
       const flattenedData = getFlattenedCurrentPageData()
-      const result = await exportCurrentPageToCSV(flattenedData, headers,'Manage_Dealers')
+      const result = await exportCurrentPageToCSV(
+        flattenedData,
+        headers,
+        'Manage_Dealers'
+      )
       result ? toast.success('Exported successfully') : null
     } catch (error) {
       toast.error('Export failed')
@@ -137,7 +180,6 @@ export function Dealerships() {
       setHeaders(headerTexts)
     }
   }, [dealerships])
- 
 
   return (
     <div className='bg-background min-h-screen'>
@@ -219,19 +261,43 @@ export function Dealerships() {
                   <TableBody>
                     {dealerships.map((dealer: any) => (
                       <TableRow key={dealer.id} className='hover:bg-background'>
-                        <TableCell className='cursor-pointer font-medium text-blue-600 hover:underline'>
+                        <TableCell className='cursor-pointer font-medium text-blue-600 hover:underline hover:cursor-pointer'   onClick={() => {
+                            navigate({
+                              to: '/parts_orders',
+                            })
+                          }}>
                           {dealer.name || '--'}
                         </TableCell>
                         <TableCell>{dealer.dealershipNumber || '--'}</TableCell>
-                        <TableCell className='text-center font-medium'>
+                        <TableCell
+                          className='text-center font-medium text-blue-600 underline hover:cursor-pointer'
+                          onClick={() => {
+                            navigate({
+                              to: '/repair_orders',
+                              search: { id: dealer.id.toString() },
+                            })
+                          }}
+                        >
                           {dealer.countPendingOrders ?? 0}
                         </TableCell>
                         <TableCell>{dealer.city || '--'}</TableCell>
                         <TableCell>{dealer.state || '--'}</TableCell>
-                        <TableCell className='text-center'>
+                        <TableCell
+                          className='text-center text-blue-600 underline hover:cursor-pointer'
+                          onClick={() => {
+                            setOrganizationId(dealer.id)
+                            getTeamMembers('Dealership', dealer.id)
+                          }}
+                        >
                           {dealer.countActiveUsers ?? 0}
                         </TableCell>
-                        <TableCell className='text-center'>
+                        <TableCell
+                          className='text-center text-blue-600 underline hover:cursor-pointer'
+                          onClick={() => {
+                            setOrganizationId(dealer.id)
+                            getTeamMembers('Dealership', dealer.id)
+                          }}
+                        >
                           {dealer.countPendingUsers ?? 0}
                         </TableCell>
                       </TableRow>
@@ -252,6 +318,18 @@ export function Dealerships() {
           )}
         </div>
       </div>
+      <ViewAdminTeamDialog
+        teamMembers={teamMembers}
+        open={isShowAdminTeam}
+        onOpenChange={setIsShowAdminTeam}
+        onSuccess={async () => {
+          await getTeamMembers('Dealership', organizationId)
+          setOrganizationId(undefined)
+        }}
+        onError={(error) => {
+          console.error('Failed to get team members:', error)
+        }}
+      />
     </div>
   )
 }

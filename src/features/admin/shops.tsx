@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import OrganizationApi from '@/js/clients/base/OrganizationApi'
+import PersonApi from '@/js/clients/base/PersonApi'
 import OrganizationSearchRequest from '@/js/models/OrganizationSearchRequest'
+import PersonSearchRequest from '@/js/models/PersonSearchRequest'
 import ResultParameter from '@/js/models/ResultParameter'
 import { Search, Download, TableIcon } from 'lucide-react'
 import { toast } from 'sonner'
@@ -32,7 +35,8 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { DataTablePagination } from '@/components/data-table-pagination'
-
+import ViewAdminTeamDialog from  '@/components/AdminViewTeamDialog'
+import { TeamMember } from '@/components/ViewTeamDialog'
 export function Shops() {
   const { user } = useAuthStore((state) => state.auth)
   const [currentPage, setCurrentPage] = useState(1)
@@ -48,6 +52,41 @@ export function Shops() {
   const totalPages = Math.ceil(totalItems / itemsPerPage)
   const [headers, setHeaders] = useState<string[]>([])
   const shopsOrderRef = useRef<HTMLTableElement>(null)
+
+  const [isShowAdminTeam, setIsShowAdminTeam] = useState(false)
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
+  const [organizationId, setOrganizationId]= useState<number>()
+
+  const navigate = useNavigate()
+
+  const getTeamMembers = async (
+    userType: 'Shop' | 'Dealership' | 'Network',
+    organizationId:number | undefined
+  ) => {
+    try {
+      const personApi = new PersonApi()
+      const request = PersonSearchRequest.create({
+        type: userType,
+        organizationId
+      })
+
+      personApi.search(request, {
+        status200: (data) => {
+          setTeamMembers(data.persons)
+          setIsShowAdminTeam(true)
+        },
+        error: (error) => {
+          console.error('Person search error:', error)
+        },
+        else: (statusCode, message) => {
+          console.error('Unhandled search response:', statusCode, message)
+        },
+      })
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
   // 获取店铺数据
   const fetchShops = async () => {
     if (!user) return
@@ -153,7 +192,7 @@ export function Shops() {
         City: order.city || '--',
         State: order.state || '--',
         Dealer: order.sponsorDealership.name || '--',
-        "Dealer #": order.sponsorDealership.dealershipNumber || '--',
+        'Dealer #': order.sponsorDealership.dealershipNumber || '--',
         Region: order.region.name || '--',
       }
     })
@@ -161,7 +200,11 @@ export function Shops() {
   const exportCSV = async () => {
     try {
       const flattenedData = getFlattenedCurrentPageData()
-      const result = await exportCurrentPageToCSV(flattenedData, headers,'Manage_Shops')
+      const result = await exportCurrentPageToCSV(
+        flattenedData,
+        headers,
+        'Manage_Shops'
+      )
       result ? toast.success('Exported successfully') : null
     } catch (error) {
       toast.error('Export failed')
@@ -345,18 +388,40 @@ export function Shops() {
                     return (
                       <TableRow key={shop.id} className='hover:bg-background'>
                         <TableCell className='font-medium text-blue-600'>
-                          <span className='cursor-pointer hover:underline'>
+                          <span className='cursor-pointer hover:underline'   onClick={() => {
+                            navigate({
+                              to: '/repair_orders',
+                              search: { id: shop.id.toString() },
+                            })
+                          }}>
                             {shop.name || '--'}
                           </span>
                         </TableCell>
                         <TableCell>{shop.shopNumber || '--'}</TableCell>
-                        <TableCell className='text-center font-medium'>
+                        <TableCell
+                          className='text-center font-medium text-blue-600 underline'
+                          onClick={() => {
+                            navigate({
+                              to: '/repair_orders',
+                              search: { id: shop.id.toString() },
+                            })
+                          }}
+                        >
                           {shop.countPendingOrders ?? 0}
                         </TableCell>
-                        <TableCell className='text-center'>
+                        <TableCell
+                          className='text-center text-blue-600 underline hover:cursor-pointer'
+                          onClick={() => {
+                            setOrganizationId(shop.id)
+                            getTeamMembers('Shop',shop.id)
+                          }}
+                        >
                           {shop.countActiveUsers ?? 0}
                         </TableCell>
-                        <TableCell className='text-center'>
+                        <TableCell className='text-center text-blue-600 underline hover:cursor-pointer'   onClick={() => {
+                            setOrganizationId(shop.id)
+                            getTeamMembers('Shop',shop.id)
+                          }}>
                           {shop.countPendingUsers ?? 0}
                         </TableCell>
                         <TableCell>
@@ -402,6 +467,18 @@ export function Shops() {
           </>
         )}
       </div>
+       <ViewAdminTeamDialog
+           teamMembers={teamMembers}
+           open={isShowAdminTeam}
+           onOpenChange={setIsShowAdminTeam}
+           onSuccess={async ()=>{
+            await getTeamMembers('Shop',organizationId)
+            setOrganizationId(undefined)
+           }}
+           onError={(error) => {
+             console.error('Failed to get team members:', error)
+           }}
+         />
     </div>
   )
 }

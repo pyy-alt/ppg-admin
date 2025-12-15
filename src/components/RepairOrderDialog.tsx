@@ -102,9 +102,9 @@ export default function RepairOrderDialog({
   const isEdit = !!initialData
 
   const [structuralMeasurementFileAssets, setStructuralMeasurementFileAssets] =
-    useState<File[]>([])
+    useState<any[]>([])
   const [preRepairPhotoFileAssets, setPreRepairPhotoFileAssets] = useState<
-    File[]
+    any[]
   >([])
 
   const form = useForm<FormValues>({
@@ -175,6 +175,7 @@ export default function RepairOrderDialog({
       return []
     }
   }
+
   // 当 initialData 变化时，更新表单和文件
   useEffect(() => {
     getOrderFromDealership()
@@ -190,10 +191,22 @@ export default function RepairOrderDialog({
         model: initialData.model || '',
         orderFromDealershipId: initialData.dealership?.id?.toString() || '',
       })
-      setStructuralMeasurementFileAssets(
-        initialData.structuralMeasurementFileAssets || []
+      const imgList = (initialData.preRepairPhotoFileAssets || []).map(
+        (item: any) => {
+          item.name = item.filename
+          item.viewUrl = import.meta.env.VITE_API_URL + item.viewUrl
+          return item
+        }
       )
-      setPreRepairPhotoFileAssets(initialData.preRepairPhotoFileAssets || [])
+      setPreRepairPhotoFileAssets(imgList || [])
+      const pdfList = (initialData.structuralMeasurementFileAssets || []).map(
+        (item: any) => {
+          item.name = item.filename
+          item.viewUrl = import.meta.env.VITE_API_URL + item.viewUrl
+          return item
+        }
+      )
+      setStructuralMeasurementFileAssets(pdfList || [])
     } else {
       form.reset({
         roNumber: '',
@@ -214,98 +227,107 @@ export default function RepairOrderDialog({
       const api = new RequestApi()
 
       // 转换文件为 FileAsset 数组
-      const structuralMeasurementFiles = await convertFilesToFileAssets(
-        structuralMeasurementFileAssets,
-        FileAssetFileAssetTypeEnum.STRUCTURAL_MEASUREMENT
-      )
+      try {
+        // 只把「新上传」的文件转 base64 上传
+        const newPhotoFiles = preRepairPhotoFileAssets.filter(
+          (f): f is File => f instanceof File
+        )
 
-      const preRepairPhotoFiles = await convertFilesToFileAssets(
-        preRepairPhotoFileAssets,
-        FileAssetFileAssetTypeEnum.PRE_REPAIR_PHOTO
-      )
+        const newStructuralFiles = structuralMeasurementFileAssets.filter(
+          (f): f is File => f instanceof File
+        )
+        const preRepairPhotoFileAssetsToUpload = await convertFilesToFileAssets(
+          newPhotoFiles,
+          FileAssetFileAssetTypeEnum.PRE_REPAIR_PHOTO
+        )
+        const structuralFileAssetsToUpload = await convertFilesToFileAssets(
+          newStructuralFiles,
+          FileAssetFileAssetTypeEnum.STRUCTURAL_MEASUREMENT
+        )
 
-      const dealership = orderFromDealerships.find(
-        (dealership) => dealership.id === Number(data.orderFromDealershipId)
-      )
-      const repairOrderPayload = {
-        ...(initialData ?? {}), // 包含 id 等原始字段（编辑模式）
-        roNumber: data.roNumber,
-        customer: data.customer,
-        vin: data.vin,
-        make: data.make,
-        year: data.year,
-        model: data.model,
-        structuralMeasurementFileAssets:
-          structuralMeasurementFiles.length > 0
-            ? structuralMeasurementFiles
-            : initialData?.structuralMeasurementFileAssets,
-        preRepairPhotoFileAssets:
-          preRepairPhotoFiles.length > 0
-            ? preRepairPhotoFiles
-            : initialData?.preRepairPhotoFileAssets,
-        dealership,
-        shop: user?.person?.shop || initialData?.shop || null,
-      }
-
-      await new Promise((resolve) => {
-        if (isEdit) {
-          const repairOrder = (RepairOrder as any).create(repairOrderPayload)
-          api.repairOrderSave(repairOrder, {
-            status200: () => {
-              performClose()
-              toast.success('Repair Order saved successfully')
-              onSuccess?.({
-                ...data,
-                structuralMeasurementFileAssets,
-                preRepairPhotoFileAssets,
-              })
-              resolve(true)
-            },
-            else: (_statusCode: number, responseText: string) => {
-              toast.error(responseText)
-              // 所有非 200（包括 404、403、409 等）最终会走到这里
-              resolve(false) // 只负责结束 Promise，恢复按钮状态
-            },
-            error: (error) => {
-              console.error('Error saving repair order:', error)
-              toast.error('Error saving repair order:', error)
-              resolve(false)
-            },
-          })
-        } else {
-          const model = RepairOrderCreateModel.create({
-            repairOrder: repairOrderPayload,
-            partsOrder: {
-              parts: [],
-            },
-          })
-
-          api.repairOrderCreate(model, {
-            status200: (response) => {
-              console.log('Repair Order created successfully:', response)
-              onSuccess?.({
-                ...data,
-                structuralMeasurementFileAssets,
-                preRepairPhotoFileAssets,
-                id: response.id,
-              })
-              performClose()
-              toast.success('Repair Order created successfully')
-              resolve(true)
-            },
-            else: (_statusCode: number, responseText: string) => {
-              // 所有非 200（包括 404、403、409 等）最终会走到这里
-              toast.error(responseText)
-              resolve(false) // 只负责结束 Promise，恢复按钮状态
-            },
-            error: (error) => {
-              console.error('Error creating repair order:', error)
-              toast.error('Error creating repair order:', error)
-              resolve(false)
-            },
-          })
+        const dealership = orderFromDealerships.find(
+          (dealership) => dealership.id === Number(data.orderFromDealershipId)
+        )
+        const repairOrderPayload = {
+          ...(initialData ?? {}), // 包含 id 等原始字段（编辑模式）
+          roNumber: data.roNumber,
+          customer: data.customer,
+          vin: data.vin,
+          make: data.make,
+          year: data.year,
+          model: data.model,
+          structuralMeasurementFileAssets:
+            structuralFileAssetsToUpload.length > 0
+              ? structuralFileAssetsToUpload
+              : structuralMeasurementFileAssets,
+          preRepairPhotoFileAssets:
+            preRepairPhotoFileAssetsToUpload.length > 0
+              ? preRepairPhotoFileAssetsToUpload
+              : preRepairPhotoFileAssets,
+          dealership,
+          shop: user?.person?.shop || initialData?.shop || null,
         }
-      })
+
+        await new Promise((resolve) => {
+          if (isEdit) {
+            const repairOrder = (RepairOrder as any).create(repairOrderPayload)
+            api.repairOrderSave(repairOrder, {
+              status200: () => {
+                performClose()
+                toast.success('Repair Order saved successfully')
+                onSuccess?.({
+                  ...data,
+                  structuralMeasurementFileAssets,
+                  preRepairPhotoFileAssets,
+                })
+                resolve(true)
+              },
+              else: (_statusCode: number, responseText: string) => {
+                toast.error(responseText)
+                // 所有非 200（包括 404、403、409 等）最终会走到这里
+                resolve(false) // 只负责结束 Promise，恢复按钮状态
+              },
+              error: (error) => {
+                console.error('Error saving repair order:', error)
+                toast.error('Error saving repair order:', error)
+                resolve(false)
+              },
+            })
+          } else {
+            const model = RepairOrderCreateModel.create({
+              repairOrder: repairOrderPayload,
+              partsOrder: {
+                parts: [],
+              },
+            })
+
+            api.repairOrderCreate(model, {
+              status200: (response) => {
+                console.log('Repair Order created successfully:', response)
+                onSuccess?.({
+                  ...data,
+                  structuralMeasurementFileAssets,
+                  preRepairPhotoFileAssets,
+                  id: response.id,
+                })
+                performClose()
+                toast.success('Repair Order created successfully')
+                resolve(true)
+              },
+              else: (_statusCode: number, responseText: string) => {
+                // 所有非 200（包括 404、403、409 等）最终会走到这里
+                toast.error(responseText)
+                resolve(false) // 只负责结束 Promise，恢复按钮状态
+              },
+              error: (error) => {
+                console.error('Error creating repair order:', error)
+                toast.error('Error creating repair order:', error)
+                resolve(false)
+              },
+            })
+          }
+        })
+      } catch (error) {}
     } catch (error) {
       console.error('Error submitting repair order:', error)
       throw error // ✅ 重新抛出错误，让 React Hook Form 知道提交失败
@@ -321,7 +343,7 @@ export default function RepairOrderDialog({
   }: {
     title: string
     icon: React.ElementType
-    files: File[]
+    files: any
     onFilesChange: (files: File[]) => void
     accept?: string
   }) => {
@@ -349,6 +371,10 @@ export default function RepairOrderDialog({
       accept: getAcceptConfig(),
       multiple: true,
       onDrop: (acceptedFiles) => {
+        console.log(
+          acceptedFiles.length,
+          acceptedFiles.map((f) => f.name)
+        )
         onFilesChange([...files, ...acceptedFiles])
       },
     })
@@ -398,29 +424,35 @@ export default function RepairOrderDialog({
 
         {files.length > 0 && (
           <div className='space-y-2'>
-            {files.map((file, i) => (
+            {files.map((file: any, i: number) => (
               <div
                 key={`${file.name}-${i}-${file.size}`}
                 className='flex items-center justify-between rounded-md px-3 py-2 transition-colors'
               >
-                <div className='flex items-center gap-2 text-blue-500'>
+                <a
+                  className='flex cursor-pointer items-center gap-2 text-blue-500'
+                  href={file.viewUrl}
+                  target='_blank'
+                >
                   {title.includes('Photo') ? (
                     <ImageIcon className='h-4 w-4' />
                   ) : (
                     <FileText className='h-4 w-4' />
                   )}
-                  <span className='max-w-48 truncate text-sm text-blue-500 hover:underline'>
+                  <span className='max-w-48 truncate text-sm text-blue-500 underline'>
                     {file.name}
                   </span>
                   {/* <span className='text-muted-foreground text-xs'>
                     {(file.size / 1024 / 1024).toFixed(1)} MB
                   </span> */}
-                </div>
+                </a>
                 <button
                   type='button'
                   onClick={(e) => {
                     e.stopPropagation()
-                    onFilesChange(files.filter((_, idx) => idx !== i))
+                    onFilesChange(
+                      files.filter((_: any, idx: number) => idx !== i)
+                    )
                   }}
                   className='text-destructive hover:bg-destructive/10 hover:text-destructive focus:ring-destructive rounded p-1 transition-colors focus:ring-2 focus:ring-offset-1 focus:outline-none'
                   aria-label={`Remove ${file.name}`}
@@ -437,7 +469,7 @@ export default function RepairOrderDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleDialogOpenChange}>
-      <DialogContent className='flex max-h-[90vh] flex-col sm:max-w-4xl'>
+      <DialogContent className='flex max-h-[90vh] flex-col  w-[90%] sm:max-w-7xl '>
         <DialogHeader className='shrink-0'>
           <DialogTitle className='text-2xl font-semibold'>
             {isEdit ? 'Edit Repair Order' : 'New Repair Order'}

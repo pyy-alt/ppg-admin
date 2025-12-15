@@ -340,15 +340,14 @@ export function RepairOrderDetail() {
           <p className='mt-4 flex items-center space-x-4 text-sm text-gray-200'>
             {/* 房子图标 */}
             <Warehouse className='h-5 w-5 text-white' />
-           { user?.person?.shop &&
-             <span>
-              Assigned Dealership:{' '}
-              { user?.person?.shop?.sponsorDealership.name ?? '--'}( {' '}
-              {user?.person?.shop?.sponsorDealership.dealershipNumber})
-            </span>
-
-            || '--'
-           }
+            {(user?.person?.shop && (
+              <span>
+                Assigned Dealership:{' '}
+                {user?.person?.shop?.sponsorDealership.name ?? '--'}({' '}
+                {user?.person?.shop?.sponsorDealership.dealershipNumber})
+              </span>
+            )) ||
+              '--'}
             <Users className='ml-6 h-5 w-5 text-white' />
             <span>
               {' '}
@@ -502,8 +501,9 @@ export function RepairOrderDetail() {
                         (f) => (
                           <a
                             key={f.id}
-                            href={f.downloadUrl}
+                            href={`${import.meta.env.VITE_API_URL}${f.downloadUrl}`}
                             className='text-blue-700 underline hover:underline'
+                            target='_blank'
                           >
                             {f.filename}
                           </a>
@@ -517,7 +517,7 @@ export function RepairOrderDetail() {
                   Structural Measurements
                 </span>
                 <br />
-                <a href='#' className='text-primary hover:underline'>
+                <div className='text-primary hover:underline'>
                   {initRepaitOrderData?.structuralMeasurementFileAssets &&
                   initRepaitOrderData?.structuralMeasurementFileAssets.length >
                     0
@@ -525,15 +525,16 @@ export function RepairOrderDetail() {
                         (f) => (
                           <a
                             key={f.id}
-                            href={f.downloadUrl}
+                            href={`${import.meta.env.VITE_API_URL}${f.downloadUrl}`}
                             className='text-blue-700 underline hover:underline'
+                            target='_blank'
                           >
                             {f.filename}
                           </a>
                         )
                       )
                     : '--'}
-                </a>
+                </div>
               </div>
               <div>
                 <span className='text-muted-foreground'>
@@ -673,7 +674,9 @@ export function RepairOrderDetail() {
                         (selectedPartsOrderData as any)?.status !==
                           'CsrRejected' &&
                         (selectedPartsOrderData as any)?.stage !==
-                          'OrderReceived') && (selectedPartsOrderData as any)?.status!=='RepairCompleted' ? (
+                          'OrderReceived' &&
+                        (selectedPartsOrderData as any)?.status !==
+                          'RepairCompleted') ? (
                         <Button
                           onClick={() => {
                             setSelectedPartsOrderData(selectedPartsOrderData)
@@ -721,7 +724,7 @@ export function RepairOrderDetail() {
                           (file: any) => (
                             <a
                               key={file.id}
-                              href={file.viewUrl}
+                              href={`${import.meta.env.VITE_API_URL + file.viewUrl}`}
                               className='text-blue-700 underline hover:underline'
                             >
                               {file.filename}

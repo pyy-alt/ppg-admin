@@ -116,16 +116,32 @@ export function PartOrders() {
       setHeaders(headerTexts)
     }
   }, [orders])
-  const getStatusVariant = (
-    status: string
-  ): 'default' | 'secondary' | 'destructive' | 'outline' => {
-    if (status.includes('Review') || status.includes('Rejected'))
-      return 'destructive'
-    if (status.includes('Shipped') || status.includes('Completed'))
-      return 'default'
-    if (status.includes('Received')) return 'secondary'
-    if (status.includes('Processing')) return 'outline'
-    return 'secondary'
+  // const getStatusVariant = (
+  //   status: string
+  // ): 'default' | 'secondary' | 'destructive' | 'outline' => {
+  //   if (status.includes('Review') || status.includes('Rejected'))
+  //     return 'destructive'
+  //   if (status.includes('Shipped') || status.includes('Completed'))
+  //     return 'default'
+  //   if (status.includes('Received')) return 'secondary'
+  //   if (status.includes('Processing')) return 'outline'
+  //   return 'secondary'
+  // }
+  const getStatusTxt = (status: string) => {
+    switch (status) {
+      case 'CsrReview':
+        return 'CSR Review'
+      case 'CsrRejected':
+        return 'Csr Rejected'
+      case 'DealershipProcessing':
+        return 'Dealer Processing'
+      case 'DealershipShipped':
+        return 'Dealer Shipped'
+      case 'ShopReceived':
+        return 'Shop Received'
+      case 'RepairCompleted':
+        return 'Repair Completed'
+    }
   }
 
   // 获取零件订单数据
@@ -519,7 +535,7 @@ export function PartOrders() {
                     return (
                       <TableRow key={order.id} className='hover:bg-muted/50'>
                         <TableCell
-                          className='cursor-pointer text-blue-600 hover:underline'
+                          className='cursor-pointer text-blue-600 underline'
                           onClick={() => {
                             navigate({
                               to: '/repair_orders/$id',
@@ -536,11 +552,18 @@ export function PartOrders() {
                         </TableCell>
                         <TableCell>{yearMakeModel}</TableCell>
                         <TableCell>
-                          <Badge
+                          {/* <Badge
                             variant={getStatusVariant(filterByStatus)}
                             className='whitespace-nowrap'
                           >
                             {status}
+                          </Badge> */}
+                          <Badge
+                            // variant={getStatusVariant(filterByStatus)}
+                            variant='secondary'
+                            className='whitespace-nowrap'
+                          >
+                            {getStatusTxt(status)}
                           </Badge>
                         </TableCell>
                         <TableCell className='text-sm'>{shop}</TableCell>

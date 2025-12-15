@@ -236,9 +236,12 @@ export function PartsOrderDialog({
     //   return
     // }
 
+    // 过滤掉带文件ID的文件
+    const newFiles = estimateFiles.filter((f): f is File => f instanceof File)
+
     // 转换文件为 FileAsset 数组
     const estimateFileAssets = await convertFilesToFileAssets(
-      estimateFiles,
+      newFiles,
       FileAssetFileAssetTypeEnum.ESTIMATE
     )
 
@@ -247,7 +250,7 @@ export function PartsOrderDialog({
       const partsOrder = (PartsOrder as any).create({
         ...initialData,
         parts: data.parts.map((part) => part.number),
-        estimateFileAssets,
+        estimateFileAssets:estimateFileAssets.length>0 ? estimateFileAssets : estimateFiles ,
         repairOrder: initRepaitOrderData,
       })
       setLoading(true)
@@ -409,8 +412,9 @@ export function PartsOrderDialog({
                         {initialData?.dateReviewed
                           ? formatDateOnly(initialData?.dateReviewed)
                           : '---'}
-                          {initialData?.reviewedByPerson &&  '  by ' + '   '}
-                          {initialData?.reviewedByPerson && initialData?.reviewedByPerson.firstName +
+                        {initialData?.reviewedByPerson && '  by ' + '   '}
+                        {initialData?.reviewedByPerson &&
+                          initialData?.reviewedByPerson.firstName +
                             ' ' +
                             initialData?.reviewedByPerson.lastName}
                       </p>
@@ -423,8 +427,9 @@ export function PartsOrderDialog({
                         {initialData?.dateShipped
                           ? formatDateOnly(initialData?.dateShipped)
                           : '---'}
-                          {initialData?.shippedByPerson &&  '  by ' + '   '}
-                          {initialData?.shippedByPerson && initialData?.shippedByPerson.firstName +
+                        {initialData?.shippedByPerson && '  by ' + '   '}
+                        {initialData?.shippedByPerson &&
+                          initialData?.shippedByPerson.firstName +
                             ' ' +
                             initialData?.shippedByPerson.lastName}
                       </p>
