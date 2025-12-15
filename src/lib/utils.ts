@@ -1,5 +1,45 @@
+import FileAsset from '@/js/models/FileAsset'
+import { type FileAssetType } from '@/js/models/enum/FileAssetFileAssetTypeEnum'
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+
+// 添加工具函数：将 File 转换为 base64
+export const fileToBase64 = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.readAsDataURL(file)
+    reader.onload = () => {
+      // 移除 data:image/png;base64, 或 data:application/pdf;base64, 前缀
+      const base64String = (reader.result as string).split(',')[1]
+      resolve(base64String)
+    }
+    reader.onerror = (error) => reject(error)
+  })
+}
+// 添加工具函数：将 File[] 转换为 FileAsset[]
+export const convertFilesToFileAssets = async (
+  files: File[],
+  fileAssetType: FileAssetType
+): Promise<any[]> => {
+  if (!files || files.length === 0) {
+    return []
+  }
+
+  const fileAssets = await Promise.all(
+    files.map(async (file) => {
+      const base64Data = await fileToBase64(file)
+      return FileAsset.create({
+        fileAssetType: fileAssetType,
+        uploadBase64Data: base64Data,
+        filename: file.name,
+        fileSize: file.size,
+        mimeType: file.type,
+      })
+    })
+  )
+
+  return fileAssets
+}
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -57,4 +97,186 @@ export function getPageNumbers(currentPage: number, totalPages: number) {
   }
 
   return rangeWithDots
+}
+
+// 根据预设范围计算日期  // 根据预设范围计算日期
+export const calculateDateRange = (preset: string) => {
+  const today = new Date()
+  // 获取今天的本地日期（年月日）
+  const todayYear = today.getFullYear()
+  const todayMonth = today.getMonth()
+  const todayDate = today.getDate()
+
+  // 创建只包含年月日的日期对象（时间设为 00:00:00，使用本地时区）
+  const createDateOnly = (year: number, month: number, date: number) => {
+    return new Date(year, month, date, 0, 0, 0, 0)
+  }
+
+  // 创建结束日期（时间设为 23:59:59.999，使用本地时区）
+  const createEndDate = (year: number, month: number, date: number) => {
+    return new Date(year, month, date, 23, 59, 59, 999)
+  }
+
+  switch (preset) {
+    case '7': {
+      const fromDate = new Date(todayYear, todayMonth, todayDate - 7)
+      return {
+        from: createDateOnly(
+          fromDate.getFullYear(),
+          fromDate.getMonth(),
+          fromDate.getDate()
+        ),
+        to: createEndDate(todayYear, todayMonth, todayDate),
+      }
+    }
+    case '30': {
+      const fromDate = new Date(todayYear, todayMonth, todayDate - 30)
+      return {
+        from: createDateOnly(
+          fromDate.getFullYear(),
+          fromDate.getMonth(),
+          fromDate.getDate()
+        ),
+        to: createEndDate(todayYear, todayMonth, todayDate),
+      }
+    }
+    case 'month-to-date':
+      return {
+        from: createDateOnly(todayYear, todayMonth, 1),
+        to: createEndDate(todayYear, todayMonth, todayDate),
+      }
+    case 'quarter-to-date': {
+      const quarter = Math.floor(todayMonth / 3)
+      return {
+        from: createDateOnly(todayYear, quarter * 3, 1),
+        to: createEndDate(todayYear, todayMonth, todayDate),
+      }
+    }
+    case 'year-to-date':
+      return {
+        from: createDateOnly(todayYear, 0, 1),
+        to: createEndDate(todayYear, todayMonth, todayDate),
+      }
+    case 'last-month': {
+      const lastMonth = todayMonth === 0 ? 11 : todayMonth - 1
+      const lastMonthYear = todayMonth === 0 ? todayYear - 1 : todayYear
+      // 获取上个月的最后一天
+      const lastDayOfLastMonth = new Date(todayYear, todayMonth, 0).getDate()
+      return {
+        from: createDateOnly(lastMonthYear, lastMonth, 1),
+        to: createEndDate(lastMonthYear, lastMonth, lastDayOfLastMonth),
+      }
+    }
+    case 'last-quarter': {
+      const lastQuarter = Math.floor(todayMonth / 3) - 1
+      const lastQuarterMonth = lastQuarter < 0 ? 9 : lastQuarter * 3 // 如果上季度是去年，则是 9 月（Q4）
+      const lastQuarterYear = lastQuarter < 0 ? todayYear - 1 : todayYear
+      // 获取上季度的最后一天
+      const lastDayOfLastQuarter = new Date(
+        lastQuarterYear,
+        (lastQuarter + 1) * 3,
+        0
+      ).getDate()
+      const lastQuarterEndMonth =
+        lastQuarter < 0 ? 11 : (lastQuarter + 1) * 3 - 1
+      return {
+        from: createDateOnly(lastQuarterYear, lastQuarterMonth, 1),
+        to: createEndDate(
+          lastQuarterYear,
+          lastQuarterEndMonth,
+          lastDayOfLastQuarter
+        ),
+      }
+    }
+    case 'last-year':
+      return {
+        from: createDateOnly(todayYear - 1, 0, 1),
+        to: createEndDate(todayYear - 1, 11, 31),
+      }
+    case 'custom':
+      return { from: undefined, to: undefined }
+    default:
+      return { from: undefined, to: undefined }
+  }
+}
+/**
+ * 格式化日期时间 → 02/31/2025 10:33:25 AM（美式月/日/年 + 12小时制 + AM/PM）
+ * @param date Date | string | undefined | null
+ * @param includeSeconds 是否显示秒（默认 true）
+ * @returns string | undefined
+ */
+export const formatDateOnly = (
+  date: Date | string | number | undefined | null,
+  includeSeconds = true
+): string | undefined => {
+  if (!date) return undefined
+
+  const d = new Date(date)
+
+  // 判断日期是否有效
+  if (isNaN(d.getTime())) return undefined
+
+  const year = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, '0') // 月份从0开始
+  const day = String(d.getDate()).padStart(2, '0')
+
+  let hours = d.getHours()
+  const minutes = String(d.getMinutes()).padStart(2, '0')
+  const seconds = String(d.getSeconds()).padStart(2, '0')
+
+  const ampm = hours >= 12 ? 'PM' : 'AM'
+  hours = hours % 12
+  hours = hours || 12 // 0点显示为12
+
+  const timeStr = includeSeconds
+    ? `${hours}:${minutes}:${seconds} ${ampm}`
+    : `${hours}:${minutes} ${ampm}`
+
+  return `${month}/${day}/${year} ${timeStr}`
+}
+export const exportCurrentPageToCSV = (
+  data: any[],
+  headers: string[],
+  filename: string = 'Parts_Order'
+) => {
+  if (data.length === 0) {
+    alert('没有数据可导出')
+    return
+  }
+  try {
+    return new Promise((resolve) => {
+      // 转义函数（防止逗号、换行、引号破坏 CSV）
+      const escape = (val: any) => {
+        if (val === null || val === undefined) return ''
+        const str = String(val).trim()
+        return str.includes(',') || str.includes('"') || str.includes('\n')
+          ? `"${str.replace(/"/g, '""')}"`
+          : str
+      }
+
+      // 自动根据 headers 的顺序取数据（key 必须和对象属性一致）
+      const rows = data.map((row) =>
+        headers.map((header) => escape(row[header] ?? '--'))
+      )
+
+      // 组合 CSV 内容（加 BOM 防止 Excel 中文乱码）
+      const csvContent =
+        '\uFEFF' +
+        [headers.join(','), ...rows.map((r) => r.join(','))].join('\r\n')
+
+      // 下载
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `${filename}_${new Date().toISOString().slice(0, 10)}.csv`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+      resolve(true)
+    })
+  } catch (error) {
+    return Promise.reject(error)
+  }
 }

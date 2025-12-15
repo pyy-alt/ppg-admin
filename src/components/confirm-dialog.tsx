@@ -1,3 +1,4 @@
+import { TriangleAlert } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
   AlertDialog,
@@ -43,16 +44,21 @@ export function ConfirmDialog(props: ConfirmDialogProps) {
     <AlertDialog {...actions}>
       <AlertDialogContent className={cn(className && className)}>
         <AlertDialogHeader className='text-start'>
-          <AlertDialogTitle>{title}</AlertDialogTitle>
+          <div className='mb-2 flex items-center gap-2'>
+            <TriangleAlert className='text-destructive size-6' />
+            <AlertDialogTitle>{title}</AlertDialogTitle>
+          </div>
           <AlertDialogDescription asChild>
             <div>{desc}</div>
           </AlertDialogDescription>
         </AlertDialogHeader>
         {children}
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isLoading}>
-            {cancelBtnText ?? 'Cancel'}
-          </AlertDialogCancel>
+          {cancelBtnText !== undefined && cancelBtnText !== null && (
+            <AlertDialogCancel disabled={isLoading}>
+              {cancelBtnText ?? 'Cancel'}
+            </AlertDialogCancel>
+          )}
           <Button
             variant={destructive ? 'destructive' : 'default'}
             onClick={handleConfirm}

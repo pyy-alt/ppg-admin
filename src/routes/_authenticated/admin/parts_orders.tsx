@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Orders } from '@/features/admin/orders'
+import { PartOrders } from '@/features/admin/orders'
 import { useAuthenticated } from '@/hooks/use-authenticated'
 import { Loading } from '@/components/Loading'
 
@@ -11,7 +11,7 @@ function AdminPartsOrdersComponent() {
   }
   
   // 使用默认的 AuthenticatedLayout（包含侧边栏）
-  return <Orders />
+  return <PartOrders />
 }
 
 export const Route = createFileRoute('/_authenticated/admin/parts_orders')({

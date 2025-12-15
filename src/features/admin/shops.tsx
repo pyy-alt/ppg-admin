@@ -1,8 +1,23 @@
-'use client'
-
-import { Search, Download } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from '@tanstack/react-router'
+import OrganizationApi from '@/js/clients/base/OrganizationApi'
+import PersonApi from '@/js/clients/base/PersonApi'
+import OrganizationSearchRequest from '@/js/models/OrganizationSearchRequest'
+import PersonSearchRequest from '@/js/models/PersonSearchRequest'
+import ResultParameter from '@/js/models/ResultParameter'
+import { Search, Download, TableIcon } from 'lucide-react'
+import { toast } from 'sonner'
+import { useAuthStore } from '@/stores/auth-store'
+import { exportCurrentPageToCSV } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/components/ui/empty'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -20,146 +35,203 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { DataTablePagination } from '@/components/data-table-pagination'
-import { useState } from 'react'
-
-// 真实模拟店铺数据（已覆盖所有状态和地区）
-const mockShops = [
-  {
-    name: 'Bay Area Auto Care',
-    number: '4127',
-    pendingOrders: 4,
-    activeUsers: 5,
-    pendingUsers: 2,
-    status: 'Certified',
-    certification: 'Audi Ultra',
-    address: '101 Mission St',
-    city: 'San Francisco',
-    state: 'CA',
-    dealer: 'VW San Francisco',
-    dealerNumber: '65478',
-    region: 'Western US',
-  },
-  {
-    name: 'Boston Performance',
-    number: '5289',
-    pendingOrders: 3,
-    activeUsers: 7,
-    pendingUsers: 1,
-    status: 'Certified',
-    certification: 'Audi Ultra',
-    address: '222 Commonwealth Ave',
-    city: 'Boston',
-    state: 'MA',
-    dealer: 'Audi of Boston',
-    dealerNumber: '37219',
-    region: 'Eastern US',
-  },
-  {
-    name: 'Chicago Car Specialists',
-    number: '3098',
-    pendingOrders: 1,
-    activeUsers: 3,
-    pendingUsers: 0,
-    status: 'Certified',
-    certification: 'Volkswagen',
-    address: '789 Wacker Dr',
-    city: 'Chicago',
-    state: 'IL',
-    dealer: 'Audi of Chicago',
-    dealerNumber: '76532',
-    region: 'Central US',
-  },
-  {
-    name: 'Dallas Pro Shop',
-    number: '6345',
-    pendingOrders: 7,
-    activeUsers: 6,
-    pendingUsers: 3,
-    status: 'Certified',
-    certification: 'Audi Hybrid',
-    address: '353 Elm St',
-    city: 'Dallas',
-    state: 'TX',
-    dealer: 'VW Dallas',
-    dealerNumber: '98123',
-    region: 'Central US',
-  },
-  {
-    name: 'LA Performance Garage',
-    number: '1032',
-    pendingOrders: 3,
-    activeUsers: 2,
-    pendingUsers: 2,
-    status: 'Certified',
-    certification: 'Audi Hybrid',
-    address: '777 Sunset Blvd',
-    city: 'Los Angeles',
-    state: 'CA',
-    dealer: 'Audi Los Angeles',
-    dealerNumber: '89176',
-    region: 'Western US',
-  },
-  {
-    name: 'NYC Car Center',
-    number: '9234',
-    pendingOrders: 2,
-    activeUsers: 8,
-    pendingUsers: 0,
-    status: 'Certified',
-    certification: 'Volkswagen',
-    address: '666 5th Ave',
-    city: 'New York',
-    state: 'NY',
-    dealer: 'VW of New York',
-    dealerNumber: '67895',
-    region: 'Eastern US',
-  },
-  {
-    name: 'Santa Monica Service',
-    number: '2045',
-    pendingOrders: 5,
-    activeUsers: 5,
-    pendingUsers: 1,
-    status: 'Certified',
-    certification: 'Volkswagen',
-    address: '456 Ocean Ave',
-    city: 'Santa Monica',
-    state: 'CA',
-    dealer: 'VW Santa Monica',
-    dealerNumber: '92341',
-    region: 'Western US',
-  },
-  {
-    name: 'Vancouver Car Experts',
-    number: '7456',
-    pendingOrders: 2,
-    activeUsers: 6,
-    pendingUsers: 2,
-    status: 'Certified',
-    certification: 'Audi Hybrid',
-    address: '444 Granville St',
-    city: 'Vancouver',
-    state: 'BC',
-    dealer: 'Audi Vancouver',
-    dealerNumber: '56784',
-    region: 'Canada',
-  },
-]
-
+import ViewAdminTeamDialog from  '@/components/AdminViewTeamDialog'
+import { TeamMember } from '@/components/ViewTeamDialog'
 export function Shops() {
-  // 添加状态
+  const { user } = useAuthStore((state) => state.auth)
   const [currentPage, setCurrentPage] = useState(1)
+  const [smartFilter, setSmartFilter] = useState('')
+  const [filterByShopStatus, setFilterByShopStatus] = useState<string>('all')
+  const [filterByShopCertification, setFilterByShopCertification] =
+    useState<string>('all')
+  const [filterByRegionId, setFilterByRegionId] = useState<string>('all')
+  const [shops, setShops] = useState<any[]>([])
+  const [totalItems, setTotalItems] = useState(0)
+  const [loading, setLoading] = useState(false)
   const itemsPerPage = 20
-  const totalItems = mockShops.length // 根据实际数据
   const totalPages = Math.ceil(totalItems / itemsPerPage)
+  const [headers, setHeaders] = useState<string[]>([])
+  const shopsOrderRef = useRef<HTMLTableElement>(null)
+
+  const [isShowAdminTeam, setIsShowAdminTeam] = useState(false)
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
+  const [organizationId, setOrganizationId]= useState<number>()
+
+  const navigate = useNavigate()
+
+  const getTeamMembers = async (
+    userType: 'Shop' | 'Dealership' | 'Network',
+    organizationId:number | undefined
+  ) => {
+    try {
+      const personApi = new PersonApi()
+      const request = PersonSearchRequest.create({
+        type: userType,
+        organizationId
+      })
+
+      personApi.search(request, {
+        status200: (data) => {
+          setTeamMembers(data.persons)
+          setIsShowAdminTeam(true)
+        },
+        error: (error) => {
+          console.error('Person search error:', error)
+        },
+        else: (statusCode, message) => {
+          console.error('Unhandled search response:', statusCode, message)
+        },
+      })
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  // 获取店铺数据
+  const fetchShops = async () => {
+    if (!user) return
+
+    setLoading(true)
+    try {
+      const api = new OrganizationApi()
+
+      // 构建请求参数
+      const requestParams: any = {
+        type: 'Shop', // 必须设置为 'Shop' 来搜索店铺
+        smartFilter: smartFilter,
+        filterByRegionId: filterByRegionId && parseInt(filterByRegionId),
+      }
+
+      // 处理状态筛选
+      if (filterByShopStatus !== 'all') {
+        requestParams.filterByShopStatus = filterByShopStatus
+      }
+
+      // 处理认证筛选
+      if (filterByShopCertification !== 'all') {
+        requestParams.filterByShopCertification = filterByShopCertification
+      }
+
+      // 添加分页参数
+      const resultParameter = ResultParameter.create({
+        resultsLimitOffset: (currentPage - 1) * itemsPerPage,
+        resultsLimitCount: itemsPerPage,
+        resultsOrderBy: 'Name', // 可以根据需要调整排序字段
+        resultsOrderAscending: false,
+      })
+      requestParams.resultParameter = resultParameter
+
+      const request = OrganizationSearchRequest.create(requestParams)
+
+      api.search(request, {
+        status200: (response: any) => {
+          setShops(response.organizations || [])
+          setTotalItems(response.totalItemCount || 0)
+          setLoading(false)
+        },
+        error: (error: any) => {
+          console.error('获取店铺列表失败:', error)
+          setLoading(false)
+        },
+        status403: (message: string) => {
+          console.error('权限不足:', message)
+          setLoading(false)
+        },
+      })
+    } catch (error) {
+      console.error('API 调用错误:', error)
+      setLoading(false)
+    }
+  }
+
+  // 当筛选条件改变时，重置页码并调用 API
+  useEffect(() => {
+    if (!user) return
+
+    // 重置到第一页
+    setCurrentPage(1)
+
+    // 调用 API（对于文本输入，使用防抖）
+    const timeoutId = setTimeout(
+      () => {
+        fetchShops()
+      },
+      smartFilter ? 500 : 0
+    )
+
+    return () => clearTimeout(timeoutId)
+  }, [
+    smartFilter,
+    filterByShopStatus,
+    filterByShopCertification,
+    filterByRegionId,
+    user,
+  ])
+
+  // ✅ 当页码改变时单独调用（不重置页码）
+  useEffect(() => {
+    if (!user || currentPage === 1) return
+    fetchShops()
+  }, [currentPage, user])
+
+  const getFlattenedCurrentPageData = () => {
+    const startIndex = (currentPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    const pageData = shops.slice(startIndex, endIndex)
+
+    return pageData.map((order: any) => {
+      return {
+        Name: order.name,
+        Number: order.shopNumber,
+        '# of Pending Orders': order.countPendingUsers || 0,
+        '# of Active Users': order.countActiveUsers || 0,
+        '# of Pending Users': order.countPendingUsers || 0,
+        Status: order.status || '--',
+        Certification: order.certification || '--',
+        address: order.address || '--',
+        City: order.city || '--',
+        State: order.state || '--',
+        Dealer: order.sponsorDealership.name || '--',
+        'Dealer #': order.sponsorDealership.dealershipNumber || '--',
+        Region: order.region.name || '--',
+      }
+    })
+  }
+  const exportCSV = async () => {
+    try {
+      const flattenedData = getFlattenedCurrentPageData()
+      const result = await exportCurrentPageToCSV(
+        flattenedData,
+        headers,
+        'Manage_Shops'
+      )
+      result ? toast.success('Exported successfully') : null
+    } catch (error) {
+      toast.error('Export failed')
+    }
+  }
+
+  useEffect(() => {
+    // 确保组件已挂载且 ref 已连接到 DOM
+    if (shopsOrderRef.current) {
+      // 2. 使用原生 DOM API 查找所有 <th> 元素
+      const thElements = shopsOrderRef.current.querySelectorAll('thead th')
+
+      // 3. 提取文本内容
+      const headerTexts = Array.from(thElements).map((th) =>
+        th.textContent.trim()
+      )
+      setHeaders(headerTexts)
+    }
+  }, [shops])
 
   return (
-    <div className='min-h-screen bg-background text-foreground'>
+    <div className='bg-background min-h-screen'>
       {/* Header */}
-      <div className='border-b bg-background'>
+      <div className='bg-background'>
         <div className='flex items-center justify-between px-6 py-4'>
-          <h1 className='text-2xl font-bold text-foreground'>Manage Shops</h1>
-          <Button>
+          <h1 className='text-foreground text-2xl font-bold'>Manage Shops</h1>
+          <Button onClick={exportCSV}>
             <Download className='mr-2 h-4 w-4' />
             Report
           </Button>
@@ -170,144 +242,243 @@ export function Shops() {
         {/* Search + Filters */}
         <div className='mb-6 flex flex-col gap-4 lg:flex-row lg:items-center'>
           <div className='relative max-w-md flex-1'>
-            <Search className='absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
+            <Search className='text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2' />
             <Input
+              value={smartFilter}
+              onChange={(e) => setSmartFilter(e.target.value)}
               placeholder='Filter by Name, #, City'
               className='pl-10'
             />
           </div>
 
           <div className='flex flex-wrap gap-3'>
-            <Select defaultValue='all'>
-              <SelectTrigger className='bg-muted'>
+            <Select
+              value={filterByShopStatus}
+              onValueChange={(value) => setFilterByShopStatus(value)}
+            >
+              <SelectTrigger className='bg-muted w-48'>
                 <SelectValue placeholder='Status' />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value='all'>All Status</SelectItem>
-                <SelectItem value='certified'>Certified</SelectItem>
-                <SelectItem value='pending'>
-                  Pending Approval Pending
-                </SelectItem>
+                <SelectItem value='Certified'>Certified</SelectItem>
+                <SelectItem value='Closed'>Closed</SelectItem>
+                <SelectItem value='InProcess'>In-Process</SelectItem>
+                <SelectItem value='Suspended'>Suspended</SelectItem>
+                <SelectItem value='Terminated'>Terminated</SelectItem>
               </SelectContent>
             </Select>
 
-            <Select defaultValue='all'>
-              <SelectTrigger className='bg-muted'>
+            <Select
+              value={filterByShopCertification}
+              onValueChange={(value) => setFilterByShopCertification(value)}
+            >
+              <SelectTrigger className='bg-muted w-48'>
                 <SelectValue placeholder='Certification' />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value='all'>All Certifications</SelectItem>
-                <SelectItem value='audi-ultra'>Audi Ultra</SelectItem>
-                <SelectItem value='audi-hybrid'>Audi Hybrid</SelectItem>
-                <SelectItem value='vw'>Volkswagen</SelectItem>
+                <SelectItem value='AudiUltra'>Audi Ultra</SelectItem>
+                <SelectItem value='AudiHybrid'>Audi Hybrid</SelectItem>
+                <SelectItem value='VW'>Volkswagen</SelectItem>
               </SelectContent>
             </Select>
 
-            <Select defaultValue='all'>
-              <SelectTrigger className='bg-muted'>
+            <Select
+              value={filterByRegionId}
+              onValueChange={(value) => setFilterByRegionId(value)}
+            >
+              <SelectTrigger className='bg-muted w-48'>
                 <SelectValue placeholder='CSR Region' />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value='all'>All Regions</SelectItem>
-                <SelectItem value='western'>Western US</SelectItem>
-                <SelectItem value='eastern'>Eastern US</SelectItem>
-                <SelectItem value='central'>Central US</SelectItem>
-                <SelectItem value='canada'>Canada</SelectItem>
+                {user?.regions?.map((region) => (
+                  <SelectItem
+                    key={region.id}
+                    value={region.id?.toString() || ''}
+                  >
+                    {region.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
         </div>
 
         {/* Table */}
-        <div className='overflow-hidden rounded-lg border bg-card text-card-foreground shadow-sm'>
-          <Table>
-            <TableHeader>
-              <TableRow className='bg-muted hover:bg-muted'>
-                <TableHead className='font-semibold text-foreground'>Name</TableHead>
-                <TableHead className='font-semibold text-foreground'>
-                  Number
-                </TableHead>
-                <TableHead className='font-semibold text-foreground'>
-                  # of Pending Orders
-                </TableHead>
-                <TableHead className='font-semibold text-foreground'>
-                  # of Active Users
-                </TableHead>
-                <TableHead className='font-semibold text-foreground'>
-                  # of Pending Users
-                </TableHead>
-                <TableHead className='font-semibold text-foreground'>
-                  Status
-                </TableHead>
-                <TableHead className='font-semibold text-foreground'>
-                  Certification
-                </TableHead>
-                <TableHead className='font-semibold text-foreground'>
-                  Address
-                </TableHead>
-                <TableHead className='font-semibold text-foreground'>City</TableHead>
-                <TableHead className='font-semibold text-foreground'>
-                  State
-                </TableHead>
-                <TableHead className='font-semibold text-foreground'>
-                  Dealer
-                </TableHead>
-                <TableHead className='font-semibold text-foreground'>
-                  Dealer #
-                </TableHead>
-                <TableHead className='font-semibold text-foreground'>
-                  Region
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {mockShops.map((shop) => (
-                <TableRow key={shop.number} className='hover:bg-muted/50'>
-                  <TableCell className='cursor-pointer font-medium text-primary hover:underline'>
-                    {shop.name}
-                  </TableCell>
-                  <TableCell>{shop.number}</TableCell>
-                  <TableCell className='text-center font-medium'>
-                    {shop.pendingOrders}
-                  </TableCell>
-                  <TableCell className='text-center'>
-                    {shop.activeUsers}
-                  </TableCell>
-                  <TableCell className='text-center'>
-                    {shop.pendingUsers}
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant='default'
-                      className='bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900 dark:text-green-100 dark:hover:bg-green-800'
-                    >
-                      {shop.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{shop.certification}</TableCell>
-                  <TableCell className='text-muted-foreground'>
-                    {shop.address}
-                  </TableCell>
-                  <TableCell>{shop.city}</TableCell>
-                  <TableCell>{shop.state}</TableCell>
-                  <TableCell>{shop.dealer}</TableCell>
-                  <TableCell>{shop.dealerNumber}</TableCell>
-                  <TableCell>{shop.region}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+        {loading ? (
+          <div className='bg-background overflow-hidden rounded-lg border shadow-sm'>
+            <div className='flex items-center justify-center py-12'>
+              <div className='text-muted-foreground'>loading...</div>
+            </div>
+          </div>
+        ) : shops.length === 0 ? (
+          <div className='bg-background overflow-hidden rounded-lg border shadow-sm'>
+            <Empty>
+              <EmptyHeader>
+                <EmptyMedia variant='icon'>
+                  <TableIcon className='h-4 w-4' />
+                </EmptyMedia>
+                <EmptyTitle>No data to display</EmptyTitle>
+                <EmptyDescription>
+                  There are no records in this table yet. Add your first entry
+                  to get started.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          </div>
+        ) : (
+          <>
+            <div className='bg-background overflow-hidden rounded-lg border shadow-sm'>
+              <Table ref={shopsOrderRef}>
+                <TableHeader>
+                  <TableRow className='bg-muted'>
+                    <TableHead className='text-foreground font-semibold'>
+                      Name
+                    </TableHead>
+                    <TableHead className='text-foreground font-semibold'>
+                      Number
+                    </TableHead>
+                    <TableHead className='text-foreground font-semibold'>
+                      # of Pending Orders
+                    </TableHead>
+                    <TableHead className='text-foreground font-semibold'>
+                      # of Active Users
+                    </TableHead>
+                    <TableHead className='text-foreground font-semibold'>
+                      # of Pending Users
+                    </TableHead>
+                    <TableHead className='text-foreground font-semibold'>
+                      Status
+                    </TableHead>
+                    <TableHead className='text-foreground font-semibold'>
+                      Certification
+                    </TableHead>
+                    <TableHead className='text-foreground font-semibold'>
+                      Address
+                    </TableHead>
+                    <TableHead className='text-foreground font-semibold'>
+                      City
+                    </TableHead>
+                    <TableHead className='text-foreground font-semibold'>
+                      State
+                    </TableHead>
+                    <TableHead className='text-foreground font-semibold'>
+                      Dealer
+                    </TableHead>
+                    <TableHead className='text-foreground font-semibold'>
+                      Dealer #
+                    </TableHead>
+                    <TableHead className='text-foreground font-semibold'>
+                      Region
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {shops.map((shop: any) => {
+                    const dealer = shop.sponsorDealership
+                    const dealerName = dealer?.name || '--'
+                    const dealerNumber = dealer?.dealershipNumber || '--'
+                    const region = shop.region?.name || '--'
+                    const statusValue = shop.filterByShopStatus || '--'
+                    const certificationValue =
+                      shop.filterByShopCertification || '--'
 
-        {/* Pagination */}
-        <DataTablePagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          totalItems={totalItems}
-          itemsPerPage={itemsPerPage}
-          onPageChange={setCurrentPage}
-        />
+                    return (
+                      <TableRow key={shop.id} className='hover:bg-background'>
+                        <TableCell className='font-medium text-blue-600'>
+                          <span className='cursor-pointer hover:underline'   onClick={() => {
+                            navigate({
+                              to: '/repair_orders',
+                              search: { id: shop.id.toString() },
+                            })
+                          }}>
+                            {shop.name || '--'}
+                          </span>
+                        </TableCell>
+                        <TableCell>{shop.shopNumber || '--'}</TableCell>
+                        <TableCell
+                          className='text-center font-medium text-blue-600 underline'
+                          onClick={() => {
+                            navigate({
+                              to: '/repair_orders',
+                              search: { id: shop.id.toString() },
+                            })
+                          }}
+                        >
+                          {shop.countPendingOrders ?? 0}
+                        </TableCell>
+                        <TableCell
+                          className='text-center text-blue-600 underline hover:cursor-pointer'
+                          onClick={() => {
+                            setOrganizationId(shop.id)
+                            getTeamMembers('Shop',shop.id)
+                          }}
+                        >
+                          {shop.countActiveUsers ?? 0}
+                        </TableCell>
+                        <TableCell className='text-center text-blue-600 underline hover:cursor-pointer'   onClick={() => {
+                            setOrganizationId(shop.id)
+                            getTeamMembers('Shop',shop.id)
+                          }}>
+                          {shop.countPendingUsers ?? 0}
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={
+                              statusValue === 'certified'
+                                ? 'default'
+                                : 'secondary'
+                            }
+                            className={
+                              statusValue === 'certified'
+                                ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                                : ''
+                            }
+                          >
+                            {statusValue}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{certificationValue}</TableCell>
+                        <TableCell className='text-muted-foreground text-sm'>
+                          {shop.address || '--'}
+                        </TableCell>
+                        <TableCell>{shop.city || '--'}</TableCell>
+                        <TableCell>{shop.state || '--'}</TableCell>
+                        <TableCell>{dealerName}</TableCell>
+                        <TableCell>{dealerNumber}</TableCell>
+                        <TableCell>{region}</TableCell>
+                      </TableRow>
+                    )
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Pagination */}
+            <DataTablePagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={totalItems}
+              itemsPerPage={itemsPerPage}
+              onPageChange={setCurrentPage}
+            />
+          </>
+        )}
       </div>
+       <ViewAdminTeamDialog
+           teamMembers={teamMembers}
+           open={isShowAdminTeam}
+           onOpenChange={setIsShowAdminTeam}
+           onSuccess={async ()=>{
+            await getTeamMembers('Shop',organizationId)
+            setOrganizationId(undefined)
+           }}
+           onError={(error) => {
+             console.error('Failed to get team members:', error)
+           }}
+         />
     </div>
   )
 }

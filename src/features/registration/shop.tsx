@@ -1,15 +1,14 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
+import AuthenticationApi from '@/js/clients/base/AuthenticationApi'
+import RegistrationRequestBase from '@/js/models/base/RegistrationRequestBase'
 import { User, Store, Building2 } from 'lucide-react'
+import { toast } from 'sonner'
 import bannerImg from '@/assets/img/registration/banner.png'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Header } from '@/components/layout/header'
-import RegistrationRequestBase from '@/js/models/base/RegistrationRequestBase'
-import AuthenticationApi from '@/js/clients/base/AuthenticationApi'
-import { toast } from 'sonner'
-
 
 export function RegistrationShop() {
   const navigate = useNavigate()
@@ -33,7 +32,7 @@ export function RegistrationShop() {
     setIsLoading(true)
 
     try {
-      let request = new RegistrationRequestBase()
+      const request = new RegistrationRequestBase()
       request.type = 'Shop'
       request.firstName = form.firstName
       request.lastName = form.lastName
@@ -55,10 +54,8 @@ export function RegistrationShop() {
           toast.error(message)
         },
         error: (error: Error) => {
-          console.log(error);
-          toast.error('Registration failed. Please try again.')
+          toast.error(`Registration failed. Please try again.${error}`)
         },
-        
       })
     } catch (error) {
       toast.error('Registration failed. Please try again.')

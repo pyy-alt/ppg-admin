@@ -5,6 +5,8 @@ import { useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import PersonApi from '@/js/clients/base/PersonApi'
+import PersonBase from '@/js/models/base/PersonBase'
 import { X, User, Lock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -24,6 +26,22 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
+
+// src/components/EditProfileDialog.tsx
+
+// src/components/EditProfileDialog.tsx
+
+// src/components/EditProfileDialog.tsx
+
+// src/components/EditProfileDialog.tsx
+
+// src/components/EditProfileDialog.tsx
+
+// src/components/EditProfileDialog.tsx
+
+// src/components/EditProfileDialog.tsx
+
+// src/components/EditProfileDialog.tsx
 
 // src/components/EditProfileDialog.tsx
 
@@ -106,6 +124,28 @@ export default function EditProfileDialog({
 
   const onSubmit = (data: FormValues) => {
     console.log('Profile updated:', data)
+
+    const personApi = new PersonApi()
+    const request = new PersonBase()
+    request.firstName = initialData.firstName
+    request.lastName = initialData.lastName
+    request.email = initialData.email
+    // 接口暂时不支持修改密码
+    // request.currentPassword = form.getValues('currentPassword')
+    // request.newPassword = form.getValues('newPassword')
+    personApi.edit(request, {
+      status200: (person: PersonBase) => {
+        console.log('Profile updated:', person)
+        onOpenChange(false)
+        form.reset()
+      },
+      error: (error) => {
+        console.error('Error updating profile:', error)
+      },
+      else: () => {
+        console.error('Unexpected response while updating profile')
+      },
+    })
     onOpenChange(false)
     form.reset()
   }
@@ -137,7 +177,7 @@ export default function EditProfileDialog({
             {/* Personal Information */}
             <div className='space-y-5'>
               <div className='flex items-center gap-2 text-lg font-medium'>
-                <User className='h-5 w-5 text-foreground' />
+                <User className='text-foreground h-5 w-5' />
                 <h3>Personal Information</h3>
               </div>
 
@@ -192,16 +232,16 @@ export default function EditProfileDialog({
               <button
                 type='button'
                 onClick={() => setShowPasswordSection(!showPasswordSection)}
-                className='flex w-full items-center justify-between rounded-lg bg-muted px-4 py-3 text-left transition-colors hover:bg-muted/80'
+                className='bg-muted hover:bg-muted/80 flex w-full items-center justify-between rounded-lg px-4 py-3 text-left transition-colors'
               >
                 <div className='flex items-center gap-2'>
-                  <Lock className='h-5 w-5 text-foreground' />
+                  <Lock className='text-foreground h-5 w-5' />
                   <span className='font-medium'>
                     Click here to update password
                   </span>
                 </div>
                 <svg
-                  className={`h-5 w-5 text-muted-foreground transition-transform ${showPasswordSection ? 'rotate-180' : ''}`}
+                  className={`text-muted-foreground h-5 w-5 transition-transform ${showPasswordSection ? 'rotate-180' : ''}`}
                   fill='none'
                   viewBox='0 0 24 24'
                   stroke='currentColor'

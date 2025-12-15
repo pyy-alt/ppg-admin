@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { useLocation } from '@tanstack/react-router'
 
 // 我们可以定义一个包含所有可能目录的对象
 // 这样在 glob 中就可以包含所有路径
@@ -18,6 +19,8 @@ const ALL_IMAGE_GLOB = {
  * @returns {string | null} 匹配的图片资源的 URL，如果未找到则返回 null
  */
 const useBrandLogo = (directory: string, suffix: string): string | null => {
+  const location = useLocation()
+
   return useMemo(() => {
     // 1. 校验目录参数
     if (!ALL_IMAGE_GLOB[directory as keyof typeof ALL_IMAGE_GLOB]) {
@@ -28,8 +31,26 @@ const useBrandLogo = (directory: string, suffix: string): string | null => {
       return null
     }
 
-    // 2. 读取环境变量
-    const BRAND_PREFIX = import.meta.env.VITE_BRAND_PREFIX || 'audi'
+    // 2. 优先从 URL 查询参数读取品牌前缀，如果没有则使用环境变量
+    const searchParams = new URLSearchParams(location.search as string)
+
+    let brandFromUrl = searchParams.get('brand')
+    if (!brandFromUrl) {
+      try {
+        const storedBrand = localStorage.getItem('ppg-selected-brand')
+        if (storedBrand) {
+          const parsed = JSON.parse(storedBrand)
+          brandFromUrl = parsed?.brand
+        }
+      } catch (e) {
+        console.error(
+          '[useBrandLogo] Failed to parse ppg-selected-brand from localStorage:',
+          e
+        )
+      }
+    }
+    const BRAND_PREFIX =
+      brandFromUrl || import.meta.env.VITE_BRAND_PREFIX || 'audi'
 
     // 3. 构建目标文件名：例如 audi_a.png 或 vw_c.png（不包含路径前缀）
     const TARGET_FILENAME = `${BRAND_PREFIX}${suffix}`
@@ -55,7 +76,7 @@ const useBrandLogo = (directory: string, suffix: string): string | null => {
       `[useBrandLogo] Image not found for: ${TARGET_FILENAME} in ${directory} directory.`
     )
     return null
-  }, [directory, suffix])
+  }, [directory, suffix, location.href]) // 使用 location.href 作为依赖，当 URL 变化时重新计算
 }
 
 export default useBrandLogo

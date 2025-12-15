@@ -25,12 +25,6 @@ export function ForgotPassword() {
   const { isLoading: isCheckingAuth, LoadingComponent } =
     useRedirectIfAuthenticated()
 
-  // 如果正在检查认证状态或已登录，显示加载状态
-  if (isCheckingAuth && LoadingComponent) {
-    return <LoadingComponent />
-  }
-  //============end------======================
-
   // 组件挂载时调用 logout() 清除会话
   // 根据路由规范：访问 /password/forgot 时需要调用 AuthenticationApi::sessionLogout()
   // 注意：authApi.logout() 就是 AuthenticationApi::sessionLogout() 的实现
@@ -61,22 +55,31 @@ export function ForgotPassword() {
     e.preventDefault()
     setIsLoading(true)
     try {
-      const request = ForgotPasswordRequest.create({ email })
+      const request = new  ForgotPasswordRequest()
+      request.email = email
       authApi.forgotPassword(request, {
         status200: () => {
           toast.success(`Password reset link has been sent to ${email}`)
           navigate({ to: '/login' })
+          setIsLoading(false)
         },
         error: () => {
           toast.error('Failed to send reset link. Please try again.')
+          setIsLoading(false)
         },
       })
     } catch (error) {
       toast.error('Failed to send reset link. Please try again.')
-    } finally {
       setIsLoading(false)
     }
   }
+
+  // 如果正在检查认证状态或已登录，显示加载状态
+  // 这段代码必须放在后面 因为React Hook的规则要求Hook必须在组件的顶层调用
+  if (isCheckingAuth && LoadingComponent) {
+    return <LoadingComponent />
+  }
+  //============end------======================
 
   return (
     <div className='flex min-h-screen flex-col bg-background'>

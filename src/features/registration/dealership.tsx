@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
+import AuthenticationApi from '@/js/clients/base/AuthenticationApi'
+import RegistrationRequestBase from '@/js/models/base/RegistrationRequestBase'
 import { User, Building2 } from 'lucide-react'
 import { toast } from 'sonner'
 import bannerImg from '@/assets/img/registration/dealership.png'
@@ -7,8 +9,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Header } from '@/components/layout/header'
-import RegistrationRequestBase from '@/js/models/base/RegistrationRequestBase'
-import AuthenticationApi from '@/js/clients/base/AuthenticationApi'
 
 export function RegistrationDealership() {
   const navigate = useNavigate()
@@ -29,8 +29,7 @@ export function RegistrationDealership() {
     e.preventDefault()
     setIsLoading(true)
     try {
-
-      let request = new RegistrationRequestBase()
+      const request = new RegistrationRequestBase()
       request.type = 'Dealership'
       request.firstName = form.firstName
       request.lastName = form.lastName
@@ -64,12 +63,12 @@ export function RegistrationDealership() {
   }
 
   return (
-    <div className='flex min-h-screen flex-col bg-background'>
+    <div className='bg-background flex min-h-screen flex-col'>
       {/* 复用 Header（隐藏用户下拉） */}
       <Header isShowUser={false} />
 
       {/* Banner 顶部 */}
-      <div className='relative mt-16 h-32 bg-primary text-primary-foreground lg:h-40'>
+      <div className='bg-primary text-primary-foreground relative mt-16 h-32 lg:h-40'>
         <img
           src={bannerImg}
           alt='New Shop User Registration'
@@ -84,8 +83,8 @@ export function RegistrationDealership() {
           {/* Personal Information */}
           <section className='space-y-6'>
             <div className='flex items-center gap-3'>
-              <User className='h-6 w-6 text-foreground' />
-              <h2 className='text-xl font-semibold text-foreground'>
+              <User className='text-foreground h-6 w-6' />
+              <h2 className='text-foreground text-xl font-semibold'>
                 Personal Information
               </h2>
             </div>
@@ -94,14 +93,14 @@ export function RegistrationDealership() {
               <div className='space-y-2'>
                 <Label
                   htmlFor='firstName'
-                  className='text-sm font-medium text-foreground'
+                  className='text-foreground text-sm font-medium'
                 >
                   First Name
                 </Label>
                 <Input
                   id='firstName'
                   placeholder='Enter first name'
-                  className='h-12 rounded-lg rounded-lg'
+                  className='h-12 rounded-lg'
                   value={form.firstName}
                   onChange={(e) => handleChange('firstName', e.target.value)}
                   required
@@ -112,14 +111,14 @@ export function RegistrationDealership() {
               <div className='space-y-2'>
                 <Label
                   htmlFor='lastName'
-                  className='text-sm font-medium text-foreground'
+                  className='text-foreground text-sm font-medium'
                 >
                   Last Name
                 </Label>
                 <Input
                   id='lastName'
                   placeholder='Enter last name'
-                  className='h-12 rounded-lg rounded-lg'
+                  className='h-12 rounded-lg'
                   value={form.lastName}
                   onChange={(e) => handleChange('lastName', e.target.value)}
                   required
@@ -131,7 +130,7 @@ export function RegistrationDealership() {
             <div className='space-y-2'>
               <Label
                 htmlFor='email'
-                className='text-sm font-medium text-foreground'
+                className='text-foreground text-sm font-medium'
               >
                 Email
               </Label>
@@ -139,7 +138,7 @@ export function RegistrationDealership() {
                 id='email'
                 type='email'
                 placeholder='Enter email address'
-                className='h-12 rounded-lg rounded-lg'
+                className='h-12 rounded-lg'
                 value={form.email}
                 onChange={(e) => handleChange('email', e.target.value)}
                 required
@@ -151,8 +150,8 @@ export function RegistrationDealership() {
           {/* Dealership Information */}
           <section className='space-y-6'>
             <div className='flex items-center gap-3'>
-              <Building2 className='h-6 w-6 text-foreground' />
-              <h2 className='text-xl font-semibold text-foreground'>
+              <Building2 className='text-foreground h-6 w-6' />
+              <h2 className='text-foreground text-xl font-semibold'>
                 Dealership Information
               </h2>
             </div>
@@ -161,14 +160,14 @@ export function RegistrationDealership() {
               <div className='space-y-2'>
                 <Label
                   htmlFor='dealershipName'
-                  className='text-sm font-medium text-foreground'
+                  className='text-foreground text-sm font-medium'
                 >
                   Dealership Name
                 </Label>
                 <Input
                   id='dealershipName'
                   placeholder='Enter dealership name'
-                  className='h-12 rounded-lg rounded-lg'
+                  className='h-12 rounded-lg'
                   value={form.dealershipName}
                   onChange={(e) =>
                     handleChange('dealershipName', e.target.value)
@@ -181,14 +180,14 @@ export function RegistrationDealership() {
               <div className='space-y-2'>
                 <Label
                   htmlFor='dealershipNumber'
-                  className='text-sm font-medium text-foreground'
+                  className='text-foreground text-sm font-medium'
                 >
                   Dealership #
                 </Label>
                 <Input
                   id='dealershipNumber'
                   placeholder='Enter dealership number'
-                  className='h-12 rounded-lg rounded-lg'
+                  className='h-12 rounded-lg'
                   value={form.dealershipNumber}
                   onChange={(e) =>
                     handleChange('dealershipNumber', e.target.value)

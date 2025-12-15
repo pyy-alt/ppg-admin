@@ -7,12 +7,12 @@ import { Loading } from '@/components/Loading'
 /**
  * 未认证页面 Hook
  * 用于登录、注册、忘记密码等页面
- * 
+ *
  * 功能：
  * 1. 如果用户已登录，重定向到首页
  * 2. 如果用户未登录，尝试验证 Cookie（因为 InitAuth 在未认证页面不会验证）
  * 3. 返回是否正在检查认证状态
- * 
+ *
  * @returns { isLoading: boolean, LoadingComponent: React.ComponentType | null }
  */
 export function useRedirectIfAuthenticated() {
@@ -36,7 +36,6 @@ export function useRedirectIfAuthenticated() {
       return
     }
 
-
     // 如果已经检查过且确认未登录，不再验证
     if (hasCheckedRef.current && auth.loginStatus === 'unauthenticated') {
       setIsCheckingAuth(false)
@@ -45,7 +44,15 @@ export function useRedirectIfAuthenticated() {
 
     // 如果状态是 unauthenticated，尝试验证 Cookie
     // 因为 InitAuth 在未认证页面不会验证 Cookie，所以这里需要手动验证
-    if (auth.loginStatus === 'unauthenticated') {
+    //TODO==========这个地方需要确认是否接受闪了一下登录页面 在跳转到了上个界面
+    if (
+      auth.loginStatus === 'unauthenticated' &&
+      !hasCheckedRef.current &&
+      !isCheckingRef.current
+    ) {
+      // 防止多次调用接口
+      isCheckingRef.current = true // 标记为正在检查，防止并发调用
+
       refreshUserData()
         .then(() => {
           // 如果验证成功，refreshUserData 会自动更新状态为 authenticated
@@ -56,23 +63,25 @@ export function useRedirectIfAuthenticated() {
         })
         .catch(() => {
           // Cookie 无效或不存在，保持 unauthenticated 状态
-            // 标记为已检查，防止重复调用
-            hasCheckedRef.current = true
-            isCheckingRef.current = false
+          // 标记为已检查，防止重复调用
+          hasCheckedRef.current = true
+          isCheckingRef.current = false
           setIsCheckingAuth(false)
         })
-    }else if (auth.loginStatus === 'checking') {
+    } else if (auth.loginStatus === 'checking') {
       // checking 状态，等待结果
       setIsCheckingAuth(true)
-    }  
-    else {
+    } else {
       // checking 状态，等待结果
       setIsCheckingAuth(false)
     }
   }, [auth.loginStatus, navigate])
 
   // 如果正在检查认证状态或已登录，返回 Loading 组件
-  const isLoading = isCheckingAuth || auth.loginStatus === 'checking' || auth.loginStatus === 'authenticated'
+  const isLoading =
+    isCheckingAuth ||
+    auth.loginStatus === 'checking' ||
+    auth.loginStatus === 'authenticated'
 
   return {
     isLoading,

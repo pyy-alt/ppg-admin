@@ -1,0 +1,39 @@
+{
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "update": "Mettre à jour",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "create": "Créer",
+    "creating": "Création...",
+    "close": "Fermer",
+    "submit": "Soumettre",
+    "submiting": "Soumission...",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès"
+  },
+  "auth": {
+    "login": "Connexion",
+    "logout": "Déconnexion",
+    "email": "Courriel",
+    "password": "Mot de passe",
+    "forgotPassword": "Mot de passe oublié?",
+    "resetPassword": "Réinitialiser le mot de passe"
+  },
+  "user": {
+    "firstName": "Prénom",
+    "lastName": "Nom de famille",
+    "role": "Rôle",
+    "addUser": "Ajouter un utilisateur réseau"
+  },
+  "partsOrder": {
+    "title": "Commande de pièces",
+    "newOrder": "Nouvelle commande de pièces",
+    "editOrder": "Modifier la commande de pièces",
+    "supplement": "Supplément",
+    "newSupplement": "Nouveau supplément",
+    "editSupplement": "Modifier le supplément"
+  }
+}
