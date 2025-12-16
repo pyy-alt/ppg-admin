@@ -166,8 +166,20 @@ export default function RepairOrderDialog({
       })
       api.search(request, {
         status200: (response: OrganizationSearchResponse) => {
-          console.log('Order from dealership:', response)
-          setOrderFromDealerships(response.organizations || [])
+          if (response.organizations && response.organizations.length > 0) {
+            const dealerships = response.organizations
+            for (let i = 0; i < dealerships.length; i++) {
+              if (
+                dealerships[i].id === user?.person?.shop?.sponsorDealership.id
+              ) {
+                dealerships[i].isShowText = true
+                break
+              }else {
+                dealerships[i].isShowText = false
+              }
+            }
+            setOrderFromDealerships(dealerships || [])
+          }
         },
       })
     } catch (error) {
@@ -469,7 +481,7 @@ export default function RepairOrderDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleDialogOpenChange}>
-      <DialogContent className='flex max-h-[90vh] flex-col  w-[90%] sm:max-w-7xl '>
+      <DialogContent className='flex max-h-[90vh] w-[90%] flex-col sm:max-w-7xl'>
         <DialogHeader className='shrink-0'>
           <DialogTitle className='text-2xl font-semibold'>
             {isEdit ? 'Edit Repair Order' : 'New Repair Order'}
@@ -566,8 +578,10 @@ export default function RepairOrderDialog({
                                 value={dealership.id?.toString() || ''}
                                 className='py-2 pr-8 text-left whitespace-normal'
                               >
-                                {dealership.name} | {dealership.number}{' '}
-                                (Assigned Dealer)
+                                {dealership.name} | {dealership.dealershipNumber}{' '}
+                                {dealership.isShowText
+                                  ? '(Assigned Dealer)'
+                                  : ''}
                               </SelectItem>
                             ))}
                           </SelectContent>
