@@ -537,7 +537,7 @@ export function PartOrders() {
                     const dateClosed = formatDate(repairOrder?.dateClosed)
                     // 判断是否有备注（从备用经销商订购）
                     const hasNote =
-                      repairOrder?.orderFromAlternateDealership || false
+                      repairOrder?.dealership.id !== repairOrder?.shop.sponsorDealership.id
 
                     return (
                       <TableRow key={order.id} className='hover:bg-muted/50'>
@@ -574,7 +574,7 @@ export function PartOrders() {
                               <TooltipProvider>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <AlertCircle className='h-4 w-4 cursor-help text-yellow-600' />
+                                    <AlertCircle className='h-4 w-4 cursor-help text-yellow-500' />
                                   </TooltipTrigger>
                                   <TooltipContent>
                                     <p>Ordered from an alternate dealer</p>
