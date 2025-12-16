@@ -80,7 +80,7 @@ export function RepairOrderList() {
   const totalPages = Math.ceil(totalItems / itemsPerPage)
 
   const [isOpen, setOpen] = useState(false)
-  const [showRepairCompleted, setShowRepairCompleted] = useState(true)
+  const [showRepairCompleted, setShowRepairCompleted] = useState(false)
   const [filterByStatus, setFilterByStatus] = useState('all')
   const [smartFilter, setSmartFilter] = useState('')
   const [dateRangePreset, setDateRangePreset] = useState('all')
@@ -156,7 +156,7 @@ export function RepairOrderList() {
         shopId: Number(shopId),
         smartFilter: smartFilter || undefined,
         filterByStatus: statusFilter,
-        showRepairCompleted,
+        showRepairCompleted:!showRepairCompleted,
         dateLastSubmittedFrom,
         dateLastSubmittedTo,
       })
@@ -538,8 +538,9 @@ export function RepairOrderList() {
             <Checkbox
               id='show-completed'
               checked={showRepairCompleted}
-              onCheckedChange={(checked) =>
-                setShowRepairCompleted(checked as boolean)
+              onCheckedChange={(checked:boolean) =>{
+                setShowRepairCompleted(checked)
+              }
               }
               className='rounded-full'
             />
