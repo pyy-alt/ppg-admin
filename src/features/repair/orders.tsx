@@ -55,7 +55,6 @@ import RepairOrderDialog, {
   type RepairOrderData,
 } from '@/components/RepairOrderDialog'
 import { DataTablePagination } from '@/components/data-table-pagination'
-import { PartOrders } from '../part/orders'
 
 // const getStatusVariant = (status: string) => {
 //   if (status.includes('Rejected')) return 'destructive'
