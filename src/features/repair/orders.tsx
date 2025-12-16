@@ -251,7 +251,6 @@ export function RepairOrderList() {
           setRepairOrders(orders)
           // 显示数据带统计，用于表格渲染
           setDisplayOrders(ordersWithParts)
-          console.log(ordersWithParts, '+++++')
           setTotalItems((response as any).totalItemCount || 0)
         },
         error: (error) => {
@@ -364,16 +363,29 @@ export function RepairOrderList() {
 
   const showIcon = (orderAny: any) => {
     if (!orderAny.dateLastSubmitted) return null
-      const submittedDate = new Date(orderAny.dateLastSubmitted)
-      const diffMs = Date.now() - submittedDate.getTime()
-      const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000
-    return (
+
+    const submittedDate = new Date(orderAny.dateLastSubmitted)
+    const diffMs = Date.now() - submittedDate.getTime()
+    const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000
+    const isOver7Days = diffMs >= SEVEN_DAYS_MS
+
+    // 条件1：零件订单中有 ShopReceived 或 CsrRejected
+    const hasAlertPartsStatus =
       orderAny?.partsOrders?.length > 0 &&
       orderAny.partsOrders.some(
         (val: any) =>
           val.status === 'ShopReceived' || val.status === 'CsrRejected'
-      ) || diffMs >= SEVEN_DAYS_MS  &&  user?.person?.type==='Shop' && <AlertTriangle className='text-destructive h-4 w-4' />
-    )
+      )
+
+    // 条件2：超过7天 且 用户是 Shop 类型
+    const isShopAndOver7Days = isOver7Days && user?.person?.type === 'Shop'
+
+    // 任一条件满足则显示图标
+    if (hasAlertPartsStatus || isShopAndOver7Days) {
+      return <AlertTriangle className='text-destructive h-4 w-4' />
+    }
+
+    return null
   }
 
   return (
