@@ -480,16 +480,16 @@ export function RepairOrderList() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value='all'>All Status</SelectItem>
-                <SelectItem value='CsrReview'>CsrReview</SelectItem>
-                <SelectItem value='CsrRejected'>CsrRejected</SelectItem>
+                <SelectItem value='CsrReview'>CSR Review</SelectItem>
+                <SelectItem value='CsrRejected'>CSR Rejected</SelectItem>
                 <SelectItem value='DealershipProcessing'>
-                  DealershipProcessing
+                  Dealership Processing
                 </SelectItem>
                 <SelectItem value='DealershipShipped'>
-                  DealershipShipped
+                  Dealership Shipped
                 </SelectItem>
-                <SelectItem value='ShopReceived'>ShopReceived</SelectItem>
-                <SelectItem value='RepairCompleted'>RepairCompleted</SelectItem>
+                <SelectItem value='ShopReceived'>Shop Received</SelectItem>
+                <SelectItem value='RepairCompleted'>Repair Completed</SelectItem>
               </SelectContent>
             </Select>
 
