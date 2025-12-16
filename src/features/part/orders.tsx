@@ -4,6 +4,7 @@ import OrderApi from '@/js/clients/base/OrderApi'
 import PartsOrderSearchRequest from '@/js/models/PartsOrderSearchRequest'
 import ResultParameter from '@/js/models/ResultParameter'
 import { Search, Download, AlertCircle, TableIcon } from 'lucide-react'
+import { DateRange } from 'react-day-picker'
 import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/auth-store'
 import {
@@ -44,8 +45,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { DateRangePicker } from '@/components/DateRangePicker'
 import { DataTablePagination } from '@/components/data-table-pagination'
-import { DatePicker } from '@/components/date-picker'
 
 export function PartOrders() {
   const { user } = useAuthStore((state) => state.auth)
@@ -67,6 +68,9 @@ export function PartOrders() {
 
   const partsOrderRef = useRef<HTMLTableElement>(null)
   const [headers, setHeaders] = useState<string[]>([])
+
+  const [range, setRange] = useState<DateRange>()
+
   const getFlattenedCurrentPageData = () => {
     const startIndex = (currentPage - 1) * itemsPerPage
     const endIndex = startIndex + itemsPerPage
@@ -127,7 +131,7 @@ export function PartOrders() {
   //   if (status.includes('Processing')) return 'outline'
   //   return 'secondary'
   // }
-  const getStatusTxt=(status: string)=>{
+  const getStatusTxt = (status: string) => {
     switch (status) {
       case 'CsrReview':
         return 'CSR Review'
@@ -145,7 +149,7 @@ export function PartOrders() {
   }
 
   // 获取零件订单数据
-  const fetchPartsOrders = async () => {
+  const fetchPartsOrders = async (flag: boolean = false) => {
     if (!user) return
 
     setLoading(true)
@@ -200,6 +204,10 @@ export function PartOrders() {
         ;(request as any).dateSubmittedTo = dateTo
       }
 
+      if (flag) {
+        ;(request as any).dateSubmittedFrom = undefined
+        ;(request as any).dateSubmittedTo = undefined
+      }
       api.partsOrderSearch(request, {
         status200: (response: any) => {
           setOrders(response.partOrders || [])
@@ -424,22 +432,21 @@ export function PartOrders() {
 
             {/* 日期范围选择 */}
             {dateSubmittedRange === 'custom' && (
-              <div className='flex items-center gap-2'>
-                <span className='text-sm font-medium'>From</span>
-                <DatePicker
-                  disabled={dateSubmittedRange !== 'custom'}
-                  selected={dateSubmittedFrom}
-                  onSelect={(date) => setFromDate(date)}
-                  placeholder='Select from date'
-                />
-                <span className='text-sm font-medium'>To</span>
-                <DatePicker
-                  disabled={dateSubmittedRange !== 'custom'}
-                  selected={dateSubmittedTo}
-                  onSelect={(date) => setToDate(date)}
-                  placeholder='Select to date'
-                />
-              </div>
+              <DateRangePicker
+                value={range}
+                onChange={(newRange) => {
+                  setRange(newRange)
+                  // 同步到原有状态，用于 API 查询
+                  setFromDate(newRange?.from ?? undefined)
+                  setToDate(newRange?.to ?? undefined)
+                }}
+                onClose={() => {
+                  // 弹窗关闭时重新查询列表
+                  fetchPartsOrders(true)
+                }}
+                placeholder='Select date range'
+                disabled={false}
+              />
             )}
           </div>
 
@@ -554,10 +561,10 @@ export function PartOrders() {
                         <TableCell>
                           <Badge
                             // variant={getStatusVariant(filterByStatus)}
-                            variant="secondary"
+                            variant='secondary'
                             className='whitespace-nowrap'
                           >
-                            { getStatusTxt(status) }
+                            {getStatusTxt(status)}
                           </Badge>
                         </TableCell>
                         <TableCell className='text-sm'>{shop}</TableCell>

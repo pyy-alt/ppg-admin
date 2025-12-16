@@ -51,7 +51,7 @@ export function DatePicker({
           </span>
 
           {/* 2. CalendarIcon 和 ClearButton 互斥显示在最右边 */}
-          {selected && !disabled  ? (
+          {selected && !disabled ? (
             <span
               role='button'
               tabIndex={0}
@@ -61,10 +61,8 @@ export function DatePicker({
               <XIcon className='h-4 w-4' />
             </span>
           ) : (
-             (
-              // 🚨 当没有日期时，显示 CalendarIcon
-              <CalendarIcon className='h-4 w-4 opacity-50' />
-            )
+            // 🚨 当没有日期时，显示 CalendarIcon
+            <CalendarIcon className='h-4 w-4 opacity-50' />
           )}
         </Button>
       </PopoverTrigger>

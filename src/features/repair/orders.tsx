@@ -14,7 +14,9 @@ import {
   Tag,
   MapPin,
   Map,
+  Plus,
 } from 'lucide-react'
+import { DateRange } from 'react-day-picker'
 import { toast } from 'sonner'
 import audiNav from '@/assets/img/repair/audi.png'
 import vwNav from '@/assets/img/repair/vw.png'
@@ -47,12 +49,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { DateRangePicker } from '@/components/DateRangePicker'
 import { PartsOrderDialog } from '@/components/PartsOrderDialog'
 import RepairOrderDialog, {
   type RepairOrderData,
 } from '@/components/RepairOrderDialog'
 import { DataTablePagination } from '@/components/data-table-pagination'
-import { DatePicker } from '@/components/date-picker'
 
 // const getStatusVariant = (status: string) => {
 //   if (status.includes('Rejected')) return 'destructive'
@@ -96,6 +98,8 @@ export function RepairOrderList() {
   const [displayOrders, setDisplayOrders] = useState<any[]>([])
 
   const { id }: any = useSearch({ from: '/_authenticated/repair_orders' })
+
+  const [range, setRange] = useState<DateRange>()
 
   const { brand } = useBrand()
   const navImg = brand === 'vw' ? vwNav : audiNav
@@ -142,7 +146,7 @@ export function RepairOrderList() {
       console.error(e)
     }
   }
-  const getRepairOrders = async () => {
+  const getRepairOrders = async (flag: boolean = false) => {
     try {
       const api = new RequestApi()
       const shopId = user?.person?.shop?.id || id
@@ -156,7 +160,7 @@ export function RepairOrderList() {
         shopId: Number(shopId),
         smartFilter: smartFilter || undefined,
         filterByStatus: statusFilter,
-        showRepairCompleted:!showRepairCompleted,
+        showRepairCompleted: !showRepairCompleted,
         dateLastSubmittedFrom,
         dateLastSubmittedTo,
       })
@@ -179,6 +183,11 @@ export function RepairOrderList() {
         resultsOrderAscending: false,
       })
       ;(request as any).resultParameter = resultParameter
+
+      if (flag) {
+        ;(request as any).dateLastSubmittedFrom = undefined
+        ;(request as any).dateLastSubmittedTo = undefined
+      }
 
       api.repairOrderSearch(request, {
         status200: async (response) => {
@@ -336,10 +345,10 @@ export function RepairOrderList() {
     smartFilter,
     filterByStatus,
     showRepairCompleted,
-    dateLastSubmittedFrom,
-    dateLastSubmittedTo,
     user,
     currentPage,
+    dateLastSubmittedFrom,
+    dateLastSubmittedTo,
   ])
 
   // 当预设范围改变时，自动计算日期
@@ -348,6 +357,7 @@ export function RepairOrderList() {
       const { from, to } = calculateDateRange(dateRangePreset)
       setFromDate(from)
       setToDate(to)
+      setRange(undefined) // 清空自定义区间
     }
   }, [dateRangePreset])
 
@@ -429,6 +439,7 @@ export function RepairOrderList() {
                 setOpen(true)
               }}
             >
+              <Plus className='mr-1.5 h-4 w-4' />
               New Repair Order
             </Button>
           )}
@@ -483,13 +494,15 @@ export function RepairOrderList() {
                 <SelectItem value='CsrReview'>CSR Review</SelectItem>
                 <SelectItem value='CsrRejected'>CSR Rejected</SelectItem>
                 <SelectItem value='DealershipProcessing'>
-                  Dealership Processing
+                  FF Dealership ProcessingF
                 </SelectItem>
                 <SelectItem value='DealershipShipped'>
                   Dealership Shipped
                 </SelectItem>
                 <SelectItem value='ShopReceived'>Shop Received</SelectItem>
-                <SelectItem value='RepairCompleted'>Repair Completed</SelectItem>
+                <SelectItem value='RepairCompleted'>
+                  Repair Completed
+                </SelectItem>
               </SelectContent>
             </Select>
 
@@ -516,32 +529,30 @@ export function RepairOrderList() {
 
             {/* 日期范围选择 */}
             {dateRangePreset === 'custom' && (
-              <div className='flex items-center gap-2'>
-                <span className='text-sm font-medium'>From</span>
-                <DatePicker
-                  selected={dateLastSubmittedFrom}
-                  disabled={dateRangePreset != 'custom'}
-                  onSelect={(date) => setFromDate(date)}
-                  placeholder='Select from date'
-                />
-                <span className='text-sm font-medium'>To</span>
-                <DatePicker
-                  selected={dateLastSubmittedTo}
-                  disabled={dateRangePreset != 'custom'}
-                  onSelect={(date) => setToDate(date)}
-                  placeholder='Select to date'
-                />
-              </div>
+              <DateRangePicker
+                value={range}
+                onChange={(newRange) => {
+                  setRange(newRange)
+                  // 同步到原有状态，用于 API 查询
+                  setFromDate(newRange?.from ?? undefined)
+                  setToDate(newRange?.to ?? undefined)
+                }}
+                onClose={() => {
+                  // 弹窗关闭时重新查询列表
+                  getRepairOrders(true)
+                }}
+                placeholder='Select date range'
+                disabled={false}
+              />
             )}
           </div>
           <div className='flex items-center justify-end gap-2'>
             <Checkbox
               id='show-completed'
               checked={showRepairCompleted}
-              onCheckedChange={(checked:boolean) =>{
+              onCheckedChange={(checked: boolean) => {
                 setShowRepairCompleted(checked)
-              }
-              }
+              }}
               className='rounded-full'
             />
             <Label

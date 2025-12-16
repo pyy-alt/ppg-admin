@@ -102,41 +102,34 @@ export function getPageNumbers(currentPage: number, totalPages: number) {
 // 根据预设范围计算日期  // 根据预设范围计算日期
 export const calculateDateRange = (preset: string) => {
   const today = new Date()
-  // 获取今天的本地日期（年月日）
   const todayYear = today.getFullYear()
-  const todayMonth = today.getMonth()
+  const todayMonth = today.getMonth() // 0-11
   const todayDate = today.getDate()
 
-  // 创建只包含年月日的日期对象（时间设为 00:00:00，使用本地时区）
+  // 创建起始日期（00:00:00，本地时区）
   const createDateOnly = (year: number, month: number, date: number) => {
     return new Date(year, month, date, 0, 0, 0, 0)
   }
 
-  // 创建结束日期（时间设为 23:59:59.999，使用本地时区）
+  // 创建结束日期（23:59:59.999，本地时区）
   const createEndDate = (year: number, month: number, date: number) => {
     return new Date(year, month, date, 23, 59, 59, 999)
   }
 
   switch (preset) {
     case '7': {
-      const fromDate = new Date(todayYear, todayMonth, todayDate - 7)
+      // 包括今天在内的过去7天（共7天）
+      const fromDate = new Date(todayYear, todayMonth, todayDate - 6)
       return {
-        from: createDateOnly(
-          fromDate.getFullYear(),
-          fromDate.getMonth(),
-          fromDate.getDate()
-        ),
+        from: createDateOnly(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate()),
         to: createEndDate(todayYear, todayMonth, todayDate),
       }
     }
     case '30': {
-      const fromDate = new Date(todayYear, todayMonth, todayDate - 30)
+      // 包括今天在内的过去30天（共30天）
+      const fromDate = new Date(todayYear, todayMonth, todayDate - 29)
       return {
-        from: createDateOnly(
-          fromDate.getFullYear(),
-          fromDate.getMonth(),
-          fromDate.getDate()
-        ),
+        from: createDateOnly(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate()),
         to: createEndDate(todayYear, todayMonth, todayDate),
       }
     }
@@ -146,9 +139,9 @@ export const calculateDateRange = (preset: string) => {
         to: createEndDate(todayYear, todayMonth, todayDate),
       }
     case 'quarter-to-date': {
-      const quarter = Math.floor(todayMonth / 3)
+      const quarterStartMonth = Math.floor(todayMonth / 3) * 3 // 0, 3, 6, 9
       return {
-        from: createDateOnly(todayYear, quarter * 3, 1),
+        from: createDateOnly(todayYear, quarterStartMonth, 1),
         to: createEndDate(todayYear, todayMonth, todayDate),
       }
     }
@@ -158,34 +151,23 @@ export const calculateDateRange = (preset: string) => {
         to: createEndDate(todayYear, todayMonth, todayDate),
       }
     case 'last-month': {
-      const lastMonth = todayMonth === 0 ? 11 : todayMonth - 1
       const lastMonthYear = todayMonth === 0 ? todayYear - 1 : todayYear
-      // 获取上个月的最后一天
-      const lastDayOfLastMonth = new Date(todayYear, todayMonth, 0).getDate()
+      const lastMonth = todayMonth === 0 ? 11 : todayMonth - 1
+      const lastDayOfLastMonth = new Date(lastMonthYear, lastMonth + 1, 0).getDate()
       return {
         from: createDateOnly(lastMonthYear, lastMonth, 1),
         to: createEndDate(lastMonthYear, lastMonth, lastDayOfLastMonth),
       }
     }
     case 'last-quarter': {
-      const lastQuarter = Math.floor(todayMonth / 3) - 1
-      const lastQuarterMonth = lastQuarter < 0 ? 9 : lastQuarter * 3 // 如果上季度是去年，则是 9 月（Q4）
-      const lastQuarterYear = lastQuarter < 0 ? todayYear - 1 : todayYear
-      // 获取上季度的最后一天
-      const lastDayOfLastQuarter = new Date(
-        lastQuarterYear,
-        (lastQuarter + 1) * 3,
-        0
-      ).getDate()
-      const lastQuarterEndMonth =
-        lastQuarter < 0 ? 11 : (lastQuarter + 1) * 3 - 1
+      const currentQuarter = Math.floor(todayMonth / 3)
+      const lastQuarterStartMonth = currentQuarter === 0 ? 9 : (currentQuarter - 1) * 3
+      const lastQuarterYear = currentQuarter === 0 ? todayYear - 1 : todayYear
+      const lastQuarterEndMonth = lastQuarterStartMonth + 2
+      const lastDayOfLastQuarter = new Date(lastQuarterYear, lastQuarterEndMonth + 1, 0).getDate()
       return {
-        from: createDateOnly(lastQuarterYear, lastQuarterMonth, 1),
-        to: createEndDate(
-          lastQuarterYear,
-          lastQuarterEndMonth,
-          lastDayOfLastQuarter
-        ),
+        from: createDateOnly(lastQuarterYear, lastQuarterStartMonth, 1),
+        to: createEndDate(lastQuarterYear, lastQuarterEndMonth, lastDayOfLastQuarter),
       }
     }
     case 'last-year':
