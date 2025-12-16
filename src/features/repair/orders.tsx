@@ -80,7 +80,7 @@ export function RepairOrderList() {
   const totalPages = Math.ceil(totalItems / itemsPerPage)
 
   const [isOpen, setOpen] = useState(false)
-  const [showRepairCompleted, setShowRepairCompleted] = useState(false)
+  const [showRepairCompleted, setShowRepairCompleted] = useState(true)
   const [filterByStatus, setFilterByStatus] = useState('all')
   const [smartFilter, setSmartFilter] = useState('')
   const [dateRangePreset, setDateRangePreset] = useState('all')
