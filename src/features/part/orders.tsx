@@ -532,7 +532,7 @@ export function PartOrders() {
                     const dealer = repairOrder?.dealership
                       ? `${repairOrder.dealership.name || ''} (${repairOrder.dealership.id || ''})`
                       : '--'
-                    const region = repairOrder?.region || '--'
+                    const region = user?.person?.csrRegion?.name || '--'
                     const dateCompleted = formatDate(order.dateCreated)
                     const dateClosed = formatDate(repairOrder?.dateClosed)
                     // 判断是否有备注（从备用经销商订购）
