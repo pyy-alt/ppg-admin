@@ -85,15 +85,15 @@ export function RepairOrderList() {
   const [smartFilter, setSmartFilter] = useState('')
   const [dateRangePreset, setDateRangePreset] = useState('all')
 
-  const [initialData] = useState<RepairOrder | undefined>(
-    undefined
-  )
+  const [initialData] = useState<RepairOrder | undefined>(undefined)
 
   const [openPartsOrderDialog, setOpenPartsOrderDialog] = useState(false)
   const [selectedPartsOrderData, setSelectedPartsOrderData] =
     useState<PartsOrder>()
 
   const [initRepaitOrderData, setInitRepaitOrderData] = useState<RepairOrder>()
+
+  const [displayOrders, setDisplayOrders] = useState<any[]>([])
 
   const { id }: any = useSearch({ from: '/_authenticated/repair_orders' })
 
@@ -107,7 +107,6 @@ export function RepairOrderList() {
         api.repairOrderGet(id, {
           status200: (response) => {
             setInitRepaitOrderData(response)
-            setOpenPartsOrderDialog(true)
             resolve(response)
           },
           error: (error) => {
@@ -121,13 +120,14 @@ export function RepairOrderList() {
     }
   }
 
-  const getPartsOrderDetail = async (id: string) => {
+  const getPartsOrderDetail = async (id: string, flag?: boolean) => {
     try {
       return new Promise((resolve, reject) => {
         const api = new RequestApi()
         api.partsOrderGetAllForRepairOrder(id, {
           status200: (response) => {
             setSelectedPartsOrderData(response)
+            flag ? setOpenPartsOrderDialog(true) : ''
             resolve(response)
           },
           error: () => {
@@ -239,7 +239,9 @@ export function RepairOrderList() {
             })
           )
 
-          setRepairOrders(ordersWithParts)
+          setRepairOrders(orders)
+          // 显示数据带统计，用于表格渲染
+          setDisplayOrders(ordersWithParts)
           setTotalItems((response as any).totalItemCount || 0)
         },
         error: (error) => {
@@ -438,11 +440,11 @@ export function RepairOrderList() {
         onOpenChange={setOpen}
         onSuccess={async (data: any) => {
           const snapshot = JSON.parse(JSON.stringify(data))
-          await getRepairOrders()
+          // await getRepairOrders()
           const id = snapshot.id
           if (id) {
-            await getPartsOrderDetail(data.id)
             await getRepairOrderDetail(data.id)
+            await getPartsOrderDetail(data.id, true)
           } else {
             toast.error('Repair Order Failed to Create')
           }
@@ -598,7 +600,7 @@ export function RepairOrderList() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {repairOrders.map((order) => {
+                  {displayOrders.map((order) => {
                     // 使用类型断言访问属性，因为类型定义可能不完整
                     const orderAny = order as any
                     // 组合车辆信息
