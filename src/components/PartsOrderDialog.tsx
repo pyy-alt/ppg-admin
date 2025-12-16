@@ -205,19 +205,17 @@ export function PartsOrderDialog({
       })
 
       // 使用 setTimeout 将 setState 移到下一个事件循环
-      setTimeout(() => {
-        const pdfList = (
-          (initialData && initialData.estimateFileAssets) ||
-          []
-        ).map((item: any) => {
+      // setTimeout(() => {
+      //   setEstimateFiles(initialData.estimateFileAssets || [])
+      // }, 0)
+      const pdfList = (initialData.estimateFileAssets || []).map(
+        (item: any) => {
           item.name = item.filename
           item.viewUrl = import.meta.env.VITE_API_URL + item.viewUrl
           return item
-        })
-        setEstimateFiles(pdfList || [])
-
-        // setEstimateFiles(initialData.estimateFileAssets || [])
-      }, 0)
+        }
+      )
+      setEstimateFiles(pdfList || [])
     } else if (open && mode === 'create') {
       // 新增模式：重置为默认值
       form.reset({
@@ -260,8 +258,7 @@ export function PartsOrderDialog({
       const partsOrder = (PartsOrder as any).create({
         ...initialData,
         parts: data.parts.map((part) => part.number),
-        estimateFileAssets:
-          estimateFileAssets.length > 0 ? estimateFileAssets : estimateFiles,
+        estimateFileAssets:estimateFileAssets.length>0 ? estimateFileAssets : estimateFiles ,
         repairOrder: initRepaitOrderData,
       })
       setLoading(true)
@@ -569,7 +566,7 @@ export function PartsOrderDialog({
                       <div>
                         {estimateFiles && estimateFiles.length > 0 && (
                           <div className='w-full space-y-2'>
-                            {estimateFiles.map((file: any, index) => (
+                            {estimateFiles.map((file:any, index) => (
                               <div
                                 key={`${file.name}-${index}`}
                                 className='flex items-center justify-between rounded-md p-1.5'
@@ -578,10 +575,7 @@ export function PartsOrderDialog({
                                   className='flex-1 truncate'
                                   title={file.name}
                                 >
-                                  <a
-                                    href={file.viewUrl}
-                                    className='cursor-pointer truncate text-sm font-medium text-blue-500 underline'
-                                  >
+                                  <a href={file.viewUrl} className='cursor-pointer truncate text-sm font-medium text-blue-500 underline'>
                                     {file.name || file.filename}
                                   </a>
                                   {/* <p className='text-muted-foreground text-xs'>
