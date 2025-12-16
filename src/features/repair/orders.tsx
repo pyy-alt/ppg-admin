@@ -55,6 +55,7 @@ import RepairOrderDialog, {
   type RepairOrderData,
 } from '@/components/RepairOrderDialog'
 import { DataTablePagination } from '@/components/data-table-pagination'
+import { PartOrders } from '../part/orders'
 
 // const getStatusVariant = (status: string) => {
 //   if (status.includes('Rejected')) return 'destructive'
@@ -251,6 +252,7 @@ export function RepairOrderList() {
           setRepairOrders(orders)
           // 显示数据带统计，用于表格渲染
           setDisplayOrders(ordersWithParts)
+          console.log(ordersWithParts, '+++++')
           setTotalItems((response as any).totalItemCount || 0)
         },
         error: (error) => {
@@ -360,6 +362,20 @@ export function RepairOrderList() {
       setRange(undefined) // 清空自定义区间
     }
   }, [dateRangePreset])
+
+  const showIcon = (orderAny: any) => {
+    if (!orderAny.dateLastSubmitted) return null
+      const submittedDate = new Date(orderAny.dateLastSubmitted)
+      const diffMs = Date.now() - submittedDate.getTime()
+      const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000
+    return (
+      orderAny?.partsOrders?.length > 0 &&
+      orderAny.partsOrders.some(
+        (val: any) =>
+          val.status === 'ShopReceived' || val.status === 'CsrRejected'
+      ) || diffMs >= SEVEN_DAYS_MS  &&  user?.person?.type==='Shop' && <AlertTriangle className='text-destructive h-4 w-4' />
+    )
+  }
 
   return (
     <div className='bg-background min-h-screen'>
@@ -628,9 +644,7 @@ export function RepairOrderList() {
                         <TableCell className='font-medium'>
                           <div className='flex items-center gap-2'>
                             {/* hasAlert 字段可能不存在，暂时移除或使用可选 */}
-                            {orderAny.hasAlert && (
-                              <AlertTriangle className='text-destructive h-4 w-4' />
-                            )}
+                            {showIcon(orderAny)}
                             <span
                               className='cursor-pointer text-blue-600 hover:underline'
                               onClick={() => {
