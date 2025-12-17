@@ -62,7 +62,7 @@ export function RegistrationShop() {
     }
 
     // try {
-    //   // 模拟注册 API 调用
+    //   // Simulate registration API Call
     //   await new Promise((resolve) => setTimeout(resolve, 3500))
     //   // toast.success('Registration successful! Please check your email.')
     //   navigate({ to: '/registrationResult', search: { status: 'success' } })
@@ -75,10 +75,10 @@ export function RegistrationShop() {
 
   return (
     <div className='bg-background flex min-h-screen flex-col'>
-      {/* 复用 Header（隐藏用户下拉） */}
+      {/* Reuse Header（Hide user dropdown） */}
       <Header isShowUser={false} />
 
-      {/* Banner 顶部 */}
+      {/* Banner Top */}
       <div className='bg-primary text-primary-foreground relative mt-16 h-32 lg:h-40'>
         <img
           src={bannerImg}
@@ -88,7 +88,7 @@ export function RegistrationShop() {
         />
       </div>
 
-      {/* 表单主体 */}
+      {/* Form body */}
       <div className='flex flex-1 items-start justify-center px-4 py-8 lg:py-12'>
         <form onSubmit={handleSubmit} className='w-full max-w-4xl space-y-10'>
           {/* Personal Information */}
@@ -251,7 +251,7 @@ export function RegistrationShop() {
             </div>
           </section>
 
-          {/* 提交按钮 */}
+          {/* Submit button */}
           <div className='flex justify-end pt-6'>
             <Button
               type='submit'

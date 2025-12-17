@@ -83,15 +83,15 @@ interface RepairOrderDialogProps {
       [key: string]: any
     }
   ) => void
-  // 编辑模式时传入已有数据
+  // Pass existing data in edit mode
   initialData?: RepairOrderData
 }
 
-// 获取当前年份
+// Get current year
 const currentYear = new Date().getFullYear()
-// 计算列表长度
+// Calculate list length
 const listLength = currentYear + 1 - 1949
-// 计算起始年份 (明年)
+// Calculate starting year (Next year)
 const startYear = currentYear + 1
 export default function RepairOrderDialog({
   open,
@@ -122,10 +122,10 @@ export default function RepairOrderDialog({
   const [orderFromDealerships, setOrderFromDealerships] = useState<any[]>([])
   const user = useAuthStore((state) => state.auth.user)
 
-  // ✅ 修复：实际执行关闭的函数（不检查未保存更改）
+  // ✅ Fix：Function that actually executes close（Do not check for unsaved changes）
   const performClose: () => void = () => {
     onOpenChange(false)
-    // 延迟重置，避免关闭动画时看到表单清空
+    // Delay reset，Avoid seeing form cleared when closing animation
     setTimeout(() => {
       form.reset()
       setStructuralMeasurementFileAssets([])
@@ -133,26 +133,26 @@ export default function RepairOrderDialog({
     }, 200)
   }
 
-  // 使用确认 hook
+  // Use confirmation hook
   const { handleCloseRequest, ConfirmDialogComponent } = useDialogWithConfirm({
     form,
     hasUnsavedFiles:
       structuralMeasurementFileAssets.length > 0 ||
       preRepairPhotoFileAssets.length > 0,
-    onClose: performClose, // ✅ 修复：直接传入关闭函数，不调用 handleClose
+    onClose: performClose, // ✅ Fix：Directly pass in close function，Do not call handleClose
     title: 'Discard Changes?',
     description:
       'You have unsaved changes. Are you sure you want to close? All your changes will be lost.',
   })
 
   const handleClose = () => {
-    handleCloseRequest() // 这会检查是否有未保存更改，如果有则显示确认对话框
+    handleCloseRequest() // This will check for unsaved changes，If there are, show confirmation dialog
   }
 
-  // 修改 Dialog 的 onOpenChange
+  // Modify Dialog of onOpenChange
   const handleDialogOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
-      // 尝试关闭，会检查是否有未保存更改
+      // Try to close，Will check for unsaved changes
       handleCloseRequest()
     }
     return true
@@ -188,7 +188,7 @@ export default function RepairOrderDialog({
     }
   }
 
-  // 当 initialData 变化时，更新表单和文件
+  // When initialData changes，Update form and files
   useEffect(() => {
     getOrderFromDealership()
     if (initialData) {
@@ -238,9 +238,9 @@ export default function RepairOrderDialog({
     try {
       const api = new RequestApi()
 
-      // 转换文件为 FileAsset 数组
+      // Convert file to FileAsset array
       try {
-        // 只把「新上传」的文件转 base64 上传
+        // Only keep「newly uploaded」files base64 Upload
         const newPhotoFiles = preRepairPhotoFileAssets.filter(
           (f): f is File => f instanceof File
         )
@@ -261,7 +261,7 @@ export default function RepairOrderDialog({
           (dealership) => dealership.id === Number(data.orderFromDealershipId)
         )
         const repairOrderPayload = {
-          ...(initialData ?? {}), // 包含 id 等原始字段（编辑模式）
+          ...(initialData ?? {}), // Include id and other original fields（Edit mode）
           roNumber: data.roNumber,
           customer: data.customer,
           vin: data.vin,
@@ -296,8 +296,8 @@ export default function RepairOrderDialog({
               },
               else: (_statusCode: number, responseText: string) => {
                 toast.error(responseText)
-                // 所有非 200（包括 404、403、409 等）最终会走到这里
-                resolve(false) // 只负责结束 Promise，恢复按钮状态
+                // All non 200（including 404、403、409 etc.）Will eventually reach here
+                resolve(false) // Only responsible for ending Promise，Restore button status
               },
               error: (error) => {
                 console.error('Error saving repair order:', error)
@@ -327,9 +327,9 @@ export default function RepairOrderDialog({
                 resolve(true)
               },
               else: (_statusCode: number, responseText: string) => {
-                // 所有非 200（包括 404、403、409 等）最终会走到这里
+                // All non 200（including 404、403、409 etc.）Will eventually reach here
                 toast.error(responseText)
-                resolve(false) // 只负责结束 Promise，恢复按钮状态
+                resolve(false) // Only responsible for ending Promise，Restore button status
               },
               error: (error) => {
                 console.error('Error creating repair order:', error)
@@ -342,7 +342,7 @@ export default function RepairOrderDialog({
       } catch (error) {}
     } catch (error) {
       console.error('Error submitting repair order:', error)
-      throw error // ✅ 重新抛出错误，让 React Hook Form 知道提交失败
+      throw error // ✅ Re-throw error，Let React Hook Form know submission failed
     }
   }
 
@@ -359,7 +359,7 @@ export default function RepairOrderDialog({
     onFilesChange: (files: File[]) => void
     accept?: string
   }) => {
-    // 转换 accept 字符串为 react-dropzone 需要的格式
+    // Convert accept string to react-dropzone required format
     const getAcceptConfig = (): { [key: string]: string[] } | undefined => {
       if (!accept) return undefined
 
@@ -425,8 +425,8 @@ export default function RepairOrderDialog({
           size='sm'
           onClick={(e) => {
             e.preventDefault()
-            // 可以在这里添加打开相机的逻辑
-            // 暂时使用选择文件
+            // Logic to open camera can be added here
+            // Temporarily use file selection
             open()
           }}
         >
@@ -653,13 +653,13 @@ export default function RepairOrderDialog({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {/* 核心逻辑：生成年份列表 */}
+                            {/* Core logic：Generate year list */}
                             {Array.from({ length: listLength }, (_, i) => {
-                              const yearValue = startYear - i // 从明年开始递减
+                              const yearValue = startYear - i // Decrement starting from next year
                               return (
                                 <SelectItem
                                   key={yearValue}
-                                  value={`${yearValue}`} // Select 的 value 最好是字符串
+                                  value={`${yearValue}`} // Select of value Preferably a string
                                 >
                                   {yearValue}
                                 </SelectItem>

@@ -48,7 +48,7 @@ export function Header({
     try {
       const personApi = new PersonApi()
       const request = PersonSearchRequest.create({
-        // 如果user.person.type是ProgramAdministrator，则type为Network，否则为Shop或Dealership
+        // Ifuser.person.type is ProgramAdministrator，then type is Network，otherwise is Shop or Dealership
         type: isAdmin
           ? 'Network'
           : (auth.user?.person?.type as 'Shop' | 'Dealership' | 'Network'),
@@ -84,7 +84,7 @@ export function Header({
     switch (item) {
       case 'team':
         // setIsShowTeam(true)
-        // 管理员
+        // Administrator
         getTeamMembers()
         break
       case 'profile':
@@ -183,7 +183,7 @@ export function Header({
                 </button>
               </DropdownMenuTrigger>
 
-              {/* 菜单右对齐 */}
+              {/* Menu right aligned */}
               <DropdownMenuContent align='end' className='mt-2 w-56'>
                 <DropdownMenuLabel className='font-normal'>
                   <div className='flex flex-col space-y-1'>

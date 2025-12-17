@@ -28,9 +28,9 @@ import './styles/index.css'
 import { BrandProvider } from './context/brand-context'
 
 /**
- * 初始化认证状态
- * 应用启动时调用 refreshUserData 验证会话（完全依赖后端返回的状态码）
- * 优化：只在需要验证会话的路由上调用，避免在未认证页面（如登录、忘记密码）调用
+ * Initialize authentication status
+ * Called when the application starts refreshUserData Validate session（Completely relies on the status code returned by the backend）
+ * Optimize：Call only on routes that require session validation，Avoid on unauthenticated pages（Such as login、Forgot password）Call
  */
 function InitAuthInner() {
   const location = useLocation()
@@ -38,27 +38,27 @@ function InitAuthInner() {
   useEffect(() => {
     const { auth } = useAuthStore.getState()
 
-    // 定义不需要验证会话的路由（未认证页面）
-    // 这些页面明确是给未登录用户使用的，不需要调用 sessionGetCurrent
+    // Define routes that do not require session validation（Unauthenticated page）
+    // These pages are explicitly for use by unauthenticated users，No need to call sessionGetCurrent
     const unauthenticatedRoutes = [
       '/login',
       '/password/forgot',
-      '/password/reset', // 重置密码页面（带参数的路由也会匹配这个前缀）
+      '/password/reset', // Reset password page（Routes with parameters will also match this prefix）
       '/registration/shop',
       '/registration/dealership',
       '/registration/complete',
       '/registrationResult',
     ]
 
-    // 检查当前路径是否在未认证路由列表中
+    // Check if the current path is in the unauthenticated route list
     const isUnauthenticatedRoute = unauthenticatedRoutes.some(
       (route) =>
         location.pathname === route || location.pathname.startsWith(route + '/')
     )
 
 
-    // 特殊处理：如果路径是根路径 `/`，且未认证，不调用 API
-    // 因为 _authenticated/route.tsx 会显示 WelcomeGate，不需要验证会话
+    // Special handling：If the path is the root path `/`，and unauthenticated，Do not call API
+    // Because _authenticated/route.tsx Will display WelcomeGate，No need to validate session
     if (location.pathname === '/' && auth.loginStatus !== 'authenticated') {
       if (auth.loginStatus === 'checking') {
         auth.setLoginStatus('unauthenticated')
@@ -66,7 +66,7 @@ function InitAuthInner() {
       return
     }
 
-    // 如果在未认证页面，直接设置为未登录状态，不调用 API
+    // If on an unauthenticated page，Directly set to unauthenticated status，Do not call API
     if (isUnauthenticatedRoute) {
       if (auth.loginStatus === 'checking') {
         auth.setLoginStatus('unauthenticated')
@@ -74,41 +74,41 @@ function InitAuthInner() {
       return
     }
 
-    // 如果已经认证，不需要再次调用 API
+    // If already authenticated，No need to call again API
     if (auth.loginStatus === 'authenticated') {
       return
     }
 
-    // 如果正在检查中，避免重复调用
+    // If in the process of checking，Avoid duplicate calls
     if (auth.loginStatus === 'checking') {
       return
     }
 
-    // 如果在其他页面（如受保护的路由或根路径），需要验证会话
-    // 立即设置状态为 checking，避免闪烁
+    // If on other pages（Such as protected routes or root path），Requires session validation
+    // Immediately set status to checking，Avoid flickering
     auth.setLoginStatus('checking')
 
-    // 调用 refreshUserData 获取用户数据
-    // 如果 Cookie 有效 → 返回 200，更新用户信息
-    // 如果 Cookie 无效或不存在 → 返回 401 或 404，清除状态
+    // Call refreshUserData Get user data
+    // If Cookie Valid → Return 200，Update user information
+    // If Cookie Invalid or does not exist → Return 401 Or 404，Clear status
     refreshUserData().catch((error) => {
-      // 网络错误等，不清除状态（可能是临时网络问题）
-      // 404/401 错误已经在 refreshUserData 中处理了
+      // Network errors, etc.，Do not clear status（Could be a temporary network issue）
+      // 404/401 The error has been handled in refreshUserData Processed
 
-      // 如果是 404 错误（No session found），检查是否有 dialog 打开
+      // If it is 404 Error（No session found），Check for dialog Open
       if (error.message === 'No session found') {
-        // 动态导入检查 dialog 状态
+        // Dynamic import check dialog Status
         import('@/stores/global-404-store').then(({ useGlobal404Store }) => {
           setTimeout(() => {
             const { isOpen } = useGlobal404Store.getState()
-            // 如果 dialog 已经打开，不跳转，让 dialog 处理跳转
+            // If dialog Already open，Do not redirect，Let dialog Handle redirection
             if (!isOpen) {
-              // Dialog 没有打开，可能是其他原因，正常跳转
+              // Dialog Not opened，Could be for other reasons，Normal redirection
               if (import.meta.env.DEV) {
-                // console.log('InitAuth: 无法获取用户数据', error)
+                // console.log('InitAuth: Unable to get user data', error)
 
 
-                      // 检查当前路径是否是未认证路由
+                      // Check if the current path is an unauthenticated route
                       const currentPath = window.location.pathname
                       const unauthenticatedRoutes = [
                         '/login',
@@ -125,31 +125,31 @@ function InitAuthInner() {
                           currentPath === route || currentPath.startsWith(route + '/')
                       )
       
-                      // 如果在未认证路由页面，不跳转
+                      // If on an unauthenticated route page，Do not redirect
                       if (isUnauthenticatedRoute) {
                         return
                       }
       
-                      // 如果不在未认证路由列表中，说明是受保护路由
-                      // 父路由已经处理了未认证情况，会显示 WelcomeGate，不需要跳转到登录页
+                      // If not in the unauthenticated route list，Indicates it is a protected route
+                      // The parent route has handled the unauthenticated case，Will display WelcomeGate，No need to redirect to the login page
                       return
                 const redirect = window.location.href
                 window.location.href = `/login?redirect=${encodeURIComponent(redirect)}`
               }
             }
-          }, 100) // 给 dialog 一点时间打开
+          }, 100) // Give dialog A little time to open
         })
         return
       }
       if (import.meta.env.DEV) {
-        // console.log('InitAuth: 无法获取用户数据', error)
+        // console.log('InitAuth: Unable to get user data', error)
         const redirect = window.location.href
         window.location.href = `/login?redirect=${encodeURIComponent(redirect)}`
       }
     })
-  }, [location.pathname]) // 只依赖路径，不依赖 auth 对象
+  }, [location.pathname]) // Only rely on the path，Do not rely on auth Object
 
-  return null // 不渲染任何东西
+  return null // Do not render anything
 }
 
 export default function InitAuth() {
@@ -192,19 +192,19 @@ const queryClient = new QueryClient({
         if (error.response?.status === 401) {
           toast.error('Session expired!')
           useAuthStore.getState().auth.reset()
-          // ❌ 这里直接跳转到 /login，绕过了 WelcomeGate
+          // ❌ Directly redirect to /login，Bypassed WelcomeGate
           const redirect = window.location.href
           window.location.href = `/login?redirect=${encodeURIComponent(redirect)}`
         }
-        // 添加 404 处理
+        // Add 404 Handle
         if (error.response?.status === 404) {
-          // 直接跳转登录页面
+          // Directly redirect to the login page
           const requestUrl =
             error.config?.url || error.response?.config?.url || ''
 
-          // 只对特定接口的 404 进行处理
+          // Only for specific interfaces 404 Handle
           if (requestUrl && shouldRedirectToLoginOn404(requestUrl)) {
-            // 检查当前路径是否是未认证路由，如果是就不跳转（避免循环）
+            // Check if the current path is an unauthenticated route，If so, do not redirect（Avoid loops）
             const currentPath = window.location.pathname
             const unauthenticatedRoutes = [
               '/login',
@@ -221,18 +221,18 @@ const queryClient = new QueryClient({
             )
 
             if (isUnauthenticatedRoute) {
-              return // 在未认证路由页面，404 是正常的，不跳转
+              return // On unauthenticated route pages，404 Is normal，Do not redirect
             }
 
-            // 如果不在未认证路由列表中，说明是受保护路由
-            // 父路由已经处理了未认证情况，会显示 WelcomeGate，不需要跳转到登录页
+            // If not in the unauthenticated route list，Indicates it is a protected route
+            // The parent route has handled the unauthenticated case，Will display WelcomeGate，No need to redirect to the login page
             return
-            // 直接跳转到登录页
+            // Directly jump to the login page
             useAuthStore.getState().auth.reset()
             const redirect = window.location.href
             window.location.href = `/login?redirect=${encodeURIComponent(redirect)}`
           }
-          // 先弹窗用户确认
+          // First, pop up a user confirmation
           // const requestUrl =
           //   error.config?.url || error.response?.config?.url || ''
           // if (requestUrl && shouldRedirectToLoginOn404(requestUrl)) {

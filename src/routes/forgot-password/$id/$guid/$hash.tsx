@@ -2,7 +2,7 @@ import { createFileRoute, redirect } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/forgot-password/$id/$guid/$hash')({
   beforeLoad: ({ params }) => {
-    // 重定向到正确的路由
+    // Redirecting to the correct route
     throw redirect({
       to: '/password/reset/$id/$guid/$hash',
       params: {
@@ -13,6 +13,6 @@ export const Route = createFileRoute('/forgot-password/$id/$guid/$hash')({
       replace: true,
     })
   },
-  // ❌ 删除这行：component 不会被执行，因为 beforeLoad 已经重定向了
+  // ❌ Delete this line：component Will not be executed，Because beforeLoad Has already been redirected
   // component: ResetPassword
 })

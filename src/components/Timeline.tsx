@@ -67,7 +67,7 @@ interface TimelineProps {
   onReject?: () => void | Promise<void>
 }
 
-// ✅ 内部状态类型（用于 Timeline 显示）
+// ✅ Internal Status Type（Used for Timeline Display）
 type TimelineItemStatus =
   | 'pending'
   | 'approved'
@@ -86,7 +86,7 @@ interface TimelineItem {
   canReject?: boolean
 }
 
-// 格式化日期时间
+// Format Date and Time
 const formatDateTime = (date: Date | string | null | undefined): string => {
   if (!date) return ''
   const d = typeof date === 'string' ? new Date(date) : date
@@ -100,7 +100,7 @@ const formatDateTime = (date: Date | string | null | undefined): string => {
   })
 }
 
-// 格式化人员名称
+// Format Person's Name
 const formatPersonName = (
   person: { firstName?: string; lastName?: string } | null | undefined
 ): string => {
@@ -116,7 +116,7 @@ export function Timeline({
   onApprove,
   onReject,
 }: TimelineProps) {
-  // ✅ 获取当前用户角色
+  // ✅ Get Current User Role
   const { auth } = useAuthStore()
   const userType = auth.user?.person?.type as PersonType | undefined
 
@@ -148,7 +148,7 @@ export function Timeline({
     orderReceivedActivityLogItems,
   } = partsOrder
 
-  // 从 ActivityLogItems 中提取信息
+  // From ActivityLogItems Extract Information
   const getActivityLogInfo = () => {
     const logList =
       orderReviewActivityLogItems && orderReviewActivityLogItems?.length > 0
@@ -200,24 +200,24 @@ export function Timeline({
 
   const activityLog = getActivityLogInfo()
 
-  // ✅ 根据角色决定显示的节点 - 所有角色都只显示三个阶段
+  // ✅ Determine Display Nodes Based on Role - All Roles Only Display Three Stages
   const getVisibleStagesForRole = (): Stage[] => {
-    // ✅ 定义三个阶段的常量
+    // ✅ Define Constants for Three Stages
     const THREE_STAGES: Stage[] = [
       'OrderReview',
       'OrderFulfillment',
       'OrderReceived',
     ]
 
-    // ✅ 所有角色都只显示三个阶段
+    // ✅ All Roles Only Display Three Stages
     return THREE_STAGES
   }
 
-  // 根据 stage 和 status 生成 Timeline 项
+  // Based on stage and status Generate Timeline Items
   const generateTimelineItems = (): TimelineItem[] => {
     const items: TimelineItem[] = []
 
-    // ✅ 智能判断当前阶段：如果已发货但 stage 还是 OrderFulfillment，应该显示 OrderReceived
+    // ✅ Intelligently Determine Current Stage：If Shipped But stage Still OrderFulfillment，Should Display OrderReceived
     let effectiveStage = stage || 'OrderReview'
     if (
       stage === 'OrderFulfillment' &&
@@ -226,7 +226,7 @@ export function Timeline({
     ) {
       effectiveStage = 'OrderReceived'
     }
-    // 如果已接收但 stage 还是 OrderReceived，应该显示 RepairCompleted
+    // If Received But stage Still OrderReceived，Should Display RepairCompleted
     if (
       stage === 'OrderReceived' &&
       (status === 'ShopReceived' || status === 'RepairCompleted') &&
@@ -235,10 +235,10 @@ export function Timeline({
       effectiveStage = 'RepairCompleted'
     }
 
-    // ✅ 使用 effectiveStage 来计算当前阶段索引
+    // ✅ Use effectiveStage To Calculate Current Stage Index
     const currentStageIndex = STAGES.indexOf(effectiveStage as Stage)
 
-    // ✅ 根据角色过滤应该显示的阶段
+    // ✅ Filter Stages to Display Based on Role
     const visibleStages = getVisibleStagesForRole()
 
     visibleStages.forEach((stageName) => {
@@ -250,9 +250,9 @@ export function Timeline({
       let canReject = false
 
       if (index < currentStageIndex) {
-        // 已完成的阶段,后端API没有日志返回
+        // Completed Stages,BackendAPINo Log Returned
         itemStatus = 'completed'
-        // ✅ 为已完成的 OrderReview 阶段设置 date 和 by，确保日志能正确显示
+        // ✅ Set for Completed OrderReview Stage date and by，Ensure Logs Display Correctly
         if (stageName === 'OrderReview') {
           if (approvalFlag === true) {
             date = dateReviewed as Date
@@ -265,7 +265,7 @@ export function Timeline({
             by = formatPersonName(submittedByPerson)
           }
         }
-        // ✅ 为已完成的 OrderFulfillment 阶段设置 date 和 by
+        // ✅ Set for Completed OrderFulfillment Stage date and by
         if (
           stageName === 'OrderFulfillment' &&
           status === 'DealershipShipped' &&
@@ -275,7 +275,7 @@ export function Timeline({
           by = formatPersonName(shippedByPerson)
         }
       } else if (index === currentStageIndex) {
-        // 当前阶段
+        // Current Stage
         if (stageName === 'OrderReview') {
           date = dateSubmitted as Date
           by = formatPersonName(submittedByPerson)
@@ -302,7 +302,7 @@ export function Timeline({
             if (status === 'DealershipShipped') {
               date = dateShipped as Date
               by = formatPersonName(shippedByPerson)
-              // ✅ 当已发货时，OrderFulfillment 阶段标记为已完成
+              // ✅ When Shipped，OrderFulfillment Stage Marked as Completed
               itemStatus = 'completed'
             } else {
               itemStatus = 'waiting'
@@ -318,7 +318,7 @@ export function Timeline({
             date = dateReceived as Date
             by = formatPersonName(receivedByPerson)
           } else if (status === 'DealershipShipped') {
-            // ✅ 当 stage 是 OrderFulfillment 但 status 是 DealershipShipped 时，OrderReceived 显示为 waiting
+            // ✅ When stage Is OrderFulfillment But status Is DealershipShipped Then，OrderReceived Display as waiting
             itemStatus = 'waiting'
           }
           if (status === 'ShopReceived') {
@@ -330,7 +330,7 @@ export function Timeline({
           }
         }
       } else {
-        // 未来阶段 - 不显示（因为已经被过滤掉了）
+        // Future Stage - Not Display（Because It Has Been Filtered Out）
         // itemStatus = 'pending'
       }
 
@@ -359,7 +359,7 @@ export function Timeline({
     return titles[stageName]
   }
   const getStatusBadge = (item: TimelineItem) => {
-    // ✅ CSR 角色：OrderReview 阶段，CsrReview 状态 → 紫色 "Waiting on You"
+    // ✅ CSR Role：OrderReview Stage，CsrReview Status → Purple "Waiting on You"
     if (
       userType === 'Csr' &&
       item.stage === 'OrderReview' &&
@@ -376,7 +376,7 @@ export function Timeline({
       return <Badge className='text-muted bg-orange-400'>Pending Dealer</Badge>
     }
 
-    // ✅ Shop 角色：OrderReview 阶段，CsrReview 状态 → 橙色 "Pending CSR"
+    // ✅ Shop Role：OrderReview Stage，CsrReview Status → Orange "Pending CSR"
     if (
       userType === 'Shop' &&
       item.stage === 'OrderReview' &&
@@ -386,7 +386,7 @@ export function Timeline({
       return <Badge className='text-muted bg-orange-400'>Pending CSR</Badge>
     }
 
-    // ✅ Shop 角色：OrderReview 阶段，拒绝后 → 蓝色 "Waiting on You"
+    // ✅ Shop Role：OrderReview Stage，After Rejection → Blue "Waiting on You"
     if (
       userType === 'Shop' &&
       item.stage === 'OrderReview' &&
@@ -395,7 +395,7 @@ export function Timeline({
       return <Badge className='bg-blue-100 text-blue-700'>Waiting on You</Badge>
     }
 
-    // ✅ Shop 角色：OrderFulfillment 阶段 → 橙色 "Pending Dealer"
+    // ✅ Shop Role：OrderFulfillment Stage → Orange "Pending Dealer"
     if (
       userType === 'Shop' &&
       item.stage === 'OrderFulfillment' &&
@@ -404,7 +404,7 @@ export function Timeline({
       return <Badge className='text-muted bg-orange-400'>Pending Dealer</Badge>
     }
 
-    // ✅ Dealership 角色：OrderFulfillment 阶段 → 蓝色 "Waiting on You"
+    // ✅ Dealership Role：OrderFulfillment Stage → Blue "Waiting on You"
     if (
       userType === 'Dealership' &&
       item.stage === 'OrderFulfillment' &&
@@ -413,7 +413,7 @@ export function Timeline({
       return <Badge className='bg-blue-100 text-blue-700'>Waiting on You</Badge>
     }
 
-    // ✅ Shop 角色：OrderReceived 阶段 → 蓝色 "Waiting on You"
+    // ✅ Shop Role：OrderReceived Stage → Blue "Waiting on You"
     if (
       userType === 'Shop' &&
       item.stage === 'OrderReceived' &&
@@ -422,7 +422,7 @@ export function Timeline({
       return <Badge className='bg-blue-100 text-blue-700'>Waiting on You</Badge>
     }
 
-    // ✅ Dealership 角色：OrderReceived 阶段 → 橙色 "Pending Shop"
+    // ✅ Dealership Role：OrderReceived Stage → Orange "Pending Shop"
     if (
       (userType === 'Dealership' || userType === 'Csr') &&
       item.stage === 'OrderReceived' &&
@@ -434,7 +434,7 @@ export function Timeline({
     //   return <Badge className='text-muted bg-orange-400'>Pending Shop </Badge>
     // }
 
-    // ✅ 其他 waiting 状态显示蓝色 "Waiting on You"
+    // ✅ Other waiting Status Display Blue "Waiting on You"
     if (item.status === 'waiting') {
       return <Badge className='bg-blue-100 text-blue-700'>Waiting on You</Badge>
     }
@@ -472,7 +472,7 @@ export function Timeline({
                 status === 'DealershipShipped')) &&
             onMarkShipped &&
             userType === 'Dealership' &&
-            !dateReceived // ✅ 只有在还没有接收时才能操作
+            !dateReceived // ✅ Can Only Operate When Not Received
           const canApproveReject =
             item.canApprove &&
             item.canReject &&
@@ -481,7 +481,7 @@ export function Timeline({
             onReject
           return (
             <div key={item.id} className='flex gap-4'>
-              {/* 圆点 + 虚线 */}
+              {/* Dot + Dashed Line */}
               <div className='flex flex-col items-center'>
                 <div
                   className={`flex h-6 w-6 items-center justify-center rounded-full p-1 text-sm font-bold text-white ${
@@ -503,26 +503,26 @@ export function Timeline({
                   )}
                 </div>
 
-                {/* 虚线 */}
+                {/* Dashed Line */}
                 {index < timelineItems.length - 1 && (
                   <div className='mt-2 h-full w-px border-l border-gray-300' />
                 )}
               </div>
 
-              {/* 内容区域 */}
+              {/* Content Area */}
               <div className='flex-1 pb-8'>
                 <div className='mb-1 flex items-center gap-2 p-2'>
                   <h3 className='font-semibold'>{item.title}</h3>
                   {getStatusBadge(item)}
                 </div>
 
-                {/* OrderReview 阶段：显示完整的历史记录 */}
+                {/* OrderReview Stage：Display Complete History */}
                 {item.stage === 'OrderReview' && (
                   <div className='space-y-2 text-sm'>
-                    {/* 如果有 activityLog，显示完整历史记录 */}
+                    {/* If Available activityLog，Display Complete History */}
                     {activityLog ? (
                       <>
-                        {/* 提交信息 */}
+                        {/* Submit Information */}
                         {activityLog.submitted && (
                           <p className='text-muted-foreground'>
                             Request was Submitted on{' '}
@@ -544,7 +544,7 @@ export function Timeline({
                             .
                           </p>
                         )}
-                        {/* 拒绝信息 */}
+                        {/* Reject Information */}
                         {activityLog.rejected && (
                           <>
                             <p className='text-muted-foreground'>
@@ -577,7 +577,7 @@ export function Timeline({
                             )}
                           </>
                         )}
-                        {/* 重新提交信息 */}
+                        {/* Resubmit Information */}
                         {activityLog.resubmitted && (
                           <p className='text-muted-foreground'>
                             Request was Resubmitted on{' '}
@@ -599,7 +599,7 @@ export function Timeline({
                             .
                           </p>
                         )}
-                        {/* 批准信息 */}
+                        {/* Approve Information */}
                         {activityLog.approved && (
                           <p className='text-muted-foreground'>
                             Request was{' '}
@@ -625,7 +625,7 @@ export function Timeline({
                         )}
                       </>
                     ) : (
-                      /* 如果没有 activityLog，至少显示基本提交信息 */
+                      /* If Not Available activityLog，At Least Display Basic Submission Information */
                       dateSubmitted && (
                         <p className='text-muted-foreground'>
                           Request was Submitted on{' '}
@@ -646,7 +646,7 @@ export function Timeline({
 
                 {item.stage === 'OrderFulfillment' && (
                   <div className='space-y-2 text-sm'>
-                    {/* 如果有 activityLog，显示完整历史记录 */}
+                    {/* If Available activityLog，Display Complete History */}
                     {activityLog ? (
                       <>
                         {activityLog.shipped && (
@@ -687,7 +687,7 @@ export function Timeline({
                         )}
                       </>
                     ) : (
-                      /* 如果没有 activityLog，至少显示基本提交信息 */
+                      /* If Not Available activityLog，At Least Display Basic Submission Information */
                       dateSubmitted && (
                         <p className='text-muted-foreground'>
                           Request was Submitted on{' '}
@@ -708,7 +708,7 @@ export function Timeline({
 
                 {item.stage === 'OrderReceived' && (
                   <div className='space-y-2 text-sm'>
-                    {/* 如果有 activityLog，显示完整历史记录 */}
+                    {/* If Available activityLog，Display Complete History */}
                     {activityLog ? (
                       <>
                         {activityLog.received && (
@@ -751,7 +751,7 @@ export function Timeline({
                         )}
                       </>
                     ) : (
-                      /* 如果没有 activityLog，至少显示基本提交信息 */
+                      /* If Not Available activityLog，At Least Display Basic Submission Information */
                       dateSubmitted && (
                         <p className='text-muted-foreground'>
                           Request was Submitted on{' '}
@@ -769,7 +769,7 @@ export function Timeline({
                     )}
                   </div>
                 )}
-                {/* CSR 审核按钮（仅在 CSR 角色且 OrderReview 阶段等待审核时显示） */}
+                {/* CSR Review Button（Only When CSR Role and OrderReview Display when the stage is waiting for review） */}
                 {canApproveReject && (
                   <div className='flex flex-col gap-2'>
                     <p className='mb-3 text-sm'>This request is</p>
@@ -794,7 +794,7 @@ export function Timeline({
                   </div>
                 )}
 
-                {/* 重新提交按钮（Shop 角色，拒绝后显示） */}
+                {/* Resubmit button（Shop Role，Display after rejection） */}
                 {canResubmit && (
                   <div className='mt-4'>
                     <Button
@@ -808,7 +808,7 @@ export function Timeline({
                   </div>
                 )}
 
-                {/* 标记为已发货/撤销发货按钮（Dealership 角色，OrderFulfillment 阶段显示） */}
+                {/* Mark as shipped/Revoke shipment button（Dealership Role，OrderFulfillment Stage display） */}
                 {canMarkShipped && (
                   <div className='mt-4'>
                     <Button
@@ -824,7 +824,7 @@ export function Timeline({
                   </div>
                 )}
 
-                {/* 标记为已接收按钮（Shop 角色，OrderReceived 阶段显示） */}
+                {/* Mark as received button（Shop Role，OrderReceived Stage display） */}
                 {canMarkReceived && status!=='RepairCompleted' && (
                   <div className='mt-4'>
                     <Button

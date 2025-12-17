@@ -20,36 +20,36 @@ export function ForgotPassword() {
   const [isLoading, setIsLoading] = useState(false)
   const [email, setEmail] = useState('')
 
-  // ===================当用户登录状态没有实效之后直接跳转首页==============
+  // ===================Redirect to the homepage when the user's login status is no longer valid==============
 
   const { isLoading: isCheckingAuth, LoadingComponent } =
     useRedirectIfAuthenticated()
 
-  // 组件挂载时调用 logout() 清除会话
-  // 根据路由规范：访问 /password/forgot 时需要调用 AuthenticationApi::sessionLogout()
-  // 注意：authApi.logout() 就是 AuthenticationApi::sessionLogout() 的实现
-  // 优化：只在用户已登录时才调用 logout，避免不必要的 API 调用
+  // Called when the component is mounted logout() Clear session
+  // According to routing specifications：Access /password/forgot needs to be called AuthenticationApi::sessionLogout()
+  // Note：authApi.logout() is AuthenticationApi::sessionLogout() implementation
+  // Optimize：Call only when the user is logged in logout，Avoid unnecessary API calls
   useEffect(() => {
-    // 如果用户已登录，调用 logout 清除会话
-    // 如果用户未登录，直接清除前端状态即可
+    // If the user is logged in，Call logout Clear session
+    // If the user is not logged in，Directly clear the frontend state
     if (auth.loginStatus === 'authenticated') {
-      // 调用后端 API 清除会话（会清除 HttpOnly Cookie）
+      // Call backend API Clear session（will clear HttpOnly Cookie）
       authApi.logout({
         status200: () => {
-          // API 调用成功，清除前端状态
+          // API Call successful，Clear frontend state
           auth.reset()
         },
         error: () => {
-          // 即使 API 调用失败，也清除前端状态（可能是网络问题，但前端状态应该清除）
+          // Even if API Call failed，still clear frontend state（Could be a network issue，But the frontend state should be cleared）
           auth.reset()
         },
       })
     } else {
-      // 用户未登录，直接清除前端状态
+      // User not logged in，Directly clear frontend state
       auth.reset()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []) // 只在组件挂载时执行一次
+  }, []) // Execute only once when the component is mounted
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -74,8 +74,8 @@ export function ForgotPassword() {
     }
   }
 
-  // 如果正在检查认证状态或已登录，显示加载状态
-  // 这段代码必须放在后面 因为React Hook的规则要求Hook必须在组件的顶层调用
+  // If checking authentication status or already logged in，Show loading state
+  // This code must be placed later BecauseReact Hookthe rules requireHookmust be called at the top level of the component
   if (isCheckingAuth && LoadingComponent) {
     return <LoadingComponent />
   }
@@ -83,12 +83,12 @@ export function ForgotPassword() {
 
   return (
     <div className='flex min-h-screen flex-col bg-background'>
-      {/* 复用 Header（隐藏用户下拉） */}
+      {/* Reuse Header（Hide user dropdown） */}
       <Header isShowUser={false} />
 
-      {/* Main Content: 上下布局 */}
+      {/* Main Content: Vertical layout */}
       <div className='flex flex-1 flex-col'>
-        {/* 上部：品牌展示区 - 通栏显示 */}
+        {/* Upper part：Brand display area - Full-width display */}
         <div
           className='flex flex-col items-center justify-center px-6 py-12 lg:py-16'
           style={{
@@ -110,14 +110,14 @@ export function ForgotPassword() {
           </div>
         </div>
 
-        {/* 下部：忘记密码表单 */}
+        {/* Lower part：Forgot password form */}
         <div className='flex flex-1 items-start justify-center bg-card px-1 py-2 lg:py-12'>
           <div className='w-full max-w-md p-8 lg:p-10'>
             <h2 className='mb-4 text-center text-3xl font-bold text-foreground lg:text-4xl'>
               Forgot Password
             </h2>
             <form onSubmit={handleSubmit} className='space-y-7'>
-              {/* Email 输入框 */}
+              {/* Email Input box */}
               <div className='space-y-3'>
                 {/* <Label
                   htmlFor='email'
@@ -140,7 +140,7 @@ export function ForgotPassword() {
                 </div>
               </div>
 
-              {/* 提交按钮 */}
+              {/* Submit button */}
               <Button
                 type='submit'
                 variant='default'
@@ -151,7 +151,7 @@ export function ForgotPassword() {
               </Button>
             </form>
 
-            {/* 返回登录 */}
+            {/* Return to login */}
             {/* <div className='mt-8 text-center text-sm text-gray-600'>
               <Link
                 to='/login'

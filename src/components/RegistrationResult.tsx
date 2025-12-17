@@ -14,7 +14,7 @@ export function RegistrationResult() {
     status: ResultType
   }
 
-  // 自动跳转到登录页（可选）
+  // Automatically redirect to login page（Optional）
   // useEffect(() => {
   //   if (status === 'success') {
   //     const timer = setTimeout(() => {
@@ -109,26 +109,26 @@ export function RegistrationResult() {
 
   return (
     <div className='flex min-h-screen flex-col bg-white'>
-      {/* 复用 Header（隐藏用户下拉） */}
+      {/* Reuse Header（Hide user dropdown） */}
       <Header isShowUser={false} />
 
-      {/* 结果主体 - 居中布局 */}
+      {/* Result body - Centered layout */}
       <div className='flex flex-1 items-center justify-center px-4 py-12'>
         <div className='w-full max-w-2xl space-y-8 text-center'>
-          {/* 图标 */}
+          {/* Icon */}
           {config.icon}
 
-          {/* 标题 */}
+          {/* Title */}
           <h1 className='text-3xl font-bold text-gray-900 lg:text-4xl'>
             {config.title}
           </h1>
 
-          {/* 描述文字 */}
+          {/* Description text */}
           <div className='mx-auto max-w-xl text-center text-base lg:text-lg'>
             {config.message}
           </div>
 
-          {/* 成功时显示登录按钮 */}
+          {/* Show login button on success */}
           {status === 'success' && (
             <div className='pt-6'>
               {/* <Button
@@ -142,7 +142,7 @@ export function RegistrationResult() {
             </div>
           )}
 
-          {/* 重复/错误时显示返回注册按钮 */}
+          {/* Repeat/Show return to registration button on error */}
           {/* {(status === 'duplicate' || status === 'error') && (
             <div className="pt-6">
               <Button

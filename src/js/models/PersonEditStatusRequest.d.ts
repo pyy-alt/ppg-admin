@@ -6,7 +6,7 @@ import PersonEditStatusRequestBase from './base/PersonEditStatusRequestBase'
  */
 declare class PersonEditStatusRequest extends PersonEditStatusRequestBase {
   /**
-   * 创建一个新的 PersonEditStatusRequest 实例
+   * Create a new PersonEditStatusRequest instance
    */
   static create(data: {
     personId: number
@@ -18,7 +18,7 @@ declare class PersonEditStatusRequest extends PersonEditStatusRequestBase {
   }): PersonEditStatusRequest
 
   /**
-   * 从数组创建 PersonEditStatusRequest 实例数组
+   * Create from array PersonEditStatusRequest instance array
    */
   static createArray(data: any[]): PersonEditStatusRequest[]
 }

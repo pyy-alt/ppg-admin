@@ -87,7 +87,7 @@ export function Shops() {
     }
   }
 
-  // 获取店铺数据
+  // Get store data
   const fetchShops = async () => {
     if (!user) return
 
@@ -95,28 +95,28 @@ export function Shops() {
     try {
       const api = new OrganizationApi()
 
-      // 构建请求参数
+      // Build request parameters
       const requestParams: any = {
-        type: 'Shop', // 必须设置为 'Shop' 来搜索店铺
+        type: 'Shop', // Must be set to 'Shop' to search for stores
         smartFilter: smartFilter,
         filterByRegionId: filterByRegionId && parseInt(filterByRegionId),
       }
 
-      // 处理状态筛选
+      // Handle status filtering
       if (filterByShopStatus !== 'all') {
         requestParams.filterByShopStatus = filterByShopStatus
       }
 
-      // 处理认证筛选
+      // Handle certification filtering
       if (filterByShopCertification !== 'all') {
         requestParams.filterByShopCertification = filterByShopCertification
       }
 
-      // 添加分页参数
+      // Add pagination parameters
       const resultParameter = ResultParameter.create({
         resultsLimitOffset: (currentPage - 1) * itemsPerPage,
         resultsLimitCount: itemsPerPage,
-        resultsOrderBy: 'Name', // 可以根据需要调整排序字段
+        resultsOrderBy: 'Name', // Sort fields can be adjusted as needed
         resultsOrderAscending: false,
       })
       requestParams.resultParameter = resultParameter
@@ -130,28 +130,28 @@ export function Shops() {
           setLoading(false)
         },
         error: (error: any) => {
-          console.error('获取店铺列表失败:', error)
+          console.error('Failed to retrieve store list:', error)
           setLoading(false)
         },
         status403: (message: string) => {
-          console.error('权限不足:', message)
+          console.error('Insufficient permissions:', message)
           setLoading(false)
         },
       })
     } catch (error) {
-      console.error('API 调用错误:', error)
+      console.error('API Call error:', error)
       setLoading(false)
     }
   }
 
-  // 当筛选条件改变时，重置页码并调用 API
+  // When filter conditions change，Reset page number and call API
   useEffect(() => {
     if (!user) return
 
-    // 重置到第一页
+    // Reset to the first page
     setCurrentPage(1)
 
-    // 调用 API（对于文本输入，使用防抖）
+    // Call API（For text input，Use debounce）
     const timeoutId = setTimeout(
       () => {
         fetchShops()
@@ -168,7 +168,7 @@ export function Shops() {
     user,
   ])
 
-  // ✅ 当页码改变时单独调用（不重置页码）
+  // ✅ Individually call when page number changes（Do not reset page number）
   useEffect(() => {
     if (!user || currentPage === 1) return
     fetchShops()
@@ -212,12 +212,12 @@ export function Shops() {
   }
 
   useEffect(() => {
-    // 确保组件已挂载且 ref 已连接到 DOM
+    // Ensure the component is mounted and ref is connected to DOM
     if (shopsOrderRef.current) {
-      // 2. 使用原生 DOM API 查找所有 <th> 元素
+      // 2. Use native DOM API Find all <th> elements
       const thElements = shopsOrderRef.current.querySelectorAll('thead th')
 
-      // 3. 提取文本内容
+      // 3. Extract text content
       const headerTexts = Array.from(thElements).map((th) =>
         th.textContent.trim()
       )

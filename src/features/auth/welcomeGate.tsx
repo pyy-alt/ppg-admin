@@ -47,20 +47,20 @@ export default function WelcomeGate() {
   const handleCardClick = (card: (typeof cards)[0]) => {
     setBrand(card.brandPrefix as 'audi' | 'vw', card.region as 'america' | 'canada')
     setSelectedCard(card.id)
-    // 跳转到登录页面，通过 URL 参数传递品牌信息
+    // Redirect to login page，Pass URL Parameter passing brand information
     navigate({
       to: '/login',
       search: {
         brand: card.brandPrefix as 'audi' | 'vw',
         region: card.region as 'america' | 'canada',
       },
-      replace: false, // 改为 false，保留历史记录
+      replace: false, // Change to false，Keep history
     })
   }
 
   return (
     <div className='bg-background relative flex min-h-screen flex-col items-center justify-center'>
-      {/* 背景图 + 暗色叠加层 */}
+      {/* Background image + Dark overlay */}
       <div className='absolute inset-0'>
         <img
           src={background}
@@ -69,13 +69,13 @@ export default function WelcomeGate() {
         />
       </div>
 
-      {/* 主内容卡片 */}
+      {/* Main content card */}
       <div className='z-10 w-full max-w-6xl px-4 sm:px-8'>
-        {/* 顶部标题区 */}
+        {/* Top title area */}
         <h1 className='text-center text-5xl font-bold tracking-tight text-white md:text-6xl'>
           Restricted Parts Tracker
         </h1>
-        {/* 四宫格认证徽标 */}
+        {/* Four-square certification logo */}
         <div className='mt-10 grid grid-cols-2 gap-6'>
           {cards.map((card) => (
             <div
@@ -96,7 +96,7 @@ export default function WelcomeGate() {
           ))}
         </div>
       </div>
-      {/* 底部语言切换 */}
+      {/* Bottom language switch */}
       <div className='z-10 mt-10 flex items-center justify-center gap-4 text-white'>
         <Globe className='h-5 w-5' />
         <div className='flex items-center gap-4 text-sm font-medium'>

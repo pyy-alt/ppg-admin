@@ -11,7 +11,7 @@ declare class SessionBase {
   shopStatuses?: string[]
   shopCertifications?: string[]
   regions?: Region[]
-  // 注意：JWT 不在响应体中，而是通过 Set-Cookie 响应头自动设置到浏览器 Cookie
+  // Attention：JWT Not in the response body，But through Set-Cookie Automatically set to the browser in the response header Cookie
 
   static create(data: any): SessionBase
   static createArray(data: any[]): SessionBase[]

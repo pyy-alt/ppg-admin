@@ -14,15 +14,15 @@ export const Route = createFileRoute('/registrationResult' as any)({
 
 /**
  * 
- * // 在 RegistrationShop.tsx 或 RegistrationDealership.tsx 的 handleSubmit 中
+ * //  RegistrationShop.tsx or RegistrationDealership.tsx of handleSubmit in
 
-// 成功
+// success
 navigate({ to: '/registration/result', search: { status: 'success' } });
 
-// 邮箱已存在
+// Email already exists
 navigate({ to: '/registration/result', search: { status: 'duplicate' } });
 
-// 服务器错误
+// Server error
 navigate({ to: '/registration/result', search: { status: 'error' } });
  * 
  */

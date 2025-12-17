@@ -4,7 +4,7 @@ interface Global404State {
   isOpen: boolean
   message: string | null
   url: string | null
-  openTimestamp: number | null // 添加时间戳
+  openTimestamp: number | null // Add timestamp
   open: (message?: string, url?: string) => void
   close: () => void
 }
@@ -18,7 +18,7 @@ export const useGlobal404Store = create<Global404State>((set, get) => ({
     const now = Date.now()
     const state = get()
 
-    // 如果已经打开，且距离上次打开不到 1 秒，只更新消息
+    // If already opened，and less than 1 seconds since last opened，Only update messages
     if (
       state.isOpen &&
       state.openTimestamp &&
@@ -31,7 +31,7 @@ export const useGlobal404Store = create<Global404State>((set, get) => ({
       return
     }
 
-    // 第一次打开或超过 1 秒后重新打开
+    // First open or reopen after 1 seconds
     set({
       isOpen: true,
       message: message || null,

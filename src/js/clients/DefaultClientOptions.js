@@ -6,7 +6,7 @@ import { useLoadingStore } from '@/stores/loading-store'
  * It can also be overridden per-request by passing in a ClientOptions object into any API call.
  */
 export default class DefaultClientOptions {
-  // 添加防重复处理的缓存（URL -> 时间戳）
+  // Add cache to prevent duplicate processing（URL -> Timestamp）
   static _404HandledUrls = new Map()
 
   /**
@@ -27,7 +27,7 @@ export default class DefaultClientOptions {
   static generateRequestOptionsForMethod(method) {
     const requestOptions = {
       method: method,
-      credentials: 'include', // 必须使用 'include' 才能在跨域请求时携带 Cookie
+      credentials: 'include', // Must be used 'include' to carry during cross-origin requests Cookie
       headers: new Headers(),
     }
 
@@ -47,7 +47,7 @@ export default class DefaultClientOptions {
 
   static onApiCall(url, method, request, requestType) {
     console.log('[API Call] ' + method.toUpperCase() + ' ' + url)
-        // ✅ 每次开始请求时 +1
+        // ✅ At the start of each request +1
         try {
           useLoadingStore.getState().start()
         } catch {}
@@ -66,7 +66,7 @@ export default class DefaultClientOptions {
 
   static onApiResponse(url, method, request, requestType) {
     console.log('[API Response] ' + method.toUpperCase() + ' ' + url)
-    // ✅ 收到响应时 -1
+    // ✅ When receiving a response -1
     try {
       useLoadingStore.getState().end()
     } catch {}
@@ -84,18 +84,18 @@ export default class DefaultClientOptions {
 
   static onApiProcessResponse(url, method, response) {
     try {
-      // 统一处理所有非 200 状态码
+      // Uniformly handle all non 200 status codes
       if (response.status !== 200) {
-        // 克隆 response 以便读取 body（因为 response 只能读取一次）
+        // Clone response to read body（Because response can only be read once）
         const clonedResponse = response.clone()
 
-        // 异步读取错误消息
+        // Asynchronous read error message
         clonedResponse
           .text()
           .then((text) => {
             let errorMessage = ''
             try {
-              // 尝试解析 JSON 格式的错误消息
+              // Try to parse JSON formatted error message
               const data = JSON.parse(text)
               errorMessage =
                 data.message ||
@@ -103,11 +103,11 @@ export default class DefaultClientOptions {
                 text ||
                 `HTTP ${response.status} Error`
             } catch {
-              // 如果不是 JSON，直接使用文本
+              // If not JSON，Directly use the text
               errorMessage = text || `HTTP ${response.status} Error`
             }
 
-            // 根据状态码显示不同的错误提示
+            // Display different error prompts based on status codes
             switch (response.status) {
               case 400:
                 toast.error(errorMessage || 'Bad Request')
@@ -119,13 +119,13 @@ export default class DefaultClientOptions {
                 toast.error(errorMessage || 'Forbidden')
                 break
               case 404:
-                // 只对特定接口的 404 错误进行处理
-                // 动态导入以避免循环依赖
+                // Only handle errors for specific interfaces 404 Error handling
+                // Dynamically import to avoid circular dependencies
                 import('@/lib/api-404-config').then(
                   ({ shouldRedirectToLoginOn404 }) => {
-                    // 检查是否是需要跳转登录的接口
+                    // Check if it is an interface that requires login redirection
                     if (shouldRedirectToLoginOn404(url)) {
-                      // 检查当前路径是否是未认证路由（如 /login），如果是就不跳转（避免循环）
+                      // Check if the current path is an unauthenticated route（For example /login），If so, do not redirect（Avoid loops）
                       const currentPath = window.location.pathname
                       const unauthenticatedRoutes = [
                         '/login',
@@ -143,35 +143,35 @@ export default class DefaultClientOptions {
                           currentPath.startsWith(route + '/')
                       )
 
-                      // 如果在未认证路由页面，不跳转（因为这是正常情况，避免循环刷新）
+                      // If on an unauthenticated route page，Do not redirect（Because this is a normal situation，Avoid refreshing loops）
                       if (isUnauthenticatedRoute) {
                         return
                       }
 
-                      // 如果不在未认证路由列表中，说明是受保护路由
-                      // 父路由已经处理了未认证情况，会显示 WelcomeGate，不需要跳转到登录页
-                      // 直接 return，不执行跳转
+                      // If not in the unauthenticated route list，It indicates a protected route
+                      // The parent route has handled the unauthenticated situation，Will display WelcomeGate，No need to redirect to the login page
+                      // Directly return，Do not execute redirection
                       return
 
                       const now = Date.now()
                       const lastHandled =
                         DefaultClientOptions._404HandledUrls.get(url)
 
-                      // 如果这个 URL 在 3 秒内已经处理过，跳过（防止重复跳转）
+                      // If this URL within 3 seconds has been processed，Skip（Prevent duplicate redirection）
                       if (lastHandled && now - lastHandled < 3000) {
                         return
                       }
 
-                      // 标记为已处理
+                      // Mark as processed
                       DefaultClientOptions._404HandledUrls.set(url, now)
 
-                      // 3 秒后清除标记，允许重新处理
+                      // 3 Clear the mark after seconds，Allow reprocessing
                       setTimeout(() => {
                         DefaultClientOptions._404HandledUrls.delete(url)
                       }, 3000)
 
-                      // TODO: 暂时注释掉对话框，直接跳转登录页
-                      // 如果需要恢复对话框功能，取消下面的注释，并注释掉下面的直接跳转代码
+                      // TODO: Temporarily comment out the dialog，Directly redirect to the login page
+                      // If you need to restore the dialog functionality，Uncomment below，And comment out the direct redirection code below
                       // import('@/stores/global-404-store').then(({ useGlobal404Store }) => {
                       //   const store = useGlobal404Store.getState()
                       //   if (store.isOpen) {
@@ -193,7 +193,7 @@ export default class DefaultClientOptions {
                       //     .catch(() => {})
                       // })
 
-                      // 直接跳转到登录页
+                      // Directly redirect to the login page
                       import('@/stores/auth-store').then(({ useAuthStore }) => {
                         useAuthStore.getState().auth.reset()
                         const redirect = window.location.href
@@ -202,13 +202,13 @@ export default class DefaultClientOptions {
                     }
                   }
                 )
-                //   // 动态导入以避免循环依赖
+                //   // Dynamically import to avoid circular dependencies
                 //   import('@/stores/global-404-store').then(({ useGlobal404Store }) => {
                 //     import('@/lib/api-404-config').then(
                 //       ({ shouldRedirectToLoginOn404 }) => {
-                //         // 检查是否是需要跳转登录的接口
+                //         // Check if it is an interface that requires login redirection
                 //         if (shouldRedirectToLoginOn404(url)) {
-                //           // 检查当前路径是否是未认证路由（如 /login），如果是就不显示弹窗
+                //           // Check if the current path is an unauthenticated route（For example /login），If so, do not display the popup
                 //           const currentPath = window.location.pathname
                 //           const unauthenticatedRoutes = [
                 //             '/login',
@@ -225,7 +225,7 @@ export default class DefaultClientOptions {
                 //               currentPath === route || currentPath.startsWith(route + '/')
                 //           )
 
-                //           // 如果在未认证路由页面，不显示弹窗（因为这是正常情况）
+                //           // If on an unauthenticated route page，Do not display the popup（Because this is a normal situation）
                 //           if (isUnauthenticatedRoute) {
                 //             return
                 //           }
@@ -233,29 +233,29 @@ export default class DefaultClientOptions {
                 //           const now = Date.now()
                 //           const lastHandled = DefaultClientOptions._404HandledUrls.get(url)
 
-                //           // 如果这个 URL 在 3 秒内已经处理过，跳过
+                //           // If this URL within 3 seconds has been processed，Skip
                 //           if (lastHandled && now - lastHandled < 3000) {
                 //             return
                 //           }
 
-                //           // 标记为已处理
+                //           // Mark as processed
                 //           DefaultClientOptions._404HandledUrls.set(url, now)
 
-                //           // 3 秒后清除标记，允许重新处理
+                //           // 3 Clear the mark after seconds，Allow reprocessing
                 //           setTimeout(() => {
                 //             DefaultClientOptions._404HandledUrls.delete(url)
                 //           }, 3000)
 
                 //           const store = useGlobal404Store.getState()
-                //           // 如果已经打开，不重复打开
+                //           // If already opened，Do not reopen
                 //           if (store.isOpen) {
                 //             return
                 //           }
 
-                //           // 立即打开 dialog，不等待 response.text() 解析
+                //           // Open immediately dialog，Do not wait response.text() Parse
                 //           store.open(undefined, url)
 
-                //           // 然后异步获取错误消息（如果有）并更新
+                //           // Then asynchronously get the error message（If there is）And update
                 //           const clonedResponse = response.clone()
                 //           clonedResponse
                 //             .text()
@@ -264,18 +264,18 @@ export default class DefaultClientOptions {
                 //                 const data = JSON.parse(text)
                 //                 const message = data.message || data.error || null
                 //                 if (message) {
-                //                   // 只更新消息，不重复打开
+                //                   // Only update the message，Do not reopen
                 //                   store.open(message, url)
                 //                 }
                 //               } catch {
-                //                 // 如果不是 JSON，使用默认消息（已经打开了）
+                //                 // If not JSON，Use the default message（Has been opened）
                 //               }
                 //             })
                 //             .catch(() => {
-                //               // 忽略错误，使用默认消息（已经打开了）
+                //               // Ignore error，Use the default message（Has been opened）
                 //             })
                 //         }
-                //         // 如果不是白名单中的接口，404 错误会正常传递给 handler 处理
+                //         // If not an interface in the whitelist，404 Errors will be normally passed to handler Handle
                 //       }
                 //     )
                 //   })
@@ -295,11 +295,11 @@ export default class DefaultClientOptions {
             }
           })
           .catch(() => {
-            // 如果读取失败，显示默认错误
+            // If reading fails，Display default error
             toast.error(`HTTP ${response.status} Error`)
           })
 
-        // 注意：这里不 return，让 API 方法继续处理，以便 status200 能正常工作
+        // Note：Here does not return，Let API the method continue processing，So that status200 can work normally
       }
     } catch (error) {}
   }
@@ -313,7 +313,7 @@ export default class DefaultClientOptions {
     const responseHandler = {
       error: (error) => {
         console.error(error)
-         // ✅ 出错时也要 -1（防止永远卡 loading）
+         // ✅ Even when an error occurs -1（Prevent getting stuck forever loading）
          try {
           useLoadingStore.getState().end()
         } catch {}

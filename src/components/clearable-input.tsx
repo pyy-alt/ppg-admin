@@ -5,7 +5,7 @@ import * as React from 'react'
 
 interface ClearableInputProps
   extends React.ComponentProps<typeof Input> {
-  // 可选：只在 type=text 时允许清除
+  // Optional：Only allow clearing type=text when
 }
 
 export function ClearableInput({
@@ -16,7 +16,7 @@ export function ClearableInput({
 }: ClearableInputProps) {
   const handleClear = () => {
     if (!onChange) return
-    // 模拟一个空值事件给外部
+    // Simulate a null value event to external
     const event = {
       target: { value: '' },
     } as React.ChangeEvent<HTMLInputElement>

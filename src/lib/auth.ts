@@ -1,6 +1,6 @@
 /**
- * 认证相关的工具函数
- * 用于全局获取和刷新用户数据
+ * Utility functions related to authentication
+ * Used for globally fetching and refreshing user data
  */
 import AuthenticationApi from '@/js/clients/base/AuthenticationApi'
 import type Session from '@/js/models/Session'
@@ -8,18 +8,18 @@ import { type AuthStatus, useAuthStore } from '@/stores/auth-store'
 
 const authApi = new AuthenticationApi()
 
-// 添加防重复调用的标记
+// Add a flag to prevent duplicate calls
 let isRefreshing = false
 let refreshPromise: Promise<void> | null = null
 
 /**
- * 刷新当前用户数据
- * 调用 sessionGetCurrent API 获取最新的用户信息并更新到 store
+ * Refresh current user data
+ * Call sessionGetCurrent API Fetch the latest user information and update to store
  *
  * @returns Promise<void>
  */
 export async function refreshUserData(): Promise<void> {
-  // 如果正在刷新，返回同一个 Promise
+  // If refreshing，Return the same Promise
   if (isRefreshing && refreshPromise) {
     return refreshPromise
   }
@@ -28,14 +28,14 @@ export async function refreshUserData(): Promise<void> {
   const { auth } = useAuthStore.getState()
 
   refreshPromise = new Promise((resolve, reject) => {
-    // 设置状态为 checking
+    // Set status to checking
     auth.setLoginStatus('checking')
 
     authApi.sessionGetCurrent(
       {
         status200: (session: Session) => {
           if (session) {
-            auth.setUser(session) // setUser 会自动设置 loginStatus 为 'authenticated'
+            auth.setUser(session) // setUser Will be automatically set loginStatus To 'authenticated'
             isRefreshing = false
             refreshPromise = null
             resolve()
@@ -47,15 +47,15 @@ export async function refreshUserData(): Promise<void> {
           }
         },
         status401: () => {
-          // Cookie 过期或无效，清除状态
+          // Cookie Expired or invalid，Clear status
           auth.reset()
           isRefreshing = false
           refreshPromise = null
           reject(new Error('Session expired'))
         },
         status404: () => {
-          // 未登录（无会话）
-          // 检查当前路径是否是未认证路由
+          // Not logged in（No session）
+          // Check if the current path is an unauthenticated route
           const currentPath = window.location.pathname
           const unauthenticatedRoutes = [
             '/login',
@@ -73,29 +73,29 @@ export async function refreshUserData(): Promise<void> {
           )
 
           if (isUnauthenticatedRoute) {
-            // 在未认证路由页面，404 是正常情况，立即设置状态并 reject
-            auth.setLoginStatus('unauthenticated') // 重要：先设置状态，避免一直 checking
+            // On the unauthenticated route page，404 Is normal，Immediately set status and reject
+            auth.setLoginStatus('unauthenticated') // Important：Set status first，Avoid always checking
             isRefreshing = false
             refreshPromise = null
             reject(new Error('No session found'))
             return
           }
 
-          // 在受保护页面，检查是否是 session/current 接口
+          // On protected pages，Check if it is session/current Interface
           import('@/lib/api-404-config').then(
             ({ shouldRedirectToLoginOn404 }) => {
               const url =
                 'https://audi-api.ppg.dev.quasidea.com/authentication/session/current'
               if (shouldRedirectToLoginOn404(url)) {
-                // 是需要跳转登录的接口，不立即 reset，让 dialog 处理
-                // 延迟 reject，给 dialog 时间显示
+                // Is an interface that requires redirecting to login，Do not immediately reset，Let dialog Handle
+                // Delay reject，Give dialog Time display
                 setTimeout(() => {
                   isRefreshing = false
                   refreshPromise = null
                   reject(new Error('No session found'))
                 }, 500)
               } else {
-                // 其他接口的 404，正常处理
+                // Other interface's 404，Normal handling
                 auth.reset()
                 isRefreshing = false
                 refreshPromise = null
@@ -105,7 +105,7 @@ export async function refreshUserData(): Promise<void> {
           )
         },
         else: (statusCode: number) => {
-          // 处理其他未预期的状态码
+          // Handle other unexpected status codes
           if (statusCode === 404) {
             auth.reset()
             isRefreshing = false
@@ -118,13 +118,13 @@ export async function refreshUserData(): Promise<void> {
           }
         },
         error: (error: Error) => {
-          // 网络错误等
+          // Network errors, etc.
           isRefreshing = false
           refreshPromise = null
           reject(error)
         },
       },
-      null // options 参数，可选
+      null // options Parameter，Optional
     )
   })
 
@@ -132,8 +132,8 @@ export async function refreshUserData(): Promise<void> {
 }
 
 /**
- * 获取当前用户数据（从 store 中读取）
- * 这是一个同步函数，直接返回 store 中的用户数据
+ * Get current user data（From store Read from）
+ * This is a synchronous function，Return directly store User data in
  *
  * @returns AuthUser | null
  */
@@ -143,8 +143,8 @@ export function getCurrentUser() {
 }
 
 /**
- * 检查用户是否已登录（从 store 中读取）
- * 这是一个同步函数，直接返回 store 中的认证状态
+ * Check if the user is logged in（From store Read from）
+ * This is a synchronous function，Return directly store Authentication status in
  *
  * @returns boolean
  */
@@ -154,7 +154,7 @@ export function isAuthenticated(): boolean {
 }
 
 /**
- * 获取当前登录状态
+ * Get current login status
  *
  * @returns AuthStatus
  */

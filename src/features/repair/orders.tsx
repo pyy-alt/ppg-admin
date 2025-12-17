@@ -165,7 +165,7 @@ export function RepairOrderList() {
         dateLastSubmittedTo,
       })
 
-      // 日期处理保持不变
+      // Date handling remains unchanged
       if ((request as any).dateLastSubmittedFrom) {
         ;(request as any).dateLastSubmittedFrom = formatDateOnly(
           dateLastSubmittedFrom
@@ -193,7 +193,7 @@ export function RepairOrderList() {
         status200: async (response) => {
           let orders = (response as any).repairOrders || []
 
-          // 并发获取每条记录的零件订单数据
+          // Concurrent retrieval of part order data for each record
           const ordersWithParts = await Promise.all(
             orders.map(async (order: any) => {
               try {
@@ -201,14 +201,14 @@ export function RepairOrderList() {
                   order.id.toString()
                 )
 
-                // 统一处理返回（数组或对象）
+                // Unified handling of return（Array or object）
                 const partsOrders = Array.isArray(partsResponse)
                   ? partsResponse
                   : partsResponse
                     ? [partsResponse]
                     : []
 
-                // 计算各状态数量
+                // Calculate the number of each state
                 const statusCounts = {
                   CsrReview: 0,
                   CsrRejected: 0,
@@ -227,8 +227,8 @@ export function RepairOrderList() {
 
                 return {
                   ...order,
-                  partsOrders, // 完整零件订单数据（可选）
-                  statusCounts, // 各状态数量对象
+                  partsOrders, // Complete part order data（Optional）
+                  statusCounts, // Object of each state count
                 }
               } catch (err) {
                 console.error(`Failed to load parts for RO ${order.id}:`, err)
@@ -249,7 +249,7 @@ export function RepairOrderList() {
           )
 
           setRepairOrders(orders)
-          // 显示数据带统计，用于表格渲染
+          // Display data with statistics，For table rendering
           setDisplayOrders(ordersWithParts)
           setTotalItems((response as any).totalItemCount || 0)
         },
@@ -266,24 +266,24 @@ export function RepairOrderList() {
   //   try {
   //     const api = new RequestApi()
   //     const shopId = user?.person?.shop?.id || id
-  //     // 需要传递shopId 才能进行查询
+  //     // Need to passshopId to perform the query
   //     if (shopId == null) {
   //       router.history.go(-1)
   //       return
   //     }
-  //     // 处理 filterByStatus：如果是 'all'，传 undefined
+  //     // Process filterByStatus：If it is 'all'，Pass undefined
   //     const statusFilter = filterByStatus === 'all' ? undefined : filterByStatus
 
   //     const request = RepairOrderSearchRequest.create({
   //       shopId: Number(shopId),
-  //       smartFilter: smartFilter || undefined, // 空字符串转为 undefined
+  //       smartFilter: smartFilter || undefined, // Convert empty string to undefined
   //       filterByStatus: statusFilter,
   //       showRepairCompleted,
   //       dateLastSubmittedFrom,
   //       dateLastSubmittedTo,
   //     })
 
-  //     // 在序列化前，手动将日期字段格式化为字符串（覆盖 ModelBaseClass 的转换）
+  //     // Before serialization，Manually format date fields as strings（Override ModelBaseClass conversion）
   //     if ((request as any).dateLastSubmittedFrom) {
   //       ;(request as any).dateLastSubmittedFrom = formatDateOnly(
   //         dateLastSubmittedFrom
@@ -319,10 +319,10 @@ export function RepairOrderList() {
   const router = useRouter()
 
   useEffect(() => {
-    if (!user) return // 等待用户信息加载
+    if (!user) return // Waiting for user information to load
 
     const userType = user?.person?.type
-    // ✅ 新增：Dealership 用户不允许访问修复订单列表
+    // ✅ Add：Dealership User not allowed to access repair order list
     if (
       userType === 'Dealership' ||
       userType === 'Csr' ||
@@ -332,13 +332,13 @@ export function RepairOrderList() {
       navigate({ to: '/parts_orders', replace: true })
       return
     }
-    // 调用 API（对于文本输入，使用防抖）
+    // Call API（For text input，Use debounce）
     const timeoutId = setTimeout(
       () => {
         getRepairOrders()
       },
       smartFilter ? 500 : 0
-    ) // 文本输入延迟 500ms，其他条件立即执行
+    ) // Text input delay 500ms，Other conditions execute immediately
 
     return () => clearTimeout(timeoutId)
   }, [
@@ -351,13 +351,13 @@ export function RepairOrderList() {
     dateLastSubmittedTo,
   ])
 
-  // 当预设范围改变时，自动计算日期
+  // When preset range changes，Automatically calculate date
   useEffect(() => {
     if (dateRangePreset !== 'custom') {
       const { from, to } = calculateDateRange(dateRangePreset)
       setFromDate(from)
       setToDate(to)
-      setRange(undefined) // 清空自定义区间
+      setRange(undefined) // Clear custom range
     }
   }, [dateRangePreset])
 
@@ -369,7 +369,7 @@ export function RepairOrderList() {
     const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000
     const isOver7Days = diffMs >= SEVEN_DAYS_MS
 
-    // 条件1：零件订单中有 ShopReceived 或 CsrRejected
+    // Condition1：There are in part order ShopReceived or CsrRejected
     const hasAlertPartsStatus =
       orderAny?.partsOrders?.length > 0 &&
       orderAny.partsOrders.some(
@@ -377,10 +377,10 @@ export function RepairOrderList() {
           val.status === 'ShopReceived' || val.status === 'CsrRejected'
       )
 
-    // 条件2：超过7天 且 用户是 Shop 类型
+    // Condition2：Exceeds7Days and the user is Shop type
     const isShopAndOver7Days = isOver7Days && user?.person?.type === 'Shop'
 
-    // 任一条件满足则显示图标
+    // show icon if any condition is met
     if (hasAlertPartsStatus || isShopAndOver7Days) {
       return <AlertTriangle className='text-destructive h-4 w-4' />
     }
@@ -401,7 +401,7 @@ export function RepairOrderList() {
             {user?.person?.shop?.name ?? '--'}
           </p>
           <p className='mt-4 flex items-center space-x-4 text-sm text-gray-200'>
-            {/* 房子图标 */}
+            {/* house icon */}
             <Warehouse className='h-5 w-5 text-white' />
             <span>
               Assigned Dealership:{' '}
@@ -472,7 +472,7 @@ export function RepairOrderList() {
           )}
         </div>
       </div>
-      {/* 新增 or 编辑*/}
+      {/* add or edit*/}
       <RepairOrderDialog
         open={isOpen}
         onOpenChange={setOpen}
@@ -554,18 +554,18 @@ export function RepairOrderList() {
               </SelectContent>
             </Select>
 
-            {/* 日期范围选择 */}
+            {/* date range selection */}
             {dateRangePreset === 'custom' && (
               <DateRangePicker
                 value={range}
                 onChange={(newRange) => {
                   setRange(newRange)
-                  // 同步到原有状态，用于 API 查询
+                  // sync to original state，for API query
                   setFromDate(newRange?.from ?? undefined)
                   setToDate(newRange?.to ?? undefined)
                 }}
                 onClose={() => {
-                  // 弹窗关闭时重新查询列表
+                  // re-query the list when the popup is closed
                   getRepairOrders(true)
                 }}
                 placeholder='Select date range'
@@ -640,9 +640,9 @@ export function RepairOrderList() {
                 </TableHeader>
                 <TableBody>
                   {displayOrders.map((order) => {
-                    // 使用类型断言访问属性，因为类型定义可能不完整
+                    // use type assertion to access properties，because the type definition may be incomplete
                     const orderAny = order as any
-                    // 组合车辆信息
+                    // combine vehicle information
                     const vehicle =
                       orderAny.year && orderAny.make && orderAny.model
                         ? `${orderAny.year} ${orderAny.make} ${orderAny.model}`
@@ -654,7 +654,7 @@ export function RepairOrderList() {
                       >
                         <TableCell className='font-medium'>
                           <div className='flex items-center gap-2'>
-                            {/* hasAlert 字段可能不存在，暂时移除或使用可选 */}
+                            {/* hasAlert field may not exist，temporarily remove or use optional */}
                             {showIcon(orderAny)}
                             <span
                               className='cursor-pointer text-blue-600 hover:underline'
@@ -670,7 +670,7 @@ export function RepairOrderList() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          {/* orders 字段可能不存在，需要从 PartsOrder 获取，暂时显示 -- */}
+                          {/* orders field may not exist，need to get from PartsOrder obtain，temporarily display -- */}
                           <div className='space-y-1'>
                             {orderAny.salesOrderNumber ? (
                               <div>{orderAny.salesOrderNumber}</div>
@@ -726,7 +726,7 @@ export function RepairOrderList() {
                                 {orderAny.statusCounts.RepairCompleted})
                               </div>
                             )}
-                            {/* 如果所有数量为0，显示 -- */}
+                            {/* if all quantities are0，display -- */}
                             {Object.values(orderAny.statusCounts).every(
                               (count) => count === 0
                             ) && <div>--</div>}

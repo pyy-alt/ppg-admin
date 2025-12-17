@@ -46,13 +46,13 @@ const formSchema = z.object({
   parts: z.array(
     z.object({ number: z.string().min(1, 'Part number is required') })
   ),
-  // 虚拟字段，用于显示附件错误
+  // Virtual field，Used to display attachment errors
   _estimateFile: z.string().optional(),
 })
 
 type FormValues = z.infer<typeof formSchema>
 
-// 定义初始数据类型
+// Define initial data type
 export type PartsOrderData = {
   id?: number
   parts?: string[]
@@ -64,11 +64,11 @@ export type PartsOrderData = {
   year?: string
   model?: string
   salesOrderNumber?: string
-  partsOrderNumber?: number // 0 = 原始订单, 1+ = 补充订单
-  isAlternateDealer?: boolean // 是否来自备用经销商
-  alternateDealerName?: string // 备用经销商名称
-  alternateDealerId?: string // 备用经销商ID
-  status?: string // 订单状态，用于判断是否已批准/拒绝
+  partsOrderNumber?: number // 0 = Original order, 1+ = Supplemental order
+  isAlternateDealer?: boolean // Is it from an alternate dealer
+  alternateDealerName?: string // Alternate dealer name
+  alternateDealerId?: string // Alternate dealerID
+  status?: string // Order status，Used to determine if approved/Reject
   estimateFileAssets?: File[] | null
   [key: string]: any
 }
@@ -78,7 +78,7 @@ type PartsOrderDialogProps = {
   onOpenChange: (open: boolean) => void
   mode?: 'create' | 'edit'
   initialData?: PartsOrderData | undefined
-  defaultDealership?: string // 默认经销商名称
+  defaultDealership?: string // Default dealer name
   initRepaitOrderData?: RepairOrder
   onSuccess?: () => void
   isReject?: boolean
@@ -104,10 +104,10 @@ export function PartsOrderDialog({
   })
   const [loading, setLoading] = useState(false)
   const [comment, setComment] = useState('')
-  // 使用确认 hook
+  // Use confirmation hook
   const { handleCloseRequest, ConfirmDialogComponent } = useDialogWithConfirm({
     form,
-    hasUnsavedFiles: estimateFiles.length > 0, // 检查是否有文件
+    hasUnsavedFiles: estimateFiles.length > 0, // Check for files
     onClose: () => {
       form.reset()
       setEstimateFiles([])
@@ -117,26 +117,26 @@ export function PartsOrderDialog({
     description:
       'You have unsaved changes. Are you sure you want to close? All your changes will be lost.',
   })
-  // 新建完维修单子之后直接编辑原始零件订单 重新赋值
+  // Edit the original parts order directly after creating a new repair order Reassign
   if (initialData && Array.isArray(initialData)) {
     initialData = initialData[0]
   }
-  // ✅ 获取当前用户角色
+  // ✅ Get current user role
   // const { auth } = useAuthStore()
   // const userType = auth.user?.person?.type as PersonType | undefined
   // TODO=======
   // const [salesOrderNumber, setSalesOrderNumber] = useState(initialData?.salesOrderNumber || '')
 
-  // 修改 handleClose 使用新的逻辑
+  // Modify handleClose Use new logic
   const handleClose = () => {
     handleCloseRequest()
   }
-  // 修改 Dialog 的 onOpenChange
+  // Modify Dialog of onOpenChange
   const handleDialogOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
-      // 尝试关闭
+      // Try to close
       handleCloseRequest()
-      return false // 阻止默认关闭行为
+      return false // Prevent default close behavior
     }
     return true
   }
@@ -146,25 +146,25 @@ export function PartsOrderDialog({
     name: 'parts',
   })
 
-  // 判断是否是补充订单
+  // Determine if it is a supplemental order
   const isSupplement =
     initialData?.partsOrderNumber !== undefined &&
     initialData.partsOrderNumber > 0
 
-  // 判断是否来自备用经销商
+  // Determine if it is from an alternate dealer
   // const isFromAlternateDealer = initialData?.isAlternateDealer === true
 
-  // 判断是否在 CSR 批准/拒绝之前（可以编辑）
+  // Determine if in CSR Approve/Before rejecting（Editable）
   // const canEdit = !initialData?.status ||
   //   ['CsrReview', 'DealershipProcessing'].includes(initialData.status)
 
-  // 根据模式生成标题
+  // Generate title based on mode
   const getDialogTitle = () => {
     if (isReject) {
       return 'Resubmit Parts Order'
     }
     if (isSupplement) {
-      // 补充订单
+      // Supplemental order
       const supplementNum = initialData?.partsOrderNumber || 1
       if (initialData?.parts && initialData.parts?.length > 0) {
         return `Edit Supplement #${supplementNum}`
@@ -172,7 +172,7 @@ export function PartsOrderDialog({
         return `New Supplement #${supplementNum}`
       }
     } else {
-      // 原始零件订单
+      // Original parts order
       if (initialData && initialData?.id) {
         return 'Edit Parts Order'
       } else {
@@ -181,7 +181,7 @@ export function PartsOrderDialog({
     }
   }
 
-  // 获取第二部分标题
+  // Get second part title
   const getPartsOrderSectionTitle = () => {
     if (isSupplement) {
       const supplementNum = initialData?.partsOrderNumber || 1
@@ -191,10 +191,10 @@ export function PartsOrderDialog({
     }
   }
 
-  // 当 initialData 变化时，重置表单
+  // When initialData changes，Reset form
   useEffect(() => {
     if (open && initialData) {
-      // 编辑模式：使用初始数据
+      // Edit mode：Use initial data
       const parts =
         initialData.parts && initialData.parts.length > 0
           ? initialData.parts.map((part) => ({ number: part }))
@@ -204,7 +204,7 @@ export function PartsOrderDialog({
         parts: parts.length > 0 ? parts : [{ number: '' }],
       })
 
-      // 使用 setTimeout 将 setState 移到下一个事件循环
+      // Use setTimeout Move setState to the next event loop
       // setTimeout(() => {
       //   setEstimateFiles(initialData.estimateFileAssets || [])
       // }, 0)
@@ -217,7 +217,7 @@ export function PartsOrderDialog({
       )
       setEstimateFiles(pdfList || [])
     } else if (open && mode === 'create') {
-      // 新增模式：重置为默认值
+      // New mode：Reset to default value
       form.reset({
         parts: [{ number: '' }],
       })
@@ -226,7 +226,7 @@ export function PartsOrderDialog({
   }, [open, initialData, mode, form])
 
   const onSubmit = async (data: FormValues) => {
-    // 验证附件是否已上传（新增模式或编辑模式但还没有文件时）
+    // Verify if attachment has been uploaded（In new mode or edit mode but no files yet）
     // if (
     //   estimateFiles &&
     //   estimateFiles.length === 0 &&
@@ -236,7 +236,7 @@ export function PartsOrderDialog({
     //     type: 'manual',
     //     message: 'Estimate PDF is required',
     //   })
-    //   // 滚动到错误位置
+    //   // Scroll to error position
     //   const errorElement = document.querySelector('[data-estimate-error]')
     //   if (errorElement) {
     //     errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
@@ -244,10 +244,10 @@ export function PartsOrderDialog({
     //   return
     // }
 
-    // 过滤掉带文件ID的文件
+    // Filter out files withIDfiles
     const newFiles = estimateFiles.filter((f): f is File => f instanceof File)
 
-    // 转换文件为 FileAsset 数组
+    // Convert file to FileAsset Array
     const estimateFileAssets = await convertFilesToFileAssets(
       newFiles,
       FileAssetFileAssetTypeEnum.ESTIMATE
@@ -289,17 +289,17 @@ export function PartsOrderDialog({
       toast.error('Error saving parts order:', error as any)
     }
   }
-  // 修改 useDropzone 以支持多个文件
+  // Modify useDropzone to support multiple files
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: { 'application/pdf': ['.pdf'] },
-    // 移除 maxFiles 限制，或设置为更大的数字
+    // Remove maxFiles Limit，or set to a larger number
     // maxFiles: 1,
     onDrop: (acceptedFiles) => {
       setEstimateFiles((prevFiles) => [...prevFiles, ...acceptedFiles])
     },
   })
 
-  // 删除单个文件
+  // Delete single file
   const removeFile = (index: number) => {
     setEstimateFiles((prev) => prev.filter((_, i) => i !== index))
   }
@@ -311,7 +311,7 @@ export function PartsOrderDialog({
         onOpenChange={(newOpen) => handleDialogOpenChange(newOpen)}
       >
         <DialogContent className='flex max-h-[90vh] flex-col p-0 sm:max-w-4xl'>
-          {/* 固定头部 - 统一风格 */}
+          {/* Fixed header - Unified style */}
           <DialogHeader className='shrink-0'>
             <DialogTitle className='px-6 py-4 text-2xl font-semibold'>
               {getDialogTitle()}
@@ -332,9 +332,9 @@ export function PartsOrderDialog({
               onSubmit={form.handleSubmit(onSubmit)}
               className='flex min-h-0 flex-1 flex-col'
             >
-              {/* 可滚动内容区 */}
+              {/* Scrollable content area */}
               <div className='flex-1 overflow-y-auto px-6 py-6'>
-                {/* 1. Repair Order Information（只读） */}
+                {/* 1. Repair Order Information（Read-only） */}
                 <section className='mb-8'>
                   <div className='mb-5 flex items-center gap-3'>
                     <Package className='text-foreground h-5 w-5' />
@@ -390,7 +390,7 @@ export function PartsOrderDialog({
 
                 <Separator className='my-8' />
 
-                {/* 2. Parts Order Information / Supplement Information（只读） */}
+                {/* 2. Parts Order Information / Supplement Information（Read-only） */}
                 <section className='mb-8'>
                   <div className='mb-5 flex items-center gap-3'>
                     <Package className='text-foreground h-5 w-5' />
@@ -443,7 +443,7 @@ export function PartsOrderDialog({
                             initialData?.shippedByPerson.lastName}
                       </p>
                     </div>
-                    {/* 编辑模式下显示 Sales Order Number */}
+                    {/* Display in edit mode Sales Order Number */}
                     {initialData?.id && initialData?.salesOrderNumber && (
                       <div>
                         <Label className='text-muted-foreground'>
@@ -465,9 +465,9 @@ export function PartsOrderDialog({
 
                 <Separator className='my-8' />
 
-                {/* 3. Requested Part Numbers + Attachments 并排 */}
+                {/* 3. Requested Part Numbers + Attachments Side by side */}
                 <div className='grid grid-cols-1 gap-12 md:grid-cols-2'>
-                  {/* 左侧：零件输入 */}
+                  {/* Left：Parts input */}
                   <section>
                     <div className='mb-5 flex items-center gap-3'>
                       <Package className='text-foreground h-5 w-5' />
@@ -528,7 +528,7 @@ export function PartsOrderDialog({
                     </div>
                   </section>
 
-                  {/* 右侧：Estimate PDF 上传 */}
+                  {/* Right：Estimate PDF Upload */}
                   <section>
                     <div className='mb-5 flex items-center gap-3'>
                       <Paperclip className='text-foreground h-5 w-5' />
@@ -539,7 +539,7 @@ export function PartsOrderDialog({
                     <div className='space-y-3'>
                       <Label className='text-foreground text-sm font-medium'>
                         Estimate
-                        {/* 新增模式或编辑模式但还没有文件时才必填 */}
+                        {/* Required only when in add mode or edit mode and there are no files yet */}
                         {(mode === 'create' ||
                           !initialData?.estimateFileAssets?.length) && (
                           <span className='text-destructive'>*</span>
@@ -601,7 +601,7 @@ export function PartsOrderDialog({
                           </div>
                         )}
                       </div>
-                      {/* 显示错误信息 */}
+                      {/* Display error message */}
                       {form.formState.errors._estimateFile && (
                         <p className='text-destructive text-sm'>
                           {form.formState.errors._estimateFile.message}
@@ -611,7 +611,7 @@ export function PartsOrderDialog({
                   </section>
                 </div>
                 <div>
-                  {/* 如果是isRejece 要填写comment信息 */}
+                  {/* If it isisRejece Must be filledcommentInformation */}
                   {isReject && (
                     <div className='mt-6'>
                       <h3 className='flex items-center gap-3 text-lg font-medium'>
@@ -630,7 +630,7 @@ export function PartsOrderDialog({
                 </div>
               </div>
 
-              {/* 固定底部 - 统一风格 */}
+              {/* Fixed bottom - Unified style */}
               <DialogFooter className='bg-muted/50 w-full flex-shrink-0 border-t px-6 py-4 backdrop-blur'>
                 <div className='flex w-full justify-end gap-3'>
                   <Button type='button' variant='outline' onClick={handleClose}>

@@ -7,7 +7,7 @@ export default function responseInterceptor(response: Response, handler: any, ur
     useAuthStore.getState().auth.reset()
 
   
-    // 检查当前路径是否是未认证路由
+    // Check if the current path is an unauthenticated route
     const currentPath = window.location.pathname
     const unauthenticatedRoutes = [
       '/login',
@@ -24,19 +24,19 @@ export default function responseInterceptor(response: Response, handler: any, ur
         currentPath === route || currentPath.startsWith(route + '/')
     )
 
-    // 如果在未认证路由页面，不跳转
+    // If on an unauthenticated route page，Do not redirect
     if (isUnauthenticatedRoute) {
       return
     }
 
-    // 如果不在未认证路由列表中，说明是受保护路由
-    // 父路由已经处理了未认证情况，会显示 WelcomeGate，不需要跳转到登录页
+    // If not in the unauthenticated route list，It indicates a protected route
+    // The parent route has handled the unauthenticated case，Will display WelcomeGate，No need to redirect to the login page
     return
 
     toast.error('Session expired, please log in again')
     window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname)
     return
   }
-  // 404 处理移到 onApiProcessResponse 中，因为那里可以获取 URL
+  // 404 Move handling to onApiProcessResponse in，Because it can be obtained there URL
   handler(response)
 }

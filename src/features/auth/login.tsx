@@ -18,7 +18,7 @@ import { Header } from '@/components/layout/header'
 
 export function Login() {
   const { redirect } = useSearch({ from: '/(auth)/login' })
-  const { region } = useBrand() // ← 直接从 Context 读！
+  const { region } = useBrand() // ← Directly from Context Read！
   const suffix = region === 'canada' ? '_c.png' : '_a.png'
   const logoSrc = useBrandLogo('login', suffix)
   const navigate = useNavigate()
@@ -28,22 +28,22 @@ export function Login() {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
 
-  // 使用 hook 处理已登录用户重定向
+  // Use hook Handle redirection for logged-in users
   const { isLoading: isCheckingAuth, LoadingComponent } =
     useRedirectIfAuthenticated()
 
-  const [isSubmitting, setIsSubmitting] = useState(false) // 添加提交状态标记
+  const [isSubmitting, setIsSubmitting] = useState(false) // Add submission status marker
 
-  // 如果正在检查认证状态，显示加载状态
+  // If checking authentication status，Show loading status
   if (isCheckingAuth && LoadingComponent) {
     return <LoadingComponent />
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    e.stopPropagation() // 添加：阻止事件冒泡
+    e.stopPropagation() // Add：Prevent event bubbling
 
-    // 添加：防止重复提交
+    // Add：Prevent duplicate submission
     if (isLoading || isSubmitting) {
       return
     }
@@ -65,18 +65,18 @@ export function Login() {
       authApi.login(
         request,
         {
-          // 200 成功
+          // 200 Success
           status200: (session: Session) => {
-            // 后端已经通过 Set-Cookie 自动设置了 JWT，前端不需要处理 Cookie
+            // Backend has passed Set-Cookie Automatically set JWT，No need for frontend processing Cookie
 
-            // 从 session.person 构建用户信息（完全依赖后端返回的数据）
+            // From session.person Build user information（Completely rely on data returned by the backend）
             if (!session) {
               toast.error('Invalid session data')
               setIsLoading(false)
               setIsSubmitting(false)
               return
             }
-            auth.setUser(session) // setUser 会自动设置 loginStatus 为 'authenticated'
+            auth.setUser(session) // setUser Will be automatically set loginStatus For 'authenticated'
             toast.success(
               `Welcome back, ${session.person?.firstName || email}!`
             )
@@ -84,7 +84,7 @@ export function Login() {
             setIsLoading(false)
             setIsSubmitting(false)
 
-            // 支持登录后 redirect（和原来完全一致）
+            // Support after login redirect（Exactly the same as before）
             let targetPath = '/'
             if (redirect) {
               try {
@@ -127,12 +127,12 @@ export function Login() {
 
   return (
     <div className='bg-background flex min-h-screen flex-col'>
-      {/* 直接复用 Header 组件（包含用户下拉 + 地球语言） */}
+      {/* Directly reuse Header Component（Include user dropdown + Earth languages） */}
       <Header isShowUser={false} />
 
-      {/* Main Content: 上下布局 */}
+      {/* Main Content: Vertical layout */}
       <div className='flex flex-1 flex-col'>
-        {/* 上部：品牌展示区 */}
+        {/* Upper part：Brand display area */}
         <div
           className='flex flex-col items-center justify-center px-6 py-12 lg:py-16'
           style={{
@@ -152,7 +152,7 @@ export function Login() {
           ) : null}
         </div>
 
-        {/* 下部：登录表单 */}
+        {/* Lower part：Login form */}
         <div className='flex flex-1 items-start justify-center px-1 py-2 lg:py-12'>
           <div className='w-full max-w-md p-8 lg:p-10'>
             <h2 className='text-primary mb-10 text-center text-3xl font-bold lg:text-4xl'>
@@ -202,7 +202,7 @@ export function Login() {
                     required
                     disabled={isLoading}
                   />
-                  {/* 小眼睛按钮 */}
+                  {/* Small eye button */}
                   <button
                     type='button'
                     onClick={() => setShowPassword(!showPassword)}

@@ -15,7 +15,7 @@ const languages = [
   { code: 'fr-CA' as const, label: 'Français' },
 ]
 export function LanguageDropdown() {
-  // 从 Cookie 读取语言偏好，默认为 'en'
+  // From Cookie Read language preferences，Default is 'en'
   // const cookieName = getLanguageCookieName()
   // const savedLang = getCookie(cookieName) || 'en'
   // const [selected, setSelected] = useState(savedLang)
@@ -24,11 +24,11 @@ export function LanguageDropdown() {
 
   // const handleSelect = (code: string) => {
   //   setSelected(code)
-  //   // 保存到 Cookie（1年过期）
+  //   // Save to Cookie（1Year expiration）
   //   const oneYear = 60 * 60 * 24 * 365
   //   setCookie(cookieName, code, oneYear)
-  //   // TODO: 触发 i18n 切换（待集成 i18n 库）
-  //   // window.location.reload(); // 或使用 i18n 库动态切换
+  //   // TODO: Trigger i18n Switch（Pending integration i18n Library）
+  //   // window.location.reload(); // or use i18n Dynamic library switching
   // }
 
   // const currentLabel =

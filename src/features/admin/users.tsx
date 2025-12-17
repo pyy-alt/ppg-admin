@@ -43,12 +43,12 @@ export function Users() {
   const [users, setUsers] = useState<Person[]>([])
   const [initUser, setInitUser] = useState<Person | null>(null)
   const [totalItems, setTotalItems] = useState(0)
-  // 添加状态
+  // Add status
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 20
   const totalPages = Math.ceil(totalItems / itemsPerPage)
 
-  // 筛选条件状态
+  // Filter condition status
   const [smartFilter, setSmartFilter] = useState('')
   const [filterByNetworkRole, setFilterByNetworkRole] = useState<
     filterByNetworkRoleType | undefined
@@ -87,7 +87,7 @@ export function Users() {
         filterByRegionId,
         filterByNetworkRole,
       })
-      // 添加分页参数
+      // Add pagination parameters
       const resultParameter = ResultParameter.create({
         resultsLimitOffset: (page - 1) * itemsPerPage,
         resultsLimitCount: itemsPerPage,
@@ -129,7 +129,7 @@ export function Users() {
     }
   }
 
-  // 筛选条件变化：使用防抖
+  // Filter condition changes：Use debounce
   useDebouncedEffect(
     () => {
       getUsers(
@@ -160,7 +160,7 @@ export function Users() {
           </h1>
           <Button
             onClick={() => {
-              setInitUser(null) // 清除之前的用户数据
+              setInitUser(null) // Clear previous user data
               setUserOpen(true)
             }}
           >

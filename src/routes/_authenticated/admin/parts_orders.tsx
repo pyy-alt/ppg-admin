@@ -10,7 +10,7 @@ function AdminPartsOrdersComponent() {
     return <Loading />
   }
   
-  // 使用默认的 AuthenticatedLayout（包含侧边栏）
+  // Use default AuthenticatedLayout（Include sidebar）
   return <PartOrders />
 }
 

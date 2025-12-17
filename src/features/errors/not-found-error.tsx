@@ -9,7 +9,7 @@ export function NotFoundError() {
   const location = useLocation()
   const { auth } = useAuthStore()
   
-  // 如果访问的是根路径 / 且未登录，显示 Landing 页面
+  // If the access is to the root path / Not logged in yet.，Display Landing Page
   if (location.pathname === '/' && auth.loginStatus === 'unauthenticated') {
     return <Landing />
   }

@@ -54,7 +54,7 @@ export function MarkRepairAsCompleteDialog({
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className='flex max-h-[90vh] flex-col p-0 sm:max-w-4xl'>
-        {/* 固定头部 - 统一风格 */}
+        {/* Fixed header - Unified style */}
         <DialogHeader className='flex-shrink-0'>
           <DialogTitle className='px-6 py-4 text-2xl font-semibold'>
             Mark Repair as Complete
@@ -147,14 +147,14 @@ export function MarkRepairAsCompleteDialog({
                   </span>
                 </p>
               </div>
-              {/* Open Camera 按钮（可选） */}
+              {/* Open Camera Button（Optional） */}
               <Button variant='outline' size='sm' className='w-fit'>
                 <Camera className='mr-2 h-4 w-4' />
                 Open camera
               </Button>
             </div>
             <div>
-              {/* 已上传的文件列表 */}
+              {/* Uploaded file list */}
               {photos.length > 0 && (
                 <div className='mt-2 space-y-1'>
                   {photos.map((file, index) => (

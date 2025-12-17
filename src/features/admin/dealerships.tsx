@@ -76,7 +76,7 @@ export function Dealerships() {
     }
   }
 
-  // 获取经销商数据
+  // Get dealer data
   const fetchDealerships = async () => {
     if (!user) return
 
@@ -84,17 +84,17 @@ export function Dealerships() {
     try {
       const api = new OrganizationApi()
 
-      // 构建请求参数
+      // Build request parameters
       const requestParams: any = {
-        type: 'Dealership', // 必须设置为 'Dealership' 来搜索经销商
+        type: 'Dealership', // Must be set to 'Dealership' to search for dealers
         smartFilter: smartFilter || undefined,
       }
 
-      // 添加分页参数
+      // Add pagination parameters
       const resultParameter = ResultParameter.create({
         resultsLimitOffset: (currentPage - 1) * itemsPerPage,
         resultsLimitCount: itemsPerPage,
-        resultsOrderBy: 'Name', // 可以根据需要调整排序字段
+        resultsOrderBy: 'Name', // Sort fields can be adjusted as needed
         resultsOrderAscending: false,
       })
       requestParams.resultParameter = resultParameter
@@ -108,21 +108,21 @@ export function Dealerships() {
           setLoading(false)
         },
         error: (error: any) => {
-          console.error('获取经销商列表失败:', error)
+          console.error('Failed to retrieve the dealer list:', error)
           setLoading(false)
         },
         status403: (message: string) => {
-          console.error('权限不足:', message)
+          console.error('Insufficient permissions:', message)
           setLoading(false)
         },
       })
     } catch (error) {
-      console.error('API 调用错误:', error)
+      console.error('API Invocation error:', error)
       setLoading(false)
     }
   }
 
-  // 当筛选条件改变时，重置页码并调用 API
+  // When filter conditions change，Reset page number and call API
   useEffect(() => {
     if (!user) return
 
@@ -168,12 +168,12 @@ export function Dealerships() {
   }
 
   useEffect(() => {
-    // 确保组件已挂载且 ref 已连接到 DOM
+    // Ensure the component is mounted and ref is connected to DOM
     if (dealershipsRef.current) {
-      // 2. 使用原生 DOM API 查找所有 <th> 元素
+      // 2. Use native DOM API Find all <th> elements
       const thElements = dealershipsRef.current.querySelectorAll('thead th')
 
-      // 3. 提取文本内容
+      // 3. Extract text content
       const headerTexts = Array.from(thElements).map((th) =>
         th.textContent.trim()
       )

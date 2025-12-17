@@ -4,8 +4,8 @@ import { Login } from '@/features/auth/login'
 
 const searchSchema = z.object({
   redirect: z.string().optional(),
-  brand: z.enum(['audi', 'vw']).optional(), // 添加可选的 brand 参数
-  region: z.enum(['america', 'canada']).optional(), // 添加可选的 region 参数
+  brand: z.enum(['audi', 'vw']).optional(), // Add optional brand parameters
+  region: z.enum(['america', 'canada']).optional(), // Add optional region parameters
 })
 
 export const Route = createFileRoute('/(auth)/login')({

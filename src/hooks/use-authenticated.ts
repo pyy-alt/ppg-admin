@@ -3,15 +3,15 @@ import { useEffect, useState } from 'react'
 import { useAuthStore } from '@/stores/auth-store'
 
 /**
- * 认证检查 Hook
- * 返回认证状态和是否已完成检查
+ * Authentication check Hook
+ * Return authentication status and whether the check is completed
  */
 export function useAuthenticated() {
   const { auth } = useAuthStore()
   // const navigate = useNavigate()
   const [hasChecked, setHasChecked] = useState(false)
 
-  // 等待 InitAuth 完成验证
+  // Wait InitAuth Complete verification
   useEffect(() => {
     if (auth.loginStatus === 'authenticated') {
       setHasChecked(true)
@@ -29,8 +29,8 @@ export function useAuthenticated() {
     return () => clearTimeout(timer)
   }, [auth.loginStatus])
 
-  // 移除自动重定向逻辑，因为父路由已经统一处理未认证情况
-  // 如果需要在特定场景下重定向，可以在组件层面手动处理
+  // Remove automatic redirection logic，Because the parent route has already uniformly handled unauthenticated situations
+  // If redirection is needed in specific scenarios，It can be handled manually at the component level
   // useEffect(() => {
   //   if (auth.loginStatus === 'unauthenticated' && hasChecked) {
   //     const currentPath = window.location.pathname + window.location.search

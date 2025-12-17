@@ -5,18 +5,18 @@ import { RepairOrderList } from '@/features/repair/orders'
 
 function RepairOrdersComponent() {
   const { isAuthenticated, isLoading } = useAuthenticated()
-  const location = useLocation() // ✅ 添加这行
+  const location = useLocation() // ✅ Add this line.
   if (isLoading || !isAuthenticated) {
     return <Loading />
   }
 
-  // 如果路径精确匹配 /repair_orders，显示列表
-  // 否则（如 /repair_orders/1），渲染子路由（通过 Outlet）
+  // If the path matches exactly /repair_orders，Show list
+  // Otherwise（As /repair_orders/1），Render sub-routes（Through Outlet）
   if (location.pathname === '/repair_orders') {
     return <RepairOrderList />
   }
 
-  // 渲染子路由（$id）
+  // Render sub-routes（$id）
   return <Outlet />
 }
 

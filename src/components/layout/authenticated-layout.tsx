@@ -19,16 +19,16 @@ export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
       <LayoutProvider>
         <SidebarProvider defaultOpen={defaultOpen}>
           <SkipToMain />
-          {/* Header - 固定在顶部，所有页面都显示 */}
+          {/* Header - Fixed at the top，Displayed on all pages */}
           <Header fixed />
-          {/* Sidebar - 左侧导航栏 */}
+          {/* Sidebar - Left sidebar */}
           <AppSidebar />
-          {/* Main Content - 从 Header 下方开始 */}
+          {/* Main Content - From Header Start from below */}
           <SidebarInset
             className={cn(
               // Set content container, so we can use container queries
               '@container/content',
-              // 从 Header 下方开始，高度与 sidebar 一致
+              // From Header Start from below，Height and sidebar consistent
               'pt-16 h-[calc(100vh-64px)]',
 
               // If layout is fixed, set the height

@@ -9,7 +9,7 @@ function PartsOrdersComponent() {
   if (isLoading || !isAuthenticated) {
     return <Loading />
   }
-  // 如果已登录，使用 HeaderOnlyLayout
+  // If logged in，Use HeaderOnlyLayout
   return (
     <HeaderOnlyLayout>
       <PartOrders />

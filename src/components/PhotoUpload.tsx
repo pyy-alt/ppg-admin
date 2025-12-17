@@ -14,10 +14,10 @@ export function PhotoUpload({ onUpload }: PhotoUploadProps) {
   const [files, setFiles] = useState<File[]>([])
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
-      // 累积文件，而不是替换（最多 maxFiles 个）
+      // Cumulative files，Instead of replacing（At most maxFiles pieces）
       setFiles((prevFiles) => {
         const newFiles = [...prevFiles, ...acceptedFiles]
-        // 只保留最新的 maxFiles 个文件
+        // Only keep the latest maxFiles files
         return newFiles.slice(0, 2)
       })
       onUpload?.(acceptedFiles)
@@ -63,7 +63,7 @@ export function PhotoUpload({ onUpload }: PhotoUploadProps) {
           </p>
         </div>
       </div>
-      {/* 展示出上传的文件 */}
+      {/* Show uploaded files */}
       <div className='mt-2 flex flex-col flex-wrap gap-2'>
         {files.map((file, index) => (
           <div key={index}>

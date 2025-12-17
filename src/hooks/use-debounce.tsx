@@ -20,7 +20,7 @@ export function useDebouncedEffect(
   const isFirstMount = useRef(true)
 
   useEffect(() => {
-    // 初始加载立即执行
+    // Initial load executes immediately
     if (isFirstMount.current) {
       isFirstMount.current = false
       effect()

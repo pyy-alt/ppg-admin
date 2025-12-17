@@ -58,7 +58,7 @@ const formSchema = z
   })
   .refine(
     (data) => {
-      // 只有当用户填写了密码相关字段时才校验
+      // Validation only occurs when the user fills in the password-related fields
       if (data.currentPassword || data.newPassword || data.confirmPassword) {
         return data.currentPassword && data.newPassword && data.confirmPassword
       }
@@ -130,7 +130,7 @@ export default function EditProfileDialog({
     request.firstName = initialData.firstName
     request.lastName = initialData.lastName
     request.email = initialData.email
-    // 接口暂时不支持修改密码
+    // The interface does not currently support changing the password
     // request.currentPassword = form.getValues('currentPassword')
     // request.newPassword = form.getValues('newPassword')
     personApi.edit(request, {

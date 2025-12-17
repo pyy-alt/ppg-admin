@@ -2,13 +2,13 @@ import { createContext, useContext, useEffect, useState, useMemo } from 'react'
 import { getCookie, setCookie } from '@/lib/cookies'
 import { getLanguageCookieName } from '@/config/site'
 
-// 支持的语言类型
+// Supported language types
 export type Language = 'en' | 'fr-CA'
 
-// 翻译数据类型
+// Translation data type
 type Translations = Record<string, any>
 
-// 默认语言
+// Default language
 const DEFAULT_LANGUAGE: Language = 'en'
 const LANGUAGE_COOKIE_NAME = getLanguageCookieName()
 const LANGUAGE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365 // 1 year
@@ -29,7 +29,7 @@ const initialState: I18nProviderState = {
 
 const I18nContext = createContext<I18nProviderState>(initialState)
 
-// 动态加载翻译文件
+// Dynamically load translation files
 async function loadTranslations(lang: Language): Promise<Translations> {
   try {
     const module = await import(`../locales/${lang}.json`)
@@ -45,12 +45,12 @@ async function loadTranslations(lang: Language): Promise<Translations> {
   }
 }
 
-// 获取嵌套的翻译值
+// Get nested translation value
 function getNestedValue(obj: any, path: string): string {
   return path.split('.').reduce((current, key) => current?.[key], obj) || path
 }
 
-// 替换参数
+// Replace parameters
 function replaceParams(text: string, params?: Record<string, string | number>): string {
   if (!params) return text
   return Object.entries(params).reduce(
@@ -67,18 +67,18 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
 
   const [translations, setTranslations] = useState<Translations>({})
 
-  // 加载翻译文件
+  // Load translation file
   useEffect(() => {
     loadTranslations(language).then(setTranslations)
   }, [language])
 
-  // 设置语言
+  // Set language
   const setLanguage = (lang: Language) => {
     setCookie(LANGUAGE_COOKIE_NAME, lang, LANGUAGE_COOKIE_MAX_AGE)
     _setLanguage(lang)
   }
 
-  // 翻译函数
+  // Translation function
   const t = useMemo(
     () => (key: string, params?: Record<string, string | number>) => {
       const translation = getNestedValue(translations, key)

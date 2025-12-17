@@ -3,20 +3,20 @@ import { type FileAssetType } from '@/js/models/enum/FileAssetFileAssetTypeEnum'
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
-// 添加工具函数：将 File 转换为 base64
+// Add utility function：Convert File To base64
 export const fileToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
     reader.readAsDataURL(file)
     reader.onload = () => {
-      // 移除 data:image/png;base64, 或 data:application/pdf;base64, 前缀
+      // Remove data:image/png;base64, Or data:application/pdf;base64, Prefix
       const base64String = (reader.result as string).split(',')[1]
       resolve(base64String)
     }
     reader.onerror = (error) => reject(error)
   })
 }
-// 添加工具函数：将 File[] 转换为 FileAsset[]
+// Add utility function：Convert File[] To FileAsset[]
 export const convertFilesToFileAssets = async (
   files: File[],
   fileAssetType: FileAssetType
@@ -99,26 +99,26 @@ export function getPageNumbers(currentPage: number, totalPages: number) {
   return rangeWithDots
 }
 
-// 根据预设范围计算日期  // 根据预设范围计算日期
+// Calculate date based on preset range  // Calculate date based on preset range
 export const calculateDateRange = (preset: string) => {
   const today = new Date()
   const todayYear = today.getFullYear()
   const todayMonth = today.getMonth() // 0-11
   const todayDate = today.getDate()
 
-  // 创建起始日期（00:00:00，本地时区）
+  // Create start date（00:00:00，Local timezone）
   const createDateOnly = (year: number, month: number, date: number) => {
     return new Date(year, month, date, 0, 0, 0, 0)
   }
 
-  // 创建结束日期（23:59:59.999，本地时区）
+  // Create end date（23:59:59.999，Local timezone）
   const createEndDate = (year: number, month: number, date: number) => {
     return new Date(year, month, date, 23, 59, 59, 999)
   }
 
   switch (preset) {
     case '7': {
-      // 包括今天在内的过去7天（共7天）
+      // Past days including today7Days（Total7Days）
       const fromDate = new Date(todayYear, todayMonth, todayDate - 6)
       return {
         from: createDateOnly(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate()),
@@ -126,7 +126,7 @@ export const calculateDateRange = (preset: string) => {
       }
     }
     case '30': {
-      // 包括今天在内的过去30天（共30天）
+      // Past days including today30Days（Total30Days）
       const fromDate = new Date(todayYear, todayMonth, todayDate - 29)
       return {
         from: createDateOnly(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate()),
@@ -182,9 +182,9 @@ export const calculateDateRange = (preset: string) => {
   }
 }
 /**
- * 格式化日期时间 → 02/31/2025 10:33:25 AM（美式月/日/年 + 12小时制 + AM/PM）
+ * Format date and time → 02/31/2025 10:33:25 AM（American month/Day/Year + 1212-hour format + AM/PM）
  * @param date Date | string | undefined | null
- * @param includeSeconds 是否显示秒（默认 true）
+ * @param includeSeconds Whether to display seconds（Default true）
  * @returns string | undefined
  */
 export const formatDateOnly = (
@@ -195,11 +195,11 @@ export const formatDateOnly = (
 
   const d = new Date(date)
 
-  // 判断日期是否有效
+  // Determine if the date is valid
   if (isNaN(d.getTime())) return undefined
 
   const year = d.getFullYear()
-  const month = String(d.getMonth() + 1).padStart(2, '0') // 月份从0开始
+  const month = String(d.getMonth() + 1).padStart(2, '0') // Month starts from0Start
   const day = String(d.getDate()).padStart(2, '0')
 
   let hours = d.getHours()
@@ -208,7 +208,7 @@ export const formatDateOnly = (
 
   const ampm = hours >= 12 ? 'PM' : 'AM'
   hours = hours % 12
-  hours = hours || 12 // 0点显示为12
+  hours = hours || 12 // 0Display as12
 
   const timeStr = includeSeconds
     ? `${hours}:${minutes}:${seconds} ${ampm}`
@@ -222,12 +222,12 @@ export const exportCurrentPageToCSV = (
   filename: string = 'Parts_Order'
 ) => {
   if (data.length === 0) {
-    alert('没有数据可导出')
+    alert('No data available for export')
     return
   }
   try {
     return new Promise((resolve) => {
-      // 转义函数（防止逗号、换行、引号破坏 CSV）
+      // Escape function（Prevent commas、Line breaks、Quote breaking CSV）
       const escape = (val: any) => {
         if (val === null || val === undefined) return ''
         const str = String(val).trim()
@@ -236,17 +236,17 @@ export const exportCurrentPageToCSV = (
           : str
       }
 
-      // 自动根据 headers 的顺序取数据（key 必须和对象属性一致）
+      // Automatically fetch data based on headers The order must match the object properties（key Combine）
       const rows = data.map((row) =>
         headers.map((header) => escape(row[header] ?? '--'))
       )
 
-      // 组合 CSV 内容（加 BOM 防止 Excel 中文乱码）
+      // Content CSV Add（Prevent BOM Chinese garbled text Excel Download）
       const csvContent =
         '\uFEFF' +
         [headers.join(','), ...rows.map((r) => r.join(','))].join('\r\n')
 
-      // 下载
+      // Temporarily comment
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')

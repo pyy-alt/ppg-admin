@@ -5,13 +5,13 @@ import { refreshUserData } from '@/lib/auth'
 import { Loading } from '@/components/Loading'
 
 /**
- * 未认证页面 Hook
- * 用于登录、注册、忘记密码等页面
+ * Unauthenticated page Hook
+ * For login、Register、Forgot password and other pages
  *
- * 功能：
- * 1. 如果用户已登录，重定向到首页
- * 2. 如果用户未登录，尝试验证 Cookie（因为 InitAuth 在未认证页面不会验证）
- * 3. 返回是否正在检查认证状态
+ * Functionality：
+ * 1. If the user is logged in，Redirect to the homepage
+ * 2. If the user is not logged in，Attempt to validate Cookie（Because InitAuth it will not validate on the unauthenticated page）
+ * 3. Return whether it is checking authentication status
  *
  * @returns { isLoading: boolean, LoadingComponent: React.ComponentType | null }
  */
@@ -20,13 +20,13 @@ export function useRedirectIfAuthenticated() {
   const navigate = useNavigate()
   const [isCheckingAuth, setIsCheckingAuth] = useState(true)
 
-  const hasCheckedRef = useRef(false) // 防止重复调用
-  const isCheckingRef = useRef(false) // 防止并发调用
+  const hasCheckedRef = useRef(false) // Prevent duplicate calls
+  const isCheckingRef = useRef(false) // Prevent concurrent calls
 
   useEffect(() => {
-    // 如果已经认证，直接重定向
+    // If already authenticated，Redirect directly
     if (auth.loginStatus === 'authenticated') {
-      hasCheckedRef.current = true // 标记为已检查
+      hasCheckedRef.current = true // Mark as checked
       setIsCheckingAuth(false)
 
       navigate({
@@ -36,48 +36,48 @@ export function useRedirectIfAuthenticated() {
       return
     }
 
-    // 如果已经检查过且确认未登录，不再验证
+    // If already checked and confirmed not logged in，No longer validate
     if (hasCheckedRef.current && auth.loginStatus === 'unauthenticated') {
       setIsCheckingAuth(false)
       return
     }
 
-    // 如果状态是 unauthenticated，尝试验证 Cookie
-    // 因为 InitAuth 在未认证页面不会验证 Cookie，所以这里需要手动验证
-    //TODO==========这个地方需要确认是否接受闪了一下登录页面 在跳转到了上个界面
+    // If the status is unauthenticated，Attempt to validate Cookie
+    // Because InitAuth it will not validate on the unauthenticated page Cookie，So manual validation is needed here
+    //TODO==========This place needs to confirm whether to accept the flash of the login page When redirected to the previous interface
     if (
       auth.loginStatus === 'unauthenticated' &&
       !hasCheckedRef.current &&
       !isCheckingRef.current
     ) {
-      // 防止多次调用接口
-      isCheckingRef.current = true // 标记为正在检查，防止并发调用
+      // Prevent multiple calls to the interface
+      isCheckingRef.current = true // Mark as checking，Prevent concurrent calls
 
       refreshUserData()
         .then(() => {
-          // 如果验证成功，refreshUserData 会自动更新状态为 authenticated
-          // useEffect 会再次触发，执行重定向
-          hasCheckedRef.current = true // 标记为已检查
-          isCheckingRef.current = false // 防止并发调用
+          // If validation is successful，refreshUserData It will automatically update the status to authenticated
+          // useEffect It will trigger again，Execute redirect
+          hasCheckedRef.current = true // Mark as checked
+          isCheckingRef.current = false // Prevent concurrent calls
           setIsCheckingAuth(false)
         })
         .catch(() => {
-          // Cookie 无效或不存在，保持 unauthenticated 状态
-          // 标记为已检查，防止重复调用
+          // Cookie Invalid or does not exist，Maintain unauthenticated Status
+          // Mark as checked，Prevent duplicate calls
           hasCheckedRef.current = true
           isCheckingRef.current = false
           setIsCheckingAuth(false)
         })
     } else if (auth.loginStatus === 'checking') {
-      // checking 状态，等待结果
+      // checking Status，Wait for result
       setIsCheckingAuth(true)
     } else {
-      // checking 状态，等待结果
+      // checking Status，Wait for result
       setIsCheckingAuth(false)
     }
   }, [auth.loginStatus, navigate])
 
-  // 如果正在检查认证状态或已登录，返回 Loading 组件
+  // If checking authentication status or logged in，Return Loading Component
   const isLoading =
     isCheckingAuth ||
     auth.loginStatus === 'checking' ||

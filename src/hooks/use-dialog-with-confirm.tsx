@@ -4,7 +4,7 @@ import { ConfirmDialog } from '@/components/confirm-dialog'
 
 interface UseDialogWithConfirmOptions<T extends Record<string, any>> {
   form: UseFormReturn<T>
-  hasUnsavedFiles?: boolean // 用于检查是否有未保存的文件
+  hasUnsavedFiles?: boolean // Used to check for unsaved files
   onClose: () => void
   title?: string
   description?: string
@@ -19,33 +19,33 @@ export function useDialogWithConfirm<T extends Record<string, any>>({
 }: UseDialogWithConfirmOptions<T>) {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
 
-  // 检查是否有未保存的更改
+  // Check for unsaved changes
   const hasUnsavedChanges = form.formState.isDirty || hasUnsavedFiles
 
-  // 处理关闭请求
+  // Handle close request
   const handleCloseRequest = (force: boolean = false) => {
     if (force || !hasUnsavedChanges) {
-      // 没有未保存的更改，直接关闭
+      // No unsaved changes，Close directly
       onClose()
     } else {
-      // 有未保存的更改，显示确认对话框
+      // There are unsaved changes，Show confirmation dialog
       setShowConfirmDialog(true)
     }
   }
 
-  // 确认关闭
+  // Confirm close
   const handleConfirmClose = () => {
     setShowConfirmDialog(false)
     onClose()
   }
 
-  // // 取消关闭
+  // // Cancel close
   // const handleCancelClose = () => {
   //   setShowConfirmDialog(false)
   //   setPendingClose(false)
   // }
 
-  // 确认对话框组件
+  // Confirmation dialog component
   const ConfirmDialogComponent = (
     <ConfirmDialog
       open={showConfirmDialog}

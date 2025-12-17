@@ -14,7 +14,7 @@ import {
 
 interface DataTablePaginationProps {
   currentPage: number
-  totalPages: number // 保留以保持接口兼容性，但内部会重新计算
+  totalPages: number // Retain to maintain interface compatibility，but will be recalculated internally
   totalItems: number
   itemsPerPage?: number
   onPageChange: (page: number) => void
@@ -26,31 +26,31 @@ export function DataTablePagination({
   itemsPerPage = 20,
   onPageChange,
 }: DataTablePaginationProps) {
-  // 根据实际数据计算总页数
+  // Calculate total pages based on actual data
   const actualTotalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage))
 
-  // 确保 currentPage 不超过实际页数
+  // Ensure currentPage does not exceed actual pages
   const validCurrentPage = Math.min(Math.max(1, currentPage), actualTotalPages)
 
-  // 使用 useRef 来避免循环调用
+  // Use useRef to avoid circular calls
   const onPageChangeRef = useRef(onPageChange)
   useEffect(() => {
     onPageChangeRef.current = onPageChange
   }, [onPageChange])
 
-  // 如果 currentPage 无效，自动修正
+  // If currentPage Invalid，Auto-correct
   useEffect(() => {
     if (currentPage !== validCurrentPage && validCurrentPage > 0) {
       onPageChangeRef.current(validCurrentPage)
     }
-  }, [currentPage, validCurrentPage]) // 移除 onPageChange 从依赖数组
+  }, [currentPage, validCurrentPage]) // Remove onPageChange from dependency array
 
   const startItem =
     totalItems > 0 ? Math.max(1, (validCurrentPage - 1) * itemsPerPage + 1) : 0
   const endItem =
     totalItems > 0 ? Math.min(validCurrentPage * itemsPerPage, totalItems) : 0
 
-  // 确保 startItem <= endItem
+  // Ensure startItem <= endItem
   const finalStartItem = startItem <= endItem ? startItem : endItem
   const finalEndItem = startItem <= endItem ? endItem : startItem
 

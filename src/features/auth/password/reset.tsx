@@ -29,52 +29,52 @@ export function ResetPassword() {
   // console.log(id, guid, hash)
 
   const [isLoading, setIsLoading] = useState(false)
-  const [isValidating, setIsValidating] = useState(true) // 正在验证链接
-  const [isLinkValid, setIsLinkValid] = useState(false) // 链接是否有效
+  const [isValidating, setIsValidating] = useState(true) // Verifying link
+  const [isLinkValid, setIsLinkValid] = useState(false) // Whether the link is valid
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
 
-  // ✅ 添加 ref 防止重复调用
+  // ✅ Add ref Prevent duplicate calls
   const hasValidatedRef = useRef(false)
   useEffect(() => {
-    // ✅ 如果已经验证过，不再重复调用
+    // ✅ If already verified，Do not call again
     if (hasValidatedRef.current) {
       return
     }
 
-    // ✅ 标记为已开始验证
+    // ✅ Mark as verification started
     hasValidatedRef.current = true
-    // 调用 sessionCreate API 验证邮件链接并创建临时会话
-    // 如果用户已经登录，这个调用会创建新的临时会话并覆盖之前的会话
+    // Call sessionCreate API Verify email link and create temporary session
+    // If the user is already logged in，This call will create a new temporary session and overwrite the previous session
     authApi.sessionCreate(
       id,
       guid,
       hash,
       {
         status200: (session: Session) => {
-          auth.setUser(session) // setUser 会自动设置 loginStatus 为 'authenticated'
+          auth.setUser(session) // setUser Will automatically set loginStatus to 'authenticated'
           setIsLinkValid(true)
           setIsValidating(false)
         },
         status404: () => {
-          // 链接无效或已过期
+          // Link is invalid or expired
           toast.error('Reset link is invalid or has expired.')
           setIsLinkValid(false)
           setIsValidating(false)
-          // 不立即重定向，让用户看到错误提示
-          // 用户可以选择手动返回或重新申请重置链接
+          // Do not redirect immediately，Let the user see the error message
+          // The user can choose to return manually or reapply for the reset link
         },
         error: () => {
-          // 网络错误等
+          // Network errors, etc.
           toast.error('Failed to validate reset link. Please try again.')
           setIsValidating(false)
-          // ✅ 错误时重置 ref，允许重试
+          // ✅ Reset on error ref，Allow retry
           hasValidatedRef.current = false
         },
       },
       null
     )
-  }, [id, guid, hash]) // 只在组件挂载时执行一次
+  }, [id, guid, hash]) // Execute only once when the component is mounted
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -91,13 +91,13 @@ export function ResetPassword() {
 
     setIsLoading(true)
     try {
-      // 调用 updatePassword API 更新密码
-      // 注意：由于会话是通过邮件链接创建的，不需要提供 currentPassword
+      // Call updatePassword API Update password
+      // Note：Since the session is created via email link，No need to provide currentPassword
       const request = UpdatePasswordRequest.create({ newPassword: password })
       authApi.updatePassword(request, {
         status200: () => {
           toast.success('Your password has been successfully updated.')
-          // 密码更新成功后，清除会话并跳转到登录页
+          // After password update is successful，Clear session and redirect to login page
           auth.reset()
           navigate({ to: '/login' })
           setIsLoading(false)
@@ -110,12 +110,12 @@ export function ResetPassword() {
     }
   }
 
-  // 如果正在验证链接，显示加载状态
+  // If verifying link，Show loading state
   if (isValidating) {
     return <Loading />
   }
 
-  // 如果链接无效，显示错误信息
+  // If the link is invalid，Show error message
   if (!isLinkValid) {
     return (
       <div className='bg-background flex min-h-screen flex-col'>
@@ -151,7 +151,7 @@ export function ResetPassword() {
 
   return (
     <div className='bg-background flex min-h-screen flex-col'>
-      {/* 复用 Header（隐藏用户下拉） */}
+      {/* Reuse Header（Hide user dropdown） */}
       <Header isShowUser={false} />
 
       <div
@@ -173,10 +173,10 @@ export function ResetPassword() {
         ) : null}
       </div>
 
-      {/* 主体：上下布局，单屏展示 */}
+      {/* Main body：Vertical layout，Single screen display */}
       <div className='flex flex-1 flex-col items-center justify-center px-4 py-8'>
         <div className='w-full max-w-md space-y-10'>
-          {/* 下部：重置密码表单 */}
+          {/* Lower part：Reset password form */}
           <div className='space-y-8'>
             <h1 className='text-foreground text-center text-3xl font-bold'>
               Change Password
@@ -228,7 +228,7 @@ export function ResetPassword() {
                   />
                 </div>
               </div>
-              {/* 返回登录 */}
+              {/* Return to login */}
               <div className='text-right'>
                 <Link
                   to='/login'
@@ -238,7 +238,7 @@ export function ResetPassword() {
                 </Link>
               </div>
 
-              {/* 提交按钮 */}
+              {/* Submit button */}
               <Button
                 type='submit'
                 variant='default'

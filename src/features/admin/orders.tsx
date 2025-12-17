@@ -53,8 +53,8 @@ export function PartOrders() {
       const dealer = ro.dealership || {};
 
       return {
-        'RO#': ro.roNumber || '--', // ← 必须加引号！
-        'Sales#': order.salesOrderNumber || '--', // ← 必须加引号！
+        'RO#': ro.roNumber || '--', // ← Must be quoted！
+        'Sales#': order.salesOrderNumber || '--', // ← Must be quoted！
         Type: getOrderTypeText(order.partsOrderNumber || 0),
         VIN: ro.vin || '--',
         'Year/Make/Model': [ro.year, ro.make, ro.model].filter(Boolean).join(' ') || '--',
@@ -78,12 +78,12 @@ export function PartOrders() {
   };
 
   useEffect(() => {
-    // 确保组件已挂载且 ref 已连接到 DOM
+    // Ensure the component is mounted and ref is connected to DOM
     if (partsOrderRef.current) {
-      // 2. 使用原生 DOM API 查找所有 <th> 元素
+      // 2. Use native DOM API Find all <th> elements
       const thElements = partsOrderRef.current.querySelectorAll('thead th');
 
-      // 3. 提取文本内容
+      // 3. Extract text content
       const headerTexts = Array.from(thElements).map((th) => th.textContent.trim());
       setHeaders(headerTexts);
     }
@@ -116,7 +116,7 @@ export function PartOrders() {
     }
   };
 
-  // 获取零件订单数据
+  // Get parts order data
   const fetchPartsOrders = async (flag: boolean = false) => {
     if (!user) return;
 
@@ -127,35 +127,35 @@ export function PartOrders() {
       const dateFrom = dateSubmittedFrom ? formatDateOnly(dateSubmittedFrom) : undefined;
       const dateTo = dateSubmittedTo ? formatDateOnly(dateSubmittedTo) : undefined;
 
-      // 构建请求参数
+      // Build request parameters
       const requestParams: any = {
         smartFilter,
         filterByWaitingOnMe,
         filterByDealershipId: user?.person?.type === 'Dealership' ? user?.person?.dealership.id : undefined,
       };
-      // 处理订单类型筛选
+      // Handle order type filtering
       if (filterByPartsOrderNumber !== 'all') {
         requestParams.filterByPartsOrderNumber = parseInt(filterByPartsOrderNumber);
       }
 
-      // 处理状态筛选
+      // Handle status filtering
       if (filterByStatus !== 'all') {
         requestParams.filterByStatus = filterByStatus;
       }
       if (filterByRegionId !== 'all') {
         requestParams.filterByRegionId = parseInt(filterByRegionId);
       }
-      // // 添加分页参数
+      // // Add pagination parameters
       const resultParameter = ResultParameter.create({
         resultsLimitOffset: (currentPage - 1) * itemsPerPage,
         resultsLimitCount: itemsPerPage,
-        resultsOrderBy: 'dateSubmitted', // 可以根据需要调整排序字段
-        resultsOrderAscending: false, // 降序，最新的在前
+        resultsOrderBy: 'dateSubmitted', // Sort fields can be adjusted as needed
+        resultsOrderAscending: false, // Descending，Latest first
       });
       requestParams.resultParameter = resultParameter;
 
       const request = PartsOrderSearchRequest.create(requestParams);
-      // 在序列化前，手动将日期字段格式化为字符串（覆盖 ModelBaseClass 的转换）
+      // Before serialization，Manually format date fields as strings（Override ModelBaseClass conversion）
       if (dateFrom) {
         (request as any).dateSubmittedFrom = dateFrom;
       }
@@ -182,7 +182,7 @@ export function PartOrders() {
         },
       });
     } catch (error) {
-      console.error('API 调用错误:', error);
+      console.error('API Invocation error:', error);
       setLoading(false);
     }
   };
@@ -190,7 +190,7 @@ export function PartOrders() {
   useEffect(() => {
     if (!user) return;
 
-    // 调用 API（对于文本输入，使用防抖）
+    // Call API（For text input，Use debounce）
     const timeoutId = setTimeout(
       () => {
         fetchPartsOrders();
@@ -225,7 +225,7 @@ export function PartOrders() {
     dateSubmittedTo,
   ]);
 
-  // 当预设范围改变时，自动计算日期
+  // When the preset range changes，Automatically calculate date
   useEffect(() => {
     if (dateSubmittedRange !== 'custom') {
       const { from, to } = calculateDateRange(dateSubmittedRange);
@@ -234,7 +234,7 @@ export function PartOrders() {
     }
   }, [dateSubmittedRange]);
 
-  // 格式化日期显示
+  // Format date display
   const formatDate = (date: Date | string | undefined): string => {
     if (!date) return '--';
     const d = typeof date === 'string' ? new Date(date) : date;
@@ -246,7 +246,7 @@ export function PartOrders() {
     });
   };
 
-  // 获取订单类型显示文本
+  // Get order type display text
   const getOrderTypeText = (partsOrderNumber: number): string => {
     if (partsOrderNumber === 0) return 'Parts Order';
     if (partsOrderNumber === 1) return 'Supplement 1';
@@ -278,7 +278,7 @@ export function PartOrders() {
                 className="pl-10"
               />
             </div>
-            {/* 只有 CSRs（客户服务代表） 和 经销商 (Dealers) 才能看到并使用 */}
+            {/* Only CSRs（customer service representatives） and dealers (Dealers) can see and use */}
             {(user?.person?.type === 'Csr' || user?.person?.type === 'Dealership') && (
               <div className="flex items-center gap-3">
                 <Checkbox
@@ -294,7 +294,7 @@ export function PartOrders() {
             )}
           </div>
 
-          {/* 完整筛选条件 */}
+          {/* complete filter conditions */}
           <div className="mb-6 flex flex-wrap items-center gap-3">
             <Select value={filterByPartsOrderNumber} onValueChange={(value) => setTypeOfOrder(value)}>
               <SelectTrigger className="bg-muted w-48">
@@ -358,18 +358,18 @@ export function PartOrders() {
               </Select>
             </div>
 
-            {/* 日期范围选择 */}
+            {/* Date range selection */}
             {dateSubmittedRange === 'custom' && (
               <DateRangePicker
                 value={range}
                 onChange={(newRange) => {
                   setRange(newRange);
-                  // 同步到原有状态，用于 API 查询
+                  // Synchronize to original state，for API query
                   setFromDate(newRange?.from ?? undefined);
                   setToDate(newRange?.to ?? undefined);
                 }}
                 onClose={() => {
-                  // 弹窗关闭时重新查询列表
+                  // Re-query the list when the popup closes
                   fetchPartsOrders(true);
                 }}
                 placeholder="Select date range"
@@ -439,7 +439,7 @@ export function PartOrders() {
                     const region = repairOrder?.region || '--';
                     const dateCompleted = formatDate(order.dateCreated);
                     const dateClosed = formatDate(repairOrder?.dateClosed);
-                    // 判断是否有备注（从备用经销商订购）
+                    // Determine if there are remarks（Order from backup dealers）
                     const hasNote = repairOrder?.dealership.id !== repairOrder?.shop.sponsorDealership.id;
 
                     return (

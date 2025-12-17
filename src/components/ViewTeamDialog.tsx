@@ -215,7 +215,7 @@ export default function ViewTeamDialog({
           </section>
         </div>
 
-        {/* 底部关闭按钮（与 EditProfileDialog 保持一致） */}
+        {/* Bottom close button（with EditProfileDialog Keep consistent） */}
         <div className='-mx-6 flex-1 overflow-y-auto scroll-smooth px-6 py-4'></div>
         <DialogFooter className='mt-4 flex-shrink-0 gap-3 border-t pt-4'>
           <Button onClick={handleClose}>Close</Button>

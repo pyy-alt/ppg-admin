@@ -102,7 +102,7 @@ export default function NetworkUserDialog({
         fieldStaffRegions: initialValues.fieldStaffRegions,
       })
     } else if (!initialValues && open) {
-      // ✅ 如果没有 initialValues，重置为默认值
+      // ✅ If none initialValues，Reset to default value
       form.reset({
         firstName: '',
         lastName: '',
@@ -114,7 +114,7 @@ export default function NetworkUserDialog({
     }
   }, [initialValues, open, form])
 
-  // 使用 useWatch 代替 form.watch()
+  // Use useWatch Replace form.watch()
   const selectedRole = useWatch({
     control: form.control,
     name: 'role',
@@ -140,7 +140,7 @@ export default function NetworkUserDialog({
         lastName: data.lastName,
         email: data.email,
         type: data.role as PersonType,
-        id: initialValues?.id || undefined, // ✅ 编辑模式需要 id，创建模式为 undefined
+        id: initialValues?.id || undefined, // ✅ Edit mode requires id，Creation mode is undefined
         csrRegion: data.csrRegion
           ? Region.create({ id: data.csrRegion.id, name: data.csrRegion.name })
           : undefined,
@@ -151,7 +151,7 @@ export default function NetworkUserDialog({
       const personApi = new PersonApi()
 
       await new Promise((resolve) => {
-        // ✅ 修复：分别调用，不使用 await（因为这些方法返回 void）
+        // ✅ Fix：Call separately，Do not use await（Because these methods return void）
         if (initialValues) {
           personApi.edit(request, {
             status200: (response) => {
@@ -207,10 +207,10 @@ export default function NetworkUserDialog({
     }
     // onOpenChange(isOpen)
     // if (!isOpen) {
-    //   form.reset() // 关闭时自动重置
+    //   form.reset() // Automatically reset when closed
     // }
   }
-  // 当角色切换时，清空 regions 字段
+  // When switching roles，Clear regions Field
   useEffect(() => {
     if (selectedRole) {
       form.setValue('csrRegion', undefined)
@@ -223,7 +223,7 @@ export default function NetworkUserDialog({
     <>
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className='sm:max-w-lg'>
-          {/* 固定头部 - 统一风格 */}
+          {/* Fixed header - Unified style */}
           <DialogHeader className='shrink-0'>
             <DialogTitle className='px-6 py-4 text-2xl font-semibold'>
               {initialValues ? 'Edit Network User' : 'Add Network User'}
@@ -433,7 +433,7 @@ export default function NetworkUserDialog({
           </Form>
         </DialogContent>
       </Dialog>
-      {ConfirmDialogComponent} {/* 添加这一行 */}
+      {ConfirmDialogComponent} {/* Add this row */}
     </>
   )
 }

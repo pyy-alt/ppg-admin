@@ -16,7 +16,7 @@ interface BrandContextType {
   setBrand: (brand: Brand, region: Region) => void
 }
 
-// 持久化到 localStorage！
+// Persist to localStorage！
 const STORAGE_KEY = 'ppg-selected-brand'
 const BrandContext = createContext<BrandContextType | undefined>(undefined)
 
@@ -24,7 +24,7 @@ export function BrandProvider({ children }: { children: ReactNode }) {
   const [brand, setBrandState] = useState<Brand>('audi')
   const [region, setRegionState] = useState<Region>('america')
 
-  // 关键！刷新后恢复
+  // Key！Restore after refresh
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY)
     if (saved) {

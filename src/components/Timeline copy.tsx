@@ -44,7 +44,7 @@ export function Timeline() {
       <div className='space-y-8'>
         {timelineData.map((item, index) => (
           <div key={item.id} className='flex gap-4'>
-            {/* 圆点 + 虚线 */}
+            {/* Dot + Dashed line */}
             <div className='flex flex-col items-center'>
               <div
                 className={`flex h-6 w-6 items-center justify-center rounded-full p-1 text-sm font-bold text-white ${
@@ -57,7 +57,7 @@ export function Timeline() {
                         : 'bg-gray-400'
                 }`}
               >
-                {/* 已处理 → 显示 ✅，否则显示数字 */}
+                {/* Processed → Display ✅，Otherwise display number */}
                 {item.status === 'approved' ? (
                   <Check className='h-5 w-5' />
                 ) : item.status === 'rejected' ? (
@@ -67,13 +67,13 @@ export function Timeline() {
                 )}
               </div>
 
-              {/* 虚线 */}
+              {/* Dashed line */}
               {index < timelineData.length - 1 && (
                 <div className='mt-2 h-full w-px border-l border-gray-300' />
               )}
             </div>
 
-            {/* 内容区域 */}
+            {/* Content area */}
             <div className='flex-1 pb-8'>
               <div className='mb-1 flex items-center gap-2 p-2'>
                 <h3 className='font-semibold'>{item.title}</h3>
@@ -94,7 +94,7 @@ export function Timeline() {
                   <Badge className="bg-green-100 text-green-700">Approved</Badge>
                 )} */}
               </div>
-              {/* shop 发起 */}
+              {/* shop Initiate */}
               {item.submitted && (
                 <div>
                   <p className='text-muted-foreground mb-2 text-sm'>
@@ -104,7 +104,7 @@ export function Timeline() {
                 </div>
               )}
 
-              {/* csr 审核 */}
+              {/* csr Review */}
               {item.approved !== undefined && (
                 <div className='flex flex-col gap-2'>
                   {item.id===2 && (

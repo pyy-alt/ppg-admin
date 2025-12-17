@@ -48,7 +48,7 @@ export function RepairOrderDetail() {
 
   const [isApprovalDialogOpen, setIsApprovalDialogOpen] = useState(false)
   const [isReject, setIsReject] = useState(false)
-  // ✅ 获取当前用户角色
+  // ✅ Get current user role
   const { auth } = useAuthStore()
   const userType = auth.user?.person?.type as PersonType | undefined
   const { user } = useAuthStore((state) => state.auth)
@@ -86,19 +86,19 @@ export function RepairOrderDetail() {
             } else {
               setInitPartsOrderData([response])
             }
-            // 标准化为数组
+            // Standardize to array
             const list: any[] =
               Object.prototype.toString.call(response) === '[object Array]'
                 ? (response as any[])
                 : [response]
 
-            // 根据 currentIndex 或已选中的 id 同步更新 selectedPartsOrderData
+            // According to currentIndex or selected id Synchronously update selectedPartsOrderData
             setSelectedPartsOrderData((prev) => {
               if (list.length === 0) return undefined
               if (currentIndex >= 0 && currentIndex < list.length) {
                 return list[currentIndex] as PartsOrder
               }
-              //按 id 匹配之前选中的那条
+              //By id Match the previously selected one
               if (prev && (prev as any).id != null) {
                 const found = list.find(
                   (po) => (po as any).id === (prev as any).id
@@ -124,7 +124,7 @@ export function RepairOrderDetail() {
       console.error(e)
     }
   }
-  // ✅ 批准 Parts Order
+  // ✅ Approve Parts Order
   const handleApprove = async (salesOrderNumber: string) => {
     if (!selectedPartsOrderData || !(selectedPartsOrderData as any).id) return
 
@@ -140,7 +140,7 @@ export function RepairOrderDetail() {
         api.partsOrderSubmitWorkflowAction(request, {
           status200: () => {
             toast.success('Parts order approved successfully')
-            getPartsOrderDetail() // 刷新数据
+            getPartsOrderDetail() // Refresh data
             resolve(true)
           },
           error: (error) => {
@@ -158,7 +158,7 @@ export function RepairOrderDetail() {
     }
   }
 
-  // ✅ 拒绝 Parts Order
+  // ✅ Reject Parts Order
   const handleReject = async (comment: string) => {
     if (!selectedPartsOrderData || !(selectedPartsOrderData as any).id) return
 
@@ -174,7 +174,7 @@ export function RepairOrderDetail() {
         api.partsOrderSubmitWorkflowAction(request, {
           status200: () => {
             toast.success('Parts order rejected successfully')
-            getPartsOrderDetail() // 刷新数据
+            getPartsOrderDetail() // Refresh data
             resolve(true)
           },
           error: (error) => {
@@ -190,7 +190,7 @@ export function RepairOrderDetail() {
       console.error(error)
     }
   }
-  // ✅ 重新提交 Parts Order
+  // ✅ Resubmit Parts Order
   const handleTimelineResubmit = async (comment: string) => {
     try {
       await new Promise<boolean>((resolve, reject) => {
@@ -204,7 +204,7 @@ export function RepairOrderDetail() {
         api.partsOrderSubmitWorkflowAction(request, {
           status200: () => {
             toast.success('Parts order resubmitted successfully')
-            getPartsOrderDetail() // 刷新数据
+            getPartsOrderDetail() // Refresh data
             resolve(true)
           },
           error: (error) => {
@@ -235,7 +235,7 @@ export function RepairOrderDetail() {
         api.partsOrderSubmitWorkflowAction(request, {
           status200: () => {
             toast.success('Parts order marked as shipped successfully')
-            getPartsOrderDetail() // 刷新数据
+            getPartsOrderDetail() // Refresh data
             resolve(true)
           },
           error: (error) => {
@@ -263,7 +263,7 @@ export function RepairOrderDetail() {
         api.partsOrderSubmitWorkflowAction(request, {
           status200: () => {
             toast.success('Parts order marked as received successfully')
-            getPartsOrderDetail() // 刷新数据
+            getPartsOrderDetail() // Refresh data
             resolve(true)
           },
           error: (error) => {
@@ -291,7 +291,7 @@ export function RepairOrderDetail() {
         api.repairOrderComplete(request, {
           status200: () => {
             toast.success('Repair order marked as complete successfully')
-            getRepairOrderDetail() // 刷新数据
+            getRepairOrderDetail() // Refresh data
             getPartsOrderDetail()
             resolve(true)
           },
@@ -308,7 +308,7 @@ export function RepairOrderDetail() {
       toast.error(`Failed to mark repair order as complete ${error}|`)
     }
   }
-  // ✅ Timeline 的 onApprove 和 onReject 回调
+  // ✅ Timeline of onApprove and onReject Callback
   const handleTimelineApprove = () => {
     setIsApprovalDialogOpen(true)
     setIsReject(false)
@@ -338,7 +338,7 @@ export function RepairOrderDetail() {
               '--'}
           </p>
           <p className='mt-4 flex items-center space-x-4 text-sm text-gray-200'>
-            {/* 房子图标 */}
+            {/* House icon */}
             <Warehouse className='h-5 w-5 text-white' />
             {(user?.person?.shop && (
               <span>
@@ -430,9 +430,9 @@ export function RepairOrderDetail() {
               ) : null}
             </div>
           </div>
-          {/* 2. 信息区 - 极简三列，字体 14px 正文感 */}
+          {/* 2. Information area - Minimal three-column，Font 14px Body feeling */}
           <div className='grid grid-cols-1 gap-8 p-5 md:grid-cols-3'>
-            {/* 左列 */}
+            {/* Left column */}
             <div className='space-y-3'>
               <div>
                 <span className='text-muted-foreground'>Customer</span>
@@ -452,7 +452,7 @@ export function RepairOrderDetail() {
                 </p>
               </div>
             </div>
-            {/* 中列 */}
+            {/* Middle column */}
             <div className='space-y-3'>
               <div>
                 <span className='text-muted-foreground'>Date Submitted</span>
@@ -489,7 +489,7 @@ export function RepairOrderDetail() {
                 </p>
               </div>
             </div>
-            {/* 右列 - 文件链接更紧凑 */}
+            {/* Right column - File links more compact */}
             <div className='space-y-3 text-sm'>
               <div>
                 <span className='text-muted-foreground'>Pre-Repair Photos</span>
@@ -561,13 +561,13 @@ export function RepairOrderDetail() {
           </div>
         </div>
         <div className='my-5 flex flex-col rounded-sm border'>
-          {/* 3. Tabs + 主内容区 */}
+          {/* 3. Tabs + Main content area */}
           <div className='bg-muted flex items-center justify-between overflow-hidden p-5'>
-            {/* 左侧：平铺标签 + 警告 */}
+            {/* Left side：Tiled labels + Warning */}
             <div className='flex items-center gap-6 text-sm font-medium'>
               {initPartsOrderData && initPartsOrderData.length > 0 && (
                 <>
-                  {/* Parts Order 按钮（第一个，partsOrderNumber === 0） */}
+                  {/* Parts Order Button（First，partsOrderNumber === 0） */}
                   <Button
                     variant={currentIndex === 0 ? 'default' : 'outline'}
                     size='sm'
@@ -582,7 +582,7 @@ export function RepairOrderDetail() {
                     Parts Order
                   </Button>
 
-                  {/* Supplement 按钮（partsOrderNumber > 0） */}
+                  {/* Supplement Button（partsOrderNumber > 0） */}
                   {initPartsOrderData
                     .filter(
                       (po: any) =>
@@ -625,7 +625,7 @@ export function RepairOrderDetail() {
               </button> */}
             </div>
 
-            {/* 右侧：新增按钮 */}
+            {/* Right side：Add button */}
             {initPartsOrderData?.some(
               (order: any) =>
                 order.status !== 'RepairCompleted' ||
@@ -648,7 +648,7 @@ export function RepairOrderDetail() {
                 </Button>
               )}
           </div>
-          {/* 3. 真正的左右布局 */}
+          {/* 3. True left-right layout */}
           <div className='m-5 flex gap-8'>
             <div className='max-w-lg flex-1'>
               {((selectedPartsOrderData ||
@@ -738,9 +738,9 @@ export function RepairOrderDetail() {
               )) ||
                 '-- No parts order data'}
             </div>
-            {/* 右侧：Parts Tracker 时间线（纯文字 + 绿色实线） */}
+            {/* Right side：Parts Tracker Timeline（Plain text + Green solid line） */}
             <div className='min-w-0 flex-1'>
-              {/* min-w-0 防止 flex 溢出 */}
+              {/* min-w-0 Prevent flex Overflow */}
               <Timeline
                 partsOrder={
                   selectedPartsOrderData ||

@@ -26,35 +26,35 @@ export function RegistrationComplete() {
     password: '',
     confirmPassword: '',
   })
-  // 查询参数
+  // Query parameters
   const { id, hash, guid } = useParams({
     from: '/registration/complete/$id/$guid/$hash',
   })
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [isValidating, setIsValidating] = useState(true) // 正在验证链接
+  const [isValidating, setIsValidating] = useState(true) // Verifying the link.
 
   const authApi = new AuthenticationApi()
   const { auth } = useAuthStore()
 
-  // ✅ 添加 ref 防止重复调用
+  // ✅ Add ref Prevent duplicate calls
   const hasValidatedRef = useRef(false)
   useEffect(() => {
-    // ✅ 如果已经验证过，不再重复调用
+    // ✅ If it has already been verified.，No longer repeatedly called.
     if (hasValidatedRef.current) {
       return
     }
-    // ✅ 添加参数验证
+    // ✅ Add parameter validation.
     if (!id || !guid || !hash) {
       toast.error('Invalid registration link parameters.')
       setIsValidating(false)
       return
     }
 
-    // ✅ 标记为已开始验证
+    // ✅ Marked as verification started.
     hasValidatedRef.current = true
-    // 调用 sessionCreate API 验证邮件链接并创建临时会话
-    // 如果用户已经登录，这个调用会创建新的临时会话并覆盖之前的会话
+    // Invoke sessionCreate API Verify the email link and create a temporary session.
+    // If the user is already logged in，This call will create a new temporary session and overwrite the previous session.
     authApi.sessionCreate(
       id,
       guid,
@@ -62,9 +62,9 @@ export function RegistrationComplete() {
       {
         status200: (session: Session) => {
           if (session) {
-            auth.setUser(session) // setUser 会自动设置 loginStatus 为 'authenticated'
+            auth.setUser(session) // setUser Will be set automatically. loginStatus For 'authenticated'
 
-            // ✅ 构建完整地址（包含 city, state, zip）
+            // ✅ Build a complete address.（Include city, state, zip）
             const organization =
               session.person?.shop || session.person?.dealership
             const addressParts = [
@@ -72,10 +72,10 @@ export function RegistrationComplete() {
               organization?.city,
               organization?.state,
               organization?.zip,
-            ].filter(Boolean) // 过滤掉空值
+            ].filter(Boolean) // Filter out empty values.
             const fullAddress = addressParts.join(', ')
 
-            // ✅ 更新表单数据，使用从 API 获取的真实数据
+            // ✅ Update form data，Use from API Acquired real data
             setForm({
               email: session.person?.email || '',
               firstName: session.person?.firstName || '',
@@ -93,23 +93,23 @@ export function RegistrationComplete() {
           setIsValidating(false)
         },
         status404: () => {
-          // 链接无效或已过期
+          // The link is invalid or has expired.
           toast.error('Registration link is invalid or has expired.')
           setIsValidating(false)
-          // 不立即重定向，让用户看到错误提示
-          // 用户可以选择手动返回或重新申请重置链接
+          // Do not redirect immediately.，Show the user an error message.
+          // Users can choose to manually return or reapply for the reset link.
         },
         error: () => {
-          // 网络错误等
+          // Network errors, etc.
           toast.error('Failed to validate reset link. Please try again.')
           setIsValidating(false)
-          // ✅ 错误时重置 ref，允许重试
+          // ✅ Reset on error ref，Allow retry
           hasValidatedRef.current = false
         },
       },
       null
     )
-  }, [id, guid, hash]) // 只在组件挂载时执行一次
+  }, [id, guid, hash]) // Execute only once when the component is mounted.
 
   const handleChange = (field: keyof typeof form, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -131,8 +131,8 @@ export function RegistrationComplete() {
     setIsLoading(true)
 
     try {
-      // 调用 updatePassword API 更新密码
-      // 注意：由于会话是通过邮件链接创建的，不需要提供 currentPassword
+      // Invoke updatePassword API Update password
+      // Notice：Since the conversation was created through an email link.，No need to provide. currentPassword
       const request = CompleteRegistrationRequest.create({
         firstName: form.firstName,
         lastName: form.lastName,
@@ -140,12 +140,12 @@ export function RegistrationComplete() {
       })
       authApi.registrationComplete(request, {
         status200: () => {
-          // ✅ 注册完成后，清除用户状态（因为要跳转到登录页）
+          // ✅ Registration completed.，Clear user status（Because you need to jump to the login page.）
           auth.reset()
 
           toast.success('Registration completed successfully!')
 
-          // ✅ 跳转到登录页，使用 replace: true 避免返回
+          // ✅ Jump to the login page.，Use replace: true Avoid returning.
           navigate({
             to: '/login',
             replace: true,
@@ -153,20 +153,20 @@ export function RegistrationComplete() {
 
           setIsLoading(false)
         },
-        // ✅ 409 错误：全局已显示 toast.warning，这里只需重置 loading
+        // ✅ 409 Error：The entire view has been displayed. toast.warning，Just reset here. loading
         status409: () => {
           setIsLoading(false)
         },
-        // ✅ 其他错误：全局已显示 toast.error，这里只需重置 loading
+        // ✅ Other errors：The entire view is now displayed. toast.error，Just reset here. loading
         error: (error: Error) => {
-            // ✅ 检查是否是 JSON 解析错误（API 返回纯文本 "successful operation"）
+            // ✅ Check if it is JSON Parsing error（API Return to plain text. "successful operation"）
             const errorMessage = error?.message || String(error)
             if (
               errorMessage.includes('JSON.parse') ||
               errorMessage.includes('unexpected character') ||
               errorMessage.includes('successful operation')
             ) {
-              // ✅ 如果是 JSON 解析错误，说明 API 返回了纯文本成功消息，当作成功处理
+              // ✅ If it is JSON Parsing error，Explanation API Returned a plain text success message.，Treat as a successful handling.
               console.log('[registrationComplete] API returned plain text, treating as success')
               auth.reset()
               toast.success('Registration completed successfully!')
@@ -178,7 +178,7 @@ export function RegistrationComplete() {
               return
             }
   
-            // ✅ 其他错误正常处理
+            // ✅ Other errors are handled normally.
             console.error('Registration complete error:', error)
           setIsLoading(false)
         },
@@ -188,17 +188,17 @@ export function RegistrationComplete() {
       setIsLoading(false)
     }
   }
-  // 如果正在验证链接，显示加载状态
+  // If verifying the link，Show loading status
   if (isValidating) {
     return <Loading />
   }
 
   return (
     <div className='bg-background flex min-h-screen flex-col'>
-      {/* 复用 Header（隐藏用户下拉） */}
+      {/* Reuse Header（Hide user dropdown） */}
       <Header isShowUser={false} />
 
-      {/* Banner 顶部 */}
+      {/* Banner Top */}
       <div className='bg-primary text-primary-foreground relative mt-12 h-32 lg:h-40'>
         <img
           src={bannerImg}
@@ -213,7 +213,7 @@ export function RegistrationComplete() {
         </div> */}
       </div>
 
-      {/* 表单主体 */}
+      {/* Form body */}
       <div className='flex flex-1 items-start justify-center px-4 py-8 lg:py-12'>
         <form onSubmit={handleSubmit} className='w-full max-w-4xl space-y-10'>
           {/* Personal Information */}
@@ -422,7 +422,7 @@ export function RegistrationComplete() {
             </div>
           </section>
 
-          {/* 提交按钮 */}
+          {/* Submit button */}
           <div className='flex justify-end pt-6'>
             <Button
               type='submit'

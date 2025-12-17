@@ -47,11 +47,11 @@ export default function AdminViewTeamDialog({
   teamMembers,
   onSuccess
 }: AdminViewTeamDialogProps) {
-  // ✅ 用 props 初始化 members，保证后面 .map 一定有数组
+  // ✅ Use props Initialize members，Ensure that there will be .map An array must exist
   const [members, setMembers] = useState<TeamMember[]>(teamMembers ?? [])
   const [loadingId, ] = useState<string | null>(null)
 
-  // 如果父组件传入的 teamMembers 后续变化，这里同步更新一次
+  // If the parent component passes in teamMembers Subsequent changes，Update here synchronously once
   useEffect(() => {
     if (teamMembers) setMembers(teamMembers)
   }, [teamMembers])

@@ -22,12 +22,12 @@ export function DatePicker({
   placeholder = 'Pick a date',
   disabled = true,
 }: DatePickerProps) {
-  // 移除 showClearButton 状态和 useEffect，直接依赖 selected 状态
+  // Remove showClearButton State and useEffect，direct dependencies selected State
 
   const handleClear = (e: React.MouseEvent) => {
-    // 🚨 阻止事件冒泡到 PopoverTrigger
+    // 🚨 Prevent event bubbling to PopoverTrigger
     e.stopPropagation()
-    onSelect(undefined) // 清除日期
+    onSelect(undefined) // Clear date
   }
 
   return (
@@ -37,11 +37,11 @@ export function DatePicker({
           variant='outline'
           data-empty={!selected}
           className={cn(
-            'data-[empty=true]:text-muted-foreground w-[240px] justify-start bg-gray-100 pr-2 text-start font-normal', // 调整 pr-2 留出清除按钮空间
-            selected && 'pl-3' // 有日期时，左侧 padding 调整
+            'data-[empty=true]:text-muted-foreground w-[240px] justify-start bg-gray-100 pr-2 text-start font-normal', // Adjust pr-2 Leave space for clear button
+            selected && 'pl-3' // When there is a date，Left side padding Adjust
           )}
         >
-          {/* 1. 日期或占位符显示 */}
+          {/* 1. Date or placeholder display */}
           <span className='flex-1 text-left'>
             {selected ? (
               format(selected, 'MMM d, yyyy')
@@ -50,18 +50,18 @@ export function DatePicker({
             )}
           </span>
 
-          {/* 2. CalendarIcon 和 ClearButton 互斥显示在最右边 */}
+          {/* 2. CalendarIcon and ClearButton Mutually exclusive display on the far right */}
           {selected && !disabled ? (
             <span
               role='button'
               tabIndex={0}
-              className='ms-auto flex h-6 w-6 cursor-pointer items-center justify-center opacity-50 hover:opacity-100' // 模拟按钮样式
-              onClick={handleClear} // 调用带 stopPropagation 的处理函数
+              className='ms-auto flex h-6 w-6 cursor-pointer items-center justify-center opacity-50 hover:opacity-100' // Simulate button style
+              onClick={handleClear} // Call with stopPropagation the handler function
             >
               <XIcon className='h-4 w-4' />
             </span>
           ) : (
-            // 🚨 当没有日期时，显示 CalendarIcon
+            // 🚨 When there is no date，Display CalendarIcon
             <CalendarIcon className='h-4 w-4 opacity-50' />
           )}
         </Button>

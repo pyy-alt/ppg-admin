@@ -10,11 +10,11 @@ export function Global404Dialog() {
   const { isOpen, close, message } = useGlobal404Store()
 
   const handleConfirm = () => {
-    // 清除认证状态
+    // Clear authentication status
     auth.reset()
-    // 关闭 dialog
+    // Close dialog
     close()
-    // 跳转到登录页，保留当前路径作为 redirect
+    // Redirect to login page，Retain current path as redirect
     const redirect = location.href
     navigate({
       to: '/login',
@@ -27,9 +27,9 @@ export function Global404Dialog() {
     <ConfirmDialog
       open={isOpen}
       onOpenChange={close}
-      title='资源未找到'
-      desc={message || '请求的资源不存在或已被删除。请重新登录后重试。'}
-      confirmText='前往登录'
+      title='Resource not found'
+      desc={message || 'The requested resource does not exist or has been deleted。Please log in again and try again。'}
+      confirmText='Go to login'
       cancelBtnText={undefined}
       handleConfirm={handleConfirm}
       className='sm:max-w-md'

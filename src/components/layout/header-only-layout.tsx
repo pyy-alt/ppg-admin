@@ -11,9 +11,9 @@ export function HeaderOnlyLayout({ children }: HeaderOnlyLayoutProps) {
   return (
     <SearchProvider>
       <LayoutProvider>
-        {/* Header - 固定在顶部 */}
+        {/* Header - Fixed at the top */}
         <Header fixed />
-        {/* Main Content - 从 Header 下方开始，全宽显示 */}
+        {/* Main Content - From Header Start from below，Full width display */}
         <main className="pt-8 min-h-screen">
           {children ?? <Outlet />}
         </main>

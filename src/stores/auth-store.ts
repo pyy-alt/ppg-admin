@@ -3,7 +3,7 @@ import type Region from '@/js/models/Region'
 import type Session from '@/js/models/Session'
 import { create } from 'zustand'
 
-// 导出 AuthStatus 类型供全局使用
+// Export AuthStatus Type for global use
 export type AuthStatus = 'checking' | 'authenticated' | 'unauthenticated'
 
 export interface AuthUser {
@@ -17,7 +17,7 @@ interface AuthState {
   auth: {
     loginStatus: AuthStatus
     user: AuthUser | null
-    setUser: (session: Session | null) => void // ✅ 修改：接受 Session 类型
+    setUser: (session: Session | null) => void // ✅ Modify：Accept Session Type
     setLoginStatus: (status: AuthStatus) => void
     reset: () => void
   }
@@ -37,7 +37,7 @@ export const useAuthStore = create<AuthState>()((set) => {
           },
         })),
       setUser: (session) => {
-        // ✅ 从 Session 提取 guid, person, hash
+        // ✅ from Session Extract guid, person, hash
         const user: AuthUser | null = session
           ? {
               guid: session.guid,
@@ -57,9 +57,9 @@ export const useAuthStore = create<AuthState>()((set) => {
       },
       reset: () =>
         set((state) => {
-          // 注意：HttpOnly Cookie 无法通过前端 JavaScript 删除
-          // Cookie 的删除应该由后端的 logout API 通过 Set-Cookie 响应头处理
-          // 这里只清除前端状态
+          // Note：HttpOnly Cookie Cannot be processed through the frontend JavaScript Delete
+          // Cookie Deletion should be handled by the backend logout API through Set-Cookie Handle via response headers
+          // This only clears the frontend state
           return {
             ...state,
             auth: {
