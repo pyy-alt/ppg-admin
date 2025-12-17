@@ -25,7 +25,7 @@ export function PartOrders() {
   const [filterByWaitingOnMe, setOnlyMyOrders] = useState<boolean>(false);
   const [dateSubmittedFrom, setFromDate] = useState<Date | undefined>(undefined);
   const [dateSubmittedTo, setToDate] = useState<Date | undefined>(undefined);
-  const [dateSubmittedRange, setDateSubmittedRange] = useState<string>('7');
+  const [dateSubmittedRange, setDateSubmittedRange] = useState<string>('all');
   const [filterByPartsOrderNumber, setTypeOfOrder] = useState<string>('all');
   const [filterByStatus, setFilterByStatus] = useState<string>('all');
   const [filterByRegionId, setCsrRegion] = useState<string>('all');
@@ -53,8 +53,8 @@ export function PartOrders() {
       const dealer = ro.dealership || {};
 
       return {
-        'RO#': ro.roNumber || '--', // ← Must be quoted！
-        'Sales#': order.salesOrderNumber || '--', // ← Must be quoted！
+        'RO#': ro.roNumber || '--', // ← Must add quotes!
+        'Sales#': order.salesOrderNumber || '--', // ← Must add quotes!
         Type: getOrderTypeText(order.partsOrderNumber || 0),
         VIN: ro.vin || '--',
         'Year/Make/Model': [ro.year, ro.make, ro.model].filter(Boolean).join(' ') || '--',
@@ -78,9 +78,9 @@ export function PartOrders() {
   };
 
   useEffect(() => {
-    // Ensure the component is mounted and ref is connected to DOM
+    // Ensure component is mounted and ref is connected to DOM
     if (partsOrderRef.current) {
-      // 2. Use native DOM API Find all <th> elements
+      // 2. Use native DOM API to find all <th> elements
       const thElements = partsOrderRef.current.querySelectorAll('thead th');
 
       // 3. Extract text content
@@ -88,17 +88,6 @@ export function PartOrders() {
       setHeaders(headerTexts);
     }
   }, [orders]);
-  // const getStatusVariant = (
-  //   status: string
-  // ): 'default' | 'secondary' | 'destructive' | 'outline' => {
-  //   if (status.includes('Review') || status.includes('Rejected'))
-  //     return 'destructive'
-  //   if (status.includes('Shipped') || status.includes('Completed'))
-  //     return 'default'
-  //   if (status.includes('Received')) return 'secondary'
-  //   if (status.includes('Processing')) return 'outline'
-  //   return 'secondary'
-  // }
   const getStatusTxt = (status: string) => {
     switch (status) {
       case 'CsrReview':
@@ -117,7 +106,7 @@ export function PartOrders() {
   };
 
   // Get parts order data
-  const fetchPartsOrders = async (flag: boolean = false) => {
+  const fetchPartsOrders = async (flag?: boolean | undefined, date?: DateRange | undefined) => {
     if (!user) return;
 
     setLoading(true);
@@ -149,20 +138,21 @@ export function PartOrders() {
       const resultParameter = ResultParameter.create({
         resultsLimitOffset: (currentPage - 1) * itemsPerPage,
         resultsLimitCount: itemsPerPage,
-        resultsOrderBy: 'dateSubmitted', // Sort fields can be adjusted as needed
-        resultsOrderAscending: false, // Descending，Latest first
+        resultsOrderBy: 'dateSubmitted', // Can adjust sort field as needed
+        resultsOrderAscending: false, // Descending, newest first
       });
       requestParams.resultParameter = resultParameter;
 
       const request = PartsOrderSearchRequest.create(requestParams);
-      // Before serialization，Manually format date fields as strings（Override ModelBaseClass conversion）
+      // Before serialization, manually format date fields as strings (override ModelBaseClass conversion)
       if (dateFrom) {
         (request as any).dateSubmittedFrom = dateFrom;
       }
       if (dateTo) {
         (request as any).dateSubmittedTo = dateTo;
       }
-      if (flag) {
+
+      if (flag && !date) {
         (request as any).dateSubmittedFrom = undefined;
         (request as any).dateSubmittedTo = undefined;
       }
@@ -182,7 +172,7 @@ export function PartOrders() {
         },
       });
     } catch (error) {
-      console.error('API Invocation error:', error);
+      console.error('API call error:', error);
       setLoading(false);
     }
   };
@@ -190,7 +180,7 @@ export function PartOrders() {
   useEffect(() => {
     if (!user) return;
 
-    // Call API（For text input，Use debounce）
+    // Call API (for text input, use debounce)
     const timeoutId = setTimeout(
       () => {
         fetchPartsOrders();
@@ -206,8 +196,6 @@ export function PartOrders() {
     filterByStatus,
     filterByRegionId,
     dateSubmittedRange,
-    dateSubmittedFrom,
-    dateSubmittedTo,
     currentPage,
     user,
   ]);
@@ -221,18 +209,7 @@ export function PartOrders() {
     filterByStatus,
     filterByRegionId,
     dateSubmittedRange,
-    dateSubmittedFrom,
-    dateSubmittedTo,
   ]);
-
-  // When the preset range changes，Automatically calculate date
-  useEffect(() => {
-    if (dateSubmittedRange !== 'custom') {
-      const { from, to } = calculateDateRange(dateSubmittedRange);
-      setFromDate(from);
-      setToDate(to);
-    }
-  }, [dateSubmittedRange]);
 
   // Format date display
   const formatDate = (date: Date | string | undefined): string => {
@@ -278,7 +255,7 @@ export function PartOrders() {
                 className="pl-10"
               />
             </div>
-            {/* Only CSRs（customer service representatives） and dealers (Dealers) can see and use */}
+            {/* Only CSRs (Customer Service Representatives) and Dealers can see and use */}
             {(user?.person?.type === 'Csr' || user?.person?.type === 'Dealership') && (
               <div className="flex items-center gap-3">
                 <Checkbox
@@ -294,7 +271,7 @@ export function PartOrders() {
             )}
           </div>
 
-          {/* complete filter conditions */}
+          {/* Complete filter conditions */}
           <div className="mb-6 flex flex-wrap items-center gap-3">
             <Select value={filterByPartsOrderNumber} onValueChange={(value) => setTypeOfOrder(value)}>
               <SelectTrigger className="bg-muted w-48">
@@ -340,11 +317,21 @@ export function PartOrders() {
 
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">Date Submitted Range</span>
-              <Select value={dateSubmittedRange} onValueChange={(value) => setDateSubmittedRange(value)}>
+              <Select
+                value={dateSubmittedRange}
+                onValueChange={(value) => {
+                  setRange(undefined);
+                  setDateSubmittedRange(value);
+                  const { from, to } = calculateDateRange(value);
+                  setFromDate(from);
+                  setToDate(to);
+                }}
+              >
                 <SelectTrigger className="bg-muted w-48">
                   <SelectValue placeholder="ALL Dates" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="all">All Dates</SelectItem>
                   <SelectItem value="7">Past 7 days</SelectItem>
                   <SelectItem value="30">Past 30 Days</SelectItem>
                   <SelectItem value="month-to-date">Month-To-Date</SelectItem>
@@ -358,19 +345,17 @@ export function PartOrders() {
               </Select>
             </div>
 
-            {/* Date range selection */}
+            {/* Date range picker */}
             {dateSubmittedRange === 'custom' && (
               <DateRangePicker
                 value={range}
                 onChange={(newRange) => {
                   setRange(newRange);
-                  // Synchronize to original state，for API query
                   setFromDate(newRange?.from ?? undefined);
                   setToDate(newRange?.to ?? undefined);
                 }}
-                onClose={() => {
-                  // Re-query the list when the popup closes
-                  fetchPartsOrders(true);
+                onClose={(date) => {
+                  fetchPartsOrders(true, date);
                 }}
                 placeholder="Select date range"
                 disabled={false}
@@ -439,7 +424,7 @@ export function PartOrders() {
                     const region = repairOrder?.region || '--';
                     const dateCompleted = formatDate(order.dateCreated);
                     const dateClosed = formatDate(repairOrder?.dateClosed);
-                    // Determine if there are remarks（Order from backup dealers）
+                    // Determine if there is a note (ordered from alternate dealer)
                     const hasNote = repairOrder?.dealership.id !== repairOrder?.shop.sponsorDealership.id;
 
                     return (
