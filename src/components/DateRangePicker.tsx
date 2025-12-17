@@ -15,7 +15,7 @@ type DateRangePickerProps = {
   onChange: (range: DateRange | undefined) => void
   placeholder?: string
   disabled?: boolean
-  onClose?: () => void
+  onClose?: (date:DateRange | undefined) => void
 }
 
 export function DateRangePicker({
@@ -37,13 +37,13 @@ export function DateRangePicker({
     e.preventDefault()
     e.stopPropagation()
     onChange(undefined)
-    onClose?.()
+    onClose?.(undefined)
     value = undefined
 
   }
 
   return (
-    <Popover onOpenChange={(open) => !open && onClose?.()}>
+    <Popover onOpenChange={(open) => !open && onClose?.(value)}>
       <PopoverTrigger asChild>
         <Button
           variant='outline'
