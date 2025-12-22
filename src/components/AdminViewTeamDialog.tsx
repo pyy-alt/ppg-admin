@@ -298,11 +298,11 @@ export default function AdminViewTeamDialog({
                     key={member.id}
                     className='hover:bg-muted/30 transition-colors'
                   >
-                    <td className='px-6 py-4 font-medium'>
+                    <td className={member.status==='Inactive'?'text-gray-400':'px-6 py-4 font-medium'}>
                       {member.firstName}
                     </td>
                     <td className='px-6 py-4'>{member.lastName}</td>
-                    <td className='text-muted-foreground px-6 py-4 font-mono text-sm'>
+                    <td className='px-6 py-4 font-mono text-sm'>
                       {member.email}
                     </td>
                     <td className='px-6 py-4 text-sm'>{member.dateAdded}</td>

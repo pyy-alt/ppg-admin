@@ -35,13 +35,13 @@ import {
 } from '@/components/ui/table'
 import { DataTablePagination } from '@/components/data-table-pagination'
 import ViewAdminTeamDialog from  '@/components/AdminViewTeamDialog'
-import { TeamMember } from '@/components/ViewTeamDialog'
+import ViewTeamDialog, { TeamMember } from '@/components/ViewTeamDialog'
 import { ClearableInput } from '@/components/clearable-input'
 export function Shops() {
   const { user } = useAuthStore((state) => state.auth)
   const [currentPage, setCurrentPage] = useState(1)
   const [smartFilter, setSmartFilter] = useState('')
-  const [filterByShopStatus, setFilterByShopStatus] = useState<string>('all')
+  const [filterByShopStatus, setFilterByShopStatus] = useState<string>('Certified')
   const [filterByShopCertification, setFilterByShopCertification] =
     useState<string>('all')
   const [filterByRegionId, setFilterByRegionId] = useState<string>('all')
@@ -65,10 +65,15 @@ export function Shops() {
   ) => {
     try {
       const personApi = new PersonApi()
-      const request = PersonSearchRequest.create({
+      const request:any = PersonSearchRequest.create({
         type: userType,
         organizationId
       })
+      	const resultParameter = ResultParameter.create({
+				resultsOrderBy: 'firstName',
+				resultsOrderAscending: false,
+			})
+			request.resultParameter = resultParameter
 
       personApi.search(request, {
         status200: (data) => {
@@ -278,9 +283,9 @@ export function Shops() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value='all'>All Certifications</SelectItem>
-                <SelectItem value='AudiUltra'>Audi Ultra</SelectItem>
                 <SelectItem value='AudiHybrid'>Audi Hybrid</SelectItem>
-                <SelectItem value='VW'>Volkswagen</SelectItem>
+                <SelectItem value='AudiUltra'>Audi Ultra</SelectItem>
+                <SelectItem value='VW'>VW</SelectItem>
               </SelectContent>
             </Select>
 
@@ -467,17 +472,10 @@ export function Shops() {
           </>
         )}
       </div>
-       <ViewAdminTeamDialog
+       <ViewTeamDialog
            teamMembers={teamMembers}
            open={isShowAdminTeam}
            onOpenChange={setIsShowAdminTeam}
-           onSuccess={async ()=>{
-            await getTeamMembers('Shop',organizationId)
-            setOrganizationId(undefined)
-           }}
-           onError={(error) => {
-             console.error('Failed to get team members:', error)
-           }}
          />
     </div>
   )

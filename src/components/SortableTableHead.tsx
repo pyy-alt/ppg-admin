@@ -1,3 +1,4 @@
+import { ChevronDown, ChevronUp } from "lucide-react"
 import { TableHead } from "./ui/table"
 
 export function SortableTableHead({
@@ -14,11 +15,11 @@ export function SortableTableHead({
   onSort: (field: string) => void
 }) {
   const isActive = currentSortBy === field
-  const direction = isActive ? (currentAscending ? '↑' : '↓') : ''
+  const direction = isActive ? (currentAscending ? <ChevronUp size={16}/> : <ChevronDown size={16} />) : ''
 
   return (
     <TableHead
-      className="cursor-pointer select-none"
+      className="cursor-pointer select-none text-foreground font-semibold"
       onClick={() => onSort(field)}
     >
       <div className="flex items-center gap-1">

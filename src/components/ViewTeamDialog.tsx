@@ -53,7 +53,7 @@ export default function ViewTeamDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className='flex max-h-[90vh] flex-col sm:max-w-4xl'>
+      <DialogContent className='flex max-h-[90vh] flex-col sm:max-w-6xl'>
         <DialogHeader className='shrink-0'>
           {teamMembers ? (
             teamMembers.length > 0 ? (
