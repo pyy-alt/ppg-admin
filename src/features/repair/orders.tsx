@@ -16,7 +16,6 @@ import { useBrand } from '@/context/brand-context';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -24,6 +23,7 @@ import { DateRangePicker } from '@/components/DateRangePicker';
 import { PartsOrderDialog } from '@/components/PartsOrderDialog';
 import RepairOrderDialog, { type RepairOrderData } from '@/components/RepairOrderDialog';
 import { DataTablePagination } from '@/components/data-table-pagination';
+import { ClearableInput } from '@/components/clearable-input';
 interface RepairOrderListProps {
   repairOrders: [];
   totalItems: number;
@@ -353,7 +353,7 @@ export function RepairOrderList() {
           <div className="flex flex-wrap items-center gap-3">
             <div className="relative w-65">
               <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-              <Input
+              <ClearableInput
                 value={smartFilter}
                 onChange={(e) => setSmartFilter(e.target.value)}
                 placeholder="Filter by RO#, Order #,VIN,Customer"

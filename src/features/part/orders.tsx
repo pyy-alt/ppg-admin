@@ -12,13 +12,13 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { DateRangePicker } from '@/components/DateRangePicker';
 import { DataTablePagination } from '@/components/data-table-pagination';
+import { ClearableInput } from '@/components/clearable-input';
 
 export function PartOrders() {
   const { user } = useAuthStore((state) => state.auth);
@@ -259,7 +259,7 @@ export function PartOrders() {
           <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center">
             <div className="relative max-w-md flex-1">
               <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-              <Input
+              <ClearableInput
                 value={smartFilter}
                 onChange={(e) => setSmartFilter(e.target.value)}
                 placeholder="Filter by RO#, Sales Order #, VIN, Shop, Dealer"

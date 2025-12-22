@@ -17,7 +17,6 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/components/ui/empty'
-import { Input } from '@/components/ui/input'
 import {
   Table,
   TableBody,
@@ -29,6 +28,7 @@ import {
 import ViewAdminTeamDialog from '@/components/AdminViewTeamDialog'
 import { TeamMember } from '@/components/ViewTeamDialog'
 import { DataTablePagination } from '@/components/data-table-pagination'
+import { ClearableInput } from '@/components/clearable-input'
 
 export function Dealerships() {
   const { user } = useAuthStore((state) => state.auth)
@@ -136,6 +136,12 @@ export function Dealerships() {
     return () => clearTimeout(timeoutId)
   }, [smartFilter, currentPage, user])
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [
+    smartFilter,
+  ]);
+
   const getFlattenedCurrentPageData = () => {
     const startIndex = (currentPage - 1) * itemsPerPage
     const endIndex = startIndex + itemsPerPage
@@ -198,7 +204,7 @@ export function Dealerships() {
           <div className='mb-6 max-w-md'>
             <div className='relative'>
               <Search className='text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2' />
-              <Input
+              <ClearableInput
                 value={smartFilter}
                 onChange={(e) => setSmartFilter(e.target.value)}
                 placeholder='Filter by Name, #, City'

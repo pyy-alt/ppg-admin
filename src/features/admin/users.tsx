@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import PersonApi from '@/js/clients/base/PersonApi'
 import type Person from '@/js/models/Person'
 import PersonSearchRequest from '@/js/models/PersonSearchRequest'
@@ -10,418 +10,327 @@ import { useAuthStore } from '@/stores/auth-store'
 import { useDebouncedEffect } from '@/hooks/use-debounce'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import {
-  Empty,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyDescription,
-  EmptyTitle,
-} from '@/components/ui/empty'
+import { Empty, EmptyHeader, EmptyMedia, EmptyDescription, EmptyTitle } from '@/components/ui/empty'
 import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import NetworkUserDialog from '@/components/NetworkUserDialog'
 import { ClearableInput } from '@/components/clearable-input'
 import { DataTablePagination } from '@/components/data-table-pagination'
 
 type filterByNetworkRoleType = 'Csr' | 'FieldStaff' | 'ProgramAdministrator'
 export function Users() {
-  const [userOpen, setUserOpen] = useState(false)
-  const [users, setUsers] = useState<Person[]>([])
-  const [initUser, setInitUser] = useState<Person | null>(null)
-  const [totalItems, setTotalItems] = useState(0)
-  // Add status
-  const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 20
-  const totalPages = Math.ceil(totalItems / itemsPerPage)
+	const [userOpen, setUserOpen] = useState(false)
+	const [users, setUsers] = useState<Person[]>([])
+	const [initUser, setInitUser] = useState<Person | null>(null)
+	const [totalItems, setTotalItems] = useState(0)
+	// Add status
+	const [currentPage, setCurrentPage] = useState(1)
+	const itemsPerPage = 20
+	const totalPages = Math.ceil(totalItems / itemsPerPage)
 
-  // Filter condition status
-  const [smartFilter, setSmartFilter] = useState('')
-  const [filterByNetworkRole, setFilterByNetworkRole] = useState<
-    filterByNetworkRoleType | undefined
-  >(undefined)
-  const [includeInactiveFlag, setIncludeInactiveFlag] = useState(false)
+	// Filter condition status
+	const [smartFilter, setSmartFilter] = useState('')
+	const [filterByNetworkRole, setFilterByNetworkRole] = useState<filterByNetworkRoleType | undefined>(undefined)
+	const [includeInactiveFlag, setIncludeInactiveFlag] = useState(false)
 
-  const [selectedRegionId, setSelectedRegionId] = useState<string>('all')
+	const [selectedRegionId, setSelectedRegionId] = useState<string>('all')
 
-  const regions = useAuthStore((state) => state.auth.user?.regions || [])
+	const regions = useAuthStore(state => state.auth.user?.regions || [])
 
-  const currentRegionId = useMemo(() => {
-    return selectedRegionId === 'all' ? undefined : Number(selectedRegionId)
-  }, [selectedRegionId])
+	const currentRegionId = useMemo(() => {
+		return selectedRegionId === 'all' ? undefined : Number(selectedRegionId)
+	}, [selectedRegionId])
 
-  const selectedRegion = useMemo(() => {
-    if (selectedRegionId === 'all' || !selectedRegionId) return null
-    const found = regions.find((r) => r.id === Number(selectedRegionId))
-    if (found && found.id !== undefined && found.name) {
-      return { id: found.id, name: found.name } as const
-    }
-    return null
-  }, [selectedRegionId, regions])
+	const selectedRegion = useMemo(() => {
+		if (selectedRegionId === 'all' || !selectedRegionId) return null
+		const found = regions.find(r => r.id === Number(selectedRegionId))
+		if (found && found.id !== undefined && found.name) {
+			return { id: found.id, name: found.name } as const
+		}
+		return null
+	}, [selectedRegionId, regions])
 
-  const getUsers = (
-    smartFilter: string = '',
-    includeInactiveFlag: boolean = false,
-    filterByRegionId: number | undefined,
-    filterByNetworkRole?: filterByNetworkRoleType,
-    page: number = 1
-  ) => {
-    try {
-      const request = PersonSearchRequest.create({
-        smartFilter,
-        includeInactiveFlag,
-        type: 'Network' as PersonSearchRequestType,
-        filterByRegionId,
-        filterByNetworkRole,
-      })
-      // Add pagination parameters
-      const resultParameter = ResultParameter.create({
-        resultsLimitOffset: (page - 1) * itemsPerPage,
-        resultsLimitCount: itemsPerPage,
-        resultsOrderBy: 'dateLastAccess',
-        resultsOrderAscending: false,
-      })
+	const getUsers = (
+		smartFilter: string = '',
+		includeInactiveFlag: boolean = false,
+		filterByRegionId: number | undefined,
+		filterByNetworkRole?: filterByNetworkRoleType,
+		page: number = 1,
+	) => {
+		try {
+			const request = PersonSearchRequest.create({
+				smartFilter,
+				includeInactiveFlag,
+				type: 'Network' as PersonSearchRequestType,
+				filterByRegionId,
+				filterByNetworkRole,
+			})
+			// Add pagination parameters
+			const resultParameter = ResultParameter.create({
+				resultsLimitOffset: (page - 1) * itemsPerPage,
+				resultsLimitCount: itemsPerPage,
+				resultsOrderBy: 'dateLastAccess',
+				resultsOrderAscending: false,
+			})
 
-      ;(request as any).resultParameter = resultParameter
-      const personApi = new PersonApi()
+			;(request as any).resultParameter = resultParameter
+			const personApi = new PersonApi()
 
-      personApi.search(request, {
-        status200: (response) => {
-          setUsers(response.persons)
-          setTotalItems(response.totalItemCount)
-        },
-        error: (error) => {
-          toast.error(error.message)
-        },
-      })
-    } catch (error) {
-      if (error && typeof error === 'object' && 'message' in error) {
-        toast.error((error as any).message)
-      } else {
-        toast.error('An unexpected error occurred')
-      }
-    }
-  }
+			personApi.search(request, {
+				status200: response => {
+					setUsers(response.persons)
+					setTotalItems(response.totalItemCount)
+				},
+				error: error => {
+					toast.error(error.message)
+				},
+			})
+		} catch (error) {
+			if (error && typeof error === 'object' && 'message' in error) {
+				toast.error((error as any).message)
+			} else {
+				toast.error('An unexpected error occurred')
+			}
+		}
+	}
 
-  const getUserDetails = (user: Person) => {
-    try {
-      setInitUser(user)
-      setUserOpen(true)
-    } catch (error) {
-      if (error && typeof error === 'object' && 'message' in error) {
-        toast.error((error as any).message)
-      } else {
-        toast.error('An unexpected error occurred')
-      }
-    }
-  }
+	const getUserDetails = (user: Person) => {
+		try {
+			setInitUser(user)
+			setUserOpen(true)
+		} catch (error) {
+			if (error && typeof error === 'object' && 'message' in error) {
+				toast.error((error as any).message)
+			} else {
+				toast.error('An unexpected error occurred')
+			}
+		}
+	}
 
-  // Filter condition changes：Use debounce
-  useDebouncedEffect(
-    () => {
-      getUsers(
-        smartFilter,
-        includeInactiveFlag,
-        currentRegionId,
-        filterByNetworkRole,
-        currentPage
-      )
-    },
-    [
-      smartFilter,
-      includeInactiveFlag,
-      currentRegionId,
-      filterByNetworkRole,
-      currentPage,
-    ],
-    1000
-  )
+	// Filter condition changes：Use debounce
+	useDebouncedEffect(
+		() => {
+			getUsers(smartFilter, includeInactiveFlag, currentRegionId, filterByNetworkRole, currentPage)
+		},
+		[smartFilter, includeInactiveFlag, currentRegionId, filterByNetworkRole, currentPage],
+		1000,
+	)
 
-  return (
-    <div className='bg-background text-foreground min-h-screen'>
-      {/* Header */}
-      <div className='bg-background border-b'>
-        <div className='flex items-center justify-between px-6 py-4'>
-          <h1 className='text-foreground text-2xl font-bold'>
-            Manage Network Users
-          </h1>
-          <Button
-            onClick={() => {
-              setInitUser(null) // Clear previous user data
-              setUserOpen(true)
-            }}
-          >
-            <Plus className='mr-2 h-4 w-4' />
-            Add New User
-          </Button>
-        </div>
-      </div>
+	useEffect(() => {
+		setCurrentPage(1)
+	}, [smartFilter, includeInactiveFlag, currentRegionId, filterByNetworkRole])
 
-      <NetworkUserDialog
-        open={userOpen}
-        onOpenChange={setUserOpen}
-        initialValues={initUser}
-        filterByRegion={selectedRegion}
-        onSuccess={() => {
-          getUsers(
-            smartFilter,
-            includeInactiveFlag,
-            currentRegionId,
-            filterByNetworkRole
-          )
-        }}
-        onError={(error) => {
-          toast.error(error.message)
-          // console.log(error)
-        }}
-      />
+	return (
+		<div className="bg-background text-foreground min-h-screen">
+			{/* Header */}
+			<div className="bg-background border-b">
+				<div className="flex items-center justify-between px-6 py-4">
+					<h1 className="text-foreground text-2xl font-bold">Manage Network Users</h1>
+					<Button
+						onClick={() => {
+							setInitUser(null) // Clear previous user data
+							setUserOpen(true)
+						}}
+					>
+						<Plus className="mr-2 h-4 w-4" />
+						Add New User
+					</Button>
+				</div>
+			</div>
 
-      <div className='px-6 py-6'>
-        {/* Filters */}
-        <div className='mb-6 flex flex-col gap-4 lg:flex-row lg:items-center'>
-          <div className='relative max-w-md flex-1'>
-            <Search className='text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2' />
-            <ClearableInput
-              placeholder='Filter by First Name, Last Name, Email'
-              value={smartFilter}
-              onChange={(e) => setSmartFilter(e.target.value)}
-              className='pl-10'
-            />
-          </div>
+			<NetworkUserDialog
+				open={userOpen}
+				onOpenChange={setUserOpen}
+				initialValues={initUser}
+				filterByRegion={selectedRegion}
+				onSuccess={() => {
+					getUsers(smartFilter, includeInactiveFlag, currentRegionId, filterByNetworkRole)
+				}}
+				onError={error => {
+					toast.error(error.message)
+					// console.log(error)
+				}}
+			/>
 
-          <div className='flex flex-wrap items-center gap-3'>
-            <Select
-              value={filterByNetworkRole ?? 'all'}
-              onValueChange={(value) =>
-                setFilterByNetworkRole(
-                  value === 'all'
-                    ? undefined
-                    : (value as filterByNetworkRoleType)
-                )
-              }
-            >
-              <SelectTrigger className='bg-muted w-48'>
-                <SelectValue placeholder='Role' />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value='all'>All Roles</SelectItem>
-                <SelectItem value='Csr'>Csr</SelectItem>
-                <SelectItem value='FieldStaff'>FieldStaff</SelectItem>
-                <SelectItem value='ProgramAdministrator'>
-                  ProgramAdministrator
-                </SelectItem>
-              </SelectContent>
-            </Select>
+			<div className="px-6 py-6">
+				{/* Filters */}
+				<div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center">
+					<div className="relative max-w-md flex-1">
+						<Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+						<ClearableInput
+							placeholder="Filter by First Name, Last Name, Email"
+							value={smartFilter}
+							onChange={e => setSmartFilter(e.target.value)}
+							className="pl-10"
+						/>
+					</div>
 
-            <Select
-              value={selectedRegionId}
-              onValueChange={setSelectedRegionId}
-            >
-              <SelectTrigger className='bg-muted w-48'>
-                <SelectValue placeholder='CSR Region' />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value='all'>All Regions</SelectItem>
-                {regions.map((region: any) => (
-                  <SelectItem key={region.id} value={String(region.id)}>
-                    {region.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+					<div className="flex flex-wrap items-center gap-3">
+						<Select
+							value={filterByNetworkRole ?? 'all'}
+							onValueChange={value =>
+								setFilterByNetworkRole(value === 'all' ? undefined : (value as filterByNetworkRoleType))
+							}
+						>
+							<SelectTrigger className="bg-muted w-48">
+								<SelectValue placeholder="Role" />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="all">All Roles</SelectItem>
+								<SelectItem value="Csr">Csr</SelectItem>
+								<SelectItem value="FieldStaff">Field Staff</SelectItem>
+								<SelectItem value="ProgramAdministrator">Program Administrator</SelectItem>
+							</SelectContent>
+						</Select>
 
-            <div className='flex items-center gap-3'>
-              <Checkbox
-                className='rounded-full'
-                id='show-inactive'
-                onCheckedChange={(checked) =>
-                  setIncludeInactiveFlag(checked as boolean)
-                }
-              />
-              <Label
-                htmlFor='show-inactive'
-                className='cursor-pointer text-sm font-medium'
-              >
-                Show Inactive Users
-              </Label>
-            </div>
-          </div>
-        </div>
-        {users.length === 0 ? (
-          <div>
-            <Empty>
-              <EmptyHeader>
-                <EmptyMedia variant='icon'>
-                  <TableIcon className='h-4 w-4' />
-                </EmptyMedia>
-                <EmptyTitle>No data to display</EmptyTitle>
-                <EmptyDescription>
-                  There are no records in this table yet. Add your first entry
-                  to get started.
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
-          </div>
-        ) : (
-          <div>
-            {/* Table */}
-            <div className='bg-background overflow-hidden rounded-lg border shadow-sm'>
-              <Table>
-                <TableHeader>
-                  <TableRow className='bg-muted'>
-                    <TableHead className='text-foreground font-semibold'>
-                      First Name
-                    </TableHead>
-                    <TableHead className='text-foreground font-semibold'>
-                      Last Name
-                    </TableHead>
-                    <TableHead className='text-foreground font-semibold'>
-                      Email
-                    </TableHead>
-                    <TableHead className='text-foreground font-semibold'>
-                      Role
-                    </TableHead>
-                    <TableHead className='text-foreground font-semibold'>
-                      Region
-                    </TableHead>
-                    <TableHead className='text-foreground font-semibold'>
-                      Date Added
-                    </TableHead>
-                    <TableHead className='text-foreground font-semibold'>
-                      Date Last Accessed
-                    </TableHead>
-                    <TableHead className='text-foreground font-semibold'>
-                      Status
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {users.map((user) => (
-                    <TableRow key={user.email} className='hover:bg-background'>
-                      <TableCell className='font-medium'>
-                        <div
-                          className='flex items-center gap-1'
-                          onClick={() => getUserDetails(user)}
-                        >
-                          <Pencil className='h-4 w-4 hover:underline' />
-                          <span
-                            className={
-                              user.status === 'Pending'
-                                ? 'cursor-pointer text-orange-600 hover:underline'
-                                : user.status === 'Inactive'
-                                  ? 'text-gray-300'
-                                  : 'text-foreground cursor-pointer hover:underline'
-                            }
-                          >
-                            {user.firstName}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell
-                        className={
-                          user.status === 'Inactive'
-                            ? 'text-gray-300'
-                            : user.status === 'Pending'
-                              ? 'text-orange-600'
-                              : ''
-                        }
-                      >
-                        {user.lastName}
-                      </TableCell>
-                      <TableCell className='text-sm'>
-                        {user.status === 'Inactive' ? (
-                          <span className='text-gray-300'>{user.email}</span>
-                        ) : (
-                          user.email
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {user.status === 'Inactive' ? (
-                          <span className='text-gray-300'>{user.type}</span>
-                        ) : (
-                          user.type
-                        )}
-                      </TableCell>
-                      <TableCell
-                        className={
-                          user.status === 'Inactive' ? 'text-gray-300' : ''
-                        }
-                      >
-                        {user.type === 'Csr'
-                          ? user.csrRegion?.name || '--'
-                          : user.type === 'FieldStaff'
-                            ? user.fieldStaffRegions
-                                ?.map((region: any) => region.name)
-                                .join(', ') || '--'
-                            : user.type === 'ProgramAdministrator'
-                              ? 'All Regions'
-                              : '--'}
-                      </TableCell>
-                      <TableCell>
-                        {user.status === 'Inactive' ? (
-                          <span className='text-gray-300'>
-                            {(user.dateCreated &&
-                              new Date(
-                                user.dateCreated
-                              ).toLocaleDateString()) ||
-                              '--'}
-                          </span>
-                        ) : (
-                          (user.dateCreated &&
-                            new Date(user.dateCreated).toLocaleDateString()) ||
-                          '--'
-                        )}
-                      </TableCell>
-                      <TableCell
-                        className={
-                          user.status === 'Inactive'
-                            ? 'text-gray-300'
-                            : user.status === 'Pending'
-                              ? 'text-orange-600'
-                              : ''
-                        }
-                      >
-                        {(user.dateLastAccess &&
-                          new Date(user.dateLastAccess).toLocaleDateString()) ||
-                          '--'}
-                      </TableCell>
-                      <TableCell>
-                        {user.status === 'Inactive' ? (
-                          <span className='text-gray-300'>{user.status}</span>
-                        ) : (
-                          <span>{user.status}</span>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+						<Select value={selectedRegionId} onValueChange={setSelectedRegionId}>
+							<SelectTrigger className="bg-muted w-48">
+								<SelectValue placeholder="CSR Region" />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="all">All Regions</SelectItem>
+								{regions.map((region: any) => (
+									<SelectItem key={region.id} value={String(region.id)}>
+										{region.name}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
 
-            {/* Pagination */}
-            <DataTablePagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              totalItems={totalItems}
-              itemsPerPage={itemsPerPage}
-              onPageChange={setCurrentPage}
-            />
-          </div>
-        )}
-      </div>
-    </div>
-  )
+						<div className="flex items-center gap-3">
+							<Checkbox
+								className="rounded-full"
+								id="show-inactive"
+								onCheckedChange={checked => setIncludeInactiveFlag(checked as boolean)}
+							/>
+							<Label htmlFor="show-inactive" className="cursor-pointer text-sm font-medium">
+								Show Inactive Users
+							</Label>
+						</div>
+					</div>
+				</div>
+				{users.length === 0 ? (
+					<div>
+						<Empty>
+							<EmptyHeader>
+								<EmptyMedia variant="icon">
+									<TableIcon className="h-4 w-4" />
+								</EmptyMedia>
+								<EmptyTitle>No data to display</EmptyTitle>
+								<EmptyDescription>
+									There are no records in this table yet. Add your first entry to get started.
+								</EmptyDescription>
+							</EmptyHeader>
+						</Empty>
+					</div>
+				) : (
+					<div>
+						{/* Table */}
+						<div className="bg-background overflow-hidden rounded-lg border shadow-sm">
+							<Table>
+								<TableHeader>
+									<TableRow className="bg-muted">
+										<TableHead className="text-foreground font-semibold">First Name</TableHead>
+										<TableHead className="text-foreground font-semibold">Last Name</TableHead>
+										<TableHead className="text-foreground font-semibold">Email</TableHead>
+										<TableHead className="text-foreground font-semibold">Role</TableHead>
+										<TableHead className="text-foreground font-semibold">Region</TableHead>
+										<TableHead className="text-foreground font-semibold">Date Added</TableHead>
+										<TableHead className="text-foreground font-semibold">Date Last Accessed</TableHead>
+										<TableHead className="text-foreground font-semibold">Status</TableHead>
+									</TableRow>
+								</TableHeader>
+								<TableBody>
+									{users.map(user => (
+										<TableRow key={user.email} className="hover:bg-background">
+											<TableCell className="font-medium">
+												<div className="flex items-center gap-1" onClick={() => getUserDetails(user)}>
+													<Pencil className="h-4 w-4 hover:underline" />
+													<span
+														className={
+															user.status === 'Pending'
+																? 'cursor-pointer text-orange-600 hover:underline'
+																: user.status === 'Inactive'
+																	? 'text-gray-400'
+																	: 'text-foreground cursor-pointer hover:underline'
+														}
+													>
+														{user.firstName}
+													</span>
+												</div>
+											</TableCell>
+											<TableCell
+												className={
+													user.status === 'Inactive'
+														? 'text-gray-400'
+														: user.status === 'Pending'
+															? 'text-orange-600'
+															: ''
+												}
+											>
+												{user.lastName}
+											</TableCell>
+											<TableCell className="text-sm">
+												{user.status === 'Inactive' ? <span className="text-gray-400">{user.email}</span> : user.email}
+											</TableCell>
+											<TableCell>
+												{user.status === 'Inactive' ? <span className="text-gray-400">{user.type}</span> : user.type}
+											</TableCell>
+											<TableCell className={user.status === 'Inactive' ? 'text-gray-400' : ''}>
+												{user.type === 'Csr'
+													? user.csrRegion?.name || '--'
+													: user.type === 'FieldStaff'
+														? user.fieldStaffRegions?.map((region: any) => region.name).join(', ') || '--'
+														: user.type === 'ProgramAdministrator'
+															? 'All Regions'
+															: '--'}
+											</TableCell>
+											<TableCell>
+												{user.status === 'Inactive' ? (
+													<span className="text-gray-400">
+														{(user.dateCreated && new Date(user.dateCreated).toLocaleDateString()) || '--'}
+													</span>
+												) : (
+													(user.dateCreated && new Date(user.dateCreated).toLocaleDateString()) || '--'
+												)}
+											</TableCell>
+											<TableCell
+												className={
+													user.status === 'Inactive'
+														? 'text-gray-400'
+														: user.status === 'Pending'
+															? 'text-orange-600'
+															: ''
+												}
+											>
+												{(user.dateLastAccess && new Date(user.dateLastAccess).toLocaleDateString()) ||
+													'Pending Registration'}
+											</TableCell>
+											<TableCell>
+												{user.status === 'Inactive' ? (
+													<span className="text-gray-400">{user.status}</span>
+												) : (
+													<span>{user.status}</span>
+												)}
+											</TableCell>
+										</TableRow>
+									))}
+								</TableBody>
+							</Table>
+						</div>
+
+						{/* Pagination */}
+						<DataTablePagination
+							currentPage={currentPage}
+							totalPages={totalPages}
+							totalItems={totalItems}
+							itemsPerPage={itemsPerPage}
+							onPageChange={setCurrentPage}
+						/>
+					</div>
+				)}
+			</div>
+		</div>
+	)
 }

@@ -18,7 +18,6 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/components/ui/empty'
-import { Input } from '@/components/ui/input'
 import {
   Select,
   SelectContent,
@@ -37,6 +36,7 @@ import {
 import { DataTablePagination } from '@/components/data-table-pagination'
 import ViewAdminTeamDialog from  '@/components/AdminViewTeamDialog'
 import { TeamMember } from '@/components/ViewTeamDialog'
+import { ClearableInput } from '@/components/clearable-input'
 export function Shops() {
   const { user } = useAuthStore((state) => state.auth)
   const [currentPage, setCurrentPage] = useState(1)
@@ -243,7 +243,7 @@ export function Shops() {
         <div className='mb-6 flex flex-col gap-4 lg:flex-row lg:items-center'>
           <div className='relative max-w-md flex-1'>
             <Search className='text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2' />
-            <Input
+            <ClearableInput
               value={smartFilter}
               onChange={(e) => setSmartFilter(e.target.value)}
               placeholder='Filter by Name, #, City'
