@@ -435,7 +435,7 @@ export function Timeline({
     // }
 
     // ✅ Other waiting Status Display Blue "Waiting on You"
-    if (item.status === 'waiting') {
+    if (item.status === 'waiting' && userType !== 'ProgramAdministrator') {
       return <Badge className='bg-blue-100 text-blue-700'>Waiting on You</Badge>
     }
 

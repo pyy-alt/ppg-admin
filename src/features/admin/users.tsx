@@ -219,7 +219,7 @@ export function Users() {
 								</EmptyMedia>
 								<EmptyTitle>No data to display</EmptyTitle>
 								<EmptyDescription>
-									There are no records in this table yet. Add your first entry to get started.
+									No results could be found.
 								</EmptyDescription>
 							</EmptyHeader>
 						</Empty>

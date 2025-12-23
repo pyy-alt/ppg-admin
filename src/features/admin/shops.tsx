@@ -36,7 +36,7 @@ export function Shops() {
   const [isShowAdminTeam, setIsShowAdminTeam] = useState(false);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
 
-  const [sortBy, setSortBy] = useState('name');
+  const [sortBy, setSortBy] = useState('');
   const navigate = useNavigate();
 
   const [sortAscending, setSortAscending] = useState(false); // false 为降序（最新在前）
@@ -188,7 +188,7 @@ export function Shops() {
     if (sortBy === field) {
       if (sortAscending) {
         // 当前是升序 → 第三次点击：恢复默认排序
-        setSortBy('name'); // 默认字段
+        setSortBy(''); // 默认字段
         setSortAscending(false); // 默认降序
       } else {
         // 当前是降序 → 第二次点击：切换为升序
@@ -299,7 +299,7 @@ export function Shops() {
                 </EmptyMedia>
                 <EmptyTitle>No data to display</EmptyTitle>
                 <EmptyDescription>
-                  There are no records in this table yet. Add your first entry to get started.
+                  No results could be found.
                 </EmptyDescription>
               </EmptyHeader>
             </Empty>

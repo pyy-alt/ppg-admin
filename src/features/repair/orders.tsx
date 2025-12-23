@@ -407,7 +407,7 @@ export function RepairOrderList() {
                 <EmptyDescription>
                   {id !== undefined
                     ? 'This shop doesn’t have any repair orders yet. Repair orders will appear here once they are created.'
-                    : 'There are no records in this table yet. Add your first entry to get started.'}
+                    : 'No results could be found.'}
                 </EmptyDescription>
               </EmptyHeader>
             </Empty>

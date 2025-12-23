@@ -15,6 +15,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Header } from '@/components/layout/header'
+import { refreshUserData } from '@/lib/auth'
 
 export function Login() {
   const { redirect } = useSearch({ from: '/(auth)/login' })
@@ -83,6 +84,7 @@ export function Login() {
 
             setIsLoading(false)
             setIsSubmitting(false)
+            refreshUserData()
 
             // Support after login redirect（Exactly the same as before）
             let targetPath = '/'
@@ -172,7 +174,7 @@ export function Login() {
                   <Input
                     id='email'
                     type='email'
-                    placeholder='Email  Address'
+                    placeholder='Email'
                     className='text-muted-foreground h-12 rounded-full border-gray-300 pl-12 text-base focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100'
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}

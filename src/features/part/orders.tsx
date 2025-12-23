@@ -19,6 +19,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { DateRangePicker } from '@/components/DateRangePicker';
 import { DataTablePagination } from '@/components/data-table-pagination';
 import { ClearableInput } from '@/components/clearable-input';
+import { SortableTableHead } from '@/components/SortableTableHead';
 
 export function PartOrders() {
   const { user } = useAuthStore((state) => state.auth);
@@ -36,6 +37,10 @@ export function PartOrders() {
   const [loading, setLoading] = useState(false);
   const itemsPerPage = 20;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+  const [sortBy, setSortBy] = useState('');
+  const [sortAscending, setSortAscending] = useState(false); // false 为降序（最新在前）
+
   const navigate = useNavigate();
 
   const partsOrderRef = useRef<HTMLTableElement>(null);
@@ -150,8 +155,8 @@ export function PartOrders() {
       const resultParameter = ResultParameter.create({
         resultsLimitOffset: (currentPage - 1) * itemsPerPage,
         resultsLimitCount: itemsPerPage,
-        resultsOrderBy: 'dateSubmitted', // The sorting fields can be adjusted as needed.
-        resultsOrderAscending: false, // Descending order，The latest is in front.
+        resultsOrderBy: sortBy || 'dateCreated',
+        resultsOrderAscending: sortAscending
       });
       requestParams.resultParameter = resultParameter;
 
@@ -188,6 +193,24 @@ export function PartOrders() {
     }
   };
 
+  const handleSort = (field: string) => {
+    if (sortBy === field) {
+      if (sortAscending) {
+        // 当前是升序 → 第三次点击：恢复默认排序
+        setSortBy(''); // 默认字段
+        setSortAscending(false); // 默认降序
+      } else {
+        // 当前是降序 → 第二次点击：切换为升序
+        setSortAscending(true);
+      }
+    } else {
+      // 点击新字段 → 第一次点击：按该字段降序排序
+      setSortBy(field);
+      setSortAscending(false); // 默认从降序开始（最新在前）
+    }
+    setCurrentPage(1); // 排序变化时重置到第一页
+  };
+
   useEffect(() => {
     if (!user) return;
 
@@ -209,6 +232,8 @@ export function PartOrders() {
     dateSubmittedRange,
     currentPage,
     user,
+    sortBy,
+    sortAscending,
   ]);
 
   useEffect(() => {
@@ -290,7 +315,7 @@ export function PartOrders() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="0">original Parts Order</SelectItem>
+                <SelectItem value="0">Parts Order</SelectItem>
                 <SelectItem value="1">Supplement #1</SelectItem>
                 <SelectItem value="2">Supplement #2</SelectItem>
                 <SelectItem value="3">Supplement #3</SelectItem>
@@ -380,8 +405,8 @@ export function PartOrders() {
             <Table ref={partsOrderRef}>
               <TableHeader>
                 <TableRow className="bg-muted">
-                  <TableHead className="text-foreground font-semibold">RO#</TableHead>
-                  <TableHead className="text-foreground font-semibold">Sales#</TableHead>
+                  <TableHead className="text-foreground font-semibold">RO #</TableHead>
+                  <TableHead className="text-foreground font-semibold">Sales #</TableHead>
                   <TableHead className="text-foreground font-semibold">Type</TableHead>
                   <TableHead className="text-foreground font-semibold">VIN</TableHead>
                   <TableHead className="text-foreground font-semibold">Year/Make/Model</TableHead>
@@ -389,8 +414,22 @@ export function PartOrders() {
                   <TableHead className="text-foreground font-semibold">Shop</TableHead>
                   <TableHead className="text-foreground font-semibold">Dealer</TableHead>
                   <TableHead className="text-foreground font-semibold">CSR Region</TableHead>
-                  <TableHead className="text-foreground font-semibold">Date Completed</TableHead>
-                  <TableHead className="text-foreground font-semibold">Date Closed</TableHead>
+                  <SortableTableHead
+                    field="dateCreated"
+                    currentSortBy={sortBy}
+                    currentAscending={sortAscending}
+                    onSort={handleSort}
+                  >
+                    Date Completed
+                  </SortableTableHead>
+                  <SortableTableHead
+                    field="dateClosed"
+                    currentSortBy={sortBy}
+                    currentAscending={sortAscending}
+                    onSort={handleSort}
+                  >
+                    Date Closed
+                  </SortableTableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -410,7 +449,7 @@ export function PartOrders() {
                           </EmptyMedia>
                           <EmptyTitle>No data to display</EmptyTitle>
                           <EmptyDescription>
-                            There are no records in this table yet. Add your first entry to get started.
+                            No results could be found.
                           </EmptyDescription>
                         </EmptyHeader>
                       </Empty>
@@ -419,7 +458,7 @@ export function PartOrders() {
                 ) : (
                   orders.map((order: any) => {
                     const repairOrder = order.repairOrder;
-                    const roNumber = repairOrder?.roNumber || '--';
+                    const roNumber = repairOrder?.roNumber || ''
                     const salesOrder = order.salesOrderNumber || '--';
                     const type = getOrderTypeText(order.partsOrderNumber || 0);
                     const vin = repairOrder?.vin || '--';
@@ -444,9 +483,12 @@ export function PartOrders() {
                         <TableCell
                           className="cursor-pointer text-blue-600 hover:underline"
                           onClick={() => {
+                            const orderId = order.repairOrder.id;
+                            const partId = order.id;
+                            const ids = orderId.toString() + ',' + partId;
                             navigate({
                               to: '/repair_orders/$id',
-                              params: { id: order.repairOrder.id.toString() },
+                              params: { id: ids },
                             });
                           }}
                         >
@@ -472,7 +514,7 @@ export function PartOrders() {
                               <TooltipProvider>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <AlertCircle className="h-4 w-4 cursor-help text-yellow-500" />
+                                    <AlertCircle className="h-4 w-4 cursor-pointer text-yellow-500" />
                                   </TooltipTrigger>
                                   <TooltipContent>
                                     <p>Ordered from an alternate dealer</p>

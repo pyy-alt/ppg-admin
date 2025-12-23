@@ -1,24 +1,25 @@
-import { useState, useEffect, useRef } from 'react'
-import { useNavigate } from '@tanstack/react-router'
-import OrderApi from '@/js/clients/base/OrderApi'
-import PartsOrderSearchRequest from '@/js/models/PartsOrderSearchRequest'
-import ResultParameter from '@/js/models/ResultParameter'
-import { Search, Download, AlertCircle, TableIcon } from 'lucide-react'
-import { DateRange } from 'react-day-picker'
-import { toast } from 'sonner'
-import { useAuthStore } from '@/stores/auth-store'
-import { calculateDateRange, exportCurrentPageToCSV, formatDateOnly } from '@/lib/utils'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
-import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { DateRangePicker } from '@/components/DateRangePicker'
-import { DataTablePagination } from '@/components/data-table-pagination'
-import { ClearableInput } from '@/components/clearable-input'
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from '@tanstack/react-router';
+import OrderApi from '@/js/clients/base/OrderApi';
+import PartsOrderSearchRequest from '@/js/models/PartsOrderSearchRequest';
+import ResultParameter from '@/js/models/ResultParameter';
+import { Search, Download, AlertCircle, TableIcon } from 'lucide-react';
+import { DateRange } from 'react-day-picker';
+import { toast } from 'sonner';
+import { useAuthStore } from '@/stores/auth-store';
+import { calculateDateRange, exportCurrentPageToCSV, formatDateOnly } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { DateRangePicker } from '@/components/DateRangePicker';
+import { DataTablePagination } from '@/components/data-table-pagination';
+import { ClearableInput } from '@/components/clearable-input';
+import { SortableTableHead } from '@/components/SortableTableHead';
 
 export function PartOrders() {
   const { user } = useAuthStore((state) => state.auth);
@@ -36,21 +37,25 @@ export function PartOrders() {
   const [loading, setLoading] = useState(false);
   const itemsPerPage = 20;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+  const [sortBy, setSortBy] = useState('');
+  const [sortAscending, setSortAscending] = useState(false); // false 为降序（最新在前）
+
   const navigate = useNavigate();
 
-	const [range, setRange] = useState<DateRange>()
+  const [range, setRange] = useState<DateRange>();
 
-	const partsOrderRef = useRef<HTMLTableElement>(null)
-	const [headers, setHeaders] = useState<string[]>([])
-	const getFlattenedCurrentPageData = () => {
-		const startIndex = (currentPage - 1) * itemsPerPage
-		const endIndex = startIndex + itemsPerPage
-		const pageData = orders.slice(startIndex, endIndex)
+  const partsOrderRef = useRef<HTMLTableElement>(null);
+  const [headers, setHeaders] = useState<string[]>([]);
+  const getFlattenedCurrentPageData = () => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const pageData = orders.slice(startIndex, endIndex);
 
-		return pageData.map((order: any) => {
-			const ro = order.repairOrder || {}
-			const shop = ro.shop || {}
-			const dealer = ro.dealership || {}
+    return pageData.map((order: any) => {
+      const ro = order.repairOrder || {};
+      const shop = ro.shop || {};
+      const dealer = ro.dealership || {};
 
       return {
         'RO#': ro.roNumber || '--', // ← Must add quotes!
@@ -93,7 +98,7 @@ export function PartOrders() {
       case 'CsrReview':
         return 'CSR Review';
       case 'CsrRejected':
-        return 'Csr Rejected';
+        return 'CSR Rejected';
       case 'DealershipProcessing':
         return 'Dealer Processing';
       case 'DealershipShipped':
@@ -109,23 +114,23 @@ export function PartOrders() {
   const fetchPartsOrders = async (flag?: boolean | undefined, date?: DateRange | undefined) => {
     if (!user) return;
 
-		setLoading(true)
-		try {
-			const api = new OrderApi()
+    setLoading(true);
+    try {
+      const api = new OrderApi();
 
-			const dateFrom = dateSubmittedFrom ? formatDateOnly(dateSubmittedFrom) : undefined
-			const dateTo = dateSubmittedTo ? formatDateOnly(dateSubmittedTo) : undefined
+      const dateFrom = dateSubmittedFrom ? formatDateOnly(dateSubmittedFrom) : undefined;
+      const dateTo = dateSubmittedTo ? formatDateOnly(dateSubmittedTo) : undefined;
 
-			// Build request parameters
-			const requestParams: any = {
-				smartFilter,
-				filterByWaitingOnMe,
-				filterByDealershipId: user?.person?.type === 'Dealership' ? user?.person?.dealership.id : undefined,
-			}
-			// Handle order type filtering
-			if (filterByPartsOrderNumber !== 'all') {
-				requestParams.filterByPartsOrderNumber = parseInt(filterByPartsOrderNumber)
-			}
+      // Build request parameters
+      const requestParams: any = {
+        smartFilter,
+        filterByWaitingOnMe,
+        filterByDealershipId: user?.person?.type === 'Dealership' ? user?.person?.dealership.id : undefined,
+      };
+      // Handle order type filtering
+      if (filterByPartsOrderNumber !== 'all') {
+        requestParams.filterByPartsOrderNumber = parseInt(filterByPartsOrderNumber);
+      }
 
       // Handle status filtering
       if (filterByStatus !== 'all') {
@@ -138,8 +143,8 @@ export function PartOrders() {
       const resultParameter = ResultParameter.create({
         resultsLimitOffset: (currentPage - 1) * itemsPerPage,
         resultsLimitCount: itemsPerPage,
-        resultsOrderBy: 'dateSubmitted', // Can adjust sort field as needed
-        resultsOrderAscending: false, // Descending, newest first
+        resultsOrderBy: sortBy || 'dateCreated',
+        resultsOrderAscending: sortAscending,
       });
       requestParams.resultParameter = resultParameter;
 
@@ -176,9 +181,26 @@ export function PartOrders() {
       setLoading(false);
     }
   };
+  const handleSort = (field: string) => {
+    if (sortBy === field) {
+      if (sortAscending) {
+        // 当前是升序 → 第三次点击：恢复默认排序
+        setSortBy(''); // 默认字段
+        setSortAscending(false); // 默认降序
+      } else {
+        // 当前是降序 → 第二次点击：切换为升序
+        setSortAscending(true);
+      }
+    } else {
+      // 点击新字段 → 第一次点击：按该字段降序排序
+      setSortBy(field);
+      setSortAscending(false); // 默认从降序开始（最新在前）
+    }
+    setCurrentPage(1); // 排序变化时重置到第一页
+  };
 
-	useEffect(() => {
-		if (!user) return
+  useEffect(() => {
+    if (!user) return;
 
     // Call API (for text input, use debounce)
     const timeoutId = setTimeout(
@@ -198,6 +220,8 @@ export function PartOrders() {
     dateSubmittedRange,
     currentPage,
     user,
+    sortBy,
+    sortAscending,
   ]);
 
   useEffect(() => {
@@ -223,25 +247,25 @@ export function PartOrders() {
     });
   };
 
-	// Get order type display text
-	const getOrderTypeText = (partsOrderNumber: number): string => {
-		if (partsOrderNumber === 0) return 'Parts Order'
-		if (partsOrderNumber === 1) return 'Supplement 1'
-		if (partsOrderNumber === 2) return 'Supplement 2'
-		return `Supplement ${partsOrderNumber}`
-	}
+  // Get order type display text
+  const getOrderTypeText = (partsOrderNumber: number): string => {
+    if (partsOrderNumber === 0) return 'Parts Order';
+    if (partsOrderNumber === 1) return 'Supplement 1';
+    if (partsOrderNumber === 2) return 'Supplement 2';
+    return `Supplement ${partsOrderNumber}`;
+  };
 
-	return (
-		<div className="min-h-scree">
-			{/* Header */}
-			<div className="bg-background">
-				<div className="flex items-center justify-between px-6 py-4">
-					<h1 className="text-foreground text-2xl font-bold">Parts Order List</h1>
-					<Button onClick={exportCSV}>
-						<Download className="mr-2 h-4 w-4" />
-						Report
-					</Button>
-				</div>
+  return (
+    <div className="min-h-scree">
+      {/* Header */}
+      <div className="bg-background">
+        <div className="flex items-center justify-between px-6 py-4">
+          <h1 className="text-foreground text-2xl font-bold">Parts Order List</h1>
+          <Button onClick={exportCSV}>
+            <Download className="mr-2 h-4 w-4" />
+            Report
+          </Button>
+        </div>
 
         <div className="px-6 py-6">
           {/* Search + Checkbox */}
@@ -279,41 +303,41 @@ export function PartOrders() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="0">original Parts Order</SelectItem>
+                <SelectItem value="0">Parts Order</SelectItem>
                 <SelectItem value="1">Supplement #1</SelectItem>
                 <SelectItem value="2">Supplement #2</SelectItem>
                 <SelectItem value="3">Supplement #3</SelectItem>
               </SelectContent>
             </Select>
 
-						<Select value={filterByStatus} onValueChange={value => setFilterByStatus(value)}>
-							<SelectTrigger className="bg-muted w-48">
-								<SelectValue placeholder="Status" />
-							</SelectTrigger>
-							<SelectContent>
-								<SelectItem value="all">All Status</SelectItem>
-								<SelectItem value="CsrReview">CSR Review</SelectItem>
-								<SelectItem value="CsrRejected">CSR Rejected</SelectItem>
-								<SelectItem value="DealershipProcessing">Dealer Processing</SelectItem>
-								<SelectItem value="DealershipShipped">Dealer Shipped</SelectItem>
-								<SelectItem value="ShopReceived">Shop Received</SelectItem>
-								<SelectItem value="RepairCompleted">Repair Completed</SelectItem>
-							</SelectContent>
-						</Select>
+            <Select value={filterByStatus} onValueChange={(value) => setFilterByStatus(value)}>
+              <SelectTrigger className="bg-muted w-48">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="CsrReview">CSR Review</SelectItem>
+                <SelectItem value="CsrRejected">CSR Rejected</SelectItem>
+                <SelectItem value="DealershipProcessing">Dealer Processing</SelectItem>
+                <SelectItem value="DealershipShipped">Dealer Shipped</SelectItem>
+                <SelectItem value="ShopReceived">Shop Received</SelectItem>
+                <SelectItem value="RepairCompleted">Repair Completed</SelectItem>
+              </SelectContent>
+            </Select>
 
-						<Select value={filterByRegionId} onValueChange={value => setCsrRegion(value)}>
-							<SelectTrigger className="bg-muted w-48">
-								<SelectValue placeholder="CSR Region" />
-							</SelectTrigger>
-							<SelectContent>
-								<SelectItem value="all">All Regions</SelectItem>
-								{user?.regions?.map(region => (
-									<SelectItem key={region.id} value={region.id?.toString() || ''}>
-										{region.name}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
+            <Select value={filterByRegionId} onValueChange={(value) => setCsrRegion(value)}>
+              <SelectTrigger className="bg-muted w-48">
+                <SelectValue placeholder="CSR Region" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Regions</SelectItem>
+                {user?.regions?.map((region) => (
+                  <SelectItem key={region.id} value={region.id?.toString() || ''}>
+                    {region.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">Date Submitted Range</span>
@@ -368,8 +392,8 @@ export function PartOrders() {
             <Table ref={partsOrderRef}>
               <TableHeader>
                 <TableRow className="bg-muted">
-                  <TableHead className="text-foreground font-semibold">RO#</TableHead>
-                  <TableHead className="text-foreground font-semibold">Sales#</TableHead>
+                  <TableHead className="text-foreground font-semibold">RO #</TableHead>
+                  <TableHead className="text-foreground font-semibold">Sales #</TableHead>
                   <TableHead className="text-foreground font-semibold">Type</TableHead>
                   <TableHead className="text-foreground font-semibold">VIN</TableHead>
                   <TableHead className="text-foreground font-semibold">Year/Make/Model</TableHead>
@@ -377,8 +401,22 @@ export function PartOrders() {
                   <TableHead className="text-foreground font-semibold">Shop</TableHead>
                   <TableHead className="text-foreground font-semibold">Dealer</TableHead>
                   <TableHead className="text-foreground font-semibold">CSR Region</TableHead>
-                  <TableHead className="text-foreground font-semibold">Date Completed</TableHead>
-                  <TableHead className="text-foreground font-semibold">Date Closed</TableHead>
+                  <SortableTableHead
+                    field="dateCreated"
+                    currentSortBy={sortBy}
+                    currentAscending={sortAscending}
+                    onSort={handleSort}
+                  >
+                    Date Completed
+                  </SortableTableHead>
+                  <SortableTableHead
+                    field="dateClosed"
+                    currentSortBy={sortBy}
+                    currentAscending={sortAscending}
+                    onSort={handleSort}
+                  >
+                    Date Closed
+                  </SortableTableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -398,7 +436,7 @@ export function PartOrders() {
                           </EmptyMedia>
                           <EmptyTitle>No data to display</EmptyTitle>
                           <EmptyDescription>
-                            There are no records in this table yet. Add your first entry to get started.
+                            No results could be found.
                           </EmptyDescription>
                         </EmptyHeader>
                       </Empty>
@@ -407,7 +445,7 @@ export function PartOrders() {
                 ) : (
                   orders.map((order: any) => {
                     const repairOrder = order.repairOrder;
-                    const roNumber = repairOrder?.roNumber || '--';
+                    const roNumber = repairOrder?.roNumber || ''
                     const salesOrder = order.salesOrderNumber || '--';
                     const type = getOrderTypeText(order.partsOrderNumber || 0);
                     const vin = repairOrder?.vin || '--';
@@ -427,77 +465,77 @@ export function PartOrders() {
                     // Determine if there is a note (ordered from alternate dealer)
                     const hasNote = repairOrder?.dealership.id !== repairOrder?.shop.sponsorDealership.id;
 
-										return (
-											<TableRow key={order.id} className="hover:bg-muted/50">
-												<TableCell
-													className="cursor-pointer text-blue-600 underline"
-													onClick={() => {
-														navigate({
-															to: '/repair_orders/$id',
-															params: { id: order.repairOrder.id.toString() },
-														})
-													}}
-												>
-													{roNumber}
-												</TableCell>
-												<TableCell>{salesOrder}</TableCell>
-												<TableCell>{type}</TableCell>
-												<TableCell className="font-mono text-xs">{vin}</TableCell>
-												<TableCell>{yearMakeModel}</TableCell>
-												<TableCell>
-													{/* <Badge
+                    return (
+                      <TableRow key={order.id} className="hover:bg-muted/50">
+                        <TableCell
+                          className="cursor-pointer text-blue-600 underline"
+                          onClick={() => {
+                            navigate({
+                              to: '/repair_orders/$id',
+                              params: { id: order.repairOrder.id.toString() },
+                            });
+                          }}
+                        >
+                          {roNumber}
+                        </TableCell>
+                        <TableCell>{salesOrder}</TableCell>
+                        <TableCell>{type}</TableCell>
+                        <TableCell className="font-mono text-xs">{vin}</TableCell>
+                        <TableCell>{yearMakeModel}</TableCell>
+                        <TableCell>
+                          {/* <Badge
                             variant={getStatusVariant(filterByStatus)}
                             className='whitespace-nowrap'
                           >
                             {status}
                           </Badge> */}
-													<Badge
-														// variant={getStatusVariant(filterByStatus)}
-														variant="secondary"
-														className="whitespace-nowrap"
-													>
-														{getStatusTxt(status)}
-													</Badge>
-												</TableCell>
-												<TableCell className="text-sm">{shop}</TableCell>
-												<TableCell>
-													<div className="flex items-center gap-2">
-														{hasNote && (
-															<TooltipProvider>
-																<Tooltip>
-																	<TooltipTrigger asChild>
-																		<AlertCircle className="h-4 w-4 text-yellow-600 cursor-pointer" />
-																	</TooltipTrigger>
-																	<TooltipContent>
-																		<p>Ordered from an alternate dealer</p>
-																	</TooltipContent>
-																</Tooltip>
-															</TooltipProvider>
-														)}
-														<span className="text-sm">{dealer}</span>
-													</div>
-												</TableCell>
-												<TableCell>{region}</TableCell>
-												<TableCell>{dateCompleted}</TableCell>
-												<TableCell>{dateClosed || '--'}</TableCell>
-											</TableRow>
-										)
-									})
-								)}
-							</TableBody>
-						</Table>
-					</div>
+                          <Badge
+                            // variant={getStatusVariant(filterByStatus)}
+                            variant="secondary"
+                            className="whitespace-nowrap"
+                          >
+                            {getStatusTxt(status)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm">{shop}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            {hasNote && (
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <AlertCircle className="h-4 w-4 text-yellow-600 cursor-pointer" />
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>Ordered from an alternate dealer</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            )}
+                            <span className="text-sm">{dealer}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>{region}</TableCell>
+                        <TableCell>{dateCompleted}</TableCell>
+                        <TableCell>{dateClosed || '--'}</TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
+              </TableBody>
+            </Table>
+          </div>
 
-					{/* Pagination */}
-					<DataTablePagination
-						currentPage={currentPage}
-						totalPages={totalPages}
-						totalItems={totalItems}
-						itemsPerPage={itemsPerPage}
-						onPageChange={setCurrentPage}
-					/>
-				</div>
-			</div>
-		</div>
-	)
+          {/* Pagination */}
+          <DataTablePagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={totalItems}
+            itemsPerPage={itemsPerPage}
+            onPageChange={setCurrentPage}
+          />
+        </div>
+      </div>
+    </div>
+  );
 }
