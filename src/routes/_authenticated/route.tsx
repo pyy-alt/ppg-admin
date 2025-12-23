@@ -7,7 +7,7 @@ import { useLoadingStore } from '@/stores/loading-store';
 import { Loading } from '@/components/Loading';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { HeaderOnlyLayout } from '@/components/layout/header-only-layout';
-import WelcomeGate from '@/features/auth/welcomeGate';
+// import WelcomeGate from '@/features/auth/welcomeGate';
 
 declare global {
   interface Window {
@@ -198,9 +198,9 @@ function AuthenticatedRouteComponent() {
 
   // 2. Unverified，Display login page
   if (auth.loginStatus !== 'authenticated') {
-    // navigate({ to: '/login', replace: true });
-    // return <Loading />;
-    return <WelcomeGate />
+    navigate({ to: '/login', replace: true });
+    return <Loading />;
+    // return <WelcomeGate />
   }
 
   // 3. Redirecting，Display loading interface
