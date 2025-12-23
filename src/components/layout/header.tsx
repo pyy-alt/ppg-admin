@@ -36,6 +36,7 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
   const [isShowAdminTeam, setIsShowAdminTeam] = useState(false);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const { brand } = useBrand();
+  console.log(brand)
   const logo = brand === 'vw' ? vwLogo : audiLogo;
   const getTeamMembers = async () => {
     const isAdmin = auth.user?.person?.type === PersonTypeEnum.PROGRAM_ADMINISTRATOR;

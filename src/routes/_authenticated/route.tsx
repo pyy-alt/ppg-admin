@@ -1,23 +1,19 @@
-import { useEffect, useMemo } from 'react'
-import {
-  createFileRoute,
-  Outlet,
-  useLocation,
-  useNavigate,
-} from '@tanstack/react-router'
-import type Session from '@/js/models/Session'
-import { type PersonType } from '@/js/models/enum/PersonTypeEnum'
-import { useAuthStore } from '@/stores/auth-store'
-import { useLoadingStore } from '@/stores/loading-store'
-import { Loading } from '@/components/Loading'
-import { AuthenticatedLayout } from '@/components/layout/authenticated-layout'
-import { HeaderOnlyLayout } from '@/components/layout/header-only-layout'
-import WelcomeGate from '@/features/auth/welcomeGate'
+import { useEffect, useMemo } from 'react';
+import { createFileRoute, Outlet, useLocation, useNavigate } from '@tanstack/react-router';
+import type Session from '@/js/models/Session';
+import { type PersonType } from '@/js/models/enum/PersonTypeEnum';
+import { useAuthStore } from '@/stores/auth-store';
+import { useLoadingStore } from '@/stores/loading-store';
+import { Loading } from '@/components/Loading';
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
+import { HeaderOnlyLayout } from '@/components/layout/header-only-layout';
+import WelcomeGate from '@/features/auth/welcomeGate';
+import { Login } from '@/features/auth/login';
 
 declare global {
   interface Window {
-    switchUserType?: (type: PersonType) => void
-    getUserType?: () => PersonType | undefined
+    switchUserType?: (type: PersonType) => void;
+    getUserType?: () => PersonType | undefined;
   }
 }
 
@@ -26,23 +22,23 @@ declare global {
 // ============================================================================
 
 /** Routes without a sidebar */
-const ROUTES_WITHOUT_SIDEBAR = ['/parts_orders', '/repair_orders'] as const
+const ROUTES_WITHOUT_SIDEBAR = ['/parts_orders', '/repair_orders'] as const;
 
 /** Role Permission Configuration */
 type RoleConfig = {
   /** Redirect target when accessing a forbidden route */
-  forbiddenRoute: string
+  forbiddenRoute: string;
   /** Default redirection target when accessing the root path. */
-  defaultRoute: string
+  defaultRoute: string;
   /** List of allowed prefix routes */
-  allowedRoutes: string[]
-}
+  allowedRoutes: string[];
+};
 
 const ROLE_REDIRECT_CONFIG: Record<PersonType, RoleConfig> = {
   ProgramAdministrator: {
     forbiddenRoute: '/admin/parts_orders',
     defaultRoute: '/admin/parts_orders',
-    allowedRoutes: ['/admin', '/parts_orders','/repair_orders'],
+    allowedRoutes: ['/admin', '/parts_orders', '/repair_orders'],
   },
   Shop: {
     forbiddenRoute: '/repair_orders',
@@ -57,7 +53,7 @@ const ROLE_REDIRECT_CONFIG: Record<PersonType, RoleConfig> = {
   Dealership: {
     forbiddenRoute: '/parts_orders',
     defaultRoute: '/parts_orders',
-    allowedRoutes: ['/parts_orders','/repair_orders'], // Only access to the parts order list is allowed.
+    allowedRoutes: ['/parts_orders', '/repair_orders'], // Only access to the parts order list is allowed.
     // Note：Repair the order details page. /repair_orders/:id Will be processed through precondition verification.
   },
   FieldStaff: {
@@ -65,7 +61,7 @@ const ROLE_REDIRECT_CONFIG: Record<PersonType, RoleConfig> = {
     defaultRoute: '/parts_orders',
     allowedRoutes: ['/parts_orders'],
   },
-}
+};
 
 // ============================================================================
 // Utility function
@@ -78,10 +74,8 @@ const ROLE_REDIRECT_CONFIG: Record<PersonType, RoleConfig> = {
  * @returns Is access allowed?
  */
 function isPathAllowed(path: string, allowedRoutes: string[]): boolean {
-  if (path === '/') return false // The root path needs to be redirected.
-  return allowedRoutes.some(
-    (route) => path === route || path.startsWith(route + '/')
-  )
+  if (path === '/') return false; // The root path needs to be redirected.
+  return allowedRoutes.some((route) => path === route || path.startsWith(route + '/'));
 }
 
 /**
@@ -90,26 +84,23 @@ function isPathAllowed(path: string, allowedRoutes: string[]): boolean {
  * @param userType User Type
  * @returns Redirect target or null
  */
-function getRedirectTarget(
-  path: string,
-  userType: PersonType | undefined
-): string | null {
-  if (!userType) return null
+function getRedirectTarget(path: string, userType: PersonType | undefined): string | null {
+  if (!userType) return null;
 
-  const config = ROLE_REDIRECT_CONFIG[userType]
+  const config = ROLE_REDIRECT_CONFIG[userType];
 
   // If accessing the root path，Redirecting to the default route.
   if (path === '/') {
-    return config.defaultRoute
+    return config.defaultRoute;
   }
 
   // If the path is in the allowlist，No redirection
   if (isPathAllowed(path, config.allowedRoutes)) {
-    return null
+    return null;
   }
 
   // Other situations are redirected to the forbidden route.（That is the default route.）
-  return config.forbiddenRoute
+  return config.forbiddenRoute;
 }
 
 /**
@@ -117,65 +108,62 @@ function getRedirectTarget(
  * @param auth User data in the certified storage.
  */
 function setupDevTools(auth: any): void {
-  if (!import.meta.env.DEV || !auth.user) return
+  if (!import.meta.env.DEV || !auth.user) return;
 
   window.switchUserType = (type: PersonType) => {
-    if (!auth.user?.person) return
+    if (!auth.user?.person) return;
 
     const updatedPerson = {
       ...auth.user.person,
       type: type,
-    }
+    };
 
     const mockSession = {
       guid: auth.user.guid,
       person: updatedPerson,
       hash: auth.user.hash,
-    } as Session
+    } as Session;
 
-    auth.setUser(mockSession)
-    console.log(`[DevTools] User type has been switched to: ${type}`)
-  }
+    auth.setUser(mockSession);
+    console.log(`[DevTools] User type has been switched to: ${type}`);
+  };
 
   window.getUserType = () => {
-    const type = auth.user?.person?.type
-    console.log('[DevTools] Current user type:', type)
-    return type
-  }
+    const type = auth.user?.person?.type;
+    console.log('[DevTools] Current user type:', type);
+    return type;
+  };
 }
 
 function AuthenticatedRouteComponent() {
-  const { auth } = useAuthStore()
-  const location = useLocation()
-  const navigate = useNavigate()
-  const isLoading = useLoadingStore((state) => state.isLoading)
-  const userType = auth.user?.person?.type
-  const isAdmin = userType === 'ProgramAdministrator'
+  const { auth } = useAuthStore();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const isLoading = useLoadingStore((state) => state.isLoading);
+  const userType = auth.user?.person?.type;
+  const isAdmin = userType === 'ProgramAdministrator';
 
   // ============================================================================
   // Development Model：Set up debugging tools
   // ============================================================================
   useEffect(() => {
-    setupDevTools(auth)
-  }, [auth])
+    setupDevTools(auth);
+  }, [auth]);
 
   // ============================================================================
   // Routing Redirection Logic
   // ============================================================================
   useEffect(() => {
     // If checking the certification status or unverified.，Then do not process the redirection.
-    if (
-      auth.loginStatus === 'checking' ||
-      auth.loginStatus !== 'authenticated'
-    ) {
-      return
+    if (auth.loginStatus === 'checking' || auth.loginStatus !== 'authenticated') {
+      return;
     }
 
-    const redirectTarget = getRedirectTarget(location.pathname, userType)
+    const redirectTarget = getRedirectTarget(location.pathname, userType);
     if (redirectTarget) {
-      navigate({ to: redirectTarget, replace: true })
+      navigate({ to: redirectTarget, replace: true });
     }
-  }, [auth.loginStatus, userType, location.pathname, navigate])
+  }, [auth.loginStatus, userType, location.pathname, navigate]);
 
   // ============================================================================
   // Calculate derived states.
@@ -186,9 +174,9 @@ function AuthenticatedRouteComponent() {
    * When users access illegal routes，Will be redirected.，At this moment, the loading screen is displayed.
    */
   const isRedirecting = useMemo(() => {
-    if (auth.loginStatus !== 'authenticated') return false
-    return getRedirectTarget(location.pathname, userType) !== null
-  }, [auth.loginStatus, location.pathname, userType])
+    if (auth.loginStatus !== 'authenticated') return false;
+    return getRedirectTarget(location.pathname, userType) !== null;
+  }, [auth.loginStatus, location.pathname, userType]);
 
   /**
    * Is a sidebar needed?
@@ -196,10 +184,9 @@ function AuthenticatedRouteComponent() {
    */
   const needsSidebar = useMemo(() => {
     return !ROUTES_WITHOUT_SIDEBAR.some(
-      (route) =>
-        location.pathname === route || location.pathname.startsWith(route + '/')
-    )
-  }, [location.pathname])
+      (route) => location.pathname === route || location.pathname.startsWith(route + '/')
+    );
+  }, [location.pathname]);
 
   // ============================================================================
   // Rendering logic
@@ -207,17 +194,19 @@ function AuthenticatedRouteComponent() {
 
   // 1. Checking certification status，Show loading interface
   if (auth.loginStatus === 'checking') {
-    return <Loading />
+    return <Loading />;
   }
 
   // 2. Unverified，Display login page
   if (auth.loginStatus !== 'authenticated') {
+    // navigate({ to: '/login', replace: true });
+    // return <Loading />;
     return <WelcomeGate />
   }
 
   // 3. Redirecting，Display loading interface
   if (isRedirecting) {
-    return <Loading />
+    return <Loading />;
   }
 
   // ============================================================================
@@ -225,7 +214,7 @@ function AuthenticatedRouteComponent() {
   // ============================================================================
 
   // Determine the layout to be used.：Only routes that require a sidebar and are for administrators use the full layout.
-  const useFullLayout = isAdmin && needsSidebar
+  const useFullLayout = isAdmin && needsSidebar;
 
   return (
     <>
@@ -239,12 +228,12 @@ function AuthenticatedRouteComponent() {
 
       {/* Global loading overlay */}
       {isLoading && (
-        <div className='fixed inset-0 z-9999 flex items-center justify-center bg-black/20 backdrop-blur-sm'>
+        <div className="fixed inset-0 z-9999 flex items-center justify-center bg-black/20 backdrop-blur-sm">
           <Loading />
         </div>
       )}
     </>
-  )
+  );
 }
 
 export const Route = createFileRoute('/_authenticated')({
@@ -256,4 +245,4 @@ export const Route = createFileRoute('/_authenticated')({
     // If not logged in，Zilu will handle the redirection.
   },
   component: AuthenticatedRouteComponent,
-})
+});

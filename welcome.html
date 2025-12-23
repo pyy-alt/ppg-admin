@@ -116,14 +116,13 @@ function switchLanguage(lang) {
   }
 
   function selectAndNavigate(brand, region) {
-    console.log(brand, region)
-    return
     document.querySelectorAll('.card').forEach(card => card.classList.remove('selected'));
     event.currentTarget.classList.add('selected');
 
     // Must be transmitted
+    // PS: http://localhost:5173/login?brand=vw&region=america
     const params = new URLSearchParams({ brand, region, lang: currentLang });
-    window.location.href = `/login?${params.toString()}`;
+    window.location.href = `http://localhost:5173/login?${params.toString()}`;
   }
 
   document.addEventListener('DOMContentLoaded', () => {
