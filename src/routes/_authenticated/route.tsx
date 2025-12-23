@@ -8,7 +8,6 @@ import { Loading } from '@/components/Loading';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { HeaderOnlyLayout } from '@/components/layout/header-only-layout';
 import WelcomeGate from '@/features/auth/welcomeGate';
-import { Login } from '@/features/auth/login';
 
 declare global {
   interface Window {
