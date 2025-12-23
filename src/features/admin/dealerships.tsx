@@ -31,7 +31,6 @@ export function Dealerships() {
 
 	const [isShowAdminTeam, setIsShowAdminTeam] = useState(false)
 	const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
-	const [organizationId, setOrganizationId] = useState<number>()
 
 	const [sortBy, setSortBy] = useState<
 		'name' | 'dealershipNumber' | 'countActiveUsers' | 'countPendingUsers' | 'countPendingOrders' | string
@@ -317,7 +316,6 @@ export function Dealerships() {
 												<TableCell
 													className="text-center text-blue-600 underline hover:cursor-pointer"
 													onClick={() => {
-														setOrganizationId(dealer.id)
 														getTeamMembers('Dealership', dealer.id)
 													}}
 												>
@@ -326,7 +324,6 @@ export function Dealerships() {
 												<TableCell
 													className="text-center text-blue-600 underline hover:cursor-pointer"
 													onClick={() => {
-														setOrganizationId(dealer.id)
 														getTeamMembers('Dealership', dealer.id)
 													}}
 												>

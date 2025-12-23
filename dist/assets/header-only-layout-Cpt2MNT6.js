@@ -1,1 +1,0 @@
-import{j as r,O as s}from"./index-DiI2ffAh.js";import{H as a}from"./header-BJ4bOhv6.js";import{S as t,L as i}from"./search-provider-DE3XVmHF.js";function x({children:e}){return r.jsx(t,{children:r.jsxs(i,{children:[r.jsx(a,{fixed:!0}),r.jsx("main",{className:"pt-8 min-h-screen",children:e??r.jsx(s,{})})]})})}export{x as H};
