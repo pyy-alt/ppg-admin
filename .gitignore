@@ -17,3 +17,7 @@ out
 .remix-serve-data
 .remix-serve-public
 .remix-serve-server
+/dist
+/build
+.DS_Store
+npm-debug.log*
