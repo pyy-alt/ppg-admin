@@ -83,7 +83,7 @@ export default function EditProfileDialog({ open, onOpenChange, initialData }: E
     },
   });
 
-  const onSubmit = (data: FormValues) => {
+  const onSubmit = () => {
     const personApi = new PersonApi();
     const request = new PersonBase();
     request.id = initialData?.id;
@@ -94,7 +94,7 @@ export default function EditProfileDialog({ open, onOpenChange, initialData }: E
     // request.currentPassword = form.getValues('currentPassword')
     // request.newPassword = form.getValues('newPassword')
     personApi.edit(request, {
-      status200: (person: PersonBase) => {
+      status200: () => {
         onOpenChange(false);
         form.reset();
         refreshUserData();
