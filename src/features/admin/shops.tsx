@@ -37,7 +37,6 @@ export function Shops() {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
 
   const [sortBy, setSortBy] = useState('');
-  const navigate = useNavigate();
 
   const [sortAscending, setSortAscending] = useState(false); // false 为降序（最新在前）
 
