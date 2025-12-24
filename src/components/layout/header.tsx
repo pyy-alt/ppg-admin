@@ -36,7 +36,7 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
   const [isShowAdminTeam, setIsShowAdminTeam] = useState(false);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const { brand } = useBrand();
-  console.log(brand)
+  console.log(brand);
   const logo = brand === 'vw' ? vwLogo : audiLogo;
   const getTeamMembers = async () => {
     const isAdmin = auth.user?.person?.type === PersonTypeEnum.PROGRAM_ADMINISTRATOR;
@@ -137,9 +137,9 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
           {isShowUser && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex items-center justify-center gap-3 rounded-full pr-2 transition-colors hover:bg-white/10">
+                <button className="flex items-center justify-center gap-3 pr-2 transition-colors rounded-full hover:bg-white/10">
                   <div className="text-left text-white">
-                    <p className="text-sm leading-none font-medium">
+                    <p className="text-sm font-medium leading-none">
                       {auth.user
                         ? `${auth.user.person?.firstName} ${auth.user.person?.lastName}`.trim() ||
                           auth.user.person?.email
@@ -152,19 +152,21 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
                           : auth.user.person?.dealership?.name && auth.user.person?.dealership?.dealershipNumber
                             ? `${auth.user.person?.dealership?.name}(${auth.user.person?.dealership?.dealershipNumber}) | ${auth.user.person?.type}`
                             : auth.user.person?.csrRegion
-                              ? `${auth.user.person?.csrRegion?.name} | ${auth.user.person?.type}` 
-                              :  `${auth.user.person?.type}`==='ProgramAdministrator' ? ' Program Administrator  ' : auth.user.person?.type
+                              ? `${auth.user.person?.csrRegion?.name} | ${auth.user.person?.type}`
+                              : `${auth.user.person?.type}` === 'ProgramAdministrator'
+                                ? ' Program Administrator  '
+                                : auth.user.person?.type
                         : 'Not logged in'}
                     </p>
                   </div>
-                  <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
               </DropdownMenuTrigger>
 
               {/* Menu right aligned */}
-              <DropdownMenuContent align="end" className="mt-2 w-56">
+              <DropdownMenuContent align="end" className="w-56 mt-2">
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium">
@@ -173,32 +175,36 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
                           auth.user.person?.email
                         : 'User'}
                     </p>
-                    <p className="text-muted-foreground text-xs">
+                    <p className="text-xs text-muted-foreground">
                       {auth.user
                         ? auth.user.person?.shop?.name && auth.user.person?.shop?.shopNumber
                           ? `${auth.user.person?.shop?.name}(${auth.user.person?.shop?.shopNumber}) | ${auth.user.person?.type}`
                           : auth.user.person?.dealership?.name && auth.user.person?.dealership?.dealershipNumber
-                            ? `${auth.user.person?.dealership?.name}(${auth.user.person?.dealership?.dealershipNumber}) | ${auth.user.person?.type}`:
-                            `${auth.user.person?.type}`==='ProgramAdministrator' ? ' Program Administrator  ' :  auth.user.person?.type
+                            ? `${auth.user.person?.dealership?.name}(${auth.user.person?.dealership?.dealershipNumber}) | ${auth.user.person?.type}`
+                            : `${auth.user.person?.type}` === 'ProgramAdministrator'
+                              ? ' Program Administrator  '
+                              : auth.user.person?.type
                         : 'Not logged in'}
                     </p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer" onSelect={() => handleSelect('team')}>
-                  <Users className="mr-2 h-4 w-4" />
-                  <span>View Team</span>
-                </DropdownMenuItem>
+                {auth?.user?.person?.type !== PersonTypeEnum.CSR && (
+                  <DropdownMenuItem className="cursor-pointer" onSelect={() => handleSelect('team')}>
+                    <Users className="w-4 h-4 mr-2" />
+                    <span>View Team</span>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem className="cursor-pointer" onSelect={() => handleSelect('profile')}>
-                  <UserPen className="mr-2 h-4 w-4" />
+                  <UserPen className="w-4 h-4 mr-2" />
                   <span>Edit Profile</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                  className="cursor-pointer text-red-600 focus:text-red-600"
+                  className="text-red-600 cursor-pointer focus:text-red-600"
                   onSelect={() => handleSelect('logout')}
                 >
-                  <LogOut className="mr-2 h-4 w-4" />
+                  <LogOut className="w-4 h-4 mr-2" />
                   <span>Logout</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -206,7 +212,7 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
           )}
 
           {/* Language Globe */}
-          <div className="rounded-full p-2 text-white transition-colors hover:bg-white/10">
+          <div className="p-2 text-white transition-colors rounded-full hover:bg-white/10">
             <LanguageDropdown />
           </div>
         </div>
@@ -215,13 +221,18 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
         open={open}
         onOpenChange={setOpen}
         initialData={{
-					id: auth.user?.person?.id,
+          id: auth.user?.person?.id,
           firstName: auth.user?.person?.firstName || '',
           lastName: auth.user?.person?.lastName || '',
           email: auth.user?.person?.email || '',
         }}
       />
-      <ViewTeamDialog teamMembers={teamMembers} open={isShowTeam} onOpenChange={setIsShowTeam} />
+      <ViewTeamDialog
+        teamMembers={teamMembers}
+        open={isShowTeam}
+        onOpenChange={setIsShowTeam}
+        onSuccess={getTeamMembers}
+      />
       <ViewAdminTeamDialog
         teamMembers={teamMembers}
         open={isShowAdminTeam}

@@ -339,7 +339,7 @@ export function RepairOrderDetail() {
             <Users className="ml-6 h-5 w-5 text-white" />
             <span>
               {' '}
-              Field Support Team: {user?.person?.firstName} {user?.person?.lastName}
+              { user?.person?.type==='ProgramAdministrator'? 'Program Administrator' : user?.person?.type  }: {user?.person?.firstName} {user?.person?.lastName}
             </span>
           </p>
         </div>

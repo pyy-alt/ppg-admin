@@ -41,7 +41,7 @@ export function Shops() {
 
   const [sortAscending, setSortAscending] = useState(false); // false 为降序（最新在前）
 
-  const getTeamMembers = async (userType: 'Shop' | 'Dealership' | 'Network', organizationId: number | undefined) => {
+  const getTeamMembers = async (userType: 'Shop' | 'Dealership', organizationId: number | undefined) => {
     try {
       const personApi = new PersonApi();
       const request: any = PersonSearchRequest.create({
@@ -215,13 +215,13 @@ export function Shops() {
   }, [shops]);
 
   return (
-    <div className="bg-background min-h-screen">
+    <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="bg-background">
         <div className="flex items-center justify-between px-6 py-4">
-          <h1 className="text-foreground text-2xl font-bold">Manage Shops</h1>
+          <h1 className="text-2xl font-bold text-foreground">Manage Shops</h1>
           <Button onClick={exportCSV}>
-            <Download className="mr-2 h-4 w-4" />
+            <Download className="w-4 h-4 mr-2" />
             Report
           </Button>
         </div>
@@ -229,9 +229,9 @@ export function Shops() {
 
       <div className="px-6 py-6">
         {/* Search + Filters */}
-        <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center">
-          <div className="relative max-w-md flex-1">
-            <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+        <div className="flex flex-col gap-4 mb-6 lg:flex-row lg:items-center">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute w-4 h-4 -translate-y-1/2 text-muted-foreground top-1/2 left-3" />
             <ClearableInput
               value={smartFilter}
               onChange={(e) => setSmartFilter(e.target.value)}
@@ -242,7 +242,7 @@ export function Shops() {
 
           <div className="flex flex-wrap gap-3">
             <Select value={filterByShopStatus} onValueChange={(value) => setFilterByShopStatus(value)}>
-              <SelectTrigger className="bg-muted w-48">
+              <SelectTrigger className="w-48 bg-muted">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -256,7 +256,7 @@ export function Shops() {
             </Select>
 
             <Select value={filterByShopCertification} onValueChange={(value) => setFilterByShopCertification(value)}>
-              <SelectTrigger className="bg-muted w-48">
+              <SelectTrigger className="w-48 bg-muted">
                 <SelectValue placeholder="Certification" />
               </SelectTrigger>
               <SelectContent>
@@ -268,7 +268,7 @@ export function Shops() {
             </Select>
 
             <Select value={filterByRegionId} onValueChange={(value) => setFilterByRegionId(value)}>
-              <SelectTrigger className="bg-muted w-48">
+              <SelectTrigger className="w-48 bg-muted">
                 <SelectValue placeholder="CSR Region" />
               </SelectTrigger>
               <SelectContent>
@@ -285,17 +285,17 @@ export function Shops() {
 
         {/* Table */}
         {loading ? (
-          <div className="bg-background overflow-hidden rounded-lg border shadow-sm">
+          <div className="overflow-hidden border rounded-lg shadow-sm bg-background">
             <div className="flex items-center justify-center py-12">
               <div className="text-muted-foreground">loading...</div>
             </div>
           </div>
         ) : shops.length === 0 ? (
-          <div className="bg-background overflow-hidden rounded-lg border shadow-sm">
+          <div className="overflow-hidden border rounded-lg shadow-sm bg-background">
             <Empty>
               <EmptyHeader>
                 <EmptyMedia variant="icon">
-                  <TableIcon className="h-4 w-4" />
+                  <TableIcon className="w-4 h-4" />
                 </EmptyMedia>
                 <EmptyTitle>No data to display</EmptyTitle>
                 <EmptyDescription>
@@ -306,7 +306,7 @@ export function Shops() {
           </div>
         ) : (
           <>
-            <div className="bg-background overflow-hidden rounded-lg border shadow-sm">
+            <div className="overflow-hidden border rounded-lg shadow-sm bg-background">
               <Table ref={shopsOrderRef}>
                 <TableHeader>
                   <TableRow className="bg-muted">
@@ -358,10 +358,10 @@ export function Shops() {
                     >
                       Status
                     </SortableTableHead>
-                    <TableHead className="text-foreground font-semibold">Certification</TableHead>
-                    <TableHead className="text-foreground font-semibold">Address</TableHead>
-                    <TableHead className="text-foreground font-semibold">City</TableHead>
-                    <TableHead className="text-foreground font-semibold">State</TableHead>
+                    <TableHead className="font-semibold text-foreground">Certification</TableHead>
+                    <TableHead className="font-semibold text-foreground">Address</TableHead>
+                    <TableHead className="font-semibold text-foreground">City</TableHead>
+                    <TableHead className="font-semibold text-foreground">State</TableHead>
                     <SortableTableHead
                       field="dealer"
                       currentSortBy={sortBy}
@@ -414,7 +414,7 @@ export function Shops() {
                         </TableCell>
                         <TableCell>{shop.shopNumber || '--'}</TableCell>
                         <TableCell
-                          className="text-center font-medium text-blue-600 underline"
+                          className="font-medium text-center text-blue-600 underline"
                           onClick={() => {
                             navigate({
                               to: '/repair_orders',
@@ -451,7 +451,7 @@ export function Shops() {
                           </Badge>
                         </TableCell>
                         <TableCell>{certificationValue}</TableCell>
-                        <TableCell className="text-muted-foreground text-sm">{shop.address || '--'}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground">{shop.address || '--'}</TableCell>
                         <TableCell>{shop.city || '--'}</TableCell>
                         <TableCell>{shop.state || '--'}</TableCell>
                         <TableCell>{dealerName}</TableCell>
@@ -475,7 +475,7 @@ export function Shops() {
           </>
         )}
       </div>
-      <ViewTeamDialog teamMembers={teamMembers} open={isShowAdminTeam} onOpenChange={setIsShowAdminTeam} />
+      <ViewTeamDialog teamMembers={teamMembers} open={isShowAdminTeam} onOpenChange={setIsShowAdminTeam} onSuccess={getTeamMembers} />
     </div>
   );
 }
