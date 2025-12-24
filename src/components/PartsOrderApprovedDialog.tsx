@@ -84,30 +84,30 @@ export default function PartsOrderApprovedDialog({
         <DialogHeader>
           <DialogTitle className='flex items-center gap-3 text-2xl font-semibold'>
             {isReject ? (
-              <X className='h-7 w-7 rounded-full bg-red-500 p-1 text-white' />
+              <X className='p-1 text-white bg-red-500 rounded-full h-7 w-7' />
             ) : (
-              <Check className='h-7 w-7 rounded-full bg-green-500 p-1 text-white' />
+              <Check className='p-1 text-white bg-green-500 rounded-full h-7 w-7' />
             )}
             {isReject ? 'Parts Order Rejected' : 'Parts Order Approved'}
           </DialogTitle>
           <Separator />
           <button
             onClick={() => onOpenChange(false)}
-            className='focus:ring-ring absolute top-4 right-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-none'
+            className='absolute transition-opacity rounded-sm focus:ring-ring top-4 right-4 opacity-70 hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-none'
           >
-            <X className='h-4 w-4' />
+            <X className='w-4 h-4' />
             <span className='sr-only'>Close</span>
           </button>
         </DialogHeader>
 
-        <div className='space-y-10 p-6 pt-8'>
+        <div className='p-6 pt-8 space-y-10'>
           {/* Section 1: Repair Order Information */}
           <section>
-            <h3 className='mb-6 flex items-center gap-3 text-lg font-medium'>
-              <FileText className='text-muted-foreground h-6 w-6' />
+            <h3 className='flex items-center gap-3 mb-6 text-lg font-medium'>
+              <FileText className='w-6 h-6 text-muted-foreground' />
               Repair Order Information
             </h3>
-            <div className='grid grid-cols-1 gap-x-12 gap-y-6 text-sm sm:grid-cols-3'>
+            <div className='grid grid-cols-1 text-sm gap-x-12 gap-y-6 sm:grid-cols-3'>
               <div>
                 <Label className='text-muted-foreground'>Shop RO#</Label>
                 <p className='text-foreground mt-1.5 font-medium'>
@@ -131,7 +131,7 @@ export default function PartsOrderApprovedDialog({
 
               <div>
                 <Label className='text-muted-foreground'>VIN</Label>
-                <p className='text-foreground mt-1.5 font-mono'>
+                <p className='text-foreground mt-1.5'>
                   {initRepaitOrderData?.vin || '--'}
                 </p>
               </div>
@@ -149,11 +149,11 @@ export default function PartsOrderApprovedDialog({
 
           {/* Section 2: Parts Order Information */}
           <section>
-            <h3 className='mb-6 flex items-center gap-3 text-lg font-medium'>
-              <Package className='text-muted-foreground h-6 w-6' />
+            <h3 className='flex items-center gap-3 mb-6 text-lg font-medium'>
+              <Package className='w-6 h-6 text-muted-foreground' />
               Parts Order Information
             </h3>
-            <div className='grid grid-cols-1 gap-x-12 gap-y-6 text-sm sm:grid-cols-3'>
+            <div className='grid grid-cols-1 text-sm gap-x-12 gap-y-6 sm:grid-cols-3'>
               <div>
                 <Label className='text-muted-foreground'>Order Submitted</Label>
                 <p className='mt-1.5'>
@@ -200,8 +200,8 @@ export default function PartsOrderApprovedDialog({
           {/* Section 3: Assign Sales Order */}
           {isReject ? (
             <section>
-              <h3 className='mb-6 flex items-center gap-3 text-lg font-medium'>
-                <NotebookPen className='text-muted-foreground h-6 w-6' />
+              <h3 className='flex items-center gap-3 mb-6 text-lg font-medium'>
+                <NotebookPen className='w-6 h-6 text-muted-foreground' />
                 Reason for Rejection
               </h3>
               <Textarea
@@ -214,8 +214,8 @@ export default function PartsOrderApprovedDialog({
             </section>
           ) : (
             <section>
-              <h3 className='mb-6 flex items-center gap-3 text-lg font-medium'>
-                <NotebookPen className='text-muted-foreground h-6 w-6' />
+              <h3 className='flex items-center gap-3 mb-6 text-lg font-medium'>
+                <NotebookPen className='w-6 h-6 text-muted-foreground' />
                 Sales Order #
               </h3>
               <div className='max-w-sm'>
@@ -235,7 +235,7 @@ export default function PartsOrderApprovedDialog({
         </div>
 
         {/* Footer */}
-        <div className='bg-muted/30 flex items-center justify-end gap-3 border-t px-6 py-4'>
+        <div className='flex items-center justify-end gap-3 px-6 py-4 border-t bg-muted/30'>
           <Button
             variant='outline'
             size='lg'
@@ -255,7 +255,7 @@ export default function PartsOrderApprovedDialog({
           >
             {isLoading ? (
               <>
-                <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                <Loader2 className='w-4 h-4 mr-2 animate-spin' />
                 {isReject ? 'Rejecting...' : 'Approving...'}
               </>
             ) : isReject ? (

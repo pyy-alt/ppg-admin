@@ -63,21 +63,21 @@ export function MarkRepairAsCompleteDialog({
 
           <button
             onClick={handleClose}
-            className='ring-offset-background focus:ring-ring absolute top-4 right-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-none'
+            className='absolute transition-opacity rounded-sm ring-offset-background focus:ring-ring top-4 right-4 opacity-70 hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-none'
           >
-            <X className='h-4 w-4' />
+            <X className='w-4 h-4' />
             <span className='sr-only'>Close</span>
           </button>
         </DialogHeader>
 
-        <div className='min-h-0 flex-1 space-y-10 overflow-y-auto p-6 pt-8'>
+        <div className='flex-1 min-h-0 p-6 pt-8 space-y-10 overflow-y-auto'>
           {/* Section 1: Repair Order Information */}
           <section>
-            <h3 className='mb-6 flex items-center gap-3 text-lg font-medium'>
-              <FileText className='text-muted-foreground h-6 w-6' />
+            <h3 className='flex items-center gap-3 mb-6 text-lg font-medium'>
+              <FileText className='w-6 h-6 text-muted-foreground' />
               Repair Order Information
             </h3>
-            <div className='grid grid-cols-1 gap-x-12 gap-y-6 text-sm sm:grid-cols-3'>
+            <div className='grid grid-cols-1 text-sm gap-x-12 gap-y-6 sm:grid-cols-3'>
               <div>
                 <Label className='text-muted-foreground'>Shop RO#</Label>
                 <p className='text-foreground mt-1.5 font-medium'>
@@ -101,7 +101,7 @@ export function MarkRepairAsCompleteDialog({
 
               <div>
                 <Label className='text-muted-foreground'>VIN</Label>
-                <p className='text-foreground mt-1.5 font-mono'>
+                <p className='text-foreground mt-1.5'>
                   {initRepaitOrderData?.vin || '--'}
                 </p>
               </div>
@@ -119,13 +119,13 @@ export function MarkRepairAsCompleteDialog({
 
           {/* Section 2: Attachments - Post-Repair Photos */}
           <section>
-            <h3 className='mb-6 flex items-center gap-3 text-lg font-medium'>
-              <Paperclip className='text-muted-foreground h-6 w-6' />
+            <h3 className='flex items-center gap-3 mb-6 text-lg font-medium'>
+              <Paperclip className='w-6 h-6 text-muted-foreground' />
               Attachments
             </h3>
 
             <div className='space-y-4'>
-              <Label className='text-foreground font-medium'>
+              <Label className='font-medium text-foreground'>
                 Post-Repair Photos <span className='text-destructive'>*</span>
               </Label>
 
@@ -139,17 +139,17 @@ export function MarkRepairAsCompleteDialog({
                 }`}
               >
                 <input {...getInputProps()} />
-                <Upload className='text-muted-foreground mx-auto mb-4 h-12 w-12' />
+                <Upload className='w-12 h-12 mx-auto mb-4 text-muted-foreground' />
                 <p className='text-muted-foreground'>
                   Drop your photos here or{' '}
-                  <span className='text-primary font-medium hover:underline'>
+                  <span className='font-medium text-primary hover:underline'>
                     click to browse
                   </span>
                 </p>
               </div>
               {/* Open Camera Button（Optional） */}
               <Button variant='outline' size='sm' className='w-fit'>
-                <Camera className='mr-2 h-4 w-4' />
+                <Camera className='w-4 h-4 mr-2' />
                 Open camera
               </Button>
             </div>
@@ -164,7 +164,7 @@ export function MarkRepairAsCompleteDialog({
                     >
                       <div className='flex items-center gap-3'>
                         <div className='text-left'>
-                          <p className='max-w-xs truncate text-sm font-medium text-blue-500 hover:underline'>
+                          <p className='max-w-xs text-sm font-medium text-blue-500 truncate hover:underline'>
                             {file.name}
                           </p>
                           {/* <p className="text-xs text-muted-foreground">
@@ -178,9 +178,9 @@ export function MarkRepairAsCompleteDialog({
                           e.stopPropagation()
                           removePhoto(index)
                         }}
-                        className='text-destructive hover:bg-destructive/10 rounded p-1'
+                        className='p-1 rounded text-destructive hover:bg-destructive/10'
                       >
-                        <Trash2 className='h-4 w-4' />
+                        <Trash2 className='w-4 h-4' />
                       </button>
                     </div>
                   ))}
@@ -191,13 +191,13 @@ export function MarkRepairAsCompleteDialog({
         </div>
 
         {/* Footer */}
-        <div className='bg-muted/30 flex items-center justify-end gap-3 border-t px-6 py-4'>
+        <div className='flex items-center justify-end gap-3 px-6 py-4 border-t bg-muted/30'>
           <Button variant='outline' size='lg' onClick={handleClose}>
             Cancel
           </Button>
           <Button
             size='lg'
-            className='bg-black px-8 font-medium text-white hover:bg-black/90'
+            className='px-8 font-medium text-white bg-black hover:bg-black/90'
             onClick={handleComplete}
           >
             Mark Repair as Complete

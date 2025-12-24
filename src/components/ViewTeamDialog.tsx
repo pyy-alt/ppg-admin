@@ -280,7 +280,7 @@ export default function ViewTeamDialog({ open, onOpenChange, teamMembers, onSucc
                       <tr key={idx} className="transition-colors hover:bg-muted/30">
                         <td className="px-4 py-4 text-sm">{member.firstName}</td>
                         <td className="px-4 py-4 text-sm">{member.lastName}</td>
-                        <td className="px-4 py-4 font-mono text-sm text-muted-foreground">{member.email}</td>
+                        <td className="px-4 py-4 text-sm text-muted-foreground">{member.email}</td>
                         <td className="px-4 py-4 text-sm">
                           {(member.dateCreated && new Date(member.dateCreated).toLocaleDateString()) || '--'}
                         </td>

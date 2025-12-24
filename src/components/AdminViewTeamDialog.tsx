@@ -229,7 +229,7 @@ export default function AdminViewTeamDialog({ open, onOpenChange, teamMembers, o
                       {member.firstName}
                     </td>
                     <td className="px-6 py-4">{member.lastName}</td>
-                    <td className="px-6 py-4 font-mono text-sm">{member.email}</td>
+                    <td className="px-6 py-4 text-sm">{member.email}</td>
                     <td className="px-6 py-4 text-sm">{member.dateAdded}</td>
                     <td className="px-6 py-4 text-sm">{member.dateLastAccessed || '—'}</td>
                     <td className="px-6 py-4">

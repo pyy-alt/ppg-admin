@@ -225,28 +225,28 @@ export function RepairOrderList() {
       orderAny.partsOrders.some((val: any) => val.status === 'ShopReceived' || val.status === 'CsrRejected');
     const isShopAndOver7Days = isOver7Days && user?.person?.type === 'Shop';
     if (hasAlertPartsStatus || isShopAndOver7Days) {
-      return <AlertTriangle className="text-destructive h-4 w-4" />;
+      return <AlertTriangle className="w-4 h-4 text-destructive" />;
     }
     return null;
   };
 
   return (
-    <div className="bg-background min-h-screen">
-      <div className="relative h-40 w-full">
+    <div className="min-h-screen bg-background">
+      <div className="relative w-full h-40">
         <img
           src={navImg}
           alt={brand === 'vw' ? 'VW Navigation' : 'Audi Navigation'}
-          className="mt-6 h-full w-full object-cover"
+          className="object-cover w-full h-full mt-6"
         />
-        <div className="absolute top-1/2 left-6 -translate-y-1/2">
+        <div className="absolute -translate-y-1/2 top-1/2 left-6">
           <p className="text-3xl font-bold text-white">{user?.person?.shop?.name ?? '--'}</p>
-          <p className="mt-4 flex items-center space-x-4 text-sm text-gray-200">
-            <Warehouse className="h-5 w-5 text-white" />
+          <p className="flex items-center mt-4 space-x-4 text-sm text-gray-200">
+            <Warehouse className="w-5 h-5 text-white" />
             <span>
               Assigned Dealership: {user?.person?.shop?.sponsorDealership.name ?? '--'}({' '}
               {user?.person?.shop?.sponsorDealership.dealershipNumber})
             </span>
-            <Users className="ml-6 h-5 w-5 text-white" />
+            <Users className="w-5 h-5 ml-6 text-white" />
             <span>
               {' '}
               Field Support Team: {user?.person?.firstName} {user?.person?.lastName}
@@ -256,11 +256,11 @@ export function RepairOrderList() {
         <div className="absolute top-1/2 right-6 max-w-[320px] -translate-y-1/2 text-sm text-gray-100">
           <div className="grid gap-1">
             <div className="grid grid-cols-[24px_1fr] items-center gap-2">
-              <Tag className="h-5 w-5 justify-self-end text-white" aria-hidden="true" />
+              <Tag className="w-5 h-5 text-white justify-self-end" aria-hidden="true" />
               <span className="truncate">{user?.person?.shop?.shopNumber ?? '--'}</span>
             </div>
             <div className="my-1 grid grid-cols-[24px_1fr] items-center gap-2">
-              <MapPin className="h-5 w-5 justify-self-end text-white" aria-hidden="true" />
+              <MapPin className="w-5 h-5 text-white justify-self-end" aria-hidden="true" />
               <span className="truncate">
                 {user?.person?.shop?.address ?? '--'},{user?.person?.shop?.city ?? '--'},
                 {user?.person?.shop?.state ?? '--'}&nbsp;
@@ -268,7 +268,7 @@ export function RepairOrderList() {
               </span>
             </div>
             <div className="grid grid-cols-[24px_1fr] items-center gap-2">
-              <Map className="h-5 w-5 justify-self-end text-white" aria-hidden="true" />
+              <Map className="w-5 h-5 text-white justify-self-end" aria-hidden="true" />
               <span className="truncate">{user?.person?.shop?.region.name ?? '--'}</span>
             </div>
           </div>
@@ -276,9 +276,9 @@ export function RepairOrderList() {
       </div>
 
       {/* Header */}
-      <div className="bg-background border-b">
+      <div className="border-b bg-background">
         <div className="flex items-center justify-between px-6 py-4">
-          <h1 className="text-foreground text-2xl font-bold">Repair Order List</h1>
+          <h1 className="text-2xl font-bold text-foreground">Repair Order List</h1>
           {user?.person?.type === 'Shop' && (
             <Button variant="outline" onClick={() => setOpen(true)}>
               <Plus className="mr-1.5 h-4 w-4" />
@@ -314,10 +314,10 @@ export function RepairOrderList() {
 
       <div className="px-6 py-6">
         {/* Filters */}
-        <div className="mb-6 flex flex-col items-center justify-between gap-4 lg:flex-row lg:items-center">
+        <div className="flex flex-col items-center justify-between gap-4 mb-6 lg:flex-row lg:items-center">
           <div className="flex flex-wrap items-center gap-3">
             <div className="relative w-80">
-              <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+              <Search className="absolute w-4 h-4 -translate-y-1/2 text-muted-foreground top-1/2 left-3" />
               <ClearableInput
                 value={smartFilter}
                 onChange={(e) => setSmartFilter(e.target.value)}
@@ -389,7 +389,7 @@ export function RepairOrderList() {
               onCheckedChange={(checked: boolean) => setShowRepairCompleted(checked)}
               className="rounded-full"
             />
-            <Label htmlFor="show-completed" className="cursor-pointer text-sm font-medium">
+            <Label htmlFor="show-completed" className="text-sm font-medium cursor-pointer">
               Show Repair Completed
             </Label>
           </div>
@@ -401,7 +401,7 @@ export function RepairOrderList() {
             <Empty>
               <EmptyHeader>
                 <EmptyMedia variant="icon">
-                  <TableIcon className="h-4 w-4" />
+                  <TableIcon className="w-4 h-4" />
                 </EmptyMedia>
                 <EmptyTitle>No data to display</EmptyTitle>
                 <EmptyDescription>
@@ -414,18 +414,18 @@ export function RepairOrderList() {
           </div>
         ) : (
           <div>
-            <div className="bg-card overflow-hidden rounded-lg border shadow-sm">
+            <div className="overflow-hidden border rounded-lg shadow-sm bg-card">
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted">
-                    <TableHead className="text-foreground font-semibold">RO #</TableHead>
-                    <TableHead className="text-foreground font-semibold">Order #</TableHead>
-                    <TableHead className="text-foreground font-semibold">VIN</TableHead>
-                    <TableHead className="text-foreground font-semibold">Year/Make/Model</TableHead>
-                    <TableHead className="text-foreground font-semibold">Status</TableHead>
-                    <TableHead className="text-foreground font-semibold">Customer</TableHead>
-                    <TableHead className="text-foreground font-semibold">Date Submitted</TableHead>
-                    <TableHead className="text-foreground font-semibold">Date Completed</TableHead>
+                    <TableHead className="font-semibold text-foreground">RO #</TableHead>
+                    <TableHead className="font-semibold text-foreground">Order #</TableHead>
+                    <TableHead className="font-semibold text-foreground">VIN</TableHead>
+                    <TableHead className="font-semibold text-foreground">Year/Make/Model</TableHead>
+                    <TableHead className="font-semibold text-foreground">Status</TableHead>
+                    <TableHead className="font-semibold text-foreground">Customer</TableHead>
+                    <TableHead className="font-semibold text-foreground">Date Submitted</TableHead>
+                    <TableHead className="font-semibold text-foreground">Date Completed</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -441,7 +441,7 @@ export function RepairOrderList() {
                           <div className="flex items-center gap-2">
                             {showIcon(orderAny)}
                             <span
-                              className="cursor-pointer text-blue-600 hover:underline"
+                              className="text-blue-600 cursor-pointer hover:underline"
                               onClick={() => {
                                 navigate({
                                   to: '/repair_orders/$id',
@@ -458,7 +458,7 @@ export function RepairOrderList() {
                             {orderAny.salesOrderNumber ? <div>{orderAny.salesOrderNumber}</div> : <div>--</div>}
                           </div>
                         </TableCell>
-                        <TableCell className="font-mono text-sm">{orderAny.vin || '--'}</TableCell>
+                        <TableCell>{orderAny.vin || '--'}</TableCell>
                         <TableCell>{vehicle}</TableCell>
                         <TableCell>
                           <div className="space-y-1 text-sm">

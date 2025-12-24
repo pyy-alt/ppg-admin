@@ -316,19 +316,19 @@ export function RepairOrderDetail() {
   }, []);
   return (
     <div className="bg-background text-foreground">
-      <div className="relative h-40 w-full">
+      <div className="relative w-full h-40">
         <img
           src={navImg}
           alt={brand === 'vw' ? 'VW Navigation' : 'Audi Navigation'}
-          className="mt-6 h-full w-full object-cover"
+          className="object-cover w-full h-full mt-6"
         />
-        <div className="absolute top-1/2 left-6 -translate-y-1/2">
+        <div className="absolute -translate-y-1/2 top-1/2 left-6">
           <p className="text-3xl font-bold text-white">
             {user?.person?.shop?.name || (user?.person?.csrRegion && user?.person?.csrRegion.name) || '--'}
           </p>
-          <p className="mt-4 flex items-center space-x-4 text-sm text-gray-200">
+          <p className="flex items-center mt-4 space-x-4 text-sm text-gray-200">
             {/* House icon */}
-            <Warehouse className="h-5 w-5 text-white" />
+            <Warehouse className="w-5 h-5 text-white" />
             {(user?.person?.shop && (
               <span>
                 Assigned Dealership: {user?.person?.shop?.sponsorDealership.name ?? '--'}({' '}
@@ -336,7 +336,7 @@ export function RepairOrderDetail() {
               </span>
             )) ||
               '--'}
-            <Users className="ml-6 h-5 w-5 text-white" />
+            <Users className="w-5 h-5 ml-6 text-white" />
             <span>
               {' '}
               { user?.person?.type==='ProgramAdministrator'? 'Program Administrator' : user?.person?.type  }: {user?.person?.firstName} {user?.person?.lastName}
@@ -346,12 +346,12 @@ export function RepairOrderDetail() {
         <div className="absolute top-1/2 right-6 max-w-[320px] -translate-y-1/2 text-sm text-gray-200">
           <div className="grid gap-1">
             <div className="grid grid-cols-[24px_1fr] items-center gap-2">
-              <Tag className="h-5 w-5 justify-self-end text-white" aria-hidden="true" />
+              <Tag className="w-5 h-5 text-white justify-self-end" aria-hidden="true" />
               <span className="truncate">{user?.person?.shop?.shopNumber ?? '--'}</span>
             </div>
 
             <div className="my-1 grid grid-cols-[24px_1fr] items-center gap-2">
-              <MapPin className="h-5 w-5 justify-self-end text-white" aria-hidden="true" />
+              <MapPin className="w-5 h-5 text-white justify-self-end" aria-hidden="true" />
               <span className="truncate">
                 {user?.person?.shop?.address ?? '--'},{user?.person?.shop?.city ?? '--'},
                 {user?.person?.shop?.state ?? '--'}&nbsp;
@@ -360,15 +360,15 @@ export function RepairOrderDetail() {
             </div>
 
             <div className="grid grid-cols-[24px_1fr] items-center gap-2">
-              <Map className="h-5 w-5 justify-self-end text-white" aria-hidden="true" />
+              <Map className="w-5 h-5 text-white justify-self-end" aria-hidden="true" />
               <span className="truncate">{user?.person?.shop?.region.name ?? '--'}</span>
             </div>
           </div>
         </div>
       </div>
-      <div className="mx-4 my-6 p-3">
-        <div className="flex w-full flex-col rounded-sm border">
-          <div className="bg-muted text-foreground flex w-full items-center justify-between p-5">
+      <div className="p-3 mx-4 my-6">
+        <div className="flex flex-col w-full border rounded-sm">
+          <div className="flex items-center justify-between w-full p-5 bg-muted text-foreground">
             <h1 className="text-2xl font-bold tracking-tight">
               Repair Order #: &nbsp;{initRepaitOrderData?.roNumber || '--'}
             </h1>
@@ -379,14 +379,14 @@ export function RepairOrderDetail() {
                 <Button
                   onClick={() => setIsMarkRepairAsCompleteDialogOpen(true)}
                   size="sm"
-                  className="h-9 bg-green-600 text-xs font-medium"
+                  className="text-xs font-medium bg-green-600 h-9"
                 >
                   <Check className="mr-1.5 h-3.5 w-3.5" />
                   Mark Repair as Complete
                 </Button>
               ) : null}
               {userType === 'Shop' && initPartsOrderData?.every((order: any) => order.status !== 'RepairCompleted') ? (
-                <Button size="sm" variant="outline" className="h-9 text-xs font-medium" onClick={() => setOpen(true)}>
+                <Button size="sm" variant="outline" className="text-xs font-medium h-9" onClick={() => setOpen(true)}>
                   <Pencil className="mr-1.5 h-3.5 w-3.5" />
                   Edit Repair Order
                 </Button>
@@ -403,7 +403,7 @@ export function RepairOrderDetail() {
               </div>
               <div>
                 <span className="text-muted-foreground">VIN</span>
-                <p className="font-mono">{initRepaitOrderData?.vin || '--'}</p>
+                <p>{initRepaitOrderData?.vin || '--'}</p>
               </div>
               <div>
                 <span className="text-muted-foreground">Year/Make/Model</span>
@@ -444,7 +444,7 @@ export function RepairOrderDetail() {
             <div className="space-y-3 text-sm">
               <div>
                 <span className="text-muted-foreground">Pre-Repair Photos</span>
-                <div className="mt-1 flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 mt-1">
                   {initRepaitOrderData &&
                   initRepaitOrderData?.preRepairPhotoFileAssets &&
                   initRepaitOrderData?.preRepairPhotoFileAssets.length > 0
@@ -482,7 +482,7 @@ export function RepairOrderDetail() {
               </div>
               <div>
                 <span className="text-muted-foreground">Post-Repair Photos</span>
-                <div className="mt-1 flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 mt-1">
                   {initRepaitOrderData?.postRepairPhotoFileAssets &&
                   initRepaitOrderData?.postRepairPhotoFileAssets.length > 0
                     ? initRepaitOrderData?.postRepairPhotoFileAssets?.map((f) => (
@@ -496,9 +496,9 @@ export function RepairOrderDetail() {
             </div>
           </div>
         </div>
-        <div className="my-5 flex flex-col rounded-sm border">
+        <div className="flex flex-col my-5 border rounded-sm">
           {/* 3. Tabs + Main content area */}
-          <div className="bg-muted flex items-center justify-between overflow-hidden p-5">
+          <div className="flex items-center justify-between p-5 overflow-hidden bg-muted">
             {/* Left side：Tiled labels + Warning */}
             <div className="flex items-center gap-6 text-sm font-medium">
               {initPartsOrderData && initPartsOrderData.length > 0 && (
@@ -528,7 +528,7 @@ export function RepairOrderDetail() {
                           setCurrentIndex(index + 1);
                         }}
                       >
-                        {partsOrder.hasAlert && <AlertTriangle className="text-destructive h-4 w-4" />}
+                        {partsOrder.hasAlert && <AlertTriangle className="w-4 h-4 text-destructive" />}
                         Supplement {partsOrder.partsOrderNumber}
                       </Button>
                     ))}
@@ -552,7 +552,7 @@ export function RepairOrderDetail() {
                   }}
                   variant="outline"
                   size="sm"
-                  className="h-9 rounded-lg font-medium"
+                  className="font-medium rounded-lg h-9"
                 >
                   <Plus className="mr-1.5 h-3.5 w-3.5" />
                   Supplemental Parts Order
@@ -560,14 +560,14 @@ export function RepairOrderDetail() {
               )}
           </div>
           {/* 3. True left-right layout */}
-          <div className="m-5 flex gap-8">
-            <div className="max-w-lg flex-1">
+          <div className="flex gap-8 m-5">
+            <div className="flex-1 max-w-lg">
               {((selectedPartsOrderData ||
                 (initPartsOrderData && initPartsOrderData.length > 0 && initPartsOrderData[0])) && (
-                <Card className="rounded-xl border shadow-sm">
+                <Card className="border shadow-sm rounded-xl">
                   <CardHeader className="pb-4">
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-foreground text-base font-semibold">
+                      <CardTitle className="text-base font-semibold text-foreground">
                         Sales Order #: &nbsp;{(selectedPartsOrderData as any)?.salesOrderNumber || '--'}
                       </CardTitle>
                       {(userType === 'Shop' &&
@@ -585,7 +585,7 @@ export function RepairOrderDetail() {
                           }}
                           size="sm"
                           variant="outline"
-                          className="h-9 px-4 text-xs"
+                          className="px-4 text-xs h-9"
                         >
                           <Pencil className="h-3.5 w-3.5" />
                           Edit Parts Order
@@ -596,8 +596,8 @@ export function RepairOrderDetail() {
 
                   <CardContent className="space-y-6 text-sm">
                     <div>
-                      <h4 className="text-muted-foreground mb-3 font-medium">Requested Parts</h4>
-                      <ol className="text-foreground/90 space-y-2 pl-5 font-mono">
+                      <h4 className="mb-3 font-medium text-muted-foreground">Requested Parts</h4>
+                      <ol className="pl-5 space-y-2 text-foreground/90">
                         {((selectedPartsOrderData as any)?.parts?.length > 0 &&
                           (selectedPartsOrderData as any)?.parts?.map((part: string, idx: number) => (
                             <li key={part + idx}>
@@ -631,7 +631,7 @@ export function RepairOrderDetail() {
                 '-- No parts order data'}
             </div>
             {/* Right side：Parts Tracker Timeline（Plain text + Green solid line） */}
-            <div className="min-w-0 flex-1">
+            <div className="flex-1 min-w-0">
               {/* min-w-0 Prevent flex Overflow */}
               <Timeline
                 partsOrder={

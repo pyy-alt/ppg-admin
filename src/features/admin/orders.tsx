@@ -67,7 +67,7 @@ export function PartOrders() {
         Shop: shop.name ? `${shop.name} (${shop.id})` : '--',
         Dealer: dealer.name ? `${dealer.name} (${dealer.id})` : '--',
         'CSR Region': ro.region || '--',
-        'Date Completed': formatDate(order.dateCreated),
+        'Date Submitted': formatDate(order.dateSubmitted),
         'Date Closed': formatDate(ro.dateClosed) || '--',
       };
     });
@@ -260,18 +260,18 @@ export function PartOrders() {
       {/* Header */}
       <div className="bg-background">
         <div className="flex items-center justify-between px-6 py-4">
-          <h1 className="text-foreground text-2xl font-bold">Parts Order List</h1>
+          <h1 className="text-2xl font-bold text-foreground">Parts Order List</h1>
           <Button onClick={exportCSV}>
-            <Download className="mr-2 h-4 w-4" />
+            <Download className="w-4 h-4 mr-2" />
             Report
           </Button>
         </div>
 
         <div className="px-6 py-6">
           {/* Search + Checkbox */}
-          <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center">
-            <div className="relative max-w-md flex-1">
-              <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+          <div className="flex flex-col gap-4 mb-6 lg:flex-row lg:items-center">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute w-4 h-4 -translate-y-1/2 text-muted-foreground top-1/2 left-3" />
               <ClearableInput
                 value={smartFilter}
                 onChange={(e) => setSmartFilter(e.target.value)}
@@ -286,9 +286,9 @@ export function PartOrders() {
                   id="my-orders"
                   checked={filterByWaitingOnMe}
                   onCheckedChange={(checked) => setOnlyMyOrders(checked as boolean)}
-                  className="bg-muted rounded-full"
+                  className="rounded-full bg-muted"
                 />
-                <Label htmlFor="my-orders" className="flex cursor-pointer items-center gap-2 text-sm font-medium">
+                <Label htmlFor="my-orders" className="flex items-center gap-2 text-sm font-medium cursor-pointer">
                   Only View Parts Orders that are waiting On Me
                 </Label>
               </div>
@@ -296,9 +296,9 @@ export function PartOrders() {
           </div>
 
           {/* Complete filter conditions */}
-          <div className="mb-6 flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3 mb-6">
             <Select value={filterByPartsOrderNumber} onValueChange={(value) => setTypeOfOrder(value)}>
-              <SelectTrigger className="bg-muted w-48">
+              <SelectTrigger className="w-48 bg-muted">
                 <SelectValue placeholder="Type of Order" />
               </SelectTrigger>
               <SelectContent>
@@ -311,7 +311,7 @@ export function PartOrders() {
             </Select>
 
             <Select value={filterByStatus} onValueChange={(value) => setFilterByStatus(value)}>
-              <SelectTrigger className="bg-muted w-48">
+              <SelectTrigger className="w-48 bg-muted">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -326,7 +326,7 @@ export function PartOrders() {
             </Select>
 
             <Select value={filterByRegionId} onValueChange={(value) => setCsrRegion(value)}>
-              <SelectTrigger className="bg-muted w-48">
+              <SelectTrigger className="w-48 bg-muted">
                 <SelectValue placeholder="CSR Region" />
               </SelectTrigger>
               <SelectContent>
@@ -351,7 +351,7 @@ export function PartOrders() {
                   setToDate(to);
                 }}
               >
-                <SelectTrigger className="bg-muted w-48">
+                <SelectTrigger className="w-48 bg-muted">
                   <SelectValue placeholder="ALL Dates" />
                 </SelectTrigger>
                 <SelectContent>
@@ -388,26 +388,26 @@ export function PartOrders() {
           </div>
 
           {/* Table */}
-          <div className="bg-background overflow-hidden rounded-lg border shadow-sm">
+          <div className="overflow-hidden border rounded-lg shadow-sm bg-background">
             <Table ref={partsOrderRef}>
               <TableHeader>
                 <TableRow className="bg-muted">
-                  <TableHead className="text-foreground font-semibold">RO #</TableHead>
-                  <TableHead className="text-foreground font-semibold">Sales #</TableHead>
-                  <TableHead className="text-foreground font-semibold">Type</TableHead>
-                  <TableHead className="text-foreground font-semibold">VIN</TableHead>
-                  <TableHead className="text-foreground font-semibold">Year/Make/Model</TableHead>
-                  <TableHead className="text-foreground font-semibold">Status</TableHead>
-                  <TableHead className="text-foreground font-semibold">Shop</TableHead>
-                  <TableHead className="text-foreground font-semibold">Dealer</TableHead>
-                  <TableHead className="text-foreground font-semibold">CSR Region</TableHead>
+                  <TableHead className="font-semibold text-foreground">RO #</TableHead>
+                  <TableHead className="font-semibold text-foreground">Sales #</TableHead>
+                  <TableHead className="font-semibold text-foreground">Type</TableHead>
+                  <TableHead className="font-semibold text-foreground">VIN</TableHead>
+                  <TableHead className="font-semibold text-foreground">Year/Make/Model</TableHead>
+                  <TableHead className="font-semibold text-foreground">Status</TableHead>
+                  <TableHead className="font-semibold text-foreground">Shop</TableHead>
+                  <TableHead className="font-semibold text-foreground">Dealer</TableHead>
+                  <TableHead className="font-semibold text-foreground">CSR Region</TableHead>
                   <SortableTableHead
                     field="dateCreated"
                     currentSortBy={sortBy}
                     currentAscending={sortAscending}
                     onSort={handleSort}
                   >
-                    Date Completed
+                    Date Submitted
                   </SortableTableHead>
                   <SortableTableHead
                     field="dateClosed"
@@ -432,12 +432,10 @@ export function PartOrders() {
                       <Empty>
                         <EmptyHeader>
                           <EmptyMedia variant="icon">
-                            <TableIcon className="h-4 w-4" />
+                            <TableIcon className="w-4 h-4" />
                           </EmptyMedia>
                           <EmptyTitle>No data to display</EmptyTitle>
-                          <EmptyDescription>
-                            No results could be found.
-                          </EmptyDescription>
+                          <EmptyDescription>No results could be found.</EmptyDescription>
                         </EmptyHeader>
                       </Empty>
                     </TableCell>
@@ -445,7 +443,7 @@ export function PartOrders() {
                 ) : (
                   orders.map((order: any) => {
                     const repairOrder = order.repairOrder;
-                    const roNumber = repairOrder?.roNumber || ''
+                    const roNumber = repairOrder?.roNumber || '';
                     const salesOrder = order.salesOrderNumber || '--';
                     const type = getOrderTypeText(order.partsOrderNumber || 0);
                     const vin = repairOrder?.vin || '--';
@@ -460,7 +458,7 @@ export function PartOrders() {
                       ? `${repairOrder.dealership.name || ''} (${repairOrder.dealership.id || ''})`
                       : '--';
                     const region = repairOrder?.region || '--';
-                    const dateCompleted = formatDate(order.dateCreated);
+                    const dateCompleted = formatDate(order.dateSubmitted);
                     const dateClosed = formatDate(repairOrder?.dateClosed);
                     // Determine if there is a note (ordered from alternate dealer)
                     const hasNote = repairOrder?.dealership.id !== repairOrder?.shop.sponsorDealership.id;
@@ -468,7 +466,7 @@ export function PartOrders() {
                     return (
                       <TableRow key={order.id} className="hover:bg-muted/50">
                         <TableCell
-                          className="cursor-pointer text-blue-600 underline"
+                          className="text-blue-600 underline cursor-pointer"
                           onClick={() => {
                             navigate({
                               to: '/repair_orders/$id',
@@ -480,7 +478,7 @@ export function PartOrders() {
                         </TableCell>
                         <TableCell>{salesOrder}</TableCell>
                         <TableCell>{type}</TableCell>
-                        <TableCell className="font-mono text-xs">{vin}</TableCell>
+                        <TableCell>{vin}</TableCell>
                         <TableCell>{yearMakeModel}</TableCell>
                         <TableCell>
                           {/* <Badge
@@ -504,7 +502,7 @@ export function PartOrders() {
                               <TooltipProvider>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <AlertCircle className="h-4 w-4 text-yellow-600 cursor-pointer" />
+                                    <AlertCircle className="w-4 h-4 text-yellow-600 cursor-pointer" />
                                   </TooltipTrigger>
                                   <TooltipContent>
                                     <p>Ordered from an alternate dealer</p>
