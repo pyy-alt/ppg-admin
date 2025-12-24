@@ -40,6 +40,7 @@ import { Route as AuthenticatedRepair_ordersIdRouteImport } from './routes/_auth
 import { Route as AuthenticatedErrorsErrorRouteImport } from './routes/_authenticated/errors/$error'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin/users'
 import { Route as AuthenticatedAdminShopsRouteImport } from './routes/_authenticated/admin/shops'
+import { Route as AuthenticatedAdminRepair_ordersRouteImport } from './routes/_authenticated/admin/repair_orders'
 import { Route as AuthenticatedAdminParts_ordersRouteImport } from './routes/_authenticated/admin/parts_orders'
 import { Route as AuthenticatedAdminDealershipsRouteImport } from './routes/_authenticated/admin/dealerships'
 import { Route as NewRegistrationIdGuidHashRouteImport } from './routes/new-registration/$id/$guid/$hash'
@@ -210,6 +211,12 @@ const AuthenticatedAdminShopsRoute = AuthenticatedAdminShopsRouteImport.update({
   path: '/admin/shops',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminRepair_ordersRoute =
+  AuthenticatedAdminRepair_ordersRouteImport.update({
+    id: '/admin/repair_orders',
+    path: '/admin/repair_orders',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminParts_ordersRoute =
   AuthenticatedAdminParts_ordersRouteImport.update({
     id: '/admin/parts_orders',
@@ -265,6 +272,7 @@ export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/admin/dealerships': typeof AuthenticatedAdminDealershipsRoute
   '/admin/parts_orders': typeof AuthenticatedAdminParts_ordersRoute
+  '/admin/repair_orders': typeof AuthenticatedAdminRepair_ordersRoute
   '/admin/shops': typeof AuthenticatedAdminShopsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
@@ -300,6 +308,7 @@ export interface FileRoutesByTo {
   '/': typeof AuthenticatedIndexRoute
   '/admin/dealerships': typeof AuthenticatedAdminDealershipsRoute
   '/admin/parts_orders': typeof AuthenticatedAdminParts_ordersRoute
+  '/admin/repair_orders': typeof AuthenticatedAdminRepair_ordersRoute
   '/admin/shops': typeof AuthenticatedAdminShopsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
@@ -340,6 +349,7 @@ export interface FileRoutesById {
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/admin/dealerships': typeof AuthenticatedAdminDealershipsRoute
   '/_authenticated/admin/parts_orders': typeof AuthenticatedAdminParts_ordersRoute
+  '/_authenticated/admin/repair_orders': typeof AuthenticatedAdminRepair_ordersRoute
   '/_authenticated/admin/shops': typeof AuthenticatedAdminShopsRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/errors/$error': typeof AuthenticatedErrorsErrorRoute
@@ -379,6 +389,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin/dealerships'
     | '/admin/parts_orders'
+    | '/admin/repair_orders'
     | '/admin/shops'
     | '/admin/users'
     | '/errors/$error'
@@ -414,6 +425,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin/dealerships'
     | '/admin/parts_orders'
+    | '/admin/repair_orders'
     | '/admin/shops'
     | '/admin/users'
     | '/errors/$error'
@@ -453,6 +465,7 @@ export interface FileRouteTypes {
     | '/_authenticated/'
     | '/_authenticated/admin/dealerships'
     | '/_authenticated/admin/parts_orders'
+    | '/_authenticated/admin/repair_orders'
     | '/_authenticated/admin/shops'
     | '/_authenticated/admin/users'
     | '/_authenticated/errors/$error'
@@ -710,6 +723,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminShopsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/repair_orders': {
+      id: '/_authenticated/admin/repair_orders'
+      path: '/admin/repair_orders'
+      fullPath: '/admin/repair_orders'
+      preLoaderRoute: typeof AuthenticatedAdminRepair_ordersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/parts_orders': {
       id: '/_authenticated/admin/parts_orders'
       path: '/admin/parts_orders'
@@ -799,6 +819,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedAdminDealershipsRoute: typeof AuthenticatedAdminDealershipsRoute
   AuthenticatedAdminParts_ordersRoute: typeof AuthenticatedAdminParts_ordersRoute
+  AuthenticatedAdminRepair_ordersRoute: typeof AuthenticatedAdminRepair_ordersRoute
   AuthenticatedAdminShopsRoute: typeof AuthenticatedAdminShopsRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
   AuthenticatedErrorsErrorRoute: typeof AuthenticatedErrorsErrorRoute
@@ -813,6 +834,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedAdminDealershipsRoute: AuthenticatedAdminDealershipsRoute,
   AuthenticatedAdminParts_ordersRoute: AuthenticatedAdminParts_ordersRoute,
+  AuthenticatedAdminRepair_ordersRoute: AuthenticatedAdminRepair_ordersRoute,
   AuthenticatedAdminShopsRoute: AuthenticatedAdminShopsRoute,
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
   AuthenticatedErrorsErrorRoute: AuthenticatedErrorsErrorRoute,

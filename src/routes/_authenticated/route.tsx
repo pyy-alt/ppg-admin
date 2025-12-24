@@ -37,7 +37,7 @@ const ROLE_REDIRECT_CONFIG: Record<PersonType, RoleConfig> = {
   ProgramAdministrator: {
     forbiddenRoute: '/admin/parts_orders',
     defaultRoute: '/admin/parts_orders',
-    allowedRoutes: ['/admin', '/parts_orders', '/repair_orders'],
+    allowedRoutes: ['/admin', '/parts_orders', '/admin/repair_orders'],
   },
   Shop: {
     forbiddenRoute: '/repair_orders',
@@ -227,7 +227,7 @@ function AuthenticatedRouteComponent() {
 
       {/* Global loading overlay */}
       {isLoading && (
-        <div className="fixed inset-0 z-9999 flex items-center justify-center bg-black/20 backdrop-blur-sm">
+        <div className="fixed inset-0 flex items-center justify-center z-9999 bg-black/20 backdrop-blur-sm">
           <Loading />
         </div>
       )}

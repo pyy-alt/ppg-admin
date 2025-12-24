@@ -36,7 +36,11 @@ export function Dealerships() {
   >('dateLastSubmitted');
   const [sortAscending, setSortAscending] = useState(false); // false 为降序（最新在前）
 
-  const getTeamMembers = async (userType: 'Shop' | 'Dealership' | 'Network', organizationId: number | undefined) => {
+  const getTeamMembers = async (
+    userType: 'Shop' | 'Dealership' | 'Network',
+    organizationId: number | undefined,
+    useActive: string | undefined = undefined
+  ) => {
     try {
       const personApi = new PersonApi();
       const request: any = PersonSearchRequest.create({
@@ -51,7 +55,15 @@ export function Dealerships() {
 
       personApi.search(request, {
         status200: (data) => {
-          setTeamMembers(data.persons);
+          if (useActive === 'Active') {
+            const users = data.persons.filter((item: any) => item.status === 'Active');
+            setTeamMembers(users);
+          } else if (useActive === 'Pending') {
+            const users = data.persons.filter((item: any) => item.status === 'Pending' || item.status ==='RegistrationRequested');
+            setTeamMembers(users);
+          } else {
+            setTeamMembers(data.persons);
+          }
           setIsShowAdminTeam(true);
         },
         error: (error) => {
@@ -311,7 +323,7 @@ export function Dealerships() {
                         <TableCell
                           className="text-center text-blue-600 underline hover:cursor-pointer"
                           onClick={() => {
-                            getTeamMembers('Dealership', dealer.id);
+                            getTeamMembers('Dealership', dealer.id, 'Active');
                           }}
                         >
                           {dealer.countActiveUsers ?? 0}
@@ -319,7 +331,7 @@ export function Dealerships() {
                         <TableCell
                           className="text-center text-blue-600 underline hover:cursor-pointer"
                           onClick={() => {
-                            getTeamMembers('Dealership', dealer.id);
+                            getTeamMembers('Dealership', dealer.id, 'Pending');
                           }}
                         >
                           {dealer.countPendingUsers ?? 0}

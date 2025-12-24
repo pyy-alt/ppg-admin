@@ -41,7 +41,11 @@ export function Shops() {
 
   const [sortAscending, setSortAscending] = useState(false); // false 为降序（最新在前）
 
-  const getTeamMembers = async (userType: 'Shop' | 'Dealership', organizationId: number | undefined) => {
+  const getTeamMembers = async (
+    userType: 'Shop' | 'Dealership',
+    organizationId: number | undefined,
+    useActive: string | undefined = undefined
+  ) => {
     try {
       const personApi = new PersonApi();
       const request: any = PersonSearchRequest.create({
@@ -56,7 +60,15 @@ export function Shops() {
 
       personApi.search(request, {
         status200: (data) => {
-          setTeamMembers(data.persons);
+          if (useActive === 'Active') {
+            const users = data.persons.filter((item: any) => item.status === 'Active');
+            setTeamMembers(users);
+          } else if (useActive === 'Pending') {
+            const users = data.persons.filter((item: any) => item.status === 'Pending' || item.status ==='RegistrationRequested');
+            setTeamMembers(users);
+          } else {
+            setTeamMembers(data.persons);
+          }
           setIsShowAdminTeam(true);
         },
         error: (error) => {
@@ -298,9 +310,7 @@ export function Shops() {
                   <TableIcon className="w-4 h-4" />
                 </EmptyMedia>
                 <EmptyTitle>No data to display</EmptyTitle>
-                <EmptyDescription>
-                  No results could be found.
-                </EmptyDescription>
+                <EmptyDescription>No results could be found.</EmptyDescription>
               </EmptyHeader>
             </Empty>
           </div>
@@ -402,12 +412,12 @@ export function Shops() {
                         <TableCell className="font-medium text-blue-600">
                           <span
                             className="cursor-pointer hover:underline"
-                            onClick={() => {
-                              navigate({
-                                to: '/repair_orders',
-                                search: { id: shop.id },
-                              });
-                            }}
+                            // onClick={() => {
+                            //   navigate({
+                            //     to: '/repair_orders',
+                            //     search: { id: shop.id },
+                            //   });
+                            // }}
                           >
                             {shop.name || '--'}
                           </span>
@@ -415,19 +425,19 @@ export function Shops() {
                         <TableCell>{shop.shopNumber || '--'}</TableCell>
                         <TableCell
                           className="font-medium text-center text-blue-600 underline"
-                          onClick={() => {
-                            navigate({
-                              to: '/repair_orders',
-                              search: { id: shop.id.toString() },
-                            });
-                          }}
+                          // onClick={() => {
+                          //   navigate({
+                          //     to: '/repair_orders',
+                          //     search: { id: shop.id.toString() },
+                          //   });
+                          // }}
                         >
                           {shop.countPendingOrders ?? 0}
                         </TableCell>
                         <TableCell
                           className="text-center text-blue-600 underline hover:cursor-pointer"
                           onClick={() => {
-                            getTeamMembers('Shop', shop.id);
+                            getTeamMembers('Shop', shop.id, 'Active');
                           }}
                         >
                           {shop.countActiveUsers ?? 0}
@@ -435,7 +445,7 @@ export function Shops() {
                         <TableCell
                           className="text-center text-blue-600 underline hover:cursor-pointer"
                           onClick={() => {
-                            getTeamMembers('Shop', shop.id);
+                            getTeamMembers('Shop', shop.id, 'Pending');
                           }}
                         >
                           {shop.countPendingUsers ?? 0}
@@ -475,7 +485,12 @@ export function Shops() {
           </>
         )}
       </div>
-      <ViewTeamDialog teamMembers={teamMembers} open={isShowAdminTeam} onOpenChange={setIsShowAdminTeam} onSuccess={getTeamMembers} />
+      <ViewTeamDialog
+        teamMembers={teamMembers}
+        open={isShowAdminTeam}
+        onOpenChange={setIsShowAdminTeam}
+        onSuccess={getTeamMembers}
+      />
     </div>
   );
 }
