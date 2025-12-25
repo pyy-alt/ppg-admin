@@ -1,478 +1,567 @@
 {
   "common": {
-    "save": "",
-    "cancel": "",
-    "update": "",
-    "delete": "",
-    "edit": "",
-    "create": "",
-    "creating": "",
-    "close": "",
-    "submit": "",
-    "submiting": "",
-    "loading": "",
-    "error": "",
-    "success": "",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "update": "Mettre à jour",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "create": "Créer",
+    "creating": "Création en cours...",
+    "close": "Fermer",
+    "submit": "Soumettre",
+    "submiting": "Soumission en cours...",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
     "messages": {
-      "exportSuccess": "",
-      "exportFailed": ""
+      "exportSuccess": "Exporté avec succès",
+      "exportFailed": "Échec de l'export"
     },
     "empty": {
-      "title": "",
-      "description": ""
+      "title": "Aucune donnée à afficher",
+      "description": "Aucun résultat n'a été trouvé."
     }
   },
   "auth": {
     "login": {
-      "title": "",
-      "emailPlaceholder": "",
-      "passwordPlaceholder": "",
-      "rememberMe": "",
-      "forgotPassword": "",
-      "loggingIn": "",
-      "submit": "",
-      "noAccount": "",
-      "registerAsShop": "",
-      "registerAsDealer": "",
+      "title": "Connexion",
+      "emailPlaceholder": "Courriel",
+      "passwordPlaceholder": "Mot de passe",
+      "rememberMe": "Se souvenir de moi",
+      "forgotPassword": "Mot de passe oublié",
+      "loggingIn": "Connexion en cours...",
+      "submit": "Se connecter",
+      "noAccount": "Vous n'avez pas de compte ?",
+      "registerAsShop": "S'inscrire en tant qu'atelier",
+      "registerAsDealer": "S'inscrire en tant que concessionnaire",
       "success": {
-        "welcome": ""
+        "welcome": "Bienvenue, {{name}} !"
       },
       "errors": {
-        "emailPasswordRequired": "",
-        "invalidSession": "",
-        "networkError": "",
-        "networkErrorDefault": "",
-        "unexpectedError": ""
+        "emailPasswordRequired": "Veuillez saisir votre courriel et votre mot de passe",
+        "invalidSession": "Données de session invalides",
+        "networkError": "Erreur réseau, veuillez réessayer {{error}}",
+        "networkErrorDefault": "Erreur réseau, veuillez réessayer",
+        "unexpectedError": "Une erreur inattendue s'est produite"
       }
     },
     "forgotPassword": {
-      "title": "",
-      "logoAlt": "",
-      "emailPlaceholder": "",
-      "sending": "",
-      "submit": "",
-      "success": "",
+      "title": "Mot de passe oublié",
+      "logoAlt": "Réparation de collision autorisée Audi",
+      "emailPlaceholder": "Entrez votre courriel",
+      "sending": "Envoi en cours...",
+      "submit": "Envoyer le lien de réinitialisation",
+      "success": "Le lien de réinitialisation du mot de passe a été envoyé à {{email}}",
       "errors": {
-        "sendFailed": ""
+        "sendFailed": "Échec de l'envoi du lien de réinitialisation. Veuillez réessayer."
       }
     },
     "resetPassword": {
-      "title": "",
-      "newPassword": "",
-      "newPasswordPlaceholder": "",
-      "confirmPassword": "",
-      "confirmPasswordPlaceholder": "",
-      "backToLogin": "",
-      "updating": "",
-      "update": "",
-      "success": "",
+      "title": "Changer le mot de passe",
+      "newPassword": "Nouveau mot de passe",
+      "newPasswordPlaceholder": "Saisissez le nouveau mot de passe",
+      "confirmPassword": "Confirmer le mot de passe",
+      "confirmPasswordPlaceholder": "Confirmez le nouveau mot de passe",
+      "backToLogin": "Retour à la connexion",
+      "updating": "Mise à jour en cours...",
+      "update": "Mettre à jour",
+      "success": "Votre mot de passe a été mis à jour avec succès.",
       "invalidLink": {
-        "title": "",
-        "description": "",
-        "requestNew": "",
-        "backToLogin": ""
+        "title": "Lien de réinitialisation invalide",
+        "description": "Le lien de réinitialisation du mot de passe est invalide ou a expiré. Veuillez en demander un nouveau.",
+        "requestNew": "Demander un nouveau lien",
+        "backToLogin": "Retour à la connexion"
       },
       "errors": {
-        "invalidLink": "",
-        "validateFailed": "",
-        "passwordMismatch": "",
-        "passwordTooShort": "",
-        "resetFailed": ""
+        "invalidLink": "Le lien de réinitialisation est invalide ou a expiré.",
+        "validateFailed": "Échec de la validation du lien de réinitialisation. Veuillez réessayer.",
+        "passwordMismatch": "Les mots de passe ne correspondent pas.",
+        "passwordTooShort": "Le mot de passe doit comporter au moins 8 caractères.",
+        "resetFailed": "Échec de la réinitialisation du mot de passe. Veuillez réessayer."
       }
     },
     "landing": {
-      "title": "",
-      "backgroundAlt": "",
-      "logoAlt": "",
-      "login": "",
-      "registerAsShop": "",
-      "registerAsDealer": "",
+      "title": "Suivi des pièces restreintes Audi",
+      "backgroundAlt": "Motif décoratif d'arrière-plan",
+      "logoAlt": "Logo Réparation de collision autorisée Audi",
+      "login": "Se connecter",
+      "registerAsShop": "S'inscrire en tant qu'atelier",
+      "registerAsDealer": "S'inscrire en tant que concessionnaire",
       "language": {
-        "english": "",
-        "french": ""
+        "english": "English",
+        "french": "Français"
       }
     },
     "welcomeGate": {
-      "title": "",
-      "backgroundAlt": "",
-      "audiAmerica": "",
-      "vwAmerica": "",
-      "audiCanada": "",
-      "vwCanada": "",
+      "title": "Suivi des pièces restreintes",
+      "backgroundAlt": "Arrière-plan de réparation de collision",
+      "audiAmerica": "Réparation de collision autorisée Audi - Groupe des Amériques",
+      "vwAmerica": "Programme d'installation de réparation de collision certifiée Volkswagen - Groupe des Amériques",
+      "audiCanada": "Réparation de collision autorisée Audi - Groupe du Canada",
+      "vwCanada": "Programme d'installation de réparation de collision certifiée Volkswagen - Groupe du Canada",
       "language": {
-        "english": "",
-        "french": ""
+        "english": "English",
+        "french": "Français"
       }
     }
   },
   "partsOrder": {
-    "title": "",
-    "newOrder": "",
-    "editOrder": "",
-    "supplement": "",
-    "newSupplement": "",
-    "editSupplement": "",
+    "title": "Commande de pièces",
+    "newOrder": "Nouvelle commande de pièces",
+    "editOrder": "Modifier la commande de pièces",
+    "supplement": "Supplément",
+    "newSupplement": "Nouveau supplément",
+    "editSupplement": "Modifier le supplément",
     "list": {
-      "title": "",
-      "report": "",
-      "searchPlaceholder": "",
-      "onlyWaitingOnMe": "",
-      "typePlaceholder": "",
-      "statusPlaceholder": "",
-      "regionPlaceholder": "",
-      "dateRangeLabel": "",
-      "dateRangePlaceholder": "",
+      "title": "Liste des commandes de pièces",
+      "report": "Rapport",
+      "searchPlaceholder": "Filtrer par n° RO, n° commande vente, NIV, atelier, concessionnaire",
+      "onlyWaitingOnMe": "Afficher uniquement les commandes de pièces en attente de ma part",
+      "typePlaceholder": "Type de commande",
+      "statusPlaceholder": "Statut",
+      "regionPlaceholder": "Région CSR",
+      "dateRangeLabel": "Plage de dates de soumission",
+      "dateRangePlaceholder": "Toutes les dates",
       "dateRangeOptions": {
-        "7": "",
-        "30": "",
-        "all": "",
-        "month-to-date": "",
-        "quarter-to-date": "",
-        "year-to-date": "",
-        "last-month": "",
-        "last-quarter": "",
-        "last-year": "",
-        "custom": ""
+        "7": "7 derniers jours",
+        "30": "30 derniers jours",
+        "all": "Toutes les dates",
+        "month-to-date": "Mois en cours",
+        "quarter-to-date": "Trimestre en cours",
+        "year-to-date": "Année en cours",
+        "last-month": "Mois dernier",
+        "last-quarter": "Trimestre dernier",
+        "last-year": "Année dernière",
+        "custom": "Personnalisé"
       },
       "tableHeaders": {
-        "ro": "",
-        "sales": "",
-        "type": "",
-        "vin": "",
-        "ymm": "",
-        "status": "",
-        "shop": "",
-        "dealer": "",
-        "csrRegion": "",
-        "dateSubmitted": "",
-        "dateClosed": ""
+        "ro": "N° RO",
+        "sales": "N° vente",
+        "type": "Type",
+        "vin": "NIV",
+        "ymm": "Année/Marque/Modèle",
+        "status": "Statut",
+        "shop": "Atelier",
+        "dealer": "Concessionnaire",
+        "csrRegion": "Région CSR",
+        "dateSubmitted": "Date de soumission",
+        "dateClosed": "Date de clôture"
       },
-      "noData": "",
-      "loading": "",
+      "noData": "Aucune commande de pièces trouvée",
+      "loading": "Chargement des commandes de pièces...",
       "empty": {
-        "title": "",
-        "description": ""
+        "title": "Aucune donnée à afficher",
+        "description": "Aucun résultat n'a été trouvé."
       },
       "tooltip": {
-        "orderedFromAlternateDealer": ""
+        "orderedFromAlternateDealer": "Commandé auprès d'un concessionnaire alternatif"
       },
-      "dateRangePickerPlaceholder": "",
+      "dateRangePickerPlaceholder": "Sélectionner une plage de dates",
       "type": {
-        "all": "",
-        "placeholder": ""
+        "all": "Tous les types",
+        "placeholder": "Type de commande"
       },
       "status": {
-        "all": "",
-        "placeholder": ""
+        "all": "Tous les statuts",
+        "placeholder": "Statut"
       },
       "region": {
-        "all": "",
-        "placeholder": ""
+        "all": "Toutes les régions",
+        "placeholder": "Région CSR"
       },
       "columns": {
-        "ro": "",
-        "sales": "",
-        "type": "",
-        "vin": "",
-        "ymm": "",
-        "status": "",
-        "shop": "",
-        "dealer": "",
-        "csrRegion": "",
-        "dateSubmitted": "",
-        "dateClosed": ""
+        "ro": "N° RO",
+        "sales": "N° vente",
+        "type": "Type",
+        "vin": "NIV",
+        "ymm": "Année/Marque/Modèle",
+        "status": "Statut",
+        "shop": "Atelier",
+        "dealer": "Concessionnaire",
+        "csrRegion": "Région CSR",
+        "dateSubmitted": "Date de soumission",
+        "dateClosed": "Date de clôture"
       },
-      "exportSuccess": "",
-      "exportFailed": "",
-      "fetchErrorPrefix": "",
-      "fetchError": "",
-      "filterPlaceholder": "",
-      "onlyViewWaitingOnMe": "",
+      "exportSuccess": "Exporté avec succès",
+      "exportFailed": "Échec de l'export",
+      "fetchErrorPrefix": "Erreur",
+      "fetchError": "Échec du chargement des données",
+      "filterPlaceholder": "Filtrer par n° RO, n° commande vente, NIV, atelier, concessionnaire",
+      "onlyViewWaitingOnMe": "Afficher uniquement les commandes de pièces en attente de ma part",
       "dateSubmittedRange": {
-        "label": ""
+        "label": "Plage de dates de soumission"
       },
       "dateRange": {
-        "placeholder": "",
-        "all": "",
-        "last7": "",
-        "last30": "",
-        "monthToDate": "",
-        "quarterToDate": "",
-        "yearToDate": "",
-        "lastMonth": "",
-        "lastQuarter": "",
-        "lastYear": "",
-        "custom": ""
+        "placeholder": "Toutes les dates",
+        "all": "Toutes les dates",
+        "last7": "7 derniers jours",
+        "last30": "30 derniers jours",
+        "monthToDate": "Mois en cours",
+        "quarterToDate": "Trimestre en cours",
+        "yearToDate": "Année en cours",
+        "lastMonth": "Mois dernier",
+        "lastQuarter": "Trimestre dernier",
+        "lastYear": "Année dernière",
+        "custom": "Personnalisé"
       }
     },
     "types": {
-      "0": "",
-      "1": "",
-      "2": "",
-      "3": ""
+      "0": "Commande de pièces",
+      "1": "Supplément 1",
+      "2": "Supplément 2",
+      "3": "Supplément 3"
     },
     "status": {
-      "CsrReview": "",
-      "CsrRejected": "",
-      "DealershipProcessing": "",
-      "DealershipShipped": "",
-      "ShopReceived": "",
-      "RepairCompleted": ""
+      "CsrReview": "Examen CSR",
+      "CsrRejected": "Rejeté par CSR",
+      "DealershipProcessing": "Traitement par le concessionnaire",
+      "DealershipShipped": "Expédié par le concessionnaire",
+      "ShopReceived": "Reçu par l'atelier",
+      "RepairCompleted": "Réparation terminée"
     },
     "messages": {
-      "exportSuccess": "",
-      "exportFailed": "",
-      "fetchError": "",
-      "fetchErrorDefault": ""
+      "exportSuccess": "Exporté avec succès",
+      "exportFailed": "Échec de l'export",
+      "fetchError": "Erreur : {{error}}",
+      "fetchErrorDefault": "Échec du chargement des données"
     },
     "type": {
-      "partsOrder": "",
-      "supplement": ""
+      "partsOrder": "Commande de pièces",
+      "supplement": "Supplément {{n}}"
     }
   },
   "shop": {
     "list": {
-      "title": "",
-      "report": "",
-      "searchPlaceholder": "",
-      "statusPlaceholder": "",
+      "title": "Gérer les ateliers",
+      "report": "Rapport",
+      "searchPlaceholder": "Filtrer par nom, n°, ville",
+      "statusPlaceholder": "Statut",
       "status": {
-        "all": "",
-        "certified": "",
-        "closed": "",
-        "inProcess": "",
-        "suspended": "",
-        "terminated": ""
+        "all": "Tous les statuts",
+        "certified": "Certifié",
+        "closed": "Fermé",
+        "inProcess": "En cours",
+        "suspended": "Suspendu",
+        "terminated": "Résilié"
       },
-      "certificationPlaceholder": "",
+      "certificationPlaceholder": "Certification",
       "certification": {
-        "all": "",
-        "audiHybrid": "",
-        "audiUltra": "",
-        "vw": ""
+        "all": "Toutes les certifications",
+        "audiHybrid": "Audi Hybrid",
+        "audiUltra": "Audi Ultra",
+        "vw": "VW"
       },
-      "regionPlaceholder": "",
+      "regionPlaceholder": "Région CSR",
       "region": {
-        "all": ""
+        "all": "Toutes les régions"
       }
     }
   },
   "dealership": {
     "list": {
-      "title": "",
-      "report": "",
-      "searchPlaceholder": "",
+      "title": "Gérer les concessionnaires",
+      "report": "Rapport",
+      "searchPlaceholder": "Filtrer par nom, n°, ville",
       "tableHeaders": {
-        "name": "",
-        "number": "",
-        "pendingOrders": "",
-        "city": "",
-        "state": "",
-        "activeUsers": "",
-        "pendingUsers": ""
+        "name": "Nom",
+        "number": "Numéro",
+        "pendingOrders": "N° de commandes en attente",
+        "city": "Ville",
+        "state": "État/Province",
+        "activeUsers": "N° d'utilisateurs actifs",
+        "pendingUsers": "N° d'utilisateurs en attente"
       }
     }
   },
   "user": {
     "list": {
-      "title": "",
-      "addNew": "",
-      "searchPlaceholder": "",
-      "rolePlaceholder": "",
+      "title": "Gérer les utilisateurs du réseau",
+      "addNew": "Ajouter un nouvel utilisateur",
+      "searchPlaceholder": "Filtrer par prénom, nom, courriel",
+      "rolePlaceholder": "Rôle",
       "role": {
-        "all": "",
-        "csr": "",
-        "fieldStaff": "",
-        "programAdministrator": ""
+        "all": "Tous les rôles",
+        "csr": "CSR",
+        "fieldStaff": "Personnel sur le terrain",
+        "programAdministrator": "Administrateur du programme"
       },
-      "regionPlaceholder": "",
+      "regionPlaceholder": "Région CSR",
       "region": {
-        "all": ""
+        "all": "Toutes les régions"
       },
-      "showInactive": "",
+      "showInactive": "Afficher les utilisateurs inactifs",
       "tableHeaders": {
-        "firstName": "",
-        "lastName": "",
-        "email": "",
-        "role": "",
-        "region": "",
-        "dateAdded": "",
-        "dateLastAccessed": "",
-        "status": ""
+        "firstName": "Prénom",
+        "lastName": "Nom",
+        "email": "Courriel",
+        "role": "Rôle",
+        "region": "Région",
+        "dateAdded": "Date d'ajout",
+        "dateLastAccessed": "Date de dernière connexion",
+        "status": "Statut"
       },
-      "allRegions": "",
-      "pendingRegistration": ""
+      "allRegions": "Toutes les régions",
+      "pendingRegistration": "Inscription en attente"
     },
-    "firstName": ""
+    "firstName": "Prénom",
+    "type": {
+      "admin": "Administrateur du programme"
+    }
   },
   "repairOrder": {
     "messages": {
-      "loadFailed": "",
-      "createFailed": "",
-      "error": "",
-      "approveSuccess": "",
-      "approveFailed": "",
-      "rejectSuccess": "",
-      "rejectFailed": "",
-      "resubmitSuccess": "",
-      "resubmitFailed": "",
-      "shippedSuccess": "",
-      "shippedFailed": "",
-      "receivedSuccess": "",
-      "receivedFailed": "",
-      "completeSuccess": "",
-      "completeFailed": ""
+      "loadFailed": "Échec du chargement du bon de réparation",
+      "createFailed": "Échec de la création du bon de réparation",
+      "error": "Erreur",
+      "approveSuccess": "Commande de pièces approuvée avec succès",
+      "approveFailed": "Échec de l'approbation de la commande de pièces",
+      "rejectSuccess": "Commande de pièces rejetée avec succès",
+      "rejectFailed": "Échec du rejet de la commande de pièces",
+      "resubmitSuccess": "Commande de pièces resoumise avec succès",
+      "resubmitFailed": "Échec de la resoumission de la commande de pièces",
+      "shippedSuccess": "Commande de pièces marquée comme expédiée avec succès",
+      "shippedFailed": "Échec du marquage comme expédiée",
+      "receivedSuccess": "Commande de pièces marquée comme reçue avec succès",
+      "receivedFailed": "Échec du marquage comme reçue",
+      "completeSuccess": "Bon de réparation marqué comme terminé avec succès",
+      "completeFailed": "Échec du marquage comme terminé"
     },
     "navigation": {
-      "vw": "",
-      "audi": ""
+      "vw": "Navigation Volkswagen",
+      "audi": "Navigation Audi"
     },
     "header": {
-      "assignedDealership": "",
-      "fieldSupportTeam": ""
+      "assignedDealership": "Concessionnaire assigné",
+      "fieldSupportTeam": "Équipe de soutien sur le terrain"
     },
     "list": {
-      "title": "",
-      "newRepairOrder": "",
-      "searchPlaceholder": "",
-      "statusPlaceholder": "",
+      "title": "Liste des bons de réparation",
+      "newRepairOrder": "Nouveau bon de réparation",
+      "searchPlaceholder": "Filtrer par n° RO, n° commande, NIV, client",
+      "statusPlaceholder": "Statut",
       "status": {
-        "all": ""
+        "all": "Tous les statuts"
       },
-      "dateRangePlaceholder": "",
-      "showRepairCompleted": "",
+      "dateRangePlaceholder": "Plage de dates",
+      "showRepairCompleted": "Afficher les réparations terminées",
       "empty": {
-        "noOrdersForShop": ""
+        "noOrdersForShop": "Cet atelier n'a pas encore de bons de réparation. Les bons de réparation apparaîtront ici une fois créés.",
+        "title": "Aucune donnée à afficher",
+        "noResults": "Aucun résultat n'a été trouvé."
       },
       "tableHeaders": {
-        "ro": "",
-        "order": "",
-        "vin": "",
-        "ymm": "",
-        "status": "",
-        "customer": "",
-        "dateSubmitted": "",
-        "dateCompleted": ""
-      }
+        "ro": "N° RO",
+        "order": "N° commande",
+        "vin": "NIV",
+        "ymm": "Année/Marque/Modèle",
+        "status": "Statut",
+        "customer": "Client",
+        "dateSubmitted": "Date de soumission",
+        "dateCompleted": "Date de clôture"
+      },
+      "fetchError": "Échec du chargement des bons de réparation",
+      "assignedDealership": "Concessionnaire assigné",
+      "fieldSupportTeam": "Équipe de soutien sur le terrain",
+      "createFailed": "Échec de la création du bon de réparation",
+      "dateRangeOptions": {
+        "7": "7 derniers jours",
+        "30": "30 derniers jours",
+        "all": "Toutes les dates",
+        "monthToDate": "Mois en cours",
+        "quarterToDate": "Trimestre en cours",
+        "yearToDate": "Année en cours",
+        "lastMonth": "Mois dernier",
+        "lastQuarter": "Trimestre dernier",
+        "lastYear": "Année dernière",
+        "custom": "Personnalisé"
+      },
+      "dateRangePickerPlaceholder": "Sélectionner une plage de dates"
+    },
+    "status": {
+      "CsrReview": "Examen CSR",
+      "CsrRejected": "Rejeté par CSR",
+      "DealershipProcessing": "Traitement par le concessionnaire",
+      "DealershipShipped": "Expédié par le concessionnaire",
+      "ShopReceived": "Reçu par l'atelier",
+      "RepairCompleted": "Réparation terminée"
     },
     "detail": {
-      "title": "",
-      "markComplete": "",
-      "editRepairOrder": "",
-      "customer": "",
-      "vin": "",
-      "ymm": "",
-      "dateSubmitted": "",
-      "by": "",
-      "submittedTo": "",
-      "dateClosed": "",
-      "preRepairPhotos": "",
-      "structuralMeasurements": "",
-      "postRepairPhotos": "",
-      "supplementalPartsOrder": "",
-      "salesOrder": "",
-      "editPartsOrder": "",
-      "requestedParts": "",
-      "noPartsRequested": "",
-      "partsEstimate": "",
-      "noEstimateFile": ""
+      "title": "Bon de réparation n°",
+      "markComplete": "Marquer la réparation comme terminée",
+      "editRepairOrder": "Modifier le bon de réparation",
+      "customer": "Client",
+      "vin": "NIV",
+      "ymm": "Année/Marque/Modèle",
+      "dateSubmitted": "Date de soumission",
+      "submittedTo": "Soumis à",
+      "dateClosed": "Date de clôture",
+      "preRepairPhotos": "Photos avant réparation",
+      "structuralMeasurements": "Mesures structurelles",
+      "postRepairPhotos": "Photos après réparation",
+      "salesOrder": "N° de commande de vente",
+      "editPartsOrder": "Modifier la commande de pièces",
+      "requestedParts": "Pièces demandées",
+      "noPartsRequested": "-- Aucune pièce demandée",
+      "partsEstimate": "Estimation des pièces",
+      "noEstimateFile": "-- Aucun fichier d'estimation",
+      "noPartsOrderData": "-- Aucune donnée de commande de pièces",
+      "partsOrder": "Commande de pièces",
+      "supplement": "Supplément",
+      "supplementalPartsOrder": "Commande de pièces supplémentaire",
+      "approveSuccess": "Commande de pièces approuvée avec succès",
+      "approveFailed": "Échec de l'approbation de la commande de pièces",
+      "rejectSuccess": "Commande de pièces rejetée avec succès",
+      "rejectFailed": "Échec du rejet de la commande de pièces",
+      "resubmitSuccess": "Commande de pièces resoumise avec succès",
+      "resubmitFailed": "Échec de la resoumission de la commande de pièces",
+      "shippedSuccess": "Commande de pièces marquée comme expédiée avec succès",
+      "shippedFailed": "Échec du marquage comme expédiée",
+      "receivedSuccess": "Commande de pièces marquée comme reçue avec succès",
+      "receivedFailed": "Échec du marquage comme reçue",
+      "completeSuccess": "Bon de réparation marqué comme terminé avec succès",
+      "completeFailed": "Échec du marquage comme terminé",
+      "fetchError": "Échec du chargement des données",
+      "assignedDealership": "Concessionnaire assigné",
+      "by": "par"
+    },
+    "registration": {
+      "shop": {
+        "success": "Inscription réussie ! Veuillez vérifier votre courriel.",
+        "errors": {
+          "registrationFailed": "Échec de l'inscription. Veuillez réessayer. {{error}}",
+          "registrationFailedDefault": "Échec de l'inscription. Veuillez réessayer."
+        },
+        "bannerAlt": "Inscription d'un nouvel utilisateur atelier",
+        "sections": {
+          "personalInfo": "Renseignements personnels",
+          "shopInfo": "Renseignements sur l'atelier",
+          "associatedDealership": "Concessionnaire associé"
+        },
+        "fields": {
+          "firstName": "Prénom",
+          "lastName": "Nom",
+          "email": "Courriel",
+          "shopName": "Nom de l'atelier",
+          "shopNumber": "N° d'atelier",
+          "dealershipName": "Nom du concessionnaire",
+          "dealershipNumber": "N° de concessionnaire"
+        },
+        "placeholders": {
+          "firstName": "Saisissez le prénom",
+          "lastName": "Saisissez le nom",
+          "email": "Saisissez l'adresse courriel",
+          "shopName": "Saisissez le nom de l'atelier",
+          "shopNumber": "Saisissez le numéro d'atelier",
+          "dealershipName": "Saisissez le nom du concessionnaire",
+          "dealershipNumber": "Saisissez le numéro de concessionnaire"
+        },
+        "registering": "Inscription en cours...",
+        "register": "S'inscrire"
+      },
+      "dealership": {
+        "success": "Inscription réussie ! Veuillez vérifier votre courriel.",
+        "errors": {
+          "registrationFailedDefault": "Échec de l'inscription. Veuillez réessayer."
+        },
+        "bannerAlt": "Inscription d'un nouvel utilisateur concessionnaire",
+        "sections": {
+          "personalInfo": "Renseignements personnels",
+          "dealershipInfo": "Renseignements sur le concessionnaire"
+        },
+        "fields": {
+          "firstName": "Prénom",
+          "lastName": "Nom",
+          "email": "Courriel",
+          "dealershipName": "Nom du concessionnaire",
+          "dealershipNumber": "N° de concessionnaire"
+        },
+        "placeholders": {
+          "firstName": "Saisissez le prénom",
+          "lastName": "Saisissez le nom",
+          "email": "Saisissez l'adresse courriel",
+          "dealershipName": "Saisissez le nom du concessionnaire",
+          "dealershipNumber": "Saisissez le numéro de concessionnaire"
+        },
+        "registering": "Inscription en cours...",
+        "register": "S'inscrire"
+      },
+      "complete": {
+        "errors": {
+          "invalidParams": "Paramètres de lien d'inscription invalides.",
+          "invalidLink": "Le lien d'inscription est invalide ou a expiré.",
+          "validateFailed": "Échec de la validation du lien. Veuillez réessayer.",
+          "passwordMismatch": "Les mots de passe ne correspondent pas.",
+          "passwordTooShort": "Le mot de passe doit comporter au moins 8 caractères.",
+          "completeFailed": "Échec de la finalisation de l'inscription. Veuillez réessayer."
+        },
+        "success": "Inscription terminée avec succès !",
+        "bannerAlt": "Inscription d'un nouvel utilisateur atelier",
+        "sections": {
+          "personalInfo": "Renseignements personnels",
+          "shopInfo": "Renseignements sur l'atelier",
+          "password": "Mot de passe"
+        },
+        "fields": {
+          "email": "Courriel",
+          "firstName": "Prénom",
+          "lastName": "Nom",
+          "shopName": "Nom",
+          "shopNumber": "Numéro",
+          "address": "Adresse",
+          "password": "Mot de passe",
+          "confirmPassword": "Confirmer le mot de passe"
+        },
+        "placeholders": {
+          "password": "Saisissez votre mot de passe",
+          "confirmPassword": "Confirmez votre mot de passe"
+        },
+        "hidePassword": "Masquer le mot de passe",
+        "showPassword": "Afficher le mot de passe",
+        "completing": "Finalisation en cours...",
+        "submit": "Terminer l'inscription"
+      }
+    },
+    "brand": {
+      "vw": "Navigation Volkswagen",
+      "audi": "Navigation Audi"
     }
   },
-  "registration": {
-    "shop": {
-      "success": "",
-      "errors": {
-        "registrationFailed": "",
-        "registrationFailedDefault": ""
+  "team": {
+    "view": {
+      "deactivateSuccess": "Membre désactivé avec succès",
+      "deactivateFailed": "Échec de la désactivation du membre",
+      "reactivateSuccess": "Membre réactivé avec succès",
+      "reactivateFailed": "Échec de la réactivation du membre",
+      "approveSuccess": "Membre approuvé avec succès",
+      "approveFailed": "Échec de l'approbation du membre",
+      "rejectSuccess": "Membre rejeté avec succès",
+      "rejectFailed": "Échec du rejet du membre",
+      "deactivate": "Désactiver",
+      "reactivate": "Réactiver",
+      "status": {
+        "pending": "En attente de finalisation"
       },
-      "bannerAlt": "",
-      "sections": {
-        "personalInfo": "",
-        "shopInfo": "",
-        "associatedDealership": ""
+      "approve": "Approuver",
+      "reject": "Rejeter",
+      "title": {
+        "default": "Voir l'équipe",
+        "shop": "Voir l'équipe de l'atelier",
+        "dealer": "Voir l'équipe du concessionnaire",
+        "csr": "Voir l'équipe CSR",
+        "fieldStaff": "Voir l'équipe du personnel sur le terrain"
       },
-      "fields": {
-        "firstName": "",
-        "lastName": "",
-        "email": "",
-        "shopName": "",
-        "shopNumber": "",
-        "dealershipName": "",
-        "dealershipNumber": ""
-      },
-      "placeholders": {
-        "firstName": "",
-        "lastName": "",
-        "email": "",
-        "shopName": "",
-        "shopNumber": "",
-        "dealershipName": "",
-        "dealershipNumber": ""
-      },
-      "registering": "",
-      "register": ""
-    },
-    "dealership": {
-      "success": "",
-      "errors": {
-        "registrationFailedDefault": ""
-      },
-      "bannerAlt": "",
-      "sections": {
-        "personalInfo": "",
-        "dealershipInfo": ""
-      },
-      "fields": {
-        "firstName": "",
-        "lastName": "",
-        "email": "",
-        "dealershipName": "",
-        "dealershipNumber": ""
-      },
-      "placeholders": {
-        "firstName": "",
-        "lastName": "",
-        "email": "",
-        "dealershipName": "",
-        "dealershipNumber": ""
-      },
-      "registering": "",
-      "register": ""
-    },
-    "complete": {
-      "errors": {
-        "invalidParams": "",
-        "invalidLink": "",
-        "validateFailed": "",
-        "passwordMismatch": "",
-        "passwordTooShort": "",
-        "completeFailed": ""
-      },
-      "success": "",
-      "bannerAlt": "",
-      "sections": {
-        "personalInfo": "",
-        "shopInfo": "",
-        "password": ""
-      },
-      "fields": {
-        "email": "",
-        "firstName": "",
-        "lastName": "",
-        "shopName": "",
-        "shopNumber": "",
-        "address": "",
-        "password": "",
-        "confirmPassword": ""
-      },
-      "placeholders": {
-        "password": "",
-        "confirmPassword": ""
-      },
-      "hidePassword": "",
-      "showPassword": "",
-      "completing": "",
-      "submit": ""
+      "shopInfo": "Informations sur l'atelier",
+      "name": "Nom",
+      "shopNumber": "N° d'atelier",
+      "location": "Emplacement",
+      "teamMembers": "Membres de l'équipe",
+      "table": {
+        "firstName": "Prénom",
+        "lastName": "Nom",
+        "email": "Courriel",
+        "dateAdded": "Date d'ajout",
+        "dateLastAccessed": "Date de dernière connexion"
+      }
     }
   }
 }

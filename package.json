@@ -17,8 +17,7 @@
     "i18n:scan:watch": "nodemon --exec \"pnpm run i18n:scan\" -e ts,tsx,js,jsx",
     "i18n:gen-fr": "node --experimental-specifier-resolution=node scripts/generate-fr.cjs",
     "i18n:scan:all": "pnpm run i18n:scan && pnpm run i18n:gen-fr",
-    "i18n:grep": "node scripts/scan-i18n-keys.cjs"
-    ,
+    "i18n:grep": "node scripts/scan-i18n-keys.cjs",
     "i18n:gen-fr-ca": "node --experimental-specifier-resolution=node scripts/generate-fr-CA.cjs",
     "i18n:scan-and-gen": "pnpm run i18n:grep && pnpm run i18n:gen-fr-ca"
   },

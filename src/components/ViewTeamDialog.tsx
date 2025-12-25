@@ -7,6 +7,7 @@ import { Button } from './ui/button';
 import PersonEditStatusRequest from '@/js/models/PersonEditStatusRequest';
 import PersonApi from '@/js/clients/base/PersonApi';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 type PersonStatus = (typeof PersonStatusEnum)[keyof typeof PersonStatusEnum];
 
@@ -42,14 +43,17 @@ interface ViewDealerTeamDialogProps {
   teamMembers?: TeamMember[];
   onSuccess?: (userType: 'Shop' | 'Dealership', organizationId: number | undefined) => void;
 }
+
 export default function ViewTeamDialog({ open, onOpenChange, teamMembers, onSuccess }: ViewDealerTeamDialogProps) {
+  const { t } = useTranslation();
+
   const handleClose = () => {
     onOpenChange(false);
   };
 
   const handleDeactivate = async (member: TeamMember) => {
     try {
-      return await new Promise((resolve, reject) => {
+      await new Promise((resolve, reject) => {
         const request = PersonEditStatusRequest.create({
           personId: member.id,
           action: 'Deactivate',
@@ -59,7 +63,7 @@ export default function ViewTeamDialog({ open, onOpenChange, teamMembers, onSucc
           status200: () => {
             const userType = member.type === PersonTypeEnum.DEALERSHIP ? 'Dealership' : 'Shop';
             const organizationId = member.type === PersonTypeEnum.DEALERSHIP ? member.dealership?.id : member.shop?.id;
-            toast.success('Member deactivated successfully');
+            toast.success(t('team.view.deactivateSuccess'));
             onSuccess?.(userType, organizationId);
             resolve(true);
           },
@@ -72,14 +76,14 @@ export default function ViewTeamDialog({ open, onOpenChange, teamMembers, onSucc
         });
       });
     } catch (error) {
-      toast.error('Failed to deactivate member');
+      toast.error(t('team.view.deactivateFailed'));
       console.error(error);
     }
   };
 
   const handleReactivate = async (member: TeamMember) => {
     try {
-      return await new Promise((resolve, reject) => {
+      await new Promise((resolve, reject) => {
         const request = PersonEditStatusRequest.create({
           personId: member.id,
           action: 'Reactivate',
@@ -89,9 +93,9 @@ export default function ViewTeamDialog({ open, onOpenChange, teamMembers, onSucc
           status200: () => {
             const userType = member.type === PersonTypeEnum.DEALERSHIP ? 'Dealership' : 'Shop';
             const organizationId = member.type === PersonTypeEnum.DEALERSHIP ? member.dealership?.id : member.shop?.id;
-            resolve(true);
+            toast.success(t('team.view.reactivateSuccess'));
             onSuccess?.(userType, organizationId);
-            toast.success('Member reactivated successfully');
+            resolve(true);
           },
           error: (error) => {
             reject(error);
@@ -102,14 +106,14 @@ export default function ViewTeamDialog({ open, onOpenChange, teamMembers, onSucc
         });
       });
     } catch (error) {
-      toast.error('Failed to reactivate member');
+      toast.error(t('team.view.reactivateFailed'));
       console.error(error);
     }
   };
 
   const handleApprove = async (member: TeamMember) => {
     try {
-      return await new Promise((resolve, reject) => {
+      await new Promise((resolve, reject) => {
         const request = PersonEditStatusRequest.create({
           personId: member.id,
           action: 'ApproveRegistrationRequest',
@@ -117,7 +121,7 @@ export default function ViewTeamDialog({ open, onOpenChange, teamMembers, onSucc
         const personApi = new PersonApi();
         personApi.editStatus(request, {
           status200: () => {
-            toast.success('Member approved successfully');
+            toast.success(t('team.view.approveSuccess'));
             const userType = member.type === PersonTypeEnum.DEALERSHIP ? 'Dealership' : 'Shop';
             const organizationId = member.type === PersonTypeEnum.DEALERSHIP ? member.dealership?.id : member.shop?.id;
             onSuccess?.(userType, organizationId);
@@ -132,7 +136,7 @@ export default function ViewTeamDialog({ open, onOpenChange, teamMembers, onSucc
         });
       });
     } catch (error) {
-      toast.error('Failed to approve member');
+      toast.error(t('team.view.approveFailed'));
       console.error(error);
       return false;
     }
@@ -140,7 +144,7 @@ export default function ViewTeamDialog({ open, onOpenChange, teamMembers, onSucc
 
   const handleReject = async (member: TeamMember) => {
     try {
-      return await new Promise((resolve, reject) => {
+      await new Promise((resolve, reject) => {
         const request = PersonEditStatusRequest.create({
           personId: member.id,
           action: 'DeclineRegistrationRequest',
@@ -148,7 +152,7 @@ export default function ViewTeamDialog({ open, onOpenChange, teamMembers, onSucc
         const personApi = new PersonApi();
         personApi.editStatus(request, {
           status200: () => {
-            toast.success('Member rejected successfully');
+            toast.success(t('team.view.rejectSuccess'));
             const userType = member.type === PersonTypeEnum.DEALERSHIP ? 'Dealership' : 'Shop';
             const organizationId = member.type === PersonTypeEnum.DEALERSHIP ? member.dealership?.id : member.shop?.id;
             onSuccess?.(userType, organizationId);
@@ -163,35 +167,36 @@ export default function ViewTeamDialog({ open, onOpenChange, teamMembers, onSucc
         });
       });
     } catch (error) {
-      toast.error('Failed to reject member');
+      toast.error(t('team.view.rejectFailed'));
       console.error(error);
       return false;
     }
   };
+
   const renderActionButtons = (member: TeamMember) => {
     switch (member.status) {
       case 'Active':
         return (
           <Button size="sm" variant="outline" onClick={() => handleDeactivate(member)}>
-            <Pause className="mr-1 h-3.5 w-3.5" /> Deactivate
+            <Pause className="mr-1 h-3.5 w-3.5" /> {t('team.view.deactivate')}
           </Button>
         );
       case 'Inactive':
         return (
           <Button size="sm" variant="outline" onClick={() => handleReactivate(member)}>
-            <Play className="mr-1 h-3.5 w-3.5" /> Reactivate
+            <Play className="mr-1 h-3.5 w-3.5" /> {t('team.view.reactivate')}
           </Button>
         );
       case 'Pending':
-        return <p className="text-red-400">Pending Completion</p>;
+        return <p className="text-red-400">{t('team.view.status.pending')}</p>;
       case 'RegistrationRequested':
         return (
           <div className="flex gap-2">
             <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => handleApprove(member)}>
-              <Check className="mr-1 h-3.5 w-3.5" /> Approve
+              <Check className="mr-1 h-3.5 w-3.5" /> {t('team.view.approve')}
             </Button>
             <Button size="sm" variant="destructive" onClick={() => handleReject(member)}>
-              <XCircle className="mr-1 h-3.5 w-3.5" /> Reject
+              <XCircle className="mr-1 h-3.5 w-3.5" /> {t('team.view.reject')}
             </Button>
           </div>
         );
@@ -200,82 +205,76 @@ export default function ViewTeamDialog({ open, onOpenChange, teamMembers, onSucc
     }
   };
 
+  const getTeamTitle = () => {
+    if (!teamMembers || teamMembers.length === 0) return t('team.view.title.default');
+    const type = teamMembers[0].type;
+    if (type === PersonTypeEnum.SHOP) return t('team.view.title.shop');
+    if (type === PersonTypeEnum.DEALERSHIP) return t('team.view.title.dealer');
+    if (type === PersonTypeEnum.CSR) return t('team.view.title.csr');
+    if (type === PersonTypeEnum.FIELD_STAFF) return t('team.view.title.fieldStaff');
+    return t('team.view.title.default');
+  };
+
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="flex max-h-[90vh] flex-col sm:max-w-6xl">
         <DialogHeader className="shrink-0">
-          {teamMembers ? (
-            teamMembers.length > 0 ? (
-              <DialogTitle className="text-2xl font-semibold">
-                {teamMembers?.[0].type === PersonTypeEnum.SHOP && 'View Shop Team'}
-                {teamMembers?.[0].type === PersonTypeEnum.DEALERSHIP && 'View Dealer Team'}
-                {teamMembers?.[0].type === PersonTypeEnum.CSR && 'View CSR Team'}
-                {teamMembers?.[0].type === PersonTypeEnum.FIELD_STAFF && 'View Field Staff Team'}
-              </DialogTitle>
-            ) : (
-              <DialogTitle className="text-2xl font-semibold">View Team</DialogTitle>
-            )
-          ) : null}
+          <DialogTitle className="text-2xl font-semibold">{getTeamTitle()}</DialogTitle>
           <Separator />
           <button
             onClick={handleClose}
             className="absolute transition-opacity rounded-sm focus:ring-ring top-4 right-4 opacity-70 hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-none"
           >
             <X className="w-4 h-4" />
-            <span className="sr-only">Close</span>
+            <span className="sr-only">{t('common.close')}</span>
           </button>
         </DialogHeader>
-
         <div className="flex-1 py-6 space-y-8 overflow-y-auto scroll-smooth">
           {/* Shop Information */}
           <section className="space-y-5">
             <div className="flex items-center gap-3 text-lg font-medium">
               <Store className="w-6 h-6 text-foreground" />
-              <h3>Shop Information</h3>
+              <h3>{t('team.view.shopInfo')}</h3>
             </div>
-
             <div className="grid grid-cols-1 gap-6 p-5 rounded-lg bg-muted/50 md:grid-cols-3">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Name</p>
+                <p className="text-sm font-medium text-muted-foreground">{t('team.view.name')}</p>
                 <p className="mt-1 text-base font-semibold">
                   {teamMembers?.[0]?.firstName} {teamMembers?.[0]?.lastName}
                 </p>
               </div>
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Shop #</p>
+                <p className="text-sm font-medium text-muted-foreground">{t('team.view.shopNumber')}</p>
                 <p className="mt-1 text-base font-semibold">{teamMembers?.[0]?.shop?.shopNumber}</p>
               </div>
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Location</p>
+                <p className="text-sm font-medium text-muted-foreground">{t('team.view.location')}</p>
                 <p className="mt-1 text-base font-semibold">{teamMembers?.[0]?.shop?.address}</p>
               </div>
             </div>
           </section>
-
           <Separator />
-
           {/* Team Members */}
           <section className="space-y-5">
             <div className="flex items-center gap-3 text-lg font-medium">
               <Users className="w-6 h-6 text-foreground" />
-              <h3>Team Members</h3>
+              <h3>{t('team.view.teamMembers')}</h3>
             </div>
-
             <div className="overflow-hidden border rounded-lg">
               <table className="w-full">
                 <thead className="bg-muted/50">
                   <tr>
-                    <th className="px-4 py-3 text-sm font-medium text-left">First Name</th>
-                    <th className="px-4 py-3 text-sm font-medium text-left">Last Name</th>
-                    <th className="px-4 py-3 text-sm font-medium text-left">Email</th>
-                    <th className="px-4 py-3 text-sm font-medium text-left">Date Added</th>
-                    <th className="px-4 py-3 text-sm font-medium text-left">Date Last Accessed</th>
-                    <th className="px-4 py-3 text-sm font-medium text-left">{/* Status */}</th>
+                    <th className="px-4 py-3 text-sm font-medium text-left">{t('team.view.table.firstName')}</th>
+                    <th className="px-4 py-3 text-sm font-medium text-left">{t('team.view.table.lastName')}</th>
+                    <th className="px-4 py-3 text-sm font-medium text-left">{t('team.view.table.email')}</th>
+                    <th className="px-4 py-3 text-sm font-medium text-left">{t('team.view.table.dateAdded')}</th>
+                    <th className="px-4 py-3 text-sm font-medium text-left">{t('team.view.table.dateLastAccessed')}</th>
+                    <th className="px-4 py-3 text-sm font-medium text-left">{/* Actions */}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
                   {teamMembers &&
-                    teamMembers?.length > 0 &&
+                    teamMembers.length > 0 &&
                     teamMembers.map((member, idx) => (
                       <tr key={idx} className="transition-colors hover:bg-muted/30">
                         <td className="px-4 py-4 text-sm">{member.firstName}</td>
@@ -295,11 +294,8 @@ export default function ViewTeamDialog({ open, onOpenChange, teamMembers, onSucc
             </div>
           </section>
         </div>
-
-        {/* Bottom close button（with EditProfileDialog Keep consistent） */}
-        <div className="flex-1 px-6 py-4 -mx-6 overflow-y-auto scroll-smooth"></div>
         <DialogFooter className="flex-shrink-0 gap-3 pt-4 mt-4 border-t">
-          <Button onClick={handleClose}>Close</Button>
+          <Button onClick={handleClose}>{t('common.close')}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

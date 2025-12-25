@@ -303,176 +303,265 @@
       "allRegions": "All Regions",
       "pendingRegistration": "Pending Registration"
     },
-    "firstName": "user.firstName"
+    "firstName": "First Name",
+    "type": {
+      "admin": "Program Administrator"
+    }
   },
   "repairOrder": {
     "messages": {
-      "loadFailed": "repairOrder.messages.loadFailed",
-      "createFailed": "repairOrder.messages.createFailed",
-      "error": "repairOrder.messages.error",
-      "approveSuccess": "repairOrder.messages.approveSuccess",
-      "approveFailed": "repairOrder.messages.approveFailed",
-      "rejectSuccess": "repairOrder.messages.rejectSuccess",
-      "rejectFailed": "repairOrder.messages.rejectFailed",
-      "resubmitSuccess": "repairOrder.messages.resubmitSuccess",
-      "resubmitFailed": "repairOrder.messages.resubmitFailed",
-      "shippedSuccess": "repairOrder.messages.shippedSuccess",
-      "shippedFailed": "repairOrder.messages.shippedFailed",
-      "receivedSuccess": "repairOrder.messages.receivedSuccess",
-      "receivedFailed": "repairOrder.messages.receivedFailed",
-      "completeSuccess": "repairOrder.messages.completeSuccess",
-      "completeFailed": "repairOrder.messages.completeFailed"
+      "loadFailed": "Failed to load repair order",
+      "createFailed": "Failed to create repair order",
+      "error": "Error",
+      "approveSuccess": "Parts order approved successfully",
+      "approveFailed": "Failed to approve parts order",
+      "rejectSuccess": "Parts order rejected successfully",
+      "rejectFailed": "Failed to reject parts order",
+      "resubmitSuccess": "Parts order resubmitted successfully",
+      "resubmitFailed": "Failed to resubmit parts order",
+      "shippedSuccess": "Parts order marked as shipped successfully",
+      "shippedFailed": "Failed to mark parts order as shipped",
+      "receivedSuccess": "Parts order marked as received successfully",
+      "receivedFailed": "Failed to mark parts order as received",
+      "completeSuccess": "Repair order marked as complete successfully",
+      "completeFailed": "Failed to mark repair order as complete"
     },
     "navigation": {
-      "vw": "repairOrder.navigation.vw",
-      "audi": "repairOrder.navigation.audi"
+      "vw": "VW Navigation",
+      "audi": "Audi Navigation"
     },
     "header": {
-      "assignedDealership": "repairOrder.header.assignedDealership",
-      "fieldSupportTeam": "repairOrder.header.fieldSupportTeam"
+      "assignedDealership": "Assigned Dealership",
+      "fieldSupportTeam": "Field Support Team"
     },
     "list": {
-      "title": "repairOrder.list.title",
-      "newRepairOrder": "repairOrder.list.newRepairOrder",
-      "searchPlaceholder": "repairOrder.list.searchPlaceholder",
-      "statusPlaceholder": "repairOrder.list.statusPlaceholder",
+      "title": "Repair Order List",
+      "newRepairOrder": "New Repair Order",
+      "searchPlaceholder": "Filter by RO#, Order #, VIN, Customer",
+      "statusPlaceholder": "Status",
       "status": {
-        "all": "repairOrder.list.status.all"
+        "all": "All Status"
       },
-      "dateRangePlaceholder": "repairOrder.list.dateRangePlaceholder",
-      "showRepairCompleted": "repairOrder.list.showRepairCompleted",
+      "dateRangePlaceholder": "Date Range",
+      "showRepairCompleted": "Show Repair Completed",
       "empty": {
-        "noOrdersForShop": "repairOrder.list.empty.noOrdersForShop"
+        "noOrdersForShop": "This shop doesn’t have any repair orders yet. Repair orders will appear here once they are created.",
+        "title": "No data to display",
+        "noResults": "No results could be found."
       },
       "tableHeaders": {
-        "ro": "repairOrder.list.tableHeaders.ro",
-        "order": "repairOrder.list.tableHeaders.order",
-        "vin": "repairOrder.list.tableHeaders.vin",
-        "ymm": "repairOrder.list.tableHeaders.ymm",
-        "status": "repairOrder.list.tableHeaders.status",
-        "customer": "repairOrder.list.tableHeaders.customer",
-        "dateSubmitted": "repairOrder.list.tableHeaders.dateSubmitted",
-        "dateCompleted": "repairOrder.list.tableHeaders.dateCompleted"
-      }
+        "ro": "RO #",
+        "order": "Order #",
+        "vin": "VIN",
+        "ymm": "Year/Make/Model",
+        "status": "Status",
+        "customer": "Customer",
+        "dateSubmitted": "Date Submitted",
+        "dateCompleted": "Date Completed"
+      },
+      "fetchError": "Failed to load repair orders",
+      "assignedDealership": "Assigned Dealership",
+      "fieldSupportTeam": "Field Support Team",
+      "createFailed": "Repair Order Failed to Create",
+      "dateRangeOptions": {
+        "7": "Past 7 days",
+        "30": "Past 30 days",
+        "all": "All Dates",
+        "monthToDate": "Month-To-Date",
+        "quarterToDate": "Quarter-To-Date",
+        "yearToDate": "Year-To-Date",
+        "lastMonth": "Last Month",
+        "lastQuarter": "Last Quarter",
+        "lastYear": "Last Year",
+        "custom": "Custom"
+      },
+      "dateRangePickerPlaceholder": "Select date range"
+    },
+    "status": {
+      "CsrReview": "CSR Review",
+      "CsrRejected": "CSR Rejected",
+      "DealershipProcessing": "Dealer Processing",
+      "DealershipShipped": "Dealer Shipped",
+      "ShopReceived": "Shop Received",
+      "RepairCompleted": "Repair Completed"
     },
     "detail": {
-      "title": "repairOrder.detail.title",
-      "markComplete": "repairOrder.detail.markComplete",
-      "editRepairOrder": "repairOrder.detail.editRepairOrder",
-      "customer": "repairOrder.detail.customer",
-      "vin": "repairOrder.detail.vin",
-      "ymm": "repairOrder.detail.ymm",
-      "dateSubmitted": "repairOrder.detail.dateSubmitted",
-      "by": "repairOrder.detail.by",
-      "submittedTo": "repairOrder.detail.submittedTo",
-      "dateClosed": "repairOrder.detail.dateClosed",
-      "preRepairPhotos": "repairOrder.detail.preRepairPhotos",
-      "structuralMeasurements": "repairOrder.detail.structuralMeasurements",
-      "postRepairPhotos": "repairOrder.detail.postRepairPhotos",
-      "supplementalPartsOrder": "repairOrder.detail.supplementalPartsOrder",
-      "salesOrder": "repairOrder.detail.salesOrder",
-      "editPartsOrder": "repairOrder.detail.editPartsOrder",
-      "requestedParts": "repairOrder.detail.requestedParts",
-      "noPartsRequested": "repairOrder.detail.noPartsRequested",
-      "partsEstimate": "repairOrder.detail.partsEstimate",
-      "noEstimateFile": "repairOrder.detail.noEstimateFile"
+      "title": "Repair Order #",
+      "markComplete": "Mark Repair as Complete",
+      "editRepairOrder": "Edit Repair Order",
+      "customer": "Customer",
+      "vin": "VIN",
+      "ymm": "Year/Make/Model",
+      "dateSubmitted": "Date Submitted",
+      "submittedTo": "Submitted To",
+      "dateClosed": "Date Closed",
+      "preRepairPhotos": "Pre-Repair Photos",
+      "structuralMeasurements": "Structural Measurements",
+      "postRepairPhotos": "Post-Repair Photos",
+      "salesOrder": "Sales Order #",
+      "editPartsOrder": "Edit Parts Order",
+      "requestedParts": "Requested Parts",
+      "noPartsRequested": "-- No parts requested",
+      "partsEstimate": "Parts Estimate",
+      "noEstimateFile": "-- No estimate file",
+      "noPartsOrderData": "-- No parts order data",
+      "partsOrder": "Parts Order",
+      "supplement": "Supplement",
+      "supplementalPartsOrder": "Supplemental Parts Order",
+      "approveSuccess": "Parts order approved successfully",
+      "approveFailed": "Failed to approve parts order",
+      "rejectSuccess": "Parts order rejected successfully",
+      "rejectFailed": "Failed to reject parts order",
+      "resubmitSuccess": "Parts order resubmitted successfully",
+      "resubmitFailed": "Failed to resubmit parts order",
+      "shippedSuccess": "Parts order marked as shipped successfully",
+      "shippedFailed": "Failed to mark parts order as shipped",
+      "receivedSuccess": "Parts order marked as received successfully",
+      "receivedFailed": "Failed to mark parts order as received",
+      "completeSuccess": "Repair order marked as complete successfully",
+      "completeFailed": "Failed to mark repair order as complete",
+      "fetchError": "Failed to fetch data",
+      "assignedDealership": "Assigned Dealership",
+      "by": "by"
+    },
+    "registration": {
+      "shop": {
+        "success": "Registration successful! Please check your email.",
+        "errors": {
+          "registrationFailed": "Registration failed. Please try again. {{error}}",
+          "registrationFailedDefault": "Registration failed. Please try again."
+        },
+        "bannerAlt": "New Shop User Registration",
+        "sections": {
+          "personalInfo": "Personal Information",
+          "shopInfo": "Shop Information",
+          "associatedDealership": "Associated Dealership"
+        },
+        "fields": {
+          "firstName": "First Name",
+          "lastName": "Last Name",
+          "email": "Email",
+          "shopName": "Shop Name",
+          "shopNumber": "Shop #",
+          "dealershipName": "Dealership Name",
+          "dealershipNumber": "Dealership #"
+        },
+        "placeholders": {
+          "firstName": "Enter first name",
+          "lastName": "Enter last name",
+          "email": "Enter email address",
+          "shopName": "Enter shop name",
+          "shopNumber": "Enter shop number",
+          "dealershipName": "Enter dealership name",
+          "dealershipNumber": "Enter dealership number"
+        },
+        "registering": "Registering...",
+        "register": "Register"
+      },
+      "dealership": {
+        "success": "Registration successful! Please check your email.",
+        "errors": {
+          "registrationFailedDefault": "Registration failed. Please try again."
+        },
+        "bannerAlt": "New Dealership User Registration",
+        "sections": {
+          "personalInfo": "Personal Information",
+          "dealershipInfo": "Dealership Information"
+        },
+        "fields": {
+          "firstName": "First Name",
+          "lastName": "Last Name",
+          "email": "Email",
+          "dealershipName": "Dealership Name",
+          "dealershipNumber": "Dealership #"
+        },
+        "placeholders": {
+          "firstName": "Enter first name",
+          "lastName": "Enter last name",
+          "email": "Enter email address",
+          "dealershipName": "Enter dealership name",
+          "dealershipNumber": "Enter dealership number"
+        },
+        "registering": "Registering...",
+        "register": "Register"
+      },
+      "complete": {
+        "errors": {
+          "invalidParams": "Invalid registration link parameters.",
+          "invalidLink": "Registration link is invalid or has expired.",
+          "validateFailed": "Failed to validate reset link. Please try again.",
+          "passwordMismatch": "Passwords do not match.",
+          "passwordTooShort": "Password must be at least 8 characters.",
+          "completeFailed": "Failed to reset password. Please try again."
+        },
+        "success": "Registration completed successfully!",
+        "bannerAlt": "New Shop User Registration",
+        "sections": {
+          "personalInfo": "Personal Information",
+          "shopInfo": "Shop Information",
+          "password": "Password"
+        },
+        "fields": {
+          "email": "Email",
+          "firstName": "First Name",
+          "lastName": "Last Name",
+          "shopName": "Name",
+          "shopNumber": "Number",
+          "address": "Address",
+          "password": "Password",
+          "confirmPassword": "Confirm Password"
+        },
+        "placeholders": {
+          "password": "Enter your password",
+          "confirmPassword": "Confirm your password"
+        },
+        "hidePassword": "Hide password",
+        "showPassword": "Show password",
+        "completing": "Completing...",
+        "submit": "Complete Registration"
+      }
+    },
+    "brand": {
+      "vw": "VW Navigation",
+      "audi": "Audi Navigation"
     }
   },
-  "registration": {
-    "shop": {
-      "success": "Registration successful! Please check your email.",
-      "errors": {
-        "registrationFailed": "Registration failed. Please try again. {{error}}",
-        "registrationFailedDefault": "Registration failed. Please try again."
+  "team": {
+    "view": {
+      "deactivateSuccess": "Member deactivated successfully",
+      "deactivateFailed": "Failed to deactivate member",
+      "reactivateSuccess": "Member reactivated successfully",
+      "reactivateFailed": "Failed to reactivate member",
+      "approveSuccess": "Member approved successfully",
+      "approveFailed": "Failed to approve member",
+      "rejectSuccess": "Member rejected successfully",
+      "rejectFailed": "Failed to reject member",
+      "deactivate": "Deactivate",
+      "reactivate": "Reactivate",
+      "status": {
+        "pending": "Pending Completion"
       },
-      "bannerAlt": "New Shop User Registration",
-      "sections": {
-        "personalInfo": "Personal Information",
-        "shopInfo": "Shop Information",
-        "associatedDealership": "Associated Dealership"
+      "approve": "Approve",
+      "reject": "Reject",
+      "title": {
+        "default": "View Team",
+        "shop": "View Shop Team",
+        "dealer": "View Dealer Team",
+        "csr": "View CSR Team",
+        "fieldStaff": "View Field Staff Team"
       },
-      "fields": {
+      "shopInfo": "Shop Information",
+      "name": "Name",
+      "shopNumber": "Shop #",
+      "location": "Location",
+      "teamMembers": "Team Members",
+      "table": {
         "firstName": "First Name",
         "lastName": "Last Name",
         "email": "Email",
-        "shopName": "Shop Name",
-        "shopNumber": "Shop #",
-        "dealershipName": "Dealership Name",
-        "dealershipNumber": "Dealership #"
-      },
-      "placeholders": {
-        "firstName": "Enter first name",
-        "lastName": "Enter last name",
-        "email": "Enter email address",
-        "shopName": "Enter shop name",
-        "shopNumber": "Enter shop number",
-        "dealershipName": "Enter dealership name",
-        "dealershipNumber": "Enter dealership number"
-      },
-      "registering": "Registering...",
-      "register": "Register"
-    },
-    "dealership": {
-      "success": "Registration successful! Please check your email.",
-      "errors": {
-        "registrationFailedDefault": "Registration failed. Please try again."
-      },
-      "bannerAlt": "New Dealership User Registration",
-      "sections": {
-        "personalInfo": "Personal Information",
-        "dealershipInfo": "Dealership Information"
-      },
-      "fields": {
-        "firstName": "First Name",
-        "lastName": "Last Name",
-        "email": "Email",
-        "dealershipName": "Dealership Name",
-        "dealershipNumber": "Dealership #"
-      },
-      "placeholders": {
-        "firstName": "Enter first name",
-        "lastName": "Enter last name",
-        "email": "Enter email address",
-        "dealershipName": "Enter dealership name",
-        "dealershipNumber": "Enter dealership number"
-      },
-      "registering": "Registering...",
-      "register": "Register"
-    },
-    "complete": {
-      "errors": {
-        "invalidParams": "Invalid registration link parameters.",
-        "invalidLink": "Registration link is invalid or has expired.",
-        "validateFailed": "Failed to validate reset link. Please try again.",
-        "passwordMismatch": "Passwords do not match.",
-        "passwordTooShort": "Password must be at least 8 characters.",
-        "completeFailed": "Failed to reset password. Please try again."
-      },
-      "success": "Registration completed successfully!",
-      "bannerAlt": "New Shop User Registration",
-      "sections": {
-        "personalInfo": "Personal Information",
-        "shopInfo": "Shop Information",
-        "password": "Password"
-      },
-      "fields": {
-        "email": "Email",
-        "firstName": "First Name",
-        "lastName": "Last Name",
-        "shopName": "Name",
-        "shopNumber": "Number",
-        "address": "Address",
-        "password": "Password",
-        "confirmPassword": "Confirm Password"
-      },
-      "placeholders": {
-        "password": "Enter your password",
-        "confirmPassword": "Confirm your password"
-      },
-      "hidePassword": "Hide password",
-      "showPassword": "Show password",
-      "completing": "Completing...",
-      "submit": "Complete Registration"
+        "dateAdded": "Date Added",
+        "dateLastAccessed": "Date Last Accessed"
+      }
     }
   }
 }

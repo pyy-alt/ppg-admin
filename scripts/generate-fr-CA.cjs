@@ -21,7 +21,35 @@ if (!fs.existsSync(enPath)) {
 }
 
 const en = JSON.parse(fs.readFileSync(enPath, 'utf8'));
-const fr = emptyValues(en);
 
-fs.writeFileSync(frCaPath, JSON.stringify(fr, null, 2) + '\n', 'utf8');
-console.log('Generated/updated fr-CA.json at', frCaPath);
+function mergeWithExisting(template, existing) {
+  if (typeof template !== 'object' || template === null) return template;
+  if (Array.isArray(template)) return template.map(() => '');
+
+  const out = {};
+  for (const k of Object.keys(template)) {
+    const tv = template[k];
+    const ev = existing && typeof existing === 'object' ? existing[k] : undefined;
+    if (tv && typeof tv === 'object' && !Array.isArray(tv)) {
+      out[k] = mergeWithExisting(tv, ev || {});
+    } else {
+      out[k] = typeof ev === 'string' && ev.trim() !== '' ? ev : '';
+    }
+  }
+
+  // preserve extra existing keys
+  if (existing && typeof existing === 'object') {
+    for (const k of Object.keys(existing)) {
+      if (!(k in out)) out[k] = existing[k];
+    }
+  }
+
+  return out;
+}
+
+const existing = fs.existsSync(frCaPath) ? JSON.parse(fs.readFileSync(frCaPath, 'utf8')) : {};
+const template = emptyValues(en);
+const merged = mergeWithExisting(template, existing);
+
+fs.writeFileSync(frCaPath, JSON.stringify(merged, null, 2) + '\n', 'utf8');
+console.log('Merged/updated fr-CA.json at', frCaPath);

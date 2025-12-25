@@ -22,6 +22,7 @@ module.exports = {
       jsonIndent: 2,
       lineEnding: '\n',
     },
+    overrideExisting: false,
     lexers: {
       ts: ['JavascriptLexer'],
       tsx: ['JsxLexer'],
