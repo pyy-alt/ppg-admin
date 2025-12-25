@@ -21,7 +21,7 @@ declare global {
 // ============================================================================
 
 /** Routes without a sidebar */
-const ROUTES_WITHOUT_SIDEBAR = ['/parts_orders', '/repair_orders'] as const;
+const ROUTES_WITHOUT_SIDEBAR = ['/parts_orders'] as const;
 
 /** Role Permission Configuration */
 type RoleConfig = {
@@ -37,7 +37,7 @@ const ROLE_REDIRECT_CONFIG: Record<PersonType, RoleConfig> = {
   ProgramAdministrator: {
     forbiddenRoute: '/admin/parts_orders',
     defaultRoute: '/admin/parts_orders',
-    allowedRoutes: ['/admin', '/parts_orders', '/admin/repair_orders'],
+    allowedRoutes: ['/admin', '/parts_orders', '/repair_orders'],
   },
   Shop: {
     forbiddenRoute: '/repair_orders',

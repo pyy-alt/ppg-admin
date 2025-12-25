@@ -39,7 +39,7 @@ export const sidebarData: SidebarData = {
         { title: 'Parts Orders', url: '/admin/parts_orders', icon: ClipboardList },
         { title: 'Manage Shops', url: '/admin/shops', icon: Store },
         { title: 'Manage Dealers', url: '/admin/dealerships', icon: Building2 },
-        { title: 'Manage Repair Orders', url: '/admin/repair_orders', icon: Command },
+        // { title: 'Manage Repair Orders', url: '/admin/repair_orders', icon: Command },
         { title: 'Manage Network Users', url: '/admin/users', icon: Users },
       ],
     },
