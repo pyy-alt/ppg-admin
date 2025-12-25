@@ -1,5 +1,6 @@
 {
   "common": {
+    "restrictedPartsTracker": "Restricted Parts Tracker",
     "save": "Save",
     "cancel": "Cancel",
     "update": "Update",
@@ -859,6 +860,36 @@
       "markShipped": "Mark Parts as Shipped",
       "unmarkReceived": "Unmark Parts as Received",
       "markReceived": "Mark Parts as Received"
+    }
+  },
+  "header": {
+    "user": "User",
+    "notLoggedIn": "Not logged in",
+    "programAdministrator": "Program Administrator",
+    "viewTeam": "View Team",
+    "editProfile": "Edit Profile",
+    "logout": "Logout",
+    "vw": "Volkswagen",
+    "audi": "Audi"
+  },
+  "sidebar": {
+    "teams": {
+      "restrictedPartsTracker": "Restricted Parts Tracker",
+      "plan": {
+        "viteShadcn": "Vite + ShadcnUI",
+        "enterprise": "Enterprise",
+        "startup": "Startup"
+      }
+    },
+    "navGroups": {
+      "partsAndServices": "Parts & Services"
+    },
+    "nav": {
+      "partsOrders": "Parts Orders",
+      "manageShops": "Manage Shops",
+      "manageDealers": "Manage Dealers",
+      "manageRepairOrders": "Manage Repair Orders",
+      "manageNetworkUsers": "Manage Network Users"
     }
   }
 }

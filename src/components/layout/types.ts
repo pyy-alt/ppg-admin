@@ -10,6 +10,7 @@ type Team = {
   name: string
   logo: React.ElementType
   plan: string
+  [key:string]: any
 }
 
 type BaseNavItem = {
@@ -20,17 +21,20 @@ type BaseNavItem = {
 
 type NavLink = BaseNavItem & {
   url: LinkProps['to'] | (string & {})
-  items?: never
+  items?: never,
+  [key:string]:any
 }
 
 type NavCollapsible = BaseNavItem & {
   items: (BaseNavItem & { url: LinkProps['to'] | (string & {}) })[]
-  url?: never
+  url?: never,
+  [key:string]:any
 }
 
 type NavItem = NavCollapsible | NavLink
 
 type NavGroup = {
+  titleKey: string
   title: string
   items: NavItem[]
 }
@@ -38,7 +42,8 @@ type NavGroup = {
 type SidebarData = {
   user: User
   teams: Team[]
-  navGroups: NavGroup[]
+  navGroups: NavGroup[],
+  [key:string]:any
 }
 
 export type { SidebarData, NavGroup, NavItem, NavCollapsible, NavLink }

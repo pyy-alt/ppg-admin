@@ -23,10 +23,10 @@ export function AppTitle() {
             <Link
               to='/'
               onClick={() => setOpenMobile(false)}
-              className='grid flex-1 text-start text-sm leading-tight'
+              className='grid flex-1 text-sm leading-tight text-start'
             >
-              <span className='truncate font-bold'>Shadcn-Admin</span>
-              <span className='truncate text-xs'>Vite + ShadcnUI</span>
+              <span className='font-bold truncate'>Restricted Parts Tracker</span>
+              <span className='text-xs truncate'>Vite + ShadcnUI</span>
             </Link>
             <ToggleSidebar />
           </div>

@@ -1,3 +1,4 @@
+// src/components/Header.tsx
 import { useState } from 'react';
 import { useRouter } from '@tanstack/react-router';
 import AuthenticationApi from '@/js/clients/base/AuthenticationApi';
@@ -22,6 +23,7 @@ import ViewAdminTeamDialog from '../AdminViewTeamDialog';
 import { LanguageDropdown } from '../LanguageDropdown';
 import ViewTeamDialog, { type TeamMember } from '../ViewTeamDialog';
 import ResultParameter from '@/js/models/ResultParameter';
+import { useTranslation } from 'react-i18next'; // 新增导入
 
 type HeaderProps = React.HTMLAttributes<HTMLElement> & {
   fixed?: boolean;
@@ -29,6 +31,8 @@ type HeaderProps = React.HTMLAttributes<HTMLElement> & {
 };
 
 export function Header({ className, fixed, isShowUser = true, ...props }: HeaderProps) {
+  const { t } = useTranslation(); // 新增：获取 t 函数
+
   const router = useRouter();
   const { auth } = useAuthStore();
   const [open, setOpen] = useState(false);
@@ -36,15 +40,15 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
   const [isShowAdminTeam, setIsShowAdminTeam] = useState(false);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const { brand } = useBrand();
-  console.log(brand);
+
   const logo = brand === 'vw' ? vwLogo : audiLogo;
+
   const getTeamMembers = async () => {
     const isAdmin = auth.user?.person?.type === PersonTypeEnum.PROGRAM_ADMINISTRATOR;
-
     try {
       const personApi = new PersonApi();
       const request: any = PersonSearchRequest.create({
-        // Ifuser.person.type is ProgramAdministrator，then type is Network，otherwise is Shop or Dealership
+        // If user.person.type is ProgramAdministrator，then type is Network，otherwise is Shop or Dealership
         type: isAdmin ? 'Network' : (auth.user?.person?.type as 'Shop' | 'Dealership' | 'Network'),
         organizationId:
           auth.user?.person?.type === 'Shop'
@@ -78,11 +82,10 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
       console.error(error);
     }
   };
+
   const handleSelect = (item: 'team' | 'profile' | 'logout') => {
     switch (item) {
       case 'team':
-        // setIsShowTeam(true)
-        // Administrator
         getTeamMembers();
         break;
       case 'profile':
@@ -95,6 +98,7 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
         break;
     }
   };
+
   // logout
   const handleLogout = () => {
     const authApi = new AuthenticationApi();
@@ -105,6 +109,7 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
       },
     });
   };
+
   return (
     <>
       <header
@@ -115,7 +120,7 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
         <div className="flex items-center gap-4">
           <img
             src={logo}
-            alt="Audi"
+            alt={brand === 'vw' ? t('header.vw') : t('header.audi')}
             className={
               logo === vwLogo ? 'h-10 w-10 cursor-pointer object-contain' : 'h-20 w-20 cursor-pointer object-contain'
             }
@@ -123,14 +128,13 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
           />
           <div>
             {logo === vwLogo ? (
-              <span className="font-medium text-blue-500">Volkswagen </span>
+              <span className="font-medium text-blue-500">{t('header.vw')} </span>
             ) : (
-              <span className="font-medium text-red-500">Audi</span>
+              <span className="font-medium text-red-500">{t('header.audi')}</span>
             )}
-            <span className="text-sm font-medium text-white">Restricted Parts Tracker</span>
+            <span className="text-sm font-medium text-white">{t('common.restrictedPartsTracker')}</span>
           </div>
         </div>
-
         {/* Right: Globe + User Dropdown */}
         <div className="flex items-center gap-4">
           {/* User Dropdown */}
@@ -143,7 +147,7 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
                       {auth.user
                         ? `${auth.user.person?.firstName} ${auth.user.person?.lastName}`.trim() ||
                           auth.user.person?.email
-                        : 'User'}
+                        : t('header.user')}
                     </p>
                     <p className="text-xs text-gray-400">
                       {auth.user
@@ -153,10 +157,10 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
                             ? `${auth.user.person?.dealership?.name}(${auth.user.person?.dealership?.dealershipNumber}) | ${auth.user.person?.type}`
                             : auth.user.person?.csrRegion
                               ? `${auth.user.person?.csrRegion?.name} | ${auth.user.person?.type}`
-                              : `${auth.user.person?.type}` === 'ProgramAdministrator'
-                                ? ' Program Administrator  '
+                              : auth.user.person?.type === 'ProgramAdministrator'
+                                ? t('header.programAdministrator')
                                 : auth.user.person?.type
-                        : 'Not logged in'}
+                        : t('header.notLoggedIn')}
                     </p>
                   </div>
                   <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -164,7 +168,6 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
                   </svg>
                 </button>
               </DropdownMenuTrigger>
-
               {/* Menu right aligned */}
               <DropdownMenuContent align="end" className="w-56 mt-2">
                 <DropdownMenuLabel className="font-normal">
@@ -173,7 +176,7 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
                       {auth.user
                         ? `${auth.user.person?.firstName} ${auth.user.person?.lastName}`.trim() ||
                           auth.user.person?.email
-                        : 'User'}
+                        : t('header.user')}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {auth.user
@@ -181,10 +184,10 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
                           ? `${auth.user.person?.shop?.name}(${auth.user.person?.shop?.shopNumber}) | ${auth.user.person?.type}`
                           : auth.user.person?.dealership?.name && auth.user.person?.dealership?.dealershipNumber
                             ? `${auth.user.person?.dealership?.name}(${auth.user.person?.dealership?.dealershipNumber}) | ${auth.user.person?.type}`
-                            : `${auth.user.person?.type}` === 'ProgramAdministrator'
-                              ? ' Program Administrator  '
+                            : auth.user.person?.type === 'ProgramAdministrator'
+                              ? t('header.programAdministrator')
                               : auth.user.person?.type
-                        : 'Not logged in'}
+                        : t('header.notLoggedIn')}
                     </p>
                   </div>
                 </DropdownMenuLabel>
@@ -192,12 +195,12 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
                 {auth?.user?.person?.type !== PersonTypeEnum.CSR && (
                   <DropdownMenuItem className="cursor-pointer" onSelect={() => handleSelect('team')}>
                     <Users className="w-4 h-4 mr-2" />
-                    <span>View Team</span>
+                    <span>{t('header.viewTeam')}</span>
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuItem className="cursor-pointer" onSelect={() => handleSelect('profile')}>
                   <UserPen className="w-4 h-4 mr-2" />
-                  <span>Edit Profile</span>
+                  <span>{t('header.editProfile')}</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -205,12 +208,11 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
                   onSelect={() => handleSelect('logout')}
                 >
                   <LogOut className="w-4 h-4 mr-2" />
-                  <span>Logout</span>
+                  <span>{t('header.logout')}</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           )}
-
           {/* Language Globe */}
           <div className="p-2 text-white transition-colors rounded-full hover:bg-white/10">
             <LanguageDropdown />

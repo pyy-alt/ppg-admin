@@ -1,5 +1,6 @@
 {
   "common": {
+    "restrictedPartsTracker": "Suivi des pièces restreintes",
     "save": "Enregistrer",
     "cancel": "Annuler",
     "update": "Mettre à jour",
@@ -859,6 +860,36 @@
       "markShipped": "Marquer comme expédiées",
       "unmarkReceived": "Marquer comme non reçues",
       "markReceived": "Marquer comme reçues"
+    }
+  },
+  "header": {
+    "user": "Utilisateur",
+    "notLoggedIn": "Non connecté",
+    "programAdministrator": "Administrateur du programme",
+    "viewTeam": "Voir l'équipe",
+    "editProfile": "Modifier le profil",
+    "logout": "Déconnexion",
+    "vw": "Volkswagen",
+    "audi": "Audi"
+  },
+  "sidebar": {
+    "teams": {
+      "restrictedPartsTracker": "Suivi des pièces restreintes",
+      "plan": {
+        "viteShadcn": "Vite + ShadcnUI",
+        "enterprise": "Entreprise",
+        "startup": "Startup"
+      }
+    },
+    "navGroups": {
+      "partsAndServices": "Pièces et services"
+    },
+    "nav": {
+      "partsOrders": "Commandes de pièces",
+      "manageShops": "Gérer les ateliers",
+      "manageDealers": "Gérer les concessionnaires",
+      "manageRepairOrders": "Gérer les bons de réparation",
+      "manageNetworkUsers": "Gérer les utilisateurs du réseau"
     }
   }
 }
