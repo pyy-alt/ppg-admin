@@ -324,6 +324,7 @@ export function PartOrders() {
                 <SelectItem value="1">{t('partsOrder.types.1')}</SelectItem>
                 <SelectItem value="2">{t('partsOrder.types.2')}</SelectItem>
                 <SelectItem value="3">{t('partsOrder.types.3')}</SelectItem>
+                <SelectItem value="4">{t('partsOrder.types.4')}</SelectItem>
               </SelectContent>
             </Select>
 

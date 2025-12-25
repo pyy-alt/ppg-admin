@@ -255,7 +255,8 @@
       "0": "Commande de pièces",
       "1": "Supplément 1",
       "2": "Supplément 2",
-      "3": "Supplément 3"
+      "3": "Supplément 3",
+      "4": "Supplément 4"
     },
     "status": {
       "CsrReview": "Examen CSR",

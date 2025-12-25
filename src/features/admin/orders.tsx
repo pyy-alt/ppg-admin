@@ -174,7 +174,9 @@ export function PartOrders() {
           setLoading(false);
         },
         error: (error: any) => {
-          toast.error(t('partsOrder.messages.fetchError', { error: error || t('partsOrder.messages.fetchErrorDefault') }));
+          toast.error(
+            t('partsOrder.messages.fetchError', { error: error || t('partsOrder.messages.fetchErrorDefault') })
+          );
           setLoading(false);
         },
         else: () => {
@@ -313,6 +315,7 @@ export function PartOrders() {
                 <SelectItem value="1">{t('partsOrder.types.1')}</SelectItem>
                 <SelectItem value="2">{t('partsOrder.types.2')}</SelectItem>
                 <SelectItem value="3">{t('partsOrder.types.3')}</SelectItem>
+                <SelectItem value="4">{t('partsOrder.types.4')}</SelectItem>
               </SelectContent>
             </Select>
 
@@ -365,7 +368,9 @@ export function PartOrders() {
                   <SelectItem value="7">{t('partsOrder.list.dateRangeOptions.7')}</SelectItem>
                   <SelectItem value="30">{t('partsOrder.list.dateRangeOptions.30')}</SelectItem>
                   <SelectItem value="month-to-date">{t('partsOrder.list.dateRangeOptions.month-to-date')}</SelectItem>
-                  <SelectItem value="quarter-to-date">{t('partsOrder.list.dateRangeOptions.quarter-to-date')}</SelectItem>
+                  <SelectItem value="quarter-to-date">
+                    {t('partsOrder.list.dateRangeOptions.quarter-to-date')}
+                  </SelectItem>
                   <SelectItem value="year-to-date">{t('partsOrder.list.dateRangeOptions.year-to-date')}</SelectItem>
                   <SelectItem value="last-month">{t('partsOrder.list.dateRangeOptions.last-month')}</SelectItem>
                   <SelectItem value="last-quarter">{t('partsOrder.list.dateRangeOptions.last-quarter')}</SelectItem>
@@ -398,15 +403,33 @@ export function PartOrders() {
             <Table ref={partsOrderRef}>
               <TableHeader>
                 <TableRow className="bg-muted">
-                  <TableHead className="font-semibold text-foreground">{t('partsOrder.list.tableHeaders.ro')}</TableHead>
-                  <TableHead className="font-semibold text-foreground">{t('partsOrder.list.tableHeaders.sales')}</TableHead>
-                  <TableHead className="font-semibold text-foreground">{t('partsOrder.list.tableHeaders.type')}</TableHead>
-                  <TableHead className="font-semibold text-foreground">{t('partsOrder.list.tableHeaders.vin')}</TableHead>
-                  <TableHead className="font-semibold text-foreground">{t('partsOrder.list.tableHeaders.ymm')}</TableHead>
-                  <TableHead className="font-semibold text-foreground">{t('partsOrder.list.tableHeaders.status')}</TableHead>
-                  <TableHead className="font-semibold text-foreground">{t('partsOrder.list.tableHeaders.shop')}</TableHead>
-                  <TableHead className="font-semibold text-foreground">{t('partsOrder.list.tableHeaders.dealer')}</TableHead>
-                  <TableHead className="font-semibold text-foreground">{t('partsOrder.list.tableHeaders.csrRegion')}</TableHead>
+                  <TableHead className="font-semibold text-foreground">
+                    {t('partsOrder.list.tableHeaders.ro')}
+                  </TableHead>
+                  <TableHead className="font-semibold text-foreground">
+                    {t('partsOrder.list.tableHeaders.sales')}
+                  </TableHead>
+                  <TableHead className="font-semibold text-foreground">
+                    {t('partsOrder.list.tableHeaders.type')}
+                  </TableHead>
+                  <TableHead className="font-semibold text-foreground">
+                    {t('partsOrder.list.tableHeaders.vin')}
+                  </TableHead>
+                  <TableHead className="font-semibold text-foreground">
+                    {t('partsOrder.list.tableHeaders.ymm')}
+                  </TableHead>
+                  <TableHead className="font-semibold text-foreground">
+                    {t('partsOrder.list.tableHeaders.status')}
+                  </TableHead>
+                  <TableHead className="font-semibold text-foreground">
+                    {t('partsOrder.list.tableHeaders.shop')}
+                  </TableHead>
+                  <TableHead className="font-semibold text-foreground">
+                    {t('partsOrder.list.tableHeaders.dealer')}
+                  </TableHead>
+                  <TableHead className="font-semibold text-foreground">
+                    {t('partsOrder.list.tableHeaders.csrRegion')}
+                  </TableHead>
                   <SortableTableHead
                     field="dateCreated"
                     currentSortBy={sortBy}
