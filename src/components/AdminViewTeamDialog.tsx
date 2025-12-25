@@ -6,6 +6,7 @@ import { X, Users, Check, XCircle, Pause, Play } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useTranslation } from 'react-i18next';
 
 interface TeamMember {
   id: number;
@@ -36,7 +37,10 @@ interface AdminViewTeamDialogProps {
 }
 
 export default function AdminViewTeamDialog({ open, onOpenChange, teamMembers, onSuccess }: AdminViewTeamDialogProps) {
+  const { t } = useTranslation(); // 新增：获取 t 函数
+
   const [members, setMembers] = useState<TeamMember[]>(teamMembers ?? []);
+
   useEffect(() => {
     if (teamMembers) setMembers(teamMembers);
   }, [teamMembers]);
@@ -53,7 +57,7 @@ export default function AdminViewTeamDialog({ open, onOpenChange, teamMembers, o
         const personApi = new PersonApi();
         personApi.editStatus(request, {
           status200: () => {
-            toast.success('Member deactivated successfully');
+            toast.success(t('team.dialog.deactivateSuccess'));
             onSuccess?.();
             resolve(true);
           },
@@ -66,7 +70,7 @@ export default function AdminViewTeamDialog({ open, onOpenChange, teamMembers, o
         });
       });
     } catch (error) {
-      toast.error('Failed to deactivate member');
+      toast.error(t('team.dialog.deactivateFailed'));
       console.error(error);
     }
   };
@@ -81,6 +85,8 @@ export default function AdminViewTeamDialog({ open, onOpenChange, teamMembers, o
         const personApi = new PersonApi();
         personApi.editStatus(request, {
           status200: () => {
+            toast.success(t('team.dialog.reactivateSuccess'));
+            onSuccess?.();
             resolve(true);
           },
           error: (error) => {
@@ -92,7 +98,7 @@ export default function AdminViewTeamDialog({ open, onOpenChange, teamMembers, o
         });
       });
     } catch (error) {
-      toast.error('Failed to reactivate member');
+      toast.error(t('team.dialog.reactivateFailed'));
       console.error(error);
     }
   };
@@ -107,7 +113,7 @@ export default function AdminViewTeamDialog({ open, onOpenChange, teamMembers, o
         const personApi = new PersonApi();
         personApi.editStatus(request, {
           status200: () => {
-            toast.success('Member approved successfully');
+            toast.success(t('team.dialog.approveSuccess'));
             onSuccess?.();
             resolve(true);
           },
@@ -120,7 +126,7 @@ export default function AdminViewTeamDialog({ open, onOpenChange, teamMembers, o
         });
       });
     } catch (error) {
-      toast.error('Failed to approve member');
+      toast.error(t('team.dialog.approveFailed'));
       console.error(error);
       return false;
     }
@@ -136,7 +142,7 @@ export default function AdminViewTeamDialog({ open, onOpenChange, teamMembers, o
         const personApi = new PersonApi();
         personApi.editStatus(request, {
           status200: () => {
-            toast.success('Member rejected successfully');
+            toast.success(t('team.dialog.rejectSuccess'));
             onSuccess?.();
             resolve(true);
           },
@@ -149,7 +155,7 @@ export default function AdminViewTeamDialog({ open, onOpenChange, teamMembers, o
         });
       });
     } catch (error) {
-      toast.error('Failed to reject member');
+      toast.error(t('team.dialog.rejectFailed'));
       console.error(error);
       return false;
     }
@@ -160,25 +166,25 @@ export default function AdminViewTeamDialog({ open, onOpenChange, teamMembers, o
       case 'Active':
         return (
           <Button size="sm" variant="outline" onClick={() => handleDeactivate(member.id)}>
-            <Pause className="mr-1 h-3.5 w-3.5" /> Deactivate
+            <Pause className="mr-1 h-3.5 w-3.5" /> {t('team.button.deactivate')}
           </Button>
         );
       case 'Inactive':
         return (
           <Button size="sm" variant="outline" onClick={() => handleReactivate(member.id)}>
-            <Play className="mr-1 h-3.5 w-3.5" /> Reactivate
+            <Play className="mr-1 h-3.5 w-3.5" /> {t('team.button.reactivate')}
           </Button>
         );
       case 'Pending':
-        return <p className="text-red-400">Pending Completion</p>;
+        return <p className="text-red-400">{t('team.status.pending')}</p>;
       case 'RegistrationRequested':
         return (
           <div className="flex gap-2">
             <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => handleApprove(member.id)}>
-              <Check className="mr-1 h-3.5 w-3.5" /> Approve
+              <Check className="mr-1 h-3.5 w-3.5" /> {t('team.button.approve')}
             </Button>
             <Button size="sm" variant="destructive" onClick={() => handleReject(member.id)}>
-              <XCircle className="mr-1 h-3.5 w-3.5" /> Reject
+              <XCircle className="mr-1 h-3.5 w-3.5" /> {t('team.button.reject')}
             </Button>
           </div>
         );
@@ -193,32 +199,27 @@ export default function AdminViewTeamDialog({ open, onOpenChange, teamMembers, o
         <DialogHeader className="shrink-0">
           <DialogTitle className="flex items-center gap-3 text-2xl font-semibold">
             <Users className="h-7 w-7" />
-            Program Admin View of Team Members
+            {t('team.dialog.title')}
           </DialogTitle>
           <button
             onClick={handleClose}
             className="absolute transition-opacity rounded-sm focus:ring-ring top-4 right-4 opacity-70 hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-none"
           >
             <X className="w-4 h-4" />
-            <span className="sr-only">Close</span>
+            <span className="sr-only">{t('common.close')}</span>
           </button>
         </DialogHeader>
-
         <div className="flex-1 py-6 space-y-8 overflow-y-auto scroll-smooth">
-          <p className="mb-6 text-sm text-muted-foreground">
-            When Admin view Shop/Dealer Team Members, the Approve and Reject button appear if a member needs to be
-            approved/rejected.
-          </p>
-
+          <p className="mb-6 text-sm text-muted-foreground">{t('team.dialog.description')}</p>
           <div className="overflow-auto border rounded-lg">
             <table className="w-full">
               <thead className="bg-muted/50">
                 <tr>
-                  <th className="px-6 py-4 text-sm font-medium text-left">First Name</th>
-                  <th className="px-6 py-4 text-sm font-medium text-left">Last Name</th>
-                  <th className="px-6 py-4 text-sm font-medium text-left">Email</th>
-                  <th className="px-6 py-4 text-sm font-medium text-left">Date Added</th>
-                  <th className="px-6 py-4 text-sm font-medium text-left">Date Last Accessed</th>
+                  <th className="px-6 py-4 text-sm font-medium text-left">{t('team.table.firstName')}</th>
+                  <th className="px-6 py-4 text-sm font-medium text-left">{t('team.table.lastName')}</th>
+                  <th className="px-6 py-4 text-sm font-medium text-left">{t('team.table.email')}</th>
+                  <th className="px-6 py-4 text-sm font-medium text-left">{t('team.table.dateAdded')}</th>
+                  <th className="px-6 py-4 text-sm font-medium text-left">{t('team.table.dateLastAccessed')}</th>
                   <th className="px-6 py-4 text-sm font-medium text-left">{/* Status / Actions */}</th>
                 </tr>
               </thead>
@@ -233,17 +234,14 @@ export default function AdminViewTeamDialog({ open, onOpenChange, teamMembers, o
                     <td className="px-6 py-4 text-sm">{member.dateAdded}</td>
                     <td className="px-6 py-4 text-sm">{member.dateLastAccessed || '—'}</td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        {/* {getStatusDisplay(member.status)} */}
-                        {renderActionButtons(member)}
-                      </div>
+                      <div className="flex items-center gap-3">{renderActionButtons(member)}</div>
                     </td>
                   </tr>
                 ))}
                 {members.length === 0 && (
                   <tr>
                     <td colSpan={6} className="px-6 py-6 text-sm text-center text-muted-foreground">
-                      No team members found.
+                      {t('team.table.noMembers')}
                     </td>
                   </tr>
                 )}
@@ -252,7 +250,7 @@ export default function AdminViewTeamDialog({ open, onOpenChange, teamMembers, o
           </div>
         </div>
         <DialogFooter className="flex-shrink-0 gap-3 pt-4 mt-4 border-t">
-          <Button onClick={handleClose}>Close</Button>
+          <Button onClick={handleClose}>{t('common.close')}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

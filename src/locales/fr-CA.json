@@ -26,6 +26,48 @@
     "discardDescription": "Vous avez des modifications non enregistrées. Êtes-vous sûr de vouloir fermer ? Toutes vos modifications seront perdues.",
     "remove": "Supprimer"
   },
+  "profile": {
+    "dialog": {
+      "title": "Modifier le profil"
+    },
+    "section": {
+      "personalInfo": "Renseignements personnels",
+      "updatePassword": "Cliquez ici pour mettre à jour le mot de passe"
+    },
+    "form": {
+      "firstName": {
+        "label": "Prénom",
+        "placeholder": "Saisissez le prénom",
+        "required": "Le prénom est requis"
+      },
+      "lastName": {
+        "label": "Nom",
+        "placeholder": "Saisissez le nom",
+        "required": "Le nom est requis"
+      },
+      "email": {
+        "label": "Courriel",
+        "invalid": "Adresse courriel invalide"
+      },
+      "currentPassword": {
+        "label": "Mot de passe actuel",
+        "placeholder": "••••••••"
+      },
+      "newPassword": {
+        "label": "Nouveau mot de passe",
+        "placeholder": "Saisissez le nouveau mot de passe"
+      },
+      "confirmPassword": {
+        "label": "Confirmer le mot de passe",
+        "placeholder": "Confirmez le nouveau mot de passe"
+      },
+      "password": {
+        "allRequired": "Tous les champs de mot de passe sont requis",
+        "minLength": "Le nouveau mot de passe doit comporter au moins 8 caractères",
+        "mismatch": "Les mots de passe ne correspondent pas"
+      }
+    }
+  },
   "auth": {
     "login": {
       "title": "Connexion",
@@ -271,7 +313,9 @@
       "updating": "Mise à jour en cours...",
       "saving": "Enregistrement en cours...",
       "update": "Mettre à jour",
-      "save": "Enregistrer"
+      "save": "Enregistrer",
+      "approving": "Approbation en cours...",
+      "rejecting": "Rejet en cours..."
     },
     "attachments": {
       "estimate": "Estimation"
@@ -280,6 +324,18 @@
       "dropPdf": "Déposez vos fichiers PDF ici...",
       "instructionPdf": "Déposez vos fichiers PDF ici ou",
       "clickToBrowse": "cliquez pour parcourir"
+    },
+    "approveDialog": {
+      "approveTitle": "Commande de pièces approuvée",
+      "rejectTitle": "Commande de pièces rejetée",
+      "reasonTitle": "Motif du rejet",
+      "reasonPlaceholder": "Indiquez un motif de rejet",
+      "reasonRequired": "Le motif du rejet est requis",
+      "salesOrderTitle": "N° de commande de vente",
+      "assignSalesOrder": "Attribuer un n° de commande de vente",
+      "salesOrderPlaceholder": "Saisissez le numéro de commande de vente (ex. SO-174)",
+      "salesOrderRequired": "Le numéro de commande de vente est requis",
+      "actionFailed": "Échec de {{action}} la commande de pièces"
     }
   },
   "shop": {
@@ -358,6 +414,47 @@
     "firstName": "Prénom",
     "type": {
       "admin": "Administrateur du programme"
+    },
+    "dialog": {
+      "addTitle": "Ajouter un utilisateur réseau",
+      "editTitle": "Modifier l'utilisateur réseau"
+    },
+    "form": {
+      "firstName": {
+        "label": "Prénom",
+        "placeholder": "Saisissez le prénom",
+        "required": "Le prénom est requis"
+      },
+      "lastName": {
+        "label": "Nom",
+        "placeholder": "Saisissez le nom",
+        "required": "Le nom est requis"
+      },
+      "email": {
+        "label": "Adresse courriel",
+        "placeholder": "user@vwgoa.com",
+        "invalid": "Adresse courriel invalide"
+      },
+      "role": {
+        "label": "Rôle",
+        "placeholder": "Sélectionner un rôle",
+        "required": "Veuillez sélectionner un rôle"
+      },
+      "csrRegion": {
+        "label": "Région CSR"
+      },
+      "fieldStaffRegions": {
+        "label": "Région(s) du personnel sur le terrain"
+      }
+    },
+    "role": {
+      "admin": "Administrateur",
+      "csr": "CSR",
+      "fieldStaff": "Personnel sur le terrain"
+    },
+    "toast": {
+      "createSuccess": "Utilisateur créé avec succès",
+      "updateSuccess": "Utilisateur mis à jour avec succès"
     }
   },
   "repairOrder": {
@@ -535,6 +632,12 @@
       "structural": "Mesures structurelles",
       "preRepairPhotos": "Photos avant réparation"
     },
+    "completeDialog": {
+      "title": "Marquer la réparation comme terminée",
+      "postRepairPhotos": "Photos après réparation",
+      "photoRequired": "Veuillez télécharger au moins une photo",
+      "button": "Marquer la réparation comme terminée"
+    },
     "button": {
       "updating": "Mise à jour en cours...",
       "saving": "Enregistrement en cours...",
@@ -679,6 +782,35 @@
         "dateAdded": "Date d'ajout",
         "dateLastAccessed": "Date de dernière connexion"
       }
+    },
+    "dialog": {
+      "title": "Vue administrateur du programme des membres de l'équipe",
+      "description": "Lorsqu'un administrateur consulte les membres d'équipe d'un atelier ou d'un concessionnaire, les boutons Approuver et Rejeter apparaissent si un membre doit être approuvé ou rejeté.",
+      "deactivateSuccess": "Membre désactivé avec succès",
+      "deactivateFailed": "Échec de la désactivation du membre",
+      "reactivateSuccess": "Membre réactivé avec succès",
+      "reactivateFailed": "Échec de la réactivation du membre",
+      "approveSuccess": "Membre approuvé avec succès",
+      "approveFailed": "Échec de l'approbation du membre",
+      "rejectSuccess": "Membre rejeté avec succès",
+      "rejectFailed": "Échec du rejet du membre"
+    },
+    "table": {
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "email": "Courriel",
+      "dateAdded": "Date d'ajout",
+      "dateLastAccessed": "Date de dernière connexion",
+      "noMembers": "Aucun membre d'équipe trouvé."
+    },
+    "button": {
+      "deactivate": "Désactiver",
+      "reactivate": "Réactiver",
+      "approve": "Approuver",
+      "reject": "Rejeter"
+    },
+    "status": {
+      "pending": "En attente de finalisation"
     }
   },
   "timeline": {

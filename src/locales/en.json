@@ -26,6 +26,48 @@
     "discardDescription": "You have unsaved changes. Are you sure you want to close? All your changes will be lost.",
     "remove": "Remove"
   },
+  "profile": {
+    "dialog": {
+      "title": "Edit Profile"
+    },
+    "section": {
+      "personalInfo": "Personal Information",
+      "updatePassword": "Click here to update password"
+    },
+    "form": {
+      "firstName": {
+        "label": "First Name",
+        "placeholder": "Enter first name",
+        "required": "First name is required"
+      },
+      "lastName": {
+        "label": "Last Name",
+        "placeholder": "Enter last name",
+        "required": "Last name is required"
+      },
+      "email": {
+        "label": "Email",
+        "invalid": "Invalid email address"
+      },
+      "currentPassword": {
+        "label": "Current Password",
+        "placeholder": "••••••••"
+      },
+      "newPassword": {
+        "label": "New Password",
+        "placeholder": "Enter new password"
+      },
+      "confirmPassword": {
+        "label": "Confirm Password",
+        "placeholder": "Confirm new password"
+      },
+      "password": {
+        "allRequired": "All password fields are required",
+        "minLength": "New password must be at least 8 characters",
+        "mismatch": "Passwords do not match"
+      }
+    }
+  },
   "auth": {
     "login": {
       "title": "Login",
@@ -271,7 +313,9 @@
       "updating": "Updating...",
       "saving": "Saving...",
       "update": "Update",
-      "save": "Save"
+      "save": "Save",
+      "approving": "Approving...",
+      "rejecting": "Rejecting..."
     },
     "attachments": {
       "estimate": "Estimate"
@@ -280,6 +324,18 @@
       "dropPdf": "Drop your PDF files here...",
       "instructionPdf": "Drop your PDF files here or",
       "clickToBrowse": "click to browse"
+    },
+    "approveDialog": {
+      "approveTitle": "Parts Order Approved",
+      "rejectTitle": "Parts Order Rejected",
+      "reasonTitle": "Reason for Rejection",
+      "reasonPlaceholder": "Provide a reason for rejection",
+      "reasonRequired": "Reason for rejection is required",
+      "salesOrderTitle": "Sales Order #",
+      "assignSalesOrder": "Assign a Sales Order #",
+      "salesOrderPlaceholder": "Enter sales order number (e.g. SO-174)",
+      "salesOrderRequired": "Sales order number is required",
+      "actionFailed": "Failed to {{action}} parts order"
     }
   },
   "shop": {
@@ -358,6 +414,47 @@
     "firstName": "First Name",
     "type": {
       "admin": "Program Administrator"
+    },
+    "dialog": {
+      "addTitle": "Add Network User",
+      "editTitle": "Edit Network User"
+    },
+    "form": {
+      "firstName": {
+        "label": "First Name",
+        "placeholder": "Enter first name",
+        "required": "First name is required"
+      },
+      "lastName": {
+        "label": "Last Name",
+        "placeholder": "Enter last name",
+        "required": "Last name is required"
+      },
+      "email": {
+        "label": "Email Address",
+        "placeholder": "user@vwgoa.com",
+        "invalid": "Invalid email address"
+      },
+      "role": {
+        "label": "Role",
+        "placeholder": "Select role",
+        "required": "Please select a role"
+      },
+      "csrRegion": {
+        "label": "CSR Region"
+      },
+      "fieldStaffRegions": {
+        "label": "Field Staff Region(s)"
+      }
+    },
+    "role": {
+      "admin": "Admin",
+      "csr": "CSR",
+      "fieldStaff": "Field Staff"
+    },
+    "toast": {
+      "createSuccess": "User created successfully",
+      "updateSuccess": "User updated successfully"
     }
   },
   "repairOrder": {
@@ -535,6 +632,12 @@
       "structural": "Structural Measurements",
       "preRepairPhotos": "Pre-Repair Photos"
     },
+    "completeDialog": {
+      "title": "Mark Repair as Complete",
+      "postRepairPhotos": "Post-Repair Photos",
+      "photoRequired": "Please upload at least one photo",
+      "button": "Mark Repair as Complete"
+    },
     "button": {
       "updating": "Updating...",
       "saving": "Saving...",
@@ -679,6 +782,35 @@
         "dateAdded": "Date Added",
         "dateLastAccessed": "Date Last Accessed"
       }
+    },
+    "dialog": {
+      "title": "Program Admin View of Team Members",
+      "description": "When Admin view Shop/Dealer Team Members, the Approve and Reject button appear if a member needs to be approved/rejected.",
+      "deactivateSuccess": "Member deactivated successfully",
+      "deactivateFailed": "Failed to deactivate member",
+      "reactivateSuccess": "Member reactivated successfully",
+      "reactivateFailed": "Failed to reactivate member",
+      "approveSuccess": "Member approved successfully",
+      "approveFailed": "Failed to approve member",
+      "rejectSuccess": "Member rejected successfully",
+      "rejectFailed": "Failed to reject member"
+    },
+    "table": {
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "dateAdded": "Date Added",
+      "dateLastAccessed": "Date Last Accessed",
+      "noMembers": "No team members found."
+    },
+    "button": {
+      "deactivate": "Deactivate",
+      "reactivate": "Reactivate",
+      "approve": "Approve",
+      "reject": "Reject"
+    },
+    "status": {
+      "pending": "Pending Completion"
     }
   },
   "timeline": {

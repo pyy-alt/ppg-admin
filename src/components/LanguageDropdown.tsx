@@ -1,67 +1,47 @@
-// import { useState } from 'react'
-// import { getLanguageCookieName } from '@/config/site'
-import { Globe, Check } from 'lucide-react'
-// import { getCookie, setCookie } from '@/lib/cookies'
+import { Globe, Check } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { useTranslation } from 'react-i18next'
+} from '@/components/ui/dropdown-menu';
+import { useTranslation } from 'react-i18next';
 
 const languages = [
   { code: 'en' as const, label: 'English' },
   { code: 'fr-CA' as const, label: 'Français' },
-]
+];
 export function LanguageDropdown() {
-  // From Cookie Read language preferences，Default is 'en'
-  // const cookieName = getLanguageCookieName()
-  // const savedLang = getCookie(cookieName) || 'en'
-  // const [selected, setSelected] = useState(savedLang)
-  const { i18n } = useTranslation()
-  const currentLang = i18n.language || (typeof window !== 'undefined' ? localStorage.getItem('i18nextLng') || 'en' : 'en')
-
-
-  // const handleSelect = (code: string) => {
-  //   setSelected(code)
-  //   // Save to Cookie（1Year expiration）
-  //   const oneYear = 60 * 60 * 24 * 365
-  //   setCookie(cookieName, code, oneYear)
-  //   // TODO: Trigger i18n Switch（Pending integration i18n Library）
-  //   // window.location.reload(); // or use i18n Dynamic library switching
-  // }
-
-  // const currentLabel =
-  //   languages.find((l) => l.code === selected)?.label || 'English'
-
+  const { i18n } = useTranslation();
+  const currentLang =
+    i18n.language || (typeof window !== 'undefined' ? localStorage.getItem('i18nextLng') || 'en' : 'en');
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild className='hover:text-primary text-white'>
-        <button className='rounded-full p-2 transition-colors hover:bg-white/10'>
-          <Globe className='h-5 w-5' />
+      <DropdownMenuTrigger asChild className="text-white hover:text-primary">
+        <button className="p-2 transition-colors rounded-full hover:bg-white/10">
+          <Globe className="w-5 h-5" />
         </button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align='end' className='w-40'>
+      <DropdownMenuContent align="end" className="w-40">
         {languages.map((lang) => (
           <DropdownMenuItem
             key={lang.code}
-                onClick={() => {
-                  i18n.changeLanguage(lang.code)
-                  try {
-                    localStorage.setItem('i18nextLng', lang.code)
-                  } catch (e) {
-                    /* ignore */
-                  }
-                }}
-            className='flex cursor-pointer items-center justify-between'
+            onClick={() => {
+              i18n.changeLanguage(lang.code);
+              try {
+                localStorage.setItem('i18nextLng', lang.code);
+              } catch (e) {
+                /* ignore */
+              }
+            }}
+            className="flex items-center justify-between cursor-pointer"
           >
             <span>{lang.label}</span>
-            {currentLang === lang.code && <Check className='h-4 w-4 text-black' />}
+            {currentLang === lang.code && <Check className="w-4 h-4 text-black" />}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }

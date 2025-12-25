@@ -1,6 +1,3 @@
-// src/components/EditProfileDialog.tsx
-'use client';
-
 import { useState } from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -14,12 +11,13 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { refreshUserData } from '@/lib/auth';
+import { useTranslation } from 'react-i18next'; // 新增导入
 
 const formSchema = z
   .object({
-    firstName: z.string().min(1, 'First name is required'),
-    lastName: z.string().min(1, 'Last name is required'),
-    email: z.string().email('Invalid email address'),
+    firstName: z.string().min(1, 'profile.form.firstName.required'),
+    lastName: z.string().min(1, 'profile.form.lastName.required'),
+    email: z.string().email('profile.form.email.invalid'),
     currentPassword: z.string().optional(),
     newPassword: z.string().optional(),
     confirmPassword: z.string().optional(),
@@ -32,7 +30,7 @@ const formSchema = z
       }
       return true;
     },
-    { message: 'All password fields are required', path: ['currentPassword'] }
+    { message: 'profile.form.password.allRequired', path: ['currentPassword'] }
   )
   .refine(
     (data) => {
@@ -42,7 +40,7 @@ const formSchema = z
       return true;
     },
     {
-      message: 'New password must be at least 8 characters',
+      message: 'profile.form.password.minLength',
       path: ['newPassword'],
     }
   )
@@ -53,7 +51,7 @@ const formSchema = z
       }
       return true;
     },
-    { message: 'Passwords do not match', path: ['confirmPassword'] }
+    { message: 'profile.form.password.mismatch', path: ['confirmPassword'] }
   );
 
 type FormValues = z.infer<typeof formSchema>;
@@ -70,7 +68,10 @@ interface EditProfileDialogProps {
 }
 
 export default function EditProfileDialog({ open, onOpenChange, initialData }: EditProfileDialogProps) {
+  const { t } = useTranslation(); // 新增：获取 t 函数
+
   const [showPasswordSection, setShowPasswordSection] = useState(false);
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -93,6 +94,7 @@ export default function EditProfileDialog({ open, onOpenChange, initialData }: E
     // The interface does not currently support changing the password
     // request.currentPassword = form.getValues('currentPassword')
     // request.newPassword = form.getValues('newPassword')
+
     personApi.edit(request, {
       status200: () => {
         onOpenChange(false);
@@ -120,60 +122,56 @@ export default function EditProfileDialog({ open, onOpenChange, initialData }: E
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">Edit Profile</DialogTitle>
+          <DialogTitle className="text-xl font-semibold">{t('profile.dialog.title')}</DialogTitle>
           <button
             onClick={handleClose}
-            className="ring-offset-background focus:ring-ring absolute top-4 right-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-none"
+            className="absolute transition-opacity rounded-sm ring-offset-background focus:ring-ring top-4 right-4 opacity-70 hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-none"
           >
-            <X className="h-4 w-4" />
-            <span className="sr-only">Close</span>
+            <X className="w-4 h-4" />
+            <span className="sr-only">{t('common.close')}</span>
           </button>
         </DialogHeader>
-
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* Personal Information */}
             <div className="space-y-5">
               <div className="flex items-center gap-2 text-lg font-medium">
-                <User className="text-foreground h-5 w-5" />
-                <h3>Personal Information</h3>
+                <User className="w-5 h-5 text-foreground" />
+                <h3>{t('profile.section.personalInfo')}</h3>
               </div>
-
               <div className="grid gap-4">
                 <FormField
                   control={form.control}
                   name="firstName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>First Name</FormLabel>
+                      <FormLabel>{t('profile.form.firstName.label')}</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input placeholder={t('profile.form.firstName.placeholder')} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-
                 <FormField
                   control={form.control}
                   name="lastName"
                   render={({ field }) => (
                     <FormItem className="mt-4">
-                      <FormLabel>Last Name</FormLabel>
+                      <FormLabel>{t('profile.form.lastName.label')}</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input placeholder={t('profile.form.lastName.placeholder')} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-
                 <FormField
                   control={form.control}
                   name="email"
                   render={({ field }) => (
                     <FormItem className="mt-4">
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>{t('profile.form.email.label')}</FormLabel>
                       <FormControl>
                         <Input {...field} disabled className="bg-muted" />
                       </FormControl>
@@ -182,19 +180,17 @@ export default function EditProfileDialog({ open, onOpenChange, initialData }: E
                 />
               </div>
             </div>
-
             <Separator />
-
             {/* Password Section - Click to Expand */}
             <div className="space-y-5">
               <button
                 type="button"
                 onClick={() => setShowPasswordSection(!showPasswordSection)}
-                className="bg-muted hover:bg-muted/80 flex w-full items-center justify-between rounded-lg px-4 py-3 text-left transition-colors"
+                className="flex items-center justify-between w-full px-4 py-3 text-left transition-colors rounded-lg bg-muted hover:bg-muted/80"
               >
                 <div className="flex items-center gap-2">
-                  <Lock className="text-foreground h-5 w-5" />
-                  <span className="font-medium">Click here to update password</span>
+                  <Lock className="w-5 h-5 text-foreground" />
+                  <span className="font-medium">{t('profile.section.updatePassword')}</span>
                 </div>
                 <svg
                   className={`text-muted-foreground h-5 w-5 transition-transform ${showPasswordSection ? 'rotate-180' : ''}`}
@@ -205,45 +201,50 @@ export default function EditProfileDialog({ open, onOpenChange, initialData }: E
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
-
               {showPasswordSection && (
-                <div className="animate-in fade-in slide-in-from-top-2 space-y-4">
+                <div className="space-y-4 animate-in fade-in slide-in-from-top-2">
                   <FormField
                     control={form.control}
                     name="currentPassword"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Current Password</FormLabel>
+                        <FormLabel>{t('profile.form.currentPassword.label')}</FormLabel>
                         <FormControl>
-                          <Input type="password" placeholder="••••••••" {...field} />
+                          <Input
+                            type="password"
+                            placeholder={t('profile.form.currentPassword.placeholder')}
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-
                   <FormField
                     control={form.control}
                     name="newPassword"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>New Password</FormLabel>
+                        <FormLabel>{t('profile.form.newPassword.label')}</FormLabel>
                         <FormControl>
-                          <Input type="password" placeholder="Enter new password" {...field} />
+                          <Input type="password" placeholder={t('profile.form.newPassword.placeholder')} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-
                   <FormField
                     control={form.control}
                     name="confirmPassword"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Confirm Password</FormLabel>
+                        <FormLabel>{t('profile.form.confirmPassword.label')}</FormLabel>
                         <FormControl>
-                          <Input type="password" placeholder="Confirm new password" {...field} />
+                          <Input
+                            type="password"
+                            placeholder={t('profile.form.confirmPassword.placeholder')}
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -252,13 +253,12 @@ export default function EditProfileDialog({ open, onOpenChange, initialData }: E
                 </div>
               )}
             </div>
-
             <DialogFooter className="gap-3 sm:gap-3">
               <Button type="button" variant="outline" onClick={handleClose}>
-                Cancel
+                {t('common.cancel')}
               </Button>
               <Button type="submit" variant="default" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? 'Saving...' : 'Save'}
+                {form.formState.isSubmitting ? t('common.saving') : t('common.save')}
               </Button>
             </DialogFooter>
           </form>
