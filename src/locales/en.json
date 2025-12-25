@@ -423,110 +423,109 @@
       "fetchError": "Failed to fetch data",
       "assignedDealership": "Assigned Dealership",
       "by": "by"
-    },
-
-    "brand": {
-      "vw": "VW Navigation",
-      "audi": "Audi Navigation"
     }
   },
-      "registration": {
-      "shop": {
-        "success": "Registration successful! Please check your email.",
-        "errors": {
-          "registrationFailed": "Registration failed. Please try again. {{error}}",
-          "registrationFailedDefault": "Registration failed. Please try again."
-        },
-        "bannerAlt": "New Shop User Registration",
-        "sections": {
-          "personalInfo": "Personal Information",
-          "shopInfo": "Shop Information",
-          "associatedDealership": "Associated Dealership"
-        },
-        "fields": {
-          "firstName": "First Name",
-          "lastName": "Last Name",
-          "email": "Email",
-          "shopName": "Shop Name",
-          "shopNumber": "Shop #",
-          "dealershipName": "Dealership Name",
-          "dealershipNumber": "Dealership #"
-        },
-        "placeholders": {
-          "firstName": "Enter first name",
-          "lastName": "Enter last name",
-          "email": "Enter email address",
-          "shopName": "Enter shop name",
-          "shopNumber": "Enter shop number",
-          "dealershipName": "Enter dealership name",
-          "dealershipNumber": "Enter dealership number"
-        },
-        "registering": "Registering...",
-        "register": "Register"
+  "registration": {
+    "shop": {
+      "success": "Registration successful! Please check your email.",
+      "errors": {
+        "registrationFailed": "Registration failed. Please try again. {{error}}",
+        "registrationFailedDefault": "Registration failed. Please try again."
       },
-      "dealership": {
-        "success": "Registration successful! Please check your email.",
-        "errors": {
-          "registrationFailedDefault": "Registration failed. Please try again."
-        },
-        "bannerAlt": "New Dealership User Registration",
-        "sections": {
-          "personalInfo": "Personal Information",
-          "dealershipInfo": "Dealership Information"
-        },
-        "fields": {
-          "firstName": "First Name",
-          "lastName": "Last Name",
-          "email": "Email",
-          "dealershipName": "Dealership Name",
-          "dealershipNumber": "Dealership #"
-        },
-        "placeholders": {
-          "firstName": "Enter first name",
-          "lastName": "Enter last name",
-          "email": "Enter email address",
-          "dealershipName": "Enter dealership name",
-          "dealershipNumber": "Enter dealership number"
-        },
-        "registering": "Registering...",
-        "register": "Register"
+      "bannerAlt": "New Shop User Registration",
+      "sections": {
+        "personalInfo": "Personal Information",
+        "shopInfo": "Shop Information",
+        "associatedDealership": "Associated Dealership"
       },
-      "complete": {
-        "errors": {
-          "invalidParams": "Invalid registration link parameters.",
-          "invalidLink": "Registration link is invalid or has expired.",
-          "validateFailed": "Failed to validate reset link. Please try again.",
-          "passwordMismatch": "Passwords do not match.",
-          "passwordTooShort": "Password must be at least 8 characters.",
-          "completeFailed": "Failed to reset password. Please try again."
-        },
-        "success": "Registration completed successfully!",
-        "bannerAlt": "New Shop User Registration",
-        "sections": {
-          "personalInfo": "Personal Information",
-          "shopInfo": "Shop Information",
-          "password": "Password"
-        },
-        "fields": {
-          "email": "Email",
-          "firstName": "First Name",
-          "lastName": "Last Name",
-          "shopName": "Name",
-          "shopNumber": "Number",
-          "address": "Address",
-          "password": "Password",
-          "confirmPassword": "Confirm Password"
-        },
-        "placeholders": {
-          "password": "Enter your password",
-          "confirmPassword": "Confirm your password"
-        },
-        "hidePassword": "Hide password",
-        "showPassword": "Show password",
-        "completing": "Completing...",
-        "submit": "Complete Registration"
-      }
+      "fields": {
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "email": "Email",
+        "shopName": "Shop Name",
+        "shopNumber": "Shop #",
+        "dealershipName": "Dealership Name",
+        "dealershipNumber": "Dealership #"
+      },
+      "placeholders": {
+        "firstName": "Enter first name",
+        "lastName": "Enter last name",
+        "email": "Enter email address",
+        "shopName": "Enter shop name",
+        "shopNumber": "Enter shop number",
+        "dealershipName": "Enter dealership name",
+        "dealershipNumber": "Enter dealership number"
+      },
+      "registering": "Registering...",
+      "register": "Register"
     },
+    "dealership": {
+      "success": "Registration successful! Please check your email.",
+      "errors": {
+        "registrationFailedDefault": "Registration failed. Please try again."
+      },
+      "bannerAlt": "New Dealership User Registration",
+      "sections": {
+        "personalInfo": "Personal Information",
+        "dealershipInfo": "Dealership Information"
+      },
+      "fields": {
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "email": "Email",
+        "dealershipName": "Dealership Name",
+        "dealershipNumber": "Dealership #"
+      },
+      "placeholders": {
+        "firstName": "Enter first name",
+        "lastName": "Enter last name",
+        "email": "Enter email address",
+        "dealershipName": "Enter dealership name",
+        "dealershipNumber": "Enter dealership number"
+      },
+      "registering": "Registering...",
+      "register": "Register"
+    },
+    "complete": {
+      "errors": {
+        "invalidParams": "Invalid registration link parameters.",
+        "invalidLink": "Registration link is invalid or has expired.",
+        "validateFailed": "Failed to validate reset link. Please try again.",
+        "passwordMismatch": "Passwords do not match.",
+        "passwordTooShort": "Password must be at least 8 characters.",
+        "completeFailed": "Failed to reset password. Please try again."
+      },
+      "success": "Registration completed successfully!",
+      "bannerAlt": "New Shop User Registration",
+      "sections": {
+        "personalInfo": "Personal Information",
+        "shopInfo": "Shop Information",
+        "password": "Password"
+      },
+      "fields": {
+        "email": "Email",
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "shopName": "Name",
+        "shopNumber": "Number",
+        "address": "Address",
+        "password": "Password",
+        "confirmPassword": "Confirm Password"
+      },
+      "placeholders": {
+        "password": "Enter your password",
+        "confirmPassword": "Confirm your password"
+      },
+      "hidePassword": "Hide password",
+      "showPassword": "Show password",
+      "completing": "Completing...",
+      "submit": "Complete Registration"
+    }
+  },
+  "brand": {
+    "vw": "VW Navigation",
+    "audi": "Audi Navigation"
+  },
   "team": {
     "view": {
       "deactivateSuccess": "Member deactivated successfully",
@@ -563,6 +562,53 @@
         "dateAdded": "Date Added",
         "dateLastAccessed": "Date Last Accessed"
       }
+    }
+  },
+  "timeline": {
+    "title": "Parts Tracker",
+    "noData": "No parts order data available",
+    "stage": {
+      "OrderReview": "Order Review",
+      "OrderFulfillment": "Order Fulfillment",
+      "OrderReceived": "Order Received",
+      "RepairCompleted": "Repair Completed"
+    },
+    "badge": {
+      "waitingOnYou": "Waiting on You",
+      "pendingDealer": "Pending Dealer",
+      "pendingCsr": "Pending CSR",
+      "pendingShop": "Pending Shop"
+    },
+    "log": {
+      "submitted": "Request was Submitted on <strong>{{date}}</strong>.",
+      "submittedWithBy": "Request was Submitted on <strong>{{date}}</strong> by <strong>{{by}}</strong>.",
+      "rejected": "Request was <rejected>Rejected</rejected> on <strong>{{date}}</strong>.",
+      "rejectedWithBy": "Request was <rejected>Rejected</rejected> on <strong>{{date}}</strong> by <strong>{{by}}</strong>.",
+      "reason": "(Reason: {{reason}})",
+      "resubmitted": "Request was Resubmitted on <strong>{{date}}</strong>.",
+      "resubmittedWithBy": "Request was Resubmitted on <strong>{{date}}</strong> by <strong>{{by}}</strong>.",
+      "approved": "Request was <approved>Approved</approved> on <strong>{{date}}</strong>.",
+      "approvedWithBy": "Request was <approved>Approved</approved> on <strong>{{date}}</strong> by <strong>{{by}}</strong>.",
+      "submittedBasic": "Request was Submitted on <strong>{{date}}</strong>.",
+      "submittedBasicWithBy": "Request was Submitted on <strong>{{date}}</strong> by <strong>{{by}}</strong>.",
+      "shipped": "Parts were Shipped on <strong>{{date}}</strong>.",
+      "shippedWithBy": "Parts were Shipped on <strong>{{date}}</strong> by <strong>{{by}}</strong>.",
+      "unshipped": "Parts were Unshipped on <strong>{{date}}</strong>.",
+      "unshippedWithBy": "Parts were Unshipped on <strong>{{date}}</strong> by <strong>{{by}}</strong>.",
+      "received": "Parts were Received on <strong>{{date}}</strong>.",
+      "receivedWithBy": "Parts were Received on <strong>{{date}}</strong> by <strong>{{by}}</strong>.",
+      "unreceived": "Parts were Unreceived on <strong>{{date}}</strong>.",
+      "unreceivedWithBy": "Parts were Unreceived on <strong>{{date}}</strong> by <strong>{{by}}</strong>."
+    },
+    "requestPending": "This request is",
+    "button": {
+      "approve": "Approved",
+      "reject": "Rejected",
+      "resubmit": "Resubmit Request",
+      "unmarkShipped": "Unmark Parts as Shipped",
+      "markShipped": "Mark Parts as Shipped",
+      "unmarkReceived": "Unmark Parts as Received",
+      "markReceived": "Mark Parts as Received"
     }
   }
 }

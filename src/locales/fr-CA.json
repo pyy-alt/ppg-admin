@@ -423,10 +423,6 @@
       "fetchError": "Échec du chargement des données",
       "assignedDealership": "Concessionnaire assigné",
       "by": "par"
-    },
-    "brand": {
-      "vw": "Navigation Volkswagen",
-      "audi": "Navigation Audi"
     }
   },
   "registration": {
@@ -526,6 +522,10 @@
       "submit": "Terminer l'inscription"
     }
   },
+  "brand": {
+    "vw": "Navigation Volkswagen",
+    "audi": "Navigation Audi"
+  },
   "team": {
     "view": {
       "deactivateSuccess": "Membre désactivé avec succès",
@@ -562,6 +562,53 @@
         "dateAdded": "Date d'ajout",
         "dateLastAccessed": "Date de dernière connexion"
       }
+    }
+  },
+  "timeline": {
+    "title": "Suivi des commandes de pièces",
+    "noData": "Aucune donnée de commande de pièces disponible",
+    "stage": {
+      "OrderReview": "Examen de la commande",
+      "OrderFulfillment": "Traitement de la commande",
+      "OrderReceived": "Commande reçue",
+      "RepairCompleted": "Réparation terminée"
+    },
+    "badge": {
+      "waitingOnYou": "En attente de votre action",
+      "pendingDealer": "En attente du concessionnaire",
+      "pendingCsr": "En attente du CSR",
+      "pendingShop": "En attente de l'atelier"
+    },
+    "log": {
+      "submitted": "La demande a été soumise le <strong>{{date}}</strong>.",
+      "submittedWithBy": "La demande a été soumise le <strong>{{date}}</strong> par <strong>{{by}}</strong>.",
+      "rejected": "La demande a été <rejected>rejetée</rejected> le <strong>{{date}}</strong>.",
+      "rejectedWithBy": "La demande a été <rejected>rejetée</rejected> le <strong>{{date}}</strong> par <strong>{{by}}</strong>.",
+      "reason": "(Raison : {{reason}})",
+      "resubmitted": "La demande a été resoumise le <strong>{{date}}</strong>.",
+      "resubmittedWithBy": "La demande a été resoumise le <strong>{{date}}</strong> par <strong>{{by}}</strong>.",
+      "approved": "La demande a été <approved>approuvée</approved> le <strong>{{date}}</strong>.",
+      "approvedWithBy": "La demande a été <approved>approuvée</approved> le <strong>{{date}}</strong> par <strong>{{by}}</strong>.",
+      "submittedBasic": "La demande a été soumise le <strong>{{date}}</strong>.",
+      "submittedBasicWithBy": "La demande a été soumise le <strong>{{date}}</strong> par <strong>{{by}}</strong>.",
+      "shipped": "Les pièces ont été expédiées le <strong>{{date}}</strong>.",
+      "shippedWithBy": "Les pièces ont été expédiées le <strong>{{date}}</strong> par <strong>{{by}}</strong>.",
+      "unshipped": "Les pièces ont été marquées comme non expédiées le <strong>{{date}}</strong>.",
+      "unshippedWithBy": "Les pièces ont été marquées comme non expédiées le <strong>{{date}}</strong> par <strong>{{by}}</strong>.",
+      "received": "Les pièces ont été reçues le <strong>{{date}}</strong>.",
+      "receivedWithBy": "Les pièces ont été reçues le <strong>{{date}}</strong> par <strong>{{by}}</strong>.",
+      "unreceived": "Les pièces ont été marquées comme non reçues le <strong>{{date}}</strong>.",
+      "unreceivedWithBy": "Les pièces ont été marquées comme non reçues le <strong>{{date}}</strong> par <strong>{{by}}</strong>."
+    },
+    "requestPending": "Cette demande est",
+    "button": {
+      "approve": "Approuvée",
+      "reject": "Rejetée",
+      "resubmit": "Resoumettre la demande",
+      "unmarkShipped": "Marquer comme non expédiées",
+      "markShipped": "Marquer comme expédiées",
+      "unmarkReceived": "Marquer comme non reçues",
+      "markReceived": "Marquer comme reçues"
     }
   }
 }
