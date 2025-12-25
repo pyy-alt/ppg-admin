@@ -424,7 +424,13 @@
       "assignedDealership": "Assigned Dealership",
       "by": "by"
     },
-    "registration": {
+
+    "brand": {
+      "vw": "VW Navigation",
+      "audi": "Audi Navigation"
+    }
+  },
+      "registration": {
       "shop": {
         "success": "Registration successful! Please check your email.",
         "errors": {
@@ -521,11 +527,6 @@
         "submit": "Complete Registration"
       }
     },
-    "brand": {
-      "vw": "VW Navigation",
-      "audi": "Audi Navigation"
-    }
-  },
   "team": {
     "view": {
       "deactivateSuccess": "Member deactivated successfully",
