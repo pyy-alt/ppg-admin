@@ -228,7 +228,7 @@ export function PartsOrderDialog({
             setLoading(false);
             resolve(void 0);
           },
-          error: (error) => {
+          error: () => {
             toast.error(t('partsOrder.toast.saveError'));
             setLoading(false);
             reject(void 0);
