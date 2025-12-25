@@ -20,7 +20,8 @@
     "empty": {
       "title": "Aucune donnée à afficher",
       "description": "Aucun résultat n'a été trouvé."
-    }
+    },
+    "select": "Sélectionner"
   },
   "auth": {
     "login": {
@@ -423,6 +424,68 @@
       "fetchError": "Échec du chargement des données",
       "assignedDealership": "Concessionnaire assigné",
       "by": "par"
+    },
+    "dialog": {
+      "discardTitle": "Abandonner les modifications ?",
+      "discardDescription": "Vous avez des modifications non enregistrées. Êtes-vous sûr de vouloir fermer ? Toutes vos modifications seront perdues.",
+      "editTitle": "Modifier le bon de réparation",
+      "newTitle": "Nouveau bon de réparation"
+    },
+    "toast": {
+      "updateSuccess": "Bon de réparation enregistré avec succès",
+      "updateError": "Erreur lors de l'enregistrement du bon de réparation",
+      "createSuccess": "Bon de réparation créé avec succès",
+      "createError": "Erreur lors de la création du bon de réparation"
+    },
+    "dropzone": {
+      "dropHere": "Déposez vos {{type}} ici...",
+      "instruction": "Déposez vos {{type}} ici ou",
+      "clickToBrowse": "cliquez pour parcourir",
+      "openCamera": "Ouvrir l'appareil photo",
+      "removeFile": "Supprimer {{name}}"
+    },
+    "section": {
+      "info": "Informations sur le bon de réparation",
+      "attachments": "Pièces jointes"
+    },
+    "form": {
+      "roNumber": {
+        "label": "N° RO de l'atelier",
+        "placeholder": "Saisissez le n° RO de l'atelier"
+      },
+      "readOnly": "Lecture seule",
+      "customer": {
+        "label": "Client",
+        "placeholder": "Nom du client"
+      },
+      "dealership": {
+        "label": "Commande provenant du concessionnaire"
+      },
+      "assignedDealer": "Concessionnaire assigné",
+      "vin": {
+        "label": "NIV",
+        "placeholder": "Saisissez le NIV"
+      },
+      "make": {
+        "label": "Marque"
+      },
+      "year": {
+        "label": "Année"
+      },
+      "model": {
+        "label": "Modèle",
+        "placeholder": "Saisissez le modèle"
+      }
+    },
+    "attachments": {
+      "structural": "Mesures structurelles",
+      "preRepairPhotos": "Photos avant réparation"
+    },
+    "button": {
+      "updating": "Mise à jour en cours...",
+      "saving": "Enregistrement en cours...",
+      "update": "Mettre à jour",
+      "save": "Enregistrer"
     }
   },
   "registration": {

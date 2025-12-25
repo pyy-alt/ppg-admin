@@ -20,7 +20,8 @@
     "empty": {
       "title": "No data to display",
       "description": "No results could be found."
-    }
+    },
+    "select": "Select"
   },
   "auth": {
     "login": {
@@ -423,6 +424,68 @@
       "fetchError": "Failed to fetch data",
       "assignedDealership": "Assigned Dealership",
       "by": "by"
+    },
+    "dialog": {
+      "discardTitle": "Discard Changes?",
+      "discardDescription": "You have unsaved changes. Are you sure you want to close? All your changes will be lost.",
+      "editTitle": "Edit Repair Order",
+      "newTitle": "New Repair Order"
+    },
+    "toast": {
+      "updateSuccess": "Repair Order saved successfully",
+      "updateError": "Error saving repair order",
+      "createSuccess": "Repair Order created successfully",
+      "createError": "Error creating repair order"
+    },
+    "dropzone": {
+      "dropHere": "Drop your {{type}} here...",
+      "instruction": "Drop your {{type}} here or",
+      "clickToBrowse": "click to browse",
+      "openCamera": "Open camera",
+      "removeFile": "Remove {{name}}"
+    },
+    "section": {
+      "info": "Repair Order Information",
+      "attachments": "Attachments"
+    },
+    "form": {
+      "roNumber": {
+        "label": "Shop RO #",
+        "placeholder": "Enter Shop RO #"
+      },
+      "readOnly": "Read-only",
+      "customer": {
+        "label": "Customer",
+        "placeholder": "Customer name"
+      },
+      "dealership": {
+        "label": "Order From Dealership"
+      },
+      "assignedDealer": "Assigned Dealer",
+      "vin": {
+        "label": "VIN",
+        "placeholder": "Enter VIN"
+      },
+      "make": {
+        "label": "Make"
+      },
+      "year": {
+        "label": "Year"
+      },
+      "model": {
+        "label": "Model",
+        "placeholder": "Enter Model"
+      }
+    },
+    "attachments": {
+      "structural": "Structural Measurements",
+      "preRepairPhotos": "Pre-Repair Photos"
+    },
+    "button": {
+      "updating": "Updating...",
+      "saving": "Saving...",
+      "update": "Update",
+      "save": "Save"
     }
   },
   "registration": {
