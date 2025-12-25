@@ -17,7 +17,10 @@ import { DataTablePagination } from '@/components/data-table-pagination';
 import ViewTeamDialog, { TeamMember } from '@/components/ViewTeamDialog';
 import { ClearableInput } from '@/components/clearable-input';
 import { SortableTableHead } from '@/components/SortableTableHead';
+import { useTranslation } from 'react-i18next';
+
 export function Shops() {
+  const { t } = useTranslation();
   const { user } = useAuthStore((state) => state.auth);
   const [currentPage, setCurrentPage] = useState(1);
   const [smartFilter, setSmartFilter] = useState('');
@@ -189,9 +192,9 @@ export function Shops() {
     try {
       const flattenedData = getFlattenedCurrentPageData();
       const result = await exportCurrentPageToCSV(flattenedData, headers, 'Manage_Shops');
-      result ? toast.success('Exported successfully') : null;
+      result ? toast.success(t('common.messages.exportSuccess')) : null;
     } catch (error) {
-      toast.error('Export failed');
+      toast.error(t('common.messages.exportFailed'));
     }
   };
   const handleSort = (field: string) => {
@@ -219,7 +222,9 @@ export function Shops() {
       const thElements = shopsOrderRef.current.querySelectorAll('thead th');
 
       // 3. Extract text content
-      const headerTexts = Array.from(thElements).map((th) => th.textContent.trim());
+      const headerTexts = Array.from(thElements)
+        .map((th) => th?.textContent?.trim() || '')
+        .filter((text) => text !== '');
       setHeaders(headerTexts);
     }
   }, [shops]);
@@ -229,10 +234,10 @@ export function Shops() {
       {/* Header */}
       <div className="bg-background">
         <div className="flex items-center justify-between px-6 py-4">
-          <h1 className="text-2xl font-bold text-foreground">Manage Shops</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t('shop.list.title')}</h1>
           <Button onClick={exportCSV}>
             <Download className="w-4 h-4 mr-2" />
-            Report
+            {t('shop.list.report')}
           </Button>
         </div>
       </div>
@@ -245,7 +250,7 @@ export function Shops() {
             <ClearableInput
               value={smartFilter}
               onChange={(e) => setSmartFilter(e.target.value)}
-              placeholder="Filter by Name, #, City"
+                placeholder={t('shop.list.searchPlaceholder')}
               className="pl-10"
             />
           </div>
@@ -253,36 +258,36 @@ export function Shops() {
           <div className="flex flex-wrap gap-3">
             <Select value={filterByShopStatus} onValueChange={(value) => setFilterByShopStatus(value)}>
               <SelectTrigger className="w-48 bg-muted">
-                <SelectValue placeholder="Status" />
+                <SelectValue placeholder={t('shop.list.statusPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="Certified">Certified</SelectItem>
-                <SelectItem value="Closed">Closed</SelectItem>
-                <SelectItem value="InProcess">In-Process</SelectItem>
-                <SelectItem value="Suspended">Suspended</SelectItem>
-                <SelectItem value="Terminated">Terminated</SelectItem>
+                <SelectItem value="all">{t('shop.list.status.all')}</SelectItem>
+                <SelectItem value="Certified">{t('shop.list.status.certified')}</SelectItem>
+                <SelectItem value="Closed">{t('shop.list.status.closed')}</SelectItem>
+                <SelectItem value="InProcess">{t('shop.list.status.inProcess')}</SelectItem>
+                <SelectItem value="Suspended">{t('shop.list.status.suspended')}</SelectItem>
+                <SelectItem value="Terminated">{t('shop.list.status.terminated')}</SelectItem>
               </SelectContent>
             </Select>
 
             <Select value={filterByShopCertification} onValueChange={(value) => setFilterByShopCertification(value)}>
               <SelectTrigger className="w-48 bg-muted">
-                <SelectValue placeholder="Certification" />
+                <SelectValue placeholder={t('shop.list.certificationPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Certifications</SelectItem>
-                <SelectItem value="AudiHybrid">Audi Hybrid</SelectItem>
-                <SelectItem value="AudiUltra">Audi Ultra</SelectItem>
-                <SelectItem value="VW">VW</SelectItem>
+                <SelectItem value="all">{t('shop.list.certification.all')}</SelectItem>
+                <SelectItem value="AudiHybrid">{t('shop.list.certification.audiHybrid')}</SelectItem>
+                <SelectItem value="AudiUltra">{t('shop.list.certification.audiUltra')}</SelectItem>
+                <SelectItem value="VW">{t('shop.list.certification.vw')}</SelectItem>
               </SelectContent>
             </Select>
 
             <Select value={filterByRegionId} onValueChange={(value) => setFilterByRegionId(value)}>
               <SelectTrigger className="w-48 bg-muted">
-                <SelectValue placeholder="CSR Region" />
+                <SelectValue placeholder={t('shop.list.regionPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Regions</SelectItem>
+                <SelectItem value="all">{t('shop.list.region.all')}</SelectItem>
                 {user?.regions?.map((region) => (
                   <SelectItem key={region.id} value={region.id?.toString() || ''}>
                     {region.name}
@@ -297,7 +302,7 @@ export function Shops() {
         {loading ? (
           <div className="overflow-hidden border rounded-lg shadow-sm bg-background">
             <div className="flex items-center justify-center py-12">
-              <div className="text-muted-foreground">loading...</div>
+              <div className="text-muted-foreground">{t('common.loading')}</div>
             </div>
           </div>
         ) : shops.length === 0 ? (
@@ -307,8 +312,8 @@ export function Shops() {
                 <EmptyMedia variant="icon">
                   <TableIcon className="w-4 h-4" />
                 </EmptyMedia>
-                <EmptyTitle>No data to display</EmptyTitle>
-                <EmptyDescription>No results could be found.</EmptyDescription>
+                <EmptyTitle>{t('common.empty.title')}</EmptyTitle>
+                <EmptyDescription>{t('common.empty.description')}</EmptyDescription>
               </EmptyHeader>
             </Empty>
           </div>

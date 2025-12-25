@@ -12,7 +12,15 @@
     "preview": "vite preview",
     "format:check": "prettier --check .",
     "format": "prettier --write .",
-    "knip": "knip"
+    "knip": "knip",
+    "i18n:scan": "i18next-scanner --config i18next-scanner.config.cjs",
+    "i18n:scan:watch": "nodemon --exec \"pnpm run i18n:scan\" -e ts,tsx,js,jsx",
+    "i18n:gen-fr": "node --experimental-specifier-resolution=node scripts/generate-fr.cjs",
+    "i18n:scan:all": "pnpm run i18n:scan && pnpm run i18n:gen-fr",
+    "i18n:grep": "node scripts/scan-i18n-keys.cjs"
+    ,
+    "i18n:gen-fr-ca": "node --experimental-specifier-resolution=node scripts/generate-fr-CA.cjs",
+    "i18n:scan-and-gen": "pnpm run i18n:grep && pnpm run i18n:gen-fr-ca"
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.51.0",
@@ -45,6 +53,9 @@
     "clsx": "^2.1.1",
     "cmdk": "1.1.1",
     "date-fns": "^4.1.0",
+    "i18next": "^25.7.3",
+    "i18next-browser-languagedetector": "^8.2.0",
+    "i18next-http-backend": "^3.0.2",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.545.0",
     "pagination": "^0.4.6",
@@ -53,6 +64,7 @@
     "react-dom": "^19.2.0",
     "react-dropzone": "^14.3.8",
     "react-hook-form": "^7.64.0",
+    "react-i18next": "^16.5.0",
     "react-top-loading-bar": "^3.0.2",
     "recharts": "^3.2.1",
     "shadcn": "^3.5.0",
@@ -79,6 +91,7 @@
     "eslint-plugin-react-hooks": "^7.0.0",
     "eslint-plugin-react-refresh": "^0.4.23",
     "globals": "^16.4.0",
+    "i18next-scanner": "^4.6.0",
     "knip": "^5.64.2",
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.6.14",

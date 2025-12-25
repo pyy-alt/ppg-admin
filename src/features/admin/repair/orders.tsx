@@ -24,6 +24,7 @@ import { PartsOrderDialog } from '@/components/PartsOrderDialog';
 import RepairOrderDialog, { type RepairOrderData } from '@/components/RepairOrderDialog';
 import { DataTablePagination } from '@/components/data-table-pagination';
 import { ClearableInput } from '@/components/clearable-input';
+import { useTranslation } from 'react-i18next';
 
 interface RepairOrderListProps {
   repairOrders: [];
@@ -31,6 +32,7 @@ interface RepairOrderListProps {
 }
 
 export function RepairOrderList() {
+  const { t } = useTranslation();
   const { user } = useAuthStore((state) => state.auth);
   const [dateLastSubmittedFrom, setFromDate] = useState<Date | undefined>(undefined);
   const [repairOrders, setRepairOrders] = useState<RepairOrderListProps[]>([]);
@@ -186,7 +188,7 @@ export function RepairOrderList() {
         },
         error: (error) => {
           console.error('Error:', error);
-          toast.error('Failed to load repair orders');
+          toast.error(t('repairOrder.messages.loadFailed'));
         },
       });
     } catch (e) {
@@ -235,7 +237,7 @@ export function RepairOrderList() {
       <div className="relative w-full h-40">
         <img
           src={navImg}
-          alt={brand === 'vw' ? 'VW Navigation' : 'Audi Navigation'}
+          alt={brand === 'vw' ? t('repairOrder.navigation.vw') : t('repairOrder.navigation.audi')}
           className="object-cover w-full h-full mt-6"
         />
         <div className="absolute -translate-y-1/2 top-1/2 left-6">
@@ -243,13 +245,13 @@ export function RepairOrderList() {
           <p className="flex items-center mt-4 space-x-4 text-sm text-gray-200">
             <Warehouse className="w-5 h-5 text-white" />
             <span>
-              Assigned Dealership: {user?.person?.shop?.sponsorDealership.name ?? '--'}({' '}
+              {t('repairOrder.header.assignedDealership')}: {user?.person?.shop?.sponsorDealership.name ?? '--'}({' '}
               {user?.person?.shop?.sponsorDealership.dealershipNumber})
             </span>
             <Users className="w-5 h-5 ml-6 text-white" />
             <span>
               {' '}
-              Field Support Team: {user?.person?.firstName} {user?.person?.lastName}
+              {t('repairOrder.header.fieldSupportTeam')}: {user?.person?.firstName} {user?.person?.lastName}
             </span>
           </p>
         </div>
@@ -278,11 +280,11 @@ export function RepairOrderList() {
       {/* Header */}
       <div className="border-b bg-background">
         <div className="flex items-center justify-between px-6 py-4">
-          <h1 className="text-2xl font-bold text-foreground">Repair Order List</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t('repairOrder.list.title')}</h1>
           {user?.person?.type === 'Shop' && (
             <Button variant="outline" onClick={() => setOpen(true)}>
               <Plus className="mr-1.5 h-4 w-4" />
-              New Repair Order
+              {t('repairOrder.list.newRepairOrder')}
             </Button>
           )}
         </div>
@@ -299,7 +301,7 @@ export function RepairOrderList() {
             await getRepairOrderDetail(data.id);
             await getPartsOrderDetail(data.id, true);
           } else {
-            toast.error('Repair Order Failed to Create');
+            toast.error(t('repairOrder.messages.createFailed'));
           }
         }}
         initialData={initialData as RepairOrderData}
@@ -321,22 +323,22 @@ export function RepairOrderList() {
               <ClearableInput
                 value={smartFilter}
                 onChange={(e) => setSmartFilter(e.target.value)}
-                placeholder="Filter by RO#, Order #, VIN, Customer"
+                placeholder={t('repairOrder.list.searchPlaceholder')}
                 className="pl-10 text-sm placeholder:text-xs"
               />
             </div>
             <Select defaultValue="all" onValueChange={(value) => setFilterByStatus(value)}>
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="Status" />
+                <SelectValue placeholder={t('repairOrder.list.statusPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="CsrReview">CSR Review</SelectItem>
-                <SelectItem value="CsrRejected">CSR Rejected</SelectItem>
-                <SelectItem value="DealershipProcessing">FF Dealership ProcessingF</SelectItem>
-                <SelectItem value="DealershipShipped">Dealership Shipped</SelectItem>
-                <SelectItem value="ShopReceived">Shop Received</SelectItem>
-                <SelectItem value="RepairCompleted">Repair Completed</SelectItem>
+                <SelectItem value="all">{t('repairOrder.list.status.all')}</SelectItem>
+                <SelectItem value="CsrReview">{t('partsOrder.status.CsrReview')}</SelectItem>
+                <SelectItem value="CsrRejected">{t('partsOrder.status.CsrRejected')}</SelectItem>
+                <SelectItem value="DealershipProcessing">{t('partsOrder.status.DealershipProcessing')}</SelectItem>
+                <SelectItem value="DealershipShipped">{t('partsOrder.status.DealershipShipped')}</SelectItem>
+                <SelectItem value="ShopReceived">{t('partsOrder.status.ShopReceived')}</SelectItem>
+                <SelectItem value="RepairCompleted">{t('partsOrder.status.RepairCompleted')}</SelectItem>
               </SelectContent>
             </Select>
             <Select
@@ -350,19 +352,19 @@ export function RepairOrderList() {
               }}
             >
               <SelectTrigger className="w-40">
-                <SelectValue placeholder="Date Range" />
+                <SelectValue placeholder={t('repairOrder.list.dateRangePlaceholder')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Dates</SelectItem>
-                <SelectItem value="7">Past 7 days</SelectItem>
-                <SelectItem value="30">Past 30 Days</SelectItem>
-                <SelectItem value="month-to-date">Month-To-Date</SelectItem>
-                <SelectItem value="quarter-to-date">Quarter-To-Date</SelectItem>
-                <SelectItem value="year-to-date">Year-To-Date</SelectItem>
-                <SelectItem value="last-month">Last Month</SelectItem>
-                <SelectItem value="last-quarter">Last Quarter</SelectItem>
-                <SelectItem value="last-year">Last Year</SelectItem>
-                <SelectItem value="custom">Custom</SelectItem>
+                <SelectItem value="all">{t('partsOrder.list.dateRangeOptions.all')}</SelectItem>
+                <SelectItem value="7">{t('partsOrder.list.dateRangeOptions.7')}</SelectItem>
+                <SelectItem value="30">{t('partsOrder.list.dateRangeOptions.30')}</SelectItem>
+                <SelectItem value="month-to-date">{t('partsOrder.list.dateRangeOptions.month-to-date')}</SelectItem>
+                <SelectItem value="quarter-to-date">{t('partsOrder.list.dateRangeOptions.quarter-to-date')}</SelectItem>
+                <SelectItem value="year-to-date">{t('partsOrder.list.dateRangeOptions.year-to-date')}</SelectItem>
+                <SelectItem value="last-month">{t('partsOrder.list.dateRangeOptions.last-month')}</SelectItem>
+                <SelectItem value="last-quarter">{t('partsOrder.list.dateRangeOptions.last-quarter')}</SelectItem>
+                <SelectItem value="last-year">{t('partsOrder.list.dateRangeOptions.last-year')}</SelectItem>
+                <SelectItem value="custom">{t('partsOrder.list.dateRangeOptions.custom')}</SelectItem>
               </SelectContent>
             </Select>
             {/* Custom Date Range Picker */}
@@ -376,7 +378,7 @@ export function RepairOrderList() {
                     setToDate(newRange?.to ?? undefined);
                   }}
                   onClose={() => getRepairOrders(true)}
-                  placeholder="Select date range"
+                  placeholder={t('partsOrder.list.dateRangePickerPlaceholder')}
                   disabled={false}
                 />
               </div>
@@ -390,7 +392,7 @@ export function RepairOrderList() {
               className="rounded-full"
             />
             <Label htmlFor="show-completed" className="text-sm font-medium cursor-pointer">
-              Show Repair Completed
+              {t('repairOrder.list.showRepairCompleted')}
             </Label>
           </div>
         </div>
@@ -403,11 +405,11 @@ export function RepairOrderList() {
                 <EmptyMedia variant="icon">
                   <TableIcon className="w-4 h-4" />
                 </EmptyMedia>
-                <EmptyTitle>No data to display</EmptyTitle>
+                <EmptyTitle>{t('common.empty.title')}</EmptyTitle>
                 <EmptyDescription>
                   {id !== undefined
-                    ? 'This shop doesn’t have any repair orders yet. Repair orders will appear here once they are created.'
-                    : 'No results could be found.'}
+                    ? t('repairOrder.list.empty.noOrdersForShop')
+                    : t('common.empty.description')}
                 </EmptyDescription>
               </EmptyHeader>
             </Empty>
@@ -418,14 +420,14 @@ export function RepairOrderList() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted">
-                    <TableHead className="font-semibold text-foreground">RO #</TableHead>
-                    <TableHead className="font-semibold text-foreground">Order #</TableHead>
-                    <TableHead className="font-semibold text-foreground">VIN</TableHead>
-                    <TableHead className="font-semibold text-foreground">Year/Make/Model</TableHead>
-                    <TableHead className="font-semibold text-foreground">Status</TableHead>
-                    <TableHead className="font-semibold text-foreground">Customer</TableHead>
-                    <TableHead className="font-semibold text-foreground">Date Submitted</TableHead>
-                    <TableHead className="font-semibold text-foreground">Date Completed</TableHead>
+                    <TableHead className="font-semibold text-foreground">{t('repairOrder.list.tableHeaders.ro')}</TableHead>
+                    <TableHead className="font-semibold text-foreground">{t('repairOrder.list.tableHeaders.order')}</TableHead>
+                    <TableHead className="font-semibold text-foreground">{t('repairOrder.list.tableHeaders.vin')}</TableHead>
+                    <TableHead className="font-semibold text-foreground">{t('repairOrder.list.tableHeaders.ymm')}</TableHead>
+                    <TableHead className="font-semibold text-foreground">{t('repairOrder.list.tableHeaders.status')}</TableHead>
+                    <TableHead className="font-semibold text-foreground">{t('repairOrder.list.tableHeaders.customer')}</TableHead>
+                    <TableHead className="font-semibold text-foreground">{t('repairOrder.list.tableHeaders.dateSubmitted')}</TableHead>
+                    <TableHead className="font-semibold text-foreground">{t('repairOrder.list.tableHeaders.dateCompleted')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -463,29 +465,29 @@ export function RepairOrderList() {
                         <TableCell>
                           <div className="space-y-1 text-sm">
                             {orderAny.statusCounts.DealershipShipped > 1 && (
-                              <div>Dealer Shipped ({orderAny.statusCounts.DealershipShipped})</div>
+                              <div>{t('partsOrder.status.DealershipShipped')} ({orderAny.statusCounts.DealershipShipped})</div>
                             )}
-                            {orderAny.statusCounts.DealershipShipped === 1 && <div>Dealer Shipped</div>}
+                            {orderAny.statusCounts.DealershipShipped === 1 && <div>{t('partsOrder.status.DealershipShipped')}</div>}
                             {orderAny.statusCounts.ShopReceived > 1 && (
-                              <div>Shop Received ({orderAny.statusCounts.ShopReceived})</div>
+                              <div>{t('partsOrder.status.ShopReceived')} ({orderAny.statusCounts.ShopReceived})</div>
                             )}
-                            {orderAny.statusCounts.ShopReceived === 1 && <div>Shop Received</div>}
+                            {orderAny.statusCounts.ShopReceived === 1 && <div>{t('partsOrder.status.ShopReceived')}</div>}
                             {orderAny.statusCounts.CsrReview > 1 && (
-                              <div>CSR Review ({orderAny.statusCounts.CsrReview})</div>
+                              <div>{t('partsOrder.status.CsrReview')} ({orderAny.statusCounts.CsrReview})</div>
                             )}
-                            {orderAny.statusCounts.CsrReview === 1 && <div>CSR Review</div>}
+                            {orderAny.statusCounts.CsrReview === 1 && <div>{t('partsOrder.status.CsrReview')}</div>}
                             {orderAny.statusCounts.CsrRejected > 1 && (
-                              <div>CSR Rejected ({orderAny.statusCounts.CsrRejected})</div>
+                              <div>{t('partsOrder.status.CsrRejected')} ({orderAny.statusCounts.CsrRejected})</div>
                             )}
-                            {orderAny.statusCounts.CsrRejected === 1 && <div>CSR Rejected</div>}
+                            {orderAny.statusCounts.CsrRejected === 1 && <div>{t('partsOrder.status.CsrRejected')}</div>}
                             {orderAny.statusCounts.DealershipProcessing > 1 && (
-                              <div>Dealer Processing ({orderAny.statusCounts.DealershipProcessing})</div>
+                              <div>{t('partsOrder.status.DealershipProcessing')} ({orderAny.statusCounts.DealershipProcessing})</div>
                             )}
-                            {orderAny.statusCounts.DealershipProcessing === 1 && <div>Dealer Processing</div>}
+                            {orderAny.statusCounts.DealershipProcessing === 1 && <div>{t('partsOrder.status.DealershipProcessing')}</div>}
                             {orderAny.statusCounts.RepairCompleted > 1 && (
-                              <div>Repair Completed ({orderAny.statusCounts.RepairCompleted})</div>
+                              <div>{t('partsOrder.status.RepairCompleted')} ({orderAny.statusCounts.RepairCompleted})</div>
                             )}
-                            {orderAny.statusCounts.RepairCompleted === 1 && <div>Repair Completed</div>}
+                            {orderAny.statusCounts.RepairCompleted === 1 && <div>{t('partsOrder.status.RepairCompleted')}</div>}
                             {Object.values(orderAny.statusCounts).every((count) => count === 0) && <div>--</div>}
                           </div>
                         </TableCell>

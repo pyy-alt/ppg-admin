@@ -16,8 +16,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Header } from '@/components/layout/header';
 import { refreshUserData } from '@/lib/auth';
+import { useTranslation } from 'react-i18next';
 
 export function Login() {
+  const { t } = useTranslation();
   const { redirect } = useSearch({ from: '/(auth)/login' });
   const { region } = useBrand();
   const suffix = region === 'canada' ? '_c.png' : '_a.png';
@@ -49,7 +51,7 @@ export function Login() {
     }
 
     if (!email || !password) {
-      toast.error('Please enter email and password');
+      toast.error(t('auth.login.errors.emailPasswordRequired'));
       return;
     }
 
@@ -71,13 +73,13 @@ export function Login() {
 
             // From session.person Build user information（Completely rely on data returned by the backend）
             if (!session) {
-              toast.error('Invalid session data');
+              toast.error(t('auth.login.errors.invalidSession'));
               setIsLoading(false);
               setIsSubmitting(false);
               return;
             }
             auth.setUser(session); // setUser Will be automatically set loginStatus For 'authenticated'
-            toast.success(`Welcome back, ${session.person?.firstName || email}!`);
+            toast.success(t('auth.login.success.welcome', { name: session.person?.firstName || email }));
 
             setIsLoading(false);
             setIsSubmitting(false);
@@ -99,14 +101,14 @@ export function Login() {
 
           error: (err: Error) => {
             // console.error('Login error:', err)
-            toast.error(`Network error, please try again ${err.message}`);
+            toast.error(t('auth.login.errors.networkError', { error: err.message }));
             setIsLoading(false);
             setIsSubmitting(false);
           },
           else: (statusCode: number, message: string) => {
             // eslint-disable-next-line no-console
             console.error('Login error:', statusCode, message);
-            toast.error('Network error, please try again');
+            toast.error(t('auth.login.errors.networkErrorDefault'));
             setIsLoading(false);
             setIsSubmitting(false);
           },
@@ -116,7 +118,7 @@ export function Login() {
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Login error:', error);
-      toast.error('An unexpected error occurred');
+      toast.error(t('auth.login.errors.unexpectedError'));
       setIsLoading(false);
       setIsSubmitting(false);
     }
@@ -152,7 +154,7 @@ export function Login() {
         {/* Lower part：Login form */}
         <div className="flex flex-1 items-start justify-center px-1 py-2 lg:py-12">
           <div className="w-full max-w-md p-8 lg:p-10">
-            <h2 className="text-primary mb-10 text-center text-3xl font-bold lg:text-4xl">Login</h2>
+            <h2 className="text-primary mb-10 text-center text-3xl font-bold lg:text-4xl">{t('auth.login.title')}</h2>
             <form className="space-y-7" onSubmit={handleSubmit}>
               {/* Email */}
               <div className="space-y-3">
@@ -164,7 +166,7 @@ export function Login() {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="Email"
+                    placeholder={t('auth.login.emailPlaceholder')}
                     className="text-muted-foreground h-12 rounded-full border-gray-300 pl-12 text-base focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -184,7 +186,7 @@ export function Login() {
                   <Input
                     id="password"
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="Password"
+                    placeholder={t('auth.login.passwordPlaceholder')}
                     className="text-muted-foreground h-12 rounded-full border-gray-300 pr-12 pl-12 text-base focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -208,14 +210,14 @@ export function Login() {
                 <div className="flex items-center space-x-2">
                   <Checkbox id="remember" disabled={isLoading} className="bg-muted cursor-pointer" />
                   <Label htmlFor="remember" className="cursor-pointer font-normal text-gray-600">
-                    Remember Me
+                    {t('auth.login.rememberMe')}
                   </Label>
                 </div>
                 <Link
                   to="/password/forgot"
                   className="font-medium text-red-600 underline transition-colors hover:text-red-700"
                 >
-                  Forgot password
+                  {t('auth.login.forgotPassword')}
                 </Link>
               </div>
 
@@ -225,25 +227,25 @@ export function Login() {
                 className="text-muted h-14 w-full rounded-full text-base font-semibold shadow-md transition-all hover:bg-gray-900"
                 disabled={isLoading}
               >
-                {isLoading ? 'Logging in...' : 'Log in'}
+                {isLoading ? t('auth.login.loggingIn') : t('auth.login.submit')}
               </Button>
             </form>
 
             {/* Register Links */}
             <div className="mt-10 text-center text-sm text-gray-600">
-              <p className="mb-3">Don't have an account?</p>
+              <p className="mb-3">{t('auth.login.noAccount')}</p>
               <div className="flex justify-center gap-8">
                 <a
                   href="/registration/shop"
                   className="font-medium text-cyan-600 underline transition-colors hover:text-cyan-700"
                 >
-                  Register as Shop
+                  {t('auth.login.registerAsShop')}
                 </a>
                 <a
                   href="/registration/dealership"
                   className="font-medium text-cyan-600 underline transition-colors hover:text-cyan-700"
                 >
-                  Register as Dealer
+                  {t('auth.login.registerAsDealer')}
                 </a>
               </div>
             </div>

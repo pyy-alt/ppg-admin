@@ -15,8 +15,10 @@ import ViewTeamDialog, { TeamMember } from '@/components/ViewTeamDialog';
 import { DataTablePagination } from '@/components/data-table-pagination';
 import { ClearableInput } from '@/components/clearable-input';
 import { SortableTableHead } from '@/components/SortableTableHead';
+import { useTranslation } from 'react-i18next';
 
 export function Dealerships() {
+  const { t } = useTranslation();
   const { user } = useAuthStore((state) => state.auth);
   const [currentPage, setCurrentPage] = useState(1);
   const [smartFilter, setSmartFilter] = useState('');
@@ -180,9 +182,9 @@ export function Dealerships() {
     try {
       const flattenedData = getFlattenedCurrentPageData();
       const result = await exportCurrentPageToCSV(flattenedData, headers, 'Manage_Dealers');
-      result ? toast.success('Exported successfully') : null;
+      result ? toast.success(t('common.messages.exportSuccess')) : null;
     } catch (error) {
-      toast.error('Export failed');
+      toast.error(t('common.messages.exportFailed'));
     }
   };
 
@@ -193,7 +195,9 @@ export function Dealerships() {
       const thElements = dealershipsRef.current.querySelectorAll('thead th');
 
       // 3. Extract text content
-      const headerTexts = Array.from(thElements).map((th) => th.textContent.trim());
+      const headerTexts = Array.from(thElements)
+        .map((th) => th?.textContent?.trim() || '')
+        .filter((text) => text !== '');
       setHeaders(headerTexts);
     }
   }, [dealerships]);
@@ -203,10 +207,10 @@ export function Dealerships() {
       {/* Header */}
       <div className="bg-background">
         <div className="flex items-center justify-between px-6 py-4">
-          <h1 className="text-2xl font-bold text-foreground">Manage Dealers</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t('dealership.list.title')}</h1>
           <Button onClick={exportCSV}>
             <Download className="w-4 h-4 mr-2" />
-            Report
+            {t('dealership.list.report')}
           </Button>
         </div>
 
@@ -218,7 +222,7 @@ export function Dealerships() {
               <ClearableInput
                 value={smartFilter}
                 onChange={(e) => setSmartFilter(e.target.value)}
-                placeholder="Filter by Name, #, City"
+                placeholder={t('dealership.list.searchPlaceholder')}
                 className="pl-10 border-gray-300"
               />
             </div>
@@ -228,7 +232,7 @@ export function Dealerships() {
           {loading ? (
             <div className="overflow-hidden rounded-lg shadow-sm bg-background">
               <div className="flex items-center justify-center py-12">
-                <div className="text-muted-foreground">loading...</div>
+                <div className="text-muted-foreground">{t('common.loading')}</div>
               </div>
             </div>
           ) : dealerships.length === 0 ? (
@@ -238,8 +242,8 @@ export function Dealerships() {
                   <EmptyMedia variant="icon">
                     <TableIcon className="w-4 h-4" />
                   </EmptyMedia>
-                  <EmptyTitle>No data to display</EmptyTitle>
-                  <EmptyDescription>No results could be found.</EmptyDescription>
+                  <EmptyTitle>{t('common.empty.title')}</EmptyTitle>
+                  <EmptyDescription>{t('common.empty.description')}</EmptyDescription>
                 </EmptyHeader>
               </Empty>
             </div>
@@ -255,7 +259,7 @@ export function Dealerships() {
                         currentAscending={sortAscending}
                         onSort={handleSort}
                       >
-                        Name
+                        {t('dealership.list.tableHeaders.name')}
                       </SortableTableHead>
                       <SortableTableHead
                         field="dealershipNumber"
@@ -263,7 +267,7 @@ export function Dealerships() {
                         currentAscending={sortAscending}
                         onSort={handleSort}
                       >
-                        Number
+                        {t('dealership.list.tableHeaders.number')}
                       </SortableTableHead>
                       <SortableTableHead
                         field="countPendingOrders"
@@ -271,17 +275,17 @@ export function Dealerships() {
                         currentAscending={sortAscending}
                         onSort={handleSort}
                       >
-                        # of Pending Orders
+                        {t('dealership.list.tableHeaders.pendingOrders')}
                       </SortableTableHead>
-                      <TableHead>City</TableHead>
-                      <TableHead>State</TableHead>
+                      <TableHead>{t('dealership.list.tableHeaders.city')}</TableHead>
+                      <TableHead>{t('dealership.list.tableHeaders.state')}</TableHead>
                       <SortableTableHead
                         field="countActiveUsers"
                         currentSortBy={sortBy}
                         currentAscending={sortAscending}
                         onSort={handleSort}
                       >
-                        # of Active Users
+                        {t('dealership.list.tableHeaders.activeUsers')}
                       </SortableTableHead>
                       <SortableTableHead
                         field="countPendingUsers"
@@ -289,7 +293,7 @@ export function Dealerships() {
                         currentAscending={sortAscending}
                         onSort={handleSort}
                       >
-                        # of Pending Users
+                        {t('dealership.list.tableHeaders.pendingUsers')}
                       </SortableTableHead>
                     </TableRow>
                   </TableHeader>

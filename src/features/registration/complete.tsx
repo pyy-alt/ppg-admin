@@ -12,8 +12,10 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Loading } from '@/components/Loading'
 import { Header } from '@/components/layout/header'
+import { useTranslation } from 'react-i18next';
 
 export function RegistrationComplete() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [isLoading, setIsLoading] = useState(false)
   const [form, setForm] = useState({
@@ -46,7 +48,7 @@ export function RegistrationComplete() {
     }
     // ✅ Add parameter validation.
     if (!id || !guid || !hash) {
-      toast.error('Invalid registration link parameters.')
+      toast.error(t('registration.complete.errors.invalidParams'))
       setIsValidating(false)
       return
     }
@@ -94,14 +96,14 @@ export function RegistrationComplete() {
         },
         status404: () => {
           // The link is invalid or has expired.
-          toast.error('Registration link is invalid or has expired.')
+          toast.error(t('registration.complete.errors.invalidLink'))
           setIsValidating(false)
           // Do not redirect immediately.，Show the user an error message.
           // Users can choose to manually return or reapply for the reset link.
         },
         error: () => {
           // Network errors, etc.
-          toast.error('Failed to validate reset link. Please try again.')
+          toast.error(t('registration.complete.errors.validateFailed'))
           setIsValidating(false)
           // ✅ Reset on error ref，Allow retry
           hasValidatedRef.current = false
@@ -119,12 +121,12 @@ export function RegistrationComplete() {
     e.preventDefault()
 
     if (form.password !== form.confirmPassword) {
-      toast.error('Passwords do not match.')
+      toast.error(t('registration.complete.errors.passwordMismatch'))
       return
     }
 
     if (form.password.length < 8) {
-      toast.error('Password must be at least 8 characters.')
+      toast.error(t('registration.complete.errors.passwordTooShort'))
       return
     }
 
@@ -143,7 +145,7 @@ export function RegistrationComplete() {
           // ✅ Registration completed.，Clear user status（Because you need to jump to the login page.）
           auth.reset()
 
-          toast.success('Registration completed successfully!')
+          toast.success(t('registration.complete.success'))
 
           // ✅ Jump to the login page.，Use replace: true Avoid returning.
           navigate({
@@ -169,7 +171,7 @@ export function RegistrationComplete() {
               // ✅ If it is JSON Parsing error，Explanation API Returned a plain text success message.，Treat as a successful handling.
               console.log('[registrationComplete] API returned plain text, treating as success')
               auth.reset()
-              toast.success('Registration completed successfully!')
+              toast.success(t('registration.complete.success'))
               navigate({
                 to: '/login',
                 replace: true,
@@ -184,7 +186,7 @@ export function RegistrationComplete() {
         },
       })
     } catch (error) {
-      toast.error('Failed to reset password. Please try again.')
+      toast.error(t('registration.complete.errors.completeFailed'))
       setIsLoading(false)
     }
   }
@@ -202,7 +204,7 @@ export function RegistrationComplete() {
       <div className='bg-primary text-primary-foreground relative mt-12 h-32 lg:h-40'>
         <img
           src={bannerImg}
-          alt='New Shop User Registration'
+          alt={t('registration.complete.bannerAlt')}
           className='absolute inset-0 h-full w-full object-cover opacity-70'
           loading='lazy'
         />
@@ -221,7 +223,7 @@ export function RegistrationComplete() {
             <div className='flex items-center gap-3'>
               <User className='text-foreground h-6 w-6' />
               <h2 className='text-foreground text-xl font-semibold'>
-                Personal Information
+                {t('registration.complete.sections.personalInfo')}
               </h2>
             </div>
 
@@ -231,7 +233,7 @@ export function RegistrationComplete() {
                   htmlFor='email'
                   className='text-foreground text-sm font-medium'
                 >
-                  Email
+                  {t('registration.complete.fields.email')}
                 </Label>
                 <Input
                   id='email'
@@ -248,7 +250,7 @@ export function RegistrationComplete() {
                     htmlFor='firstName'
                     className='text-foreground text-sm font-medium'
                   >
-                    First Name
+                    {t('registration.complete.fields.firstName')}
                   </Label>
                   <Input
                     id='firstName'
@@ -263,7 +265,7 @@ export function RegistrationComplete() {
                     htmlFor='lastName'
                     className='text-foreground text-sm font-medium'
                   >
-                    Last Name
+                    {t('registration.complete.fields.lastName')}
                   </Label>
                   <Input
                     id='lastName'
@@ -281,7 +283,7 @@ export function RegistrationComplete() {
             <div className='flex items-center gap-3'>
               <Store className='text-foreground h-6 w-6' />
               <h2 className='text-foreground text-xl font-semibold'>
-                Shop Information
+                {t('registration.complete.sections.shopInfo')}
               </h2>
             </div>
 
@@ -291,7 +293,7 @@ export function RegistrationComplete() {
                   htmlFor='shopName'
                   className='text-foreground text-sm font-medium'
                 >
-                  Name
+                  {t('registration.complete.fields.shopName')}
                 </Label>
                 <Input
                   id='shopName'
@@ -306,7 +308,7 @@ export function RegistrationComplete() {
                   htmlFor='shopNumber'
                   className='text-foreground text-sm font-medium'
                 >
-                  Number
+                  {t('registration.complete.fields.shopNumber')}
                 </Label>
                 <Input
                   id='shopNumber'
@@ -322,7 +324,7 @@ export function RegistrationComplete() {
                 htmlFor='shopAddress'
                 className='text-foreground text-sm font-medium'
               >
-                Address
+                {t('registration.complete.fields.address')}
               </Label>
               <div className='relative'>
                 <MapPin className='text-muted-foreground absolute top-3.5 left-3 h-5 w-5' />
@@ -341,7 +343,7 @@ export function RegistrationComplete() {
             <div className='flex items-center gap-3'>
               <Lock className='text-foreground h-6 w-6' />
               <h2 className='text-foreground text-xl font-semibold'>
-                Password
+                {t('registration.complete.sections.password')}
               </h2>
             </div>
 
@@ -351,13 +353,13 @@ export function RegistrationComplete() {
                   htmlFor='password'
                   className='text-foreground text-sm font-medium'
                 >
-                  Password
+                  {t('registration.complete.fields.password')}
                 </Label>
                 <div className='relative'>
                   <Input
                     id='password'
                     type={showPassword ? 'text' : 'password'}
-                    placeholder='Enter your password'
+                    placeholder={t('registration.complete.placeholders.password')}
                     className='h-12 rounded-lg focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100'
                     value={form.password}
                     onChange={(e) => handleChange('password', e.target.value)}
@@ -370,7 +372,7 @@ export function RegistrationComplete() {
                     className='text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transition-colors'
                     disabled={isLoading}
                     aria-label={
-                      showPassword ? 'Hide password' : 'Show password'
+                      showPassword ? t('registration.complete.hidePassword') : t('registration.complete.showPassword')
                     }
                   >
                     {showPassword ? (
@@ -387,13 +389,13 @@ export function RegistrationComplete() {
                   htmlFor='confirmPassword'
                   className='text-foreground text-sm font-medium'
                 >
-                  Confirm Password
+                  {t('registration.complete.fields.confirmPassword')}
                 </Label>
                 <div className='relative'>
                   <Input
                     id='confirmPassword'
                     type={showConfirmPassword ? 'text' : 'password'}
-                    placeholder='Confirm your password'
+                    placeholder={t('registration.complete.placeholders.confirmPassword')}
                     className='h-12 rounded-lg pr-12 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100'
                     value={form.confirmPassword}
                     onChange={(e) =>
@@ -408,7 +410,7 @@ export function RegistrationComplete() {
                     className='text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transition-colors'
                     disabled={isLoading}
                     aria-label={
-                      showConfirmPassword ? 'Hide password' : 'Show password'
+                      showConfirmPassword ? t('registration.complete.hidePassword') : t('registration.complete.showPassword')
                     }
                   >
                     {showConfirmPassword ? (
@@ -430,7 +432,7 @@ export function RegistrationComplete() {
               className='h-12 rounded-full px-8 font-medium shadow-md transition-all'
               disabled={isLoading}
             >
-              {isLoading ? 'Completing...' : 'Complete Registration'}
+              {isLoading ? t('registration.complete.completing') : t('registration.complete.submit')}
             </Button>
           </div>
         </form>

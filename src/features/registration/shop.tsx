@@ -9,8 +9,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Header } from '@/components/layout/header'
+import { useTranslation } from 'react-i18next';
 
 export function RegistrationShop() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [isLoading, setIsLoading] = useState(false)
   const [form, setForm] = useState({
@@ -44,7 +46,7 @@ export function RegistrationShop() {
       const authenticationApi = new AuthenticationApi()
       authenticationApi.registrationRequestShop(request, {
         status200: () => {
-          toast.success('Registration successful! Please check your email.')
+          toast.success(t('registration.shop.success'))
           navigate({ to: '/registrationResult', search: { status: 'success' } })
         },
         status409: (message: string) => {
@@ -54,11 +56,11 @@ export function RegistrationShop() {
           toast.error(message)
         },
         error: (error: Error) => {
-          toast.error(`Registration failed. Please try again.${error}`)
+          toast.error(t('registration.shop.errors.registrationFailed', { error: error?.message || '' }))
         },
       })
     } catch (error) {
-      toast.error('Registration failed. Please try again.')
+      toast.error(t('registration.shop.errors.registrationFailedDefault'))
     }
 
     // try {
@@ -82,7 +84,7 @@ export function RegistrationShop() {
       <div className='bg-primary text-primary-foreground relative mt-16 h-32 lg:h-40'>
         <img
           src={bannerImg}
-          alt='New Shop User Registration'
+          alt={t('registration.shop.bannerAlt')}
           className='absolute inset-0 h-full w-full object-fill opacity-70'
           loading='lazy'
         />
@@ -96,7 +98,7 @@ export function RegistrationShop() {
             <div className='flex items-center gap-3'>
               <User className='text-foreground h-6 w-6' />
               <h2 className='text-foreground text-xl font-semibold'>
-                Personal Information
+                {t('registration.shop.sections.personalInfo')}
               </h2>
             </div>
             <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
@@ -105,11 +107,11 @@ export function RegistrationShop() {
                   htmlFor='firstName'
                   className='text-foreground text-sm font-medium'
                 >
-                  First Name
+                  {t('registration.shop.fields.firstName')}
                 </Label>
                 <Input
                   id='firstName'
-                  placeholder='Enter first name'
+                  placeholder={t('registration.shop.placeholders.firstName')}
                   className='h-12 rounded-lg'
                   value={form.firstName}
                   onChange={(e) => handleChange('firstName', e.target.value)}
@@ -122,11 +124,11 @@ export function RegistrationShop() {
                   htmlFor='lastName'
                   className='text-foreground text-sm font-medium'
                 >
-                  Last Name
+                  {t('registration.shop.fields.lastName')}
                 </Label>
                 <Input
                   id='lastName'
-                  placeholder='Enter last name'
+                  placeholder={t('registration.shop.placeholders.lastName')}
                   className='h-12 rounded-lg'
                   value={form.lastName}
                   onChange={(e) => handleChange('lastName', e.target.value)}
@@ -140,12 +142,12 @@ export function RegistrationShop() {
                 htmlFor='email'
                 className='text-foreground text-sm font-medium'
               >
-                Email
+                {t('registration.shop.fields.email')}
               </Label>
               <Input
                 id='email'
                 type='email'
-                placeholder='Enter email address'
+                placeholder={t('registration.shop.placeholders.email')}
                 className='h-12 rounded-lg'
                 value={form.email}
                 onChange={(e) => handleChange('email', e.target.value)}
@@ -160,7 +162,7 @@ export function RegistrationShop() {
             <div className='flex items-center gap-3'>
               <Store className='text-foreground h-6 w-6' />
               <h2 className='text-foreground text-xl font-semibold'>
-                Shop Information
+                {t('registration.shop.sections.shopInfo')}
               </h2>
             </div>
             <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
@@ -169,11 +171,11 @@ export function RegistrationShop() {
                   htmlFor='shopName'
                   className='text-foreground text-sm font-medium'
                 >
-                  Shop Name
+                  {t('registration.shop.fields.shopName')}
                 </Label>
                 <Input
                   id='shopName'
-                  placeholder='Enter shop name'
+                  placeholder={t('registration.shop.placeholders.shopName')}
                   className='h-12 rounded-lg'
                   value={form.shopName}
                   onChange={(e) => handleChange('shopName', e.target.value)}
@@ -186,11 +188,11 @@ export function RegistrationShop() {
                   htmlFor='shopNumber'
                   className='text-foreground text-sm font-medium'
                 >
-                  Shop #
+                  {t('registration.shop.fields.shopNumber')}
                 </Label>
                 <Input
                   id='shopNumber'
-                  placeholder='Enter shop number'
+                  placeholder={t('registration.shop.placeholders.shopNumber')}
                   className='h-12 rounded-lg'
                   value={form.shopNumber}
                   onChange={(e) => handleChange('shopNumber', e.target.value)}
@@ -206,7 +208,7 @@ export function RegistrationShop() {
             <div className='flex items-center gap-3'>
               <Building2 className='text-foreground h-6 w-6' />
               <h2 className='text-foreground text-xl font-semibold'>
-                Associated Dealership
+                {t('registration.shop.sections.associatedDealership')}
               </h2>
             </div>
             <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
@@ -215,11 +217,11 @@ export function RegistrationShop() {
                   htmlFor='dealershipName'
                   className='text-foreground text-sm font-medium'
                 >
-                  Dealership Name
+                  {t('registration.shop.fields.dealershipName')}
                 </Label>
                 <Input
                   id='dealershipName'
-                  placeholder='Enter dealership name'
+                  placeholder={t('registration.shop.placeholders.dealershipName')}
                   className='h-12 rounded-lg'
                   value={form.dealershipName}
                   onChange={(e) =>
@@ -234,11 +236,11 @@ export function RegistrationShop() {
                   htmlFor='dealershipNumber'
                   className='text-foreground text-sm font-medium'
                 >
-                  Dealership #
+                  {t('registration.shop.fields.dealershipNumber')}
                 </Label>
                 <Input
                   id='dealershipNumber'
-                  placeholder='Enter dealership number'
+                  placeholder={t('registration.shop.placeholders.dealershipNumber')}
                   className='h-12 rounded-lg'
                   value={form.dealershipNumber}
                   onChange={(e) =>
@@ -259,7 +261,7 @@ export function RegistrationShop() {
               variant='default'
               disabled={isLoading}
             >
-              {isLoading ? 'Registering...' : 'Register'}
+              {isLoading ? t('registration.shop.registering') : t('registration.shop.register')}
             </Button>
           </div>
         </form>

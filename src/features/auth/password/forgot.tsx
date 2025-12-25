@@ -11,9 +11,11 @@ import { useRedirectIfAuthenticated } from '@/hooks/use-redirect-if-authenticate
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Header } from '@/components/layout/header'
+import { useTranslation } from 'react-i18next'
 
 const authApi = new AuthenticationApi()
 export function ForgotPassword() {
+  const { t } = useTranslation()
   const logoSrc = useBrandLogo('login', '_a.png')
   const navigate = useNavigate()
   const { auth } = useAuthStore()
@@ -59,12 +61,12 @@ export function ForgotPassword() {
       request.email = email
       authApi.forgotPassword(request, {
         status200: () => {
-          toast.success(`Password reset link has been sent to ${email}`)
+          toast.success(t('auth.forgotPassword.success', { email }))
           navigate({ to: '/login' })
           setIsLoading(false)
         },
         error: () => {
-          toast.error('Failed to send reset link. Please try again.')
+          toast.error(t('auth.forgotPassword.errors.sendFailed'))
           setIsLoading(false)
         },
       })
@@ -103,7 +105,7 @@ export function ForgotPassword() {
               <img
                 loading='lazy'
                 src={logoSrc}
-                alt='Audi Authorized Collision Repair'
+                alt={t('auth.forgotPassword.logoAlt')}
                 className='mx-auto h-36 w-auto drop-shadow-xl lg:h-56'
               />
             ) : null}
@@ -114,7 +116,7 @@ export function ForgotPassword() {
         <div className='flex flex-1 items-start justify-center bg-card px-1 py-2 lg:py-12'>
           <div className='w-full max-w-md p-8 lg:p-10'>
             <h2 className='mb-4 text-center text-3xl font-bold text-foreground lg:text-4xl'>
-              Forgot Password
+              {t('auth.forgotPassword.title')}
             </h2>
             <form onSubmit={handleSubmit} className='space-y-7'>
               {/* Email Input box */}
@@ -130,7 +132,7 @@ export function ForgotPassword() {
                   <Input
                     id='email'
                     type='email'
-                    placeholder='Enter your email'
+                    placeholder={t('auth.forgotPassword.emailPlaceholder')}
                     className='h-14 rounded-full border-gray-300 pl-12 text-base focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100'
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -147,7 +149,7 @@ export function ForgotPassword() {
                 className='h-14 w-full rounded-full text-base font-semibold shadow-md transition-all'
                 disabled={isLoading}
               >
-                {isLoading ? 'Sending...' : 'Send Reset Link'}
+                {isLoading ? t('auth.forgotPassword.sending') : t('auth.forgotPassword.submit')}
               </Button>
             </form>
 

@@ -1,39 +1,478 @@
 {
   "common": {
-    "save": "Enregistrer",
-    "cancel": "Annuler",
-    "update": "Mettre à jour",
-    "delete": "Supprimer",
-    "edit": "Modifier",
-    "create": "Créer",
-    "creating": "Création...",
-    "close": "Fermer",
-    "submit": "Soumettre",
-    "submiting": "Soumission...",
-    "loading": "Chargement...",
-    "error": "Erreur",
-    "success": "Succès"
+    "save": "",
+    "cancel": "",
+    "update": "",
+    "delete": "",
+    "edit": "",
+    "create": "",
+    "creating": "",
+    "close": "",
+    "submit": "",
+    "submiting": "",
+    "loading": "",
+    "error": "",
+    "success": "",
+    "messages": {
+      "exportSuccess": "",
+      "exportFailed": ""
+    },
+    "empty": {
+      "title": "",
+      "description": ""
+    }
   },
   "auth": {
-    "login": "Connexion",
-    "logout": "Déconnexion",
-    "email": "Courriel",
-    "password": "Mot de passe",
-    "forgotPassword": "Mot de passe oublié?",
-    "resetPassword": "Réinitialiser le mot de passe"
-  },
-  "user": {
-    "firstName": "Prénom",
-    "lastName": "Nom de famille",
-    "role": "Rôle",
-    "addUser": "Ajouter un utilisateur réseau"
+    "login": {
+      "title": "",
+      "emailPlaceholder": "",
+      "passwordPlaceholder": "",
+      "rememberMe": "",
+      "forgotPassword": "",
+      "loggingIn": "",
+      "submit": "",
+      "noAccount": "",
+      "registerAsShop": "",
+      "registerAsDealer": "",
+      "success": {
+        "welcome": ""
+      },
+      "errors": {
+        "emailPasswordRequired": "",
+        "invalidSession": "",
+        "networkError": "",
+        "networkErrorDefault": "",
+        "unexpectedError": ""
+      }
+    },
+    "forgotPassword": {
+      "title": "",
+      "logoAlt": "",
+      "emailPlaceholder": "",
+      "sending": "",
+      "submit": "",
+      "success": "",
+      "errors": {
+        "sendFailed": ""
+      }
+    },
+    "resetPassword": {
+      "title": "",
+      "newPassword": "",
+      "newPasswordPlaceholder": "",
+      "confirmPassword": "",
+      "confirmPasswordPlaceholder": "",
+      "backToLogin": "",
+      "updating": "",
+      "update": "",
+      "success": "",
+      "invalidLink": {
+        "title": "",
+        "description": "",
+        "requestNew": "",
+        "backToLogin": ""
+      },
+      "errors": {
+        "invalidLink": "",
+        "validateFailed": "",
+        "passwordMismatch": "",
+        "passwordTooShort": "",
+        "resetFailed": ""
+      }
+    },
+    "landing": {
+      "title": "",
+      "backgroundAlt": "",
+      "logoAlt": "",
+      "login": "",
+      "registerAsShop": "",
+      "registerAsDealer": "",
+      "language": {
+        "english": "",
+        "french": ""
+      }
+    },
+    "welcomeGate": {
+      "title": "",
+      "backgroundAlt": "",
+      "audiAmerica": "",
+      "vwAmerica": "",
+      "audiCanada": "",
+      "vwCanada": "",
+      "language": {
+        "english": "",
+        "french": ""
+      }
+    }
   },
   "partsOrder": {
-    "title": "Commande de pièces",
-    "newOrder": "Nouvelle commande de pièces",
-    "editOrder": "Modifier la commande de pièces",
-    "supplement": "Supplément",
-    "newSupplement": "Nouveau supplément",
-    "editSupplement": "Modifier le supplément"
+    "title": "",
+    "newOrder": "",
+    "editOrder": "",
+    "supplement": "",
+    "newSupplement": "",
+    "editSupplement": "",
+    "list": {
+      "title": "",
+      "report": "",
+      "searchPlaceholder": "",
+      "onlyWaitingOnMe": "",
+      "typePlaceholder": "",
+      "statusPlaceholder": "",
+      "regionPlaceholder": "",
+      "dateRangeLabel": "",
+      "dateRangePlaceholder": "",
+      "dateRangeOptions": {
+        "7": "",
+        "30": "",
+        "all": "",
+        "month-to-date": "",
+        "quarter-to-date": "",
+        "year-to-date": "",
+        "last-month": "",
+        "last-quarter": "",
+        "last-year": "",
+        "custom": ""
+      },
+      "tableHeaders": {
+        "ro": "",
+        "sales": "",
+        "type": "",
+        "vin": "",
+        "ymm": "",
+        "status": "",
+        "shop": "",
+        "dealer": "",
+        "csrRegion": "",
+        "dateSubmitted": "",
+        "dateClosed": ""
+      },
+      "noData": "",
+      "loading": "",
+      "empty": {
+        "title": "",
+        "description": ""
+      },
+      "tooltip": {
+        "orderedFromAlternateDealer": ""
+      },
+      "dateRangePickerPlaceholder": "",
+      "type": {
+        "all": "",
+        "placeholder": ""
+      },
+      "status": {
+        "all": "",
+        "placeholder": ""
+      },
+      "region": {
+        "all": "",
+        "placeholder": ""
+      },
+      "columns": {
+        "ro": "",
+        "sales": "",
+        "type": "",
+        "vin": "",
+        "ymm": "",
+        "status": "",
+        "shop": "",
+        "dealer": "",
+        "csrRegion": "",
+        "dateSubmitted": "",
+        "dateClosed": ""
+      },
+      "exportSuccess": "",
+      "exportFailed": "",
+      "fetchErrorPrefix": "",
+      "fetchError": "",
+      "filterPlaceholder": "",
+      "onlyViewWaitingOnMe": "",
+      "dateSubmittedRange": {
+        "label": ""
+      },
+      "dateRange": {
+        "placeholder": "",
+        "all": "",
+        "last7": "",
+        "last30": "",
+        "monthToDate": "",
+        "quarterToDate": "",
+        "yearToDate": "",
+        "lastMonth": "",
+        "lastQuarter": "",
+        "lastYear": "",
+        "custom": ""
+      }
+    },
+    "types": {
+      "0": "",
+      "1": "",
+      "2": "",
+      "3": ""
+    },
+    "status": {
+      "CsrReview": "",
+      "CsrRejected": "",
+      "DealershipProcessing": "",
+      "DealershipShipped": "",
+      "ShopReceived": "",
+      "RepairCompleted": ""
+    },
+    "messages": {
+      "exportSuccess": "",
+      "exportFailed": "",
+      "fetchError": "",
+      "fetchErrorDefault": ""
+    },
+    "type": {
+      "partsOrder": "",
+      "supplement": ""
+    }
+  },
+  "shop": {
+    "list": {
+      "title": "",
+      "report": "",
+      "searchPlaceholder": "",
+      "statusPlaceholder": "",
+      "status": {
+        "all": "",
+        "certified": "",
+        "closed": "",
+        "inProcess": "",
+        "suspended": "",
+        "terminated": ""
+      },
+      "certificationPlaceholder": "",
+      "certification": {
+        "all": "",
+        "audiHybrid": "",
+        "audiUltra": "",
+        "vw": ""
+      },
+      "regionPlaceholder": "",
+      "region": {
+        "all": ""
+      }
+    }
+  },
+  "dealership": {
+    "list": {
+      "title": "",
+      "report": "",
+      "searchPlaceholder": "",
+      "tableHeaders": {
+        "name": "",
+        "number": "",
+        "pendingOrders": "",
+        "city": "",
+        "state": "",
+        "activeUsers": "",
+        "pendingUsers": ""
+      }
+    }
+  },
+  "user": {
+    "list": {
+      "title": "",
+      "addNew": "",
+      "searchPlaceholder": "",
+      "rolePlaceholder": "",
+      "role": {
+        "all": "",
+        "csr": "",
+        "fieldStaff": "",
+        "programAdministrator": ""
+      },
+      "regionPlaceholder": "",
+      "region": {
+        "all": ""
+      },
+      "showInactive": "",
+      "tableHeaders": {
+        "firstName": "",
+        "lastName": "",
+        "email": "",
+        "role": "",
+        "region": "",
+        "dateAdded": "",
+        "dateLastAccessed": "",
+        "status": ""
+      },
+      "allRegions": "",
+      "pendingRegistration": ""
+    },
+    "firstName": ""
+  },
+  "repairOrder": {
+    "messages": {
+      "loadFailed": "",
+      "createFailed": "",
+      "error": "",
+      "approveSuccess": "",
+      "approveFailed": "",
+      "rejectSuccess": "",
+      "rejectFailed": "",
+      "resubmitSuccess": "",
+      "resubmitFailed": "",
+      "shippedSuccess": "",
+      "shippedFailed": "",
+      "receivedSuccess": "",
+      "receivedFailed": "",
+      "completeSuccess": "",
+      "completeFailed": ""
+    },
+    "navigation": {
+      "vw": "",
+      "audi": ""
+    },
+    "header": {
+      "assignedDealership": "",
+      "fieldSupportTeam": ""
+    },
+    "list": {
+      "title": "",
+      "newRepairOrder": "",
+      "searchPlaceholder": "",
+      "statusPlaceholder": "",
+      "status": {
+        "all": ""
+      },
+      "dateRangePlaceholder": "",
+      "showRepairCompleted": "",
+      "empty": {
+        "noOrdersForShop": ""
+      },
+      "tableHeaders": {
+        "ro": "",
+        "order": "",
+        "vin": "",
+        "ymm": "",
+        "status": "",
+        "customer": "",
+        "dateSubmitted": "",
+        "dateCompleted": ""
+      }
+    },
+    "detail": {
+      "title": "",
+      "markComplete": "",
+      "editRepairOrder": "",
+      "customer": "",
+      "vin": "",
+      "ymm": "",
+      "dateSubmitted": "",
+      "by": "",
+      "submittedTo": "",
+      "dateClosed": "",
+      "preRepairPhotos": "",
+      "structuralMeasurements": "",
+      "postRepairPhotos": "",
+      "supplementalPartsOrder": "",
+      "salesOrder": "",
+      "editPartsOrder": "",
+      "requestedParts": "",
+      "noPartsRequested": "",
+      "partsEstimate": "",
+      "noEstimateFile": ""
+    }
+  },
+  "registration": {
+    "shop": {
+      "success": "",
+      "errors": {
+        "registrationFailed": "",
+        "registrationFailedDefault": ""
+      },
+      "bannerAlt": "",
+      "sections": {
+        "personalInfo": "",
+        "shopInfo": "",
+        "associatedDealership": ""
+      },
+      "fields": {
+        "firstName": "",
+        "lastName": "",
+        "email": "",
+        "shopName": "",
+        "shopNumber": "",
+        "dealershipName": "",
+        "dealershipNumber": ""
+      },
+      "placeholders": {
+        "firstName": "",
+        "lastName": "",
+        "email": "",
+        "shopName": "",
+        "shopNumber": "",
+        "dealershipName": "",
+        "dealershipNumber": ""
+      },
+      "registering": "",
+      "register": ""
+    },
+    "dealership": {
+      "success": "",
+      "errors": {
+        "registrationFailedDefault": ""
+      },
+      "bannerAlt": "",
+      "sections": {
+        "personalInfo": "",
+        "dealershipInfo": ""
+      },
+      "fields": {
+        "firstName": "",
+        "lastName": "",
+        "email": "",
+        "dealershipName": "",
+        "dealershipNumber": ""
+      },
+      "placeholders": {
+        "firstName": "",
+        "lastName": "",
+        "email": "",
+        "dealershipName": "",
+        "dealershipNumber": ""
+      },
+      "registering": "",
+      "register": ""
+    },
+    "complete": {
+      "errors": {
+        "invalidParams": "",
+        "invalidLink": "",
+        "validateFailed": "",
+        "passwordMismatch": "",
+        "passwordTooShort": "",
+        "completeFailed": ""
+      },
+      "success": "",
+      "bannerAlt": "",
+      "sections": {
+        "personalInfo": "",
+        "shopInfo": "",
+        "password": ""
+      },
+      "fields": {
+        "email": "",
+        "firstName": "",
+        "lastName": "",
+        "shopName": "",
+        "shopNumber": "",
+        "address": "",
+        "password": "",
+        "confirmPassword": ""
+      },
+      "placeholders": {
+        "password": "",
+        "confirmPassword": ""
+      },
+      "hidePassword": "",
+      "showPassword": "",
+      "completing": "",
+      "submit": ""
+    }
   }
 }

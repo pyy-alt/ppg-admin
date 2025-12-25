@@ -19,8 +19,10 @@ import PartsOrderApprovedDialog from '@/components/PartsOrderApprovedDialog';
 import { PartsOrderDialog } from '@/components/PartsOrderDialog';
 import RepairOrderDialog, { type RepairOrderData } from '@/components/RepairOrderDialog';
 import { Timeline } from '@/components/Timeline';
+import { useTranslation } from 'react-i18next';
 
 export function RepairOrderDetail() {
+  const { t } = useTranslation();
   const [openPartsOrderDialog, setOpenPartsOrderDialog] = useState(false);
   const [initRepaitOrderData, setInitRepaitOrderData] = useState<RepairOrder>();
   const [isMarkRepairAsCompleteDialogOpen, setIsMarkRepairAsCompleteDialogOpen] = useState(false);
@@ -92,7 +94,7 @@ export function RepairOrderDetail() {
             resolve(response);
           },
           error: (error) => {
-            toast.error('Error:', error);
+            toast.error(t('repairOrder.messages.error', { error }));
             reject();
           },
           else: (_statusCode, responseText) => {
@@ -120,12 +122,12 @@ export function RepairOrderDetail() {
 
         api.partsOrderSubmitWorkflowAction(request, {
           status200: () => {
-            toast.success('Parts order approved successfully');
+            toast.success(t('repairOrder.messages.approveSuccess'));
             getPartsOrderDetail(); // Refresh data
             resolve(true);
           },
           error: (error) => {
-            toast.error(`Failed to approve parts order ${error}|`);
+            toast.error(t('repairOrder.messages.approveFailed', { error }));
             console.error(error);
             reject(false);
           },
@@ -154,12 +156,12 @@ export function RepairOrderDetail() {
 
         api.partsOrderSubmitWorkflowAction(request, {
           status200: () => {
-            toast.success('Parts order rejected successfully');
+            toast.success(t('repairOrder.messages.rejectSuccess'));
             getPartsOrderDetail(); // Refresh data
             resolve(true);
           },
           error: (error) => {
-            toast.error(`Failed to reject parts order ${error}|`);
+            toast.error(t('repairOrder.messages.rejectFailed', { error }));
             reject(false);
           },
           else: () => {
@@ -184,12 +186,12 @@ export function RepairOrderDetail() {
         });
         api.partsOrderSubmitWorkflowAction(request, {
           status200: () => {
-            toast.success('Parts order resubmitted successfully');
+            toast.success(t('repairOrder.messages.resubmitSuccess'));
             getPartsOrderDetail(); // Refresh data
             resolve(true);
           },
           error: (error) => {
-            toast.error(`Failed to resubmit parts order ${error}|`);
+            toast.error(t('repairOrder.messages.resubmitFailed', { error }));
             reject(false);
           },
           else: () => {
@@ -215,12 +217,12 @@ export function RepairOrderDetail() {
         });
         api.partsOrderSubmitWorkflowAction(request, {
           status200: () => {
-            toast.success('Parts order marked as shipped successfully');
+            toast.success(t('repairOrder.messages.shippedSuccess'));
             getPartsOrderDetail(); // Refresh data
             resolve(true);
           },
           error: (error) => {
-            toast.error(`Failed to mark parts order as shipped ${error}|`);
+            toast.error(t('repairOrder.messages.shippedFailed', { error }));
             reject(false);
           },
           else: () => {
@@ -243,12 +245,12 @@ export function RepairOrderDetail() {
         });
         api.partsOrderSubmitWorkflowAction(request, {
           status200: () => {
-            toast.success('Parts order marked as received successfully');
+            toast.success(t('repairOrder.messages.receivedSuccess'));
             getPartsOrderDetail(); // Refresh data
             resolve(true);
           },
           error: (error) => {
-            toast.error(`Failed to mark parts order as received ${error}|`);
+            toast.error(t('repairOrder.messages.receivedFailed', { error }));
             reject(false);
           },
           else: () => {
@@ -271,13 +273,13 @@ export function RepairOrderDetail() {
         };
         api.repairOrderComplete(request, {
           status200: () => {
-            toast.success('Repair order marked as complete successfully');
+            toast.success(t('repairOrder.messages.completeSuccess'));
             getRepairOrderDetail(); // Refresh data
             getPartsOrderDetail();
             resolve(true);
           },
           error: (error) => {
-            toast.error(`Failed to mark repair order as complete ${error}|`);
+            toast.error(t('repairOrder.messages.completeFailed', { error }));
             reject(false);
           },
           else: () => {
@@ -319,7 +321,7 @@ export function RepairOrderDetail() {
       <div className="relative w-full h-40">
         <img
           src={navImg}
-          alt={brand === 'vw' ? 'VW Navigation' : 'Audi Navigation'}
+          alt={brand === 'vw' ? t('repairOrder.navigation.vw') : t('repairOrder.navigation.audi')}
           className="object-cover w-full h-full mt-6"
         />
         <div className="absolute -translate-y-1/2 top-1/2 left-6">
@@ -331,7 +333,7 @@ export function RepairOrderDetail() {
             <Warehouse className="w-5 h-5 text-white" />
             {(user?.person?.shop && (
               <span>
-                Assigned Dealership: {user?.person?.shop?.sponsorDealership.name ?? '--'}({' '}
+                {t('repairOrder.header.assignedDealership')}: {user?.person?.shop?.sponsorDealership.name ?? '--'}({' '}
                 {user?.person?.shop?.sponsorDealership.dealershipNumber})
               </span>
             )) ||
@@ -339,7 +341,7 @@ export function RepairOrderDetail() {
             <Users className="w-5 h-5 ml-6 text-white" />
             <span>
               {' '}
-              { user?.person?.type==='ProgramAdministrator'? 'Program Administrator' : user?.person?.type  }: {user?.person?.firstName} {user?.person?.lastName}
+              { user?.person?.type==='ProgramAdministrator'? t('user.list.role.programAdministrator') : user?.person?.type  }: {user?.person?.firstName} {user?.person?.lastName}
             </span>
           </p>
         </div>
@@ -370,7 +372,7 @@ export function RepairOrderDetail() {
         <div className="flex flex-col w-full border rounded-sm">
           <div className="flex items-center justify-between w-full p-5 bg-muted text-foreground">
             <h1 className="text-2xl font-bold tracking-tight">
-              Repair Order #: &nbsp;{initRepaitOrderData?.roNumber || '--'}
+              {t('repairOrder.detail.title')}: &nbsp;{initRepaitOrderData?.roNumber || '--'}
             </h1>
             <div className="flex gap-3">
               {initPartsOrderData?.every(
@@ -382,13 +384,13 @@ export function RepairOrderDetail() {
                   className="text-xs font-medium bg-green-600 h-9"
                 >
                   <Check className="mr-1.5 h-3.5 w-3.5" />
-                  Mark Repair as Complete
+                  {t('repairOrder.detail.markComplete')}
                 </Button>
               ) : null}
               {userType === 'Shop' && initPartsOrderData?.every((order: any) => order.status !== 'RepairCompleted') ? (
                 <Button size="sm" variant="outline" className="text-xs font-medium h-9" onClick={() => setOpen(true)}>
                   <Pencil className="mr-1.5 h-3.5 w-3.5" />
-                  Edit Repair Order
+                  {t('repairOrder.detail.editRepairOrder')}
                 </Button>
               ) : null}
             </div>
@@ -398,15 +400,15 @@ export function RepairOrderDetail() {
             {/* Left column */}
             <div className="space-y-3">
               <div>
-                <span className="text-muted-foreground">Customer</span>
+                <span className="text-muted-foreground">{t('repairOrder.detail.customer')}</span>
                 <p className="font-medium">{initRepaitOrderData?.customer || '--'}</p>
               </div>
               <div>
-                <span className="text-muted-foreground">VIN</span>
+                <span className="text-muted-foreground">{t('repairOrder.detail.vin')}</span>
                 <p>{initRepaitOrderData?.vin || '--'}</p>
               </div>
               <div>
-                <span className="text-muted-foreground">Year/Make/Model</span>
+                <span className="text-muted-foreground">{t('repairOrder.detail.ymm')}</span>
                 <p className="font-medium">
                   {initRepaitOrderData?.year}&nbsp;{initRepaitOrderData?.make}&nbsp;{initRepaitOrderData?.model}
                 </p>
@@ -415,21 +417,21 @@ export function RepairOrderDetail() {
             {/* Middle column */}
             <div className="space-y-3">
               <div>
-                <span className="text-muted-foreground">Date Submitted</span>
+                <span className="text-muted-foreground">{t('repairOrder.detail.dateSubmitted')}</span>
                 <p>
                   {formatDateOnly(initRepaitOrderData?.dateLastSubmitted as Date) || '--'}
-                  {' by' + ' '}
+                  {' ' + t('repairOrder.detail.by') + ' '}
                   {(selectedPartsOrderData as any)?.submittedByPerson?.firstName +
                     ' ' +
                     (selectedPartsOrderData as any)?.submittedByPerson?.lastName}
                 </p>
               </div>
               <div>
-                <span className="text-muted-foreground">Submitted To</span>
+                <span className="text-muted-foreground">{t('repairOrder.detail.submittedTo')}</span>
                 <p className="font-medium">{initRepaitOrderData?.dealership?.name || '--'}&nbsp;({initRepaitOrderData?.dealership?.dealershipNumber})</p>
               </div>
               <div>
-                <span className="text-muted-foreground">Date Closed</span>
+                <span className="text-muted-foreground">{t('repairOrder.detail.dateClosed')}</span>
                 <p className="text-muted-foreground">
                   {formatDateOnly(initRepaitOrderData?.dateClosed as Date) || '--'}
                   {initRepaitOrderData?.dateClosed && ' by' + ' '}
@@ -443,7 +445,7 @@ export function RepairOrderDetail() {
             {/* Right column - File links more compact */}
             <div className="space-y-3 text-sm">
               <div>
-                <span className="text-muted-foreground">Pre-Repair Photos</span>
+                <span className="text-muted-foreground">{t('repairOrder.detail.preRepairPhotos')}</span>
                 <div className="flex flex-wrap gap-2 mt-1">
                   {initRepaitOrderData &&
                   initRepaitOrderData?.preRepairPhotoFileAssets &&
@@ -462,7 +464,7 @@ export function RepairOrderDetail() {
                 </div>
               </div>
               <div>
-                <span className="text-muted-foreground">Structural Measurements</span>
+                <span className="text-muted-foreground">{t('repairOrder.detail.structuralMeasurements')}</span>
                 <br />
                 <div className="text-primary hover:underline">
                   {initRepaitOrderData?.structuralMeasurementFileAssets &&
@@ -481,7 +483,7 @@ export function RepairOrderDetail() {
                 </div>
               </div>
               <div>
-                <span className="text-muted-foreground">Post-Repair Photos</span>
+                <span className="text-muted-foreground">{t('repairOrder.detail.postRepairPhotos')}</span>
                 <div className="flex flex-wrap gap-2 mt-1">
                   {initRepaitOrderData?.postRepairPhotoFileAssets &&
                   initRepaitOrderData?.postRepairPhotoFileAssets.length > 0
@@ -513,7 +515,7 @@ export function RepairOrderDetail() {
                       setSelectedPartsOrderData(partsOrder);
                     }}
                   >
-                    Parts Order
+                    {t('partsOrder.types.0')}
                   </Button>
 
                   {/* Supplement Button（partsOrderNumber > 0） */}
@@ -529,7 +531,7 @@ export function RepairOrderDetail() {
                         }}
                       >
                         {partsOrder.hasAlert && <AlertTriangle className="w-4 h-4 text-destructive" />}
-                        Supplement {partsOrder.partsOrderNumber}
+                        {t('partsOrder.supplement')} {partsOrder.partsOrderNumber}
                       </Button>
                     ))}
                 </>
@@ -555,7 +557,7 @@ export function RepairOrderDetail() {
                   className="font-medium rounded-lg h-9"
                 >
                   <Plus className="mr-1.5 h-3.5 w-3.5" />
-                  Supplemental Parts Order
+                  {t('repairOrder.detail.supplementalPartsOrder')}
                 </Button>
               )}
           </div>
@@ -568,7 +570,7 @@ export function RepairOrderDetail() {
                   <CardHeader className="pb-4">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-base font-semibold text-foreground">
-                        Sales Order #: &nbsp;{(selectedPartsOrderData as any)?.salesOrderNumber || '--'}
+                        {t('repairOrder.detail.salesOrder')}: &nbsp;{(selectedPartsOrderData as any)?.salesOrderNumber || '--'}
                       </CardTitle>
                       {(userType === 'Shop' &&
                         (selectedPartsOrderData as any)?.stage == 'OrderReview' &&
@@ -588,7 +590,7 @@ export function RepairOrderDetail() {
                           className="px-4 text-xs h-9"
                         >
                           <Pencil className="h-3.5 w-3.5" />
-                          Edit Parts Order
+                          {t('repairOrder.detail.editPartsOrder')}
                         </Button>
                       ) : null}
                     </div>
@@ -596,7 +598,7 @@ export function RepairOrderDetail() {
 
                   <CardContent className="space-y-6 text-sm">
                     <div>
-                      <h4 className="mb-3 font-medium text-muted-foreground">Requested Parts</h4>
+                      <h4 className="mb-3 font-medium text-muted-foreground">{t('repairOrder.detail.requestedParts')}</h4>
                       <ol className="pl-5 space-y-2 text-foreground/90">
                         {((selectedPartsOrderData as any)?.parts?.length > 0 &&
                           (selectedPartsOrderData as any)?.parts?.map((part: string, idx: number) => (
@@ -604,12 +606,12 @@ export function RepairOrderDetail() {
                               ({idx + 1}) {part}
                             </li>
                           ))) ||
-                          '-- No parts requested'}
+                          t('repairOrder.detail.noPartsRequested')}
                       </ol>
                     </div>
 
                     <div>
-                      <span className="text-muted-foreground">Parts Estimate</span>
+                      <span className="text-muted-foreground">{t('repairOrder.detail.partsEstimate')}</span>
                       <br />
                       {(selectedPartsOrderData &&
                         (selectedPartsOrderData as any).estimateFileAssets &&
@@ -623,7 +625,7 @@ export function RepairOrderDetail() {
                             {file.filename}
                           </a>
                         ))) ||
-                        '-- No estimate file'}
+                        t('repairOrder.detail.noEstimateFile')}
                     </div>
                   </CardContent>
                 </Card>

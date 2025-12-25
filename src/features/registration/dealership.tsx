@@ -9,8 +9,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Header } from '@/components/layout/header'
+import { useTranslation } from 'react-i18next';
 
 export function RegistrationDealership() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [isLoading, setIsLoading] = useState(false)
   const [form, setForm] = useState({
@@ -39,7 +41,7 @@ export function RegistrationDealership() {
       const authenticationApi = new AuthenticationApi()
       authenticationApi.registrationRequestDealership(request, {
         status200: () => {
-          toast.success('Registration successful! Please check your email.')
+          toast.success(t('registration.dealership.success'))
           navigate({ to: '/registrationResult', search: { status: 'success' } })
         },
         status409: (message: string) => {
@@ -47,7 +49,7 @@ export function RegistrationDealership() {
         },
       })
     } catch (error) {
-      toast.error('Registration failed. Please try again.')
+      toast.error(t('registration.dealership.errors.registrationFailedDefault'))
     }
 
     // try {
@@ -71,7 +73,7 @@ export function RegistrationDealership() {
       <div className='bg-primary text-primary-foreground relative mt-16 h-32 lg:h-40'>
         <img
           src={bannerImg}
-          alt='New Shop User Registration'
+          alt={t('registration.dealership.bannerAlt')}
           className='absolute inset-0 h-full w-full object-fill opacity-70'
           loading='lazy'
         />
@@ -85,7 +87,7 @@ export function RegistrationDealership() {
             <div className='flex items-center gap-3'>
               <User className='text-foreground h-6 w-6' />
               <h2 className='text-foreground text-xl font-semibold'>
-                Personal Information
+                {t('registration.dealership.sections.personalInfo')}
               </h2>
             </div>
 
@@ -95,11 +97,11 @@ export function RegistrationDealership() {
                   htmlFor='firstName'
                   className='text-foreground text-sm font-medium'
                 >
-                  First Name
+                  {t('registration.dealership.fields.firstName')}
                 </Label>
                 <Input
                   id='firstName'
-                  placeholder='Enter first name'
+                  placeholder={t('registration.dealership.placeholders.firstName')}
                   className='h-12 rounded-lg'
                   value={form.firstName}
                   onChange={(e) => handleChange('firstName', e.target.value)}
@@ -113,11 +115,11 @@ export function RegistrationDealership() {
                   htmlFor='lastName'
                   className='text-foreground text-sm font-medium'
                 >
-                  Last Name
+                  {t('registration.dealership.fields.lastName')}
                 </Label>
                 <Input
                   id='lastName'
-                  placeholder='Enter last name'
+                  placeholder={t('registration.dealership.placeholders.lastName')}
                   className='h-12 rounded-lg'
                   value={form.lastName}
                   onChange={(e) => handleChange('lastName', e.target.value)}
@@ -132,12 +134,12 @@ export function RegistrationDealership() {
                 htmlFor='email'
                 className='text-foreground text-sm font-medium'
               >
-                Email
+                {t('registration.dealership.fields.email')}
               </Label>
               <Input
                 id='email'
                 type='email'
-                placeholder='Enter email address'
+                placeholder={t('registration.dealership.placeholders.email')}
                 className='h-12 rounded-lg'
                 value={form.email}
                 onChange={(e) => handleChange('email', e.target.value)}
@@ -152,7 +154,7 @@ export function RegistrationDealership() {
             <div className='flex items-center gap-3'>
               <Building2 className='text-foreground h-6 w-6' />
               <h2 className='text-foreground text-xl font-semibold'>
-                Dealership Information
+                {t('registration.dealership.sections.dealershipInfo')}
               </h2>
             </div>
 
@@ -162,11 +164,11 @@ export function RegistrationDealership() {
                   htmlFor='dealershipName'
                   className='text-foreground text-sm font-medium'
                 >
-                  Dealership Name
+                  {t('registration.dealership.fields.dealershipName')}
                 </Label>
                 <Input
                   id='dealershipName'
-                  placeholder='Enter dealership name'
+                  placeholder={t('registration.dealership.placeholders.dealershipName')}
                   className='h-12 rounded-lg'
                   value={form.dealershipName}
                   onChange={(e) =>
@@ -182,11 +184,11 @@ export function RegistrationDealership() {
                   htmlFor='dealershipNumber'
                   className='text-foreground text-sm font-medium'
                 >
-                  Dealership #
+                  {t('registration.dealership.fields.dealershipNumber')}
                 </Label>
                 <Input
                   id='dealershipNumber'
-                  placeholder='Enter dealership number'
+                  placeholder={t('registration.dealership.placeholders.dealershipNumber')}
                   className='h-12 rounded-lg'
                   value={form.dealershipNumber}
                   onChange={(e) =>
@@ -207,7 +209,7 @@ export function RegistrationDealership() {
               className='h-12 rounded-full px-8 font-medium shadow-md transition-all'
               disabled={isLoading}
             >
-              {isLoading ? 'Registering...' : 'Register'}
+              {isLoading ? t('registration.dealership.registering') : t('registration.dealership.register')}
             </Button>
           </div>
         </form>

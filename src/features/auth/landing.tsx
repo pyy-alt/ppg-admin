@@ -3,8 +3,10 @@ import { Link } from '@tanstack/react-router'
 import bg from '@/assets/img/login/landing_bg.png'
 import useBrandLogo from '@/hooks/use-bran-logo'
 import { Button } from '@/components/ui/button'
+import { useTranslation } from 'react-i18next'
 
 export function Landing() {
+  const { t } = useTranslation()
   const logoSrc = useBrandLogo('login', '_a.png')
   
   return (
@@ -13,11 +15,11 @@ export function Landing() {
       <div className='relative max-h-[280px] overflow-hidden'>
         <img
           src={bg}
-          alt='Background decorative pattern'
+          alt={t('auth.landing.backgroundAlt')}
           className='h-full w-full object-cover'
         />
         <h1 className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center text-3xl font-bold text-primary-foreground lg:text-4xl'>
-          Audi Restricted Parts Tracker
+          {t('auth.landing.title')}
         </h1>
       </div>
 
@@ -28,7 +30,7 @@ export function Landing() {
           {logoSrc ? (
             <img
               src={logoSrc}
-              alt='Audi Authorized Collision Repair Logo'
+              alt={t('auth.landing.logoAlt')}
               className='h-32 w-auto lg:h-40'
             />
           ) : null}
@@ -41,7 +43,7 @@ export function Landing() {
             variant='default'
             className='h-14 w-full rounded-full text-base font-semibold shadow-md'
           >
-            <Link to='/login'>Log in</Link>
+            <Link to='/login'>{t('auth.landing.login')}</Link>
           </Button>
 
           <Button
@@ -51,7 +53,7 @@ export function Landing() {
           >
             { }
             <Link to='/registration/shop' search={{ type: 'shop' } as any}>
-              Register as Shop
+              {t('auth.landing.registerAsShop')}
             </Link>
           </Button>
 
@@ -64,7 +66,7 @@ export function Landing() {
               to='/registration/dealership'
               search={{ type: 'dealership' } as any}
             >
-              Register as Dealer
+              {t('auth.landing.registerAsDealer')}
             </Link>
           </Button>
         </div>
@@ -72,11 +74,11 @@ export function Landing() {
         {/* Footer Language Options */}
         <div className='mt-12 flex items-center gap-2 text-sm text-muted-foreground'>
           <span aria-hidden='true'>🌐</span>
-          <span className='font-medium text-foreground'>English</span>
+          <span className='font-medium text-foreground'>{t('auth.landing.language.english')}</span>
           <span className='text-muted-foreground' aria-hidden='true'>
             |
           </span>
-          <span className='text-muted-foreground'>Français</span>
+          <span className='text-muted-foreground'>{t('auth.landing.language.french')}</span>
         </div>
       </div>
     </div>

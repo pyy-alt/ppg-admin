@@ -17,9 +17,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import NetworkUserDialog from '@/components/NetworkUserDialog'
 import { ClearableInput } from '@/components/clearable-input'
 import { DataTablePagination } from '@/components/data-table-pagination'
+import { useTranslation } from 'react-i18next';
 
 type filterByNetworkRoleType = 'Csr' | 'FieldStaff' | 'ProgramAdministrator'
 export function Users() {
+	const { t } = useTranslation()
 	const [userOpen, setUserOpen] = useState(false)
 	const [users, setUsers] = useState<Person[]>([])
 	const [initUser, setInitUser] = useState<Person | null>(null)
@@ -126,7 +128,7 @@ export function Users() {
 			{/* Header */}
 			<div className="bg-background border-b">
 				<div className="flex items-center justify-between px-6 py-4">
-					<h1 className="text-foreground text-2xl font-bold">Manage Network Users</h1>
+					<h1 className="text-foreground text-2xl font-bold">{t('user.list.title')}</h1>
 					<Button
 						onClick={() => {
 							setInitUser(null) // Clear previous user data
@@ -134,7 +136,7 @@ export function Users() {
 						}}
 					>
 						<Plus className="mr-2 h-4 w-4" />
-						Add New User
+						{t('user.list.addNew')}
 					</Button>
 				</div>
 			</div>
@@ -159,7 +161,7 @@ export function Users() {
 					<div className="relative max-w-md flex-1">
 						<Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
 						<ClearableInput
-							placeholder="Filter by First Name, Last Name, Email"
+							placeholder={t('user.list.searchPlaceholder')}
 							value={smartFilter}
 							onChange={e => setSmartFilter(e.target.value)}
 							className="pl-10"
@@ -174,22 +176,22 @@ export function Users() {
 							}
 						>
 							<SelectTrigger className="bg-muted w-48">
-								<SelectValue placeholder="Role" />
+								<SelectValue placeholder={t('user.list.rolePlaceholder')} />
 							</SelectTrigger>
 							<SelectContent>
-								<SelectItem value="all">All Roles</SelectItem>
-								<SelectItem value="Csr">Csr</SelectItem>
-								<SelectItem value="FieldStaff">Field Staff</SelectItem>
-								<SelectItem value="ProgramAdministrator">Program Administrator</SelectItem>
+								<SelectItem value="all">{t('user.list.role.all')}</SelectItem>
+								<SelectItem value="Csr">{t('user.list.role.csr')}</SelectItem>
+								<SelectItem value="FieldStaff">{t('user.list.role.fieldStaff')}</SelectItem>
+								<SelectItem value="ProgramAdministrator">{t('user.list.role.programAdministrator')}</SelectItem>
 							</SelectContent>
 						</Select>
 
 						<Select value={selectedRegionId} onValueChange={setSelectedRegionId}>
 							<SelectTrigger className="bg-muted w-48">
-								<SelectValue placeholder="CSR Region" />
+								<SelectValue placeholder={t('user.list.regionPlaceholder')} />
 							</SelectTrigger>
 							<SelectContent>
-								<SelectItem value="all">All Regions</SelectItem>
+								<SelectItem value="all">{t('user.list.region.all')}</SelectItem>
 								{regions.map((region: any) => (
 									<SelectItem key={region.id} value={String(region.id)}>
 										{region.name}
@@ -205,7 +207,7 @@ export function Users() {
 								onCheckedChange={checked => setIncludeInactiveFlag(checked as boolean)}
 							/>
 							<Label htmlFor="show-inactive" className="cursor-pointer text-sm font-medium">
-								Show Inactive Users
+								{t('user.list.showInactive')}
 							</Label>
 						</div>
 					</div>
@@ -217,9 +219,9 @@ export function Users() {
 								<EmptyMedia variant="icon">
 									<TableIcon className="h-4 w-4" />
 								</EmptyMedia>
-								<EmptyTitle>No data to display</EmptyTitle>
+								<EmptyTitle>{t('common.empty.title')}</EmptyTitle>
 								<EmptyDescription>
-									No results could be found.
+									{t('common.empty.description')}
 								</EmptyDescription>
 							</EmptyHeader>
 						</Empty>
@@ -231,14 +233,14 @@ export function Users() {
 							<Table>
 								<TableHeader>
 									<TableRow className="bg-muted">
-										<TableHead className="text-foreground font-semibold">First Name</TableHead>
-										<TableHead className="text-foreground font-semibold">Last Name</TableHead>
-										<TableHead className="text-foreground font-semibold">Email</TableHead>
-										<TableHead className="text-foreground font-semibold">Role</TableHead>
-										<TableHead className="text-foreground font-semibold">Region</TableHead>
-										<TableHead className="text-foreground font-semibold">Date Added</TableHead>
-										<TableHead className="text-foreground font-semibold">Date Last Accessed</TableHead>
-										<TableHead className="text-foreground font-semibold">Status</TableHead>
+										<TableHead className="text-foreground font-semibold">{t('user.list.tableHeaders.firstName')}</TableHead>
+										<TableHead className="text-foreground font-semibold">{t('user.list.tableHeaders.lastName')}</TableHead>
+										<TableHead className="text-foreground font-semibold">{t('user.list.tableHeaders.email')}</TableHead>
+										<TableHead className="text-foreground font-semibold">{t('user.list.tableHeaders.role')}</TableHead>
+										<TableHead className="text-foreground font-semibold">{t('user.list.tableHeaders.region')}</TableHead>
+										<TableHead className="text-foreground font-semibold">{t('user.list.tableHeaders.dateAdded')}</TableHead>
+										<TableHead className="text-foreground font-semibold">{t('user.list.tableHeaders.dateLastAccessed')}</TableHead>
+										<TableHead className="text-foreground font-semibold">{t('user.list.tableHeaders.status')}</TableHead>
 									</TableRow>
 								</TableHeader>
 								<TableBody>
@@ -283,7 +285,7 @@ export function Users() {
 													: user.type === 'FieldStaff'
 														? user.fieldStaffRegions?.map((region: any) => region.name).join(', ') || '--'
 														: user.type === 'ProgramAdministrator'
-															? 'All Regions'
+															? t('user.list.allRegions')
 															: '--'}
 											</TableCell>
 											<TableCell>
@@ -305,7 +307,7 @@ export function Users() {
 												}
 											>
 												{(user.dateLastAccess && new Date(user.dateLastAccess).toLocaleDateString()) ||
-													'Pending Registration'}
+													t('user.list.pendingRegistration')}
 											</TableCell>
 											<TableCell>
 												{user.status === 'Inactive' ? (

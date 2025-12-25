@@ -20,7 +20,7 @@ import { DateRangePicker } from '@/components/DateRangePicker';
 import { DataTablePagination } from '@/components/data-table-pagination';
 import { ClearableInput } from '@/components/clearable-input';
 import { SortableTableHead } from '@/components/SortableTableHead';
-
+import { useTranslation } from 'react-i18next';
 export function PartOrders() {
   const { user } = useAuthStore((state) => state.auth);
   const [filterByWaitingOnMe, setOnlyMyOrders] = useState<boolean>(false);
@@ -47,6 +47,7 @@ export function PartOrders() {
 
   const partsOrderRef = useRef<HTMLTableElement>(null);
   const [headers, setHeaders] = useState<string[]>([]);
+  const { t } = useTranslation();
   const getFlattenedCurrentPageData = () => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
@@ -76,9 +77,9 @@ export function PartOrders() {
     try {
       const flattenedData = getFlattenedCurrentPageData();
       const result = await exportCurrentPageToCSV(flattenedData, headers);
-      result ? toast.success('Exported successfully') : null;
+      result ? toast.success(t('partsOrder.messages.exportSuccess')) : null;
     } catch (error) {
-      toast.error('Export failed');
+      toast.error(t('partsOrder.messages.exportFailed'));
     }
   };
 
@@ -89,24 +90,28 @@ export function PartOrders() {
       const thElements = partsOrderRef.current.querySelectorAll('thead th');
 
       // 3. Extract text content
-      const headerTexts = Array.from(thElements).map((th) => th.textContent.trim());
+      const headerTexts = Array.from(thElements)
+        .map((th) => th?.textContent?.trim() || '')
+        .filter((text) => text !== '');
       setHeaders(headerTexts);
     }
   }, [orders]);
   const getStatusTxt = (status: string) => {
     switch (status) {
       case 'CsrReview':
-        return 'CSR Review';
+        return t('partsOrder.status.CsrReview');
       case 'CsrRejected':
-        return 'CSR Rejected';
+        return t('partsOrder.status.CsrRejected');
       case 'DealershipProcessing':
-        return 'Dealer Processing';
+        return t('partsOrder.status.DealershipProcessing');
       case 'DealershipShipped':
-        return 'Dealer Shipped';
+        return t('partsOrder.status.DealershipShipped');
       case 'ShopReceived':
-        return 'Shop Received';
+        return t('partsOrder.status.ShopReceived');
       case 'RepairCompleted':
-        return 'Repair Completed';
+        return t('partsOrder.status.RepairCompleted');
+      default:
+        return status;
     }
   };
 
@@ -169,7 +174,7 @@ export function PartOrders() {
           setLoading(false);
         },
         error: (error: any) => {
-          toast.error(`Error: ${error || 'Failed to fetch data'}`);
+          toast.error(t('partsOrder.messages.fetchError', { error: error || t('partsOrder.messages.fetchErrorDefault') }));
           setLoading(false);
         },
         else: () => {
@@ -249,10 +254,11 @@ export function PartOrders() {
 
   // Get order type display text
   const getOrderTypeText = (partsOrderNumber: number): string => {
-    if (partsOrderNumber === 0) return 'Parts Order';
-    if (partsOrderNumber === 1) return 'Supplement 1';
-    if (partsOrderNumber === 2) return 'Supplement 2';
-    return `Supplement ${partsOrderNumber}`;
+    if (partsOrderNumber === 0) return t('partsOrder.types.0');
+    if (partsOrderNumber === 1) return t('partsOrder.types.1');
+    if (partsOrderNumber === 2) return t('partsOrder.types.2');
+    if (partsOrderNumber === 3) return t('partsOrder.types.3');
+    return `${t('partsOrder.supplement')} ${partsOrderNumber}`;
   };
 
   return (
@@ -260,10 +266,10 @@ export function PartOrders() {
       {/* Header */}
       <div className="bg-background">
         <div className="flex items-center justify-between px-6 py-4">
-          <h1 className="text-2xl font-bold text-foreground">Parts Order List</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t('partsOrder.list.title')}</h1>
           <Button onClick={exportCSV}>
             <Download className="w-4 h-4 mr-2" />
-            Report
+            {t('partsOrder.list.report')}
           </Button>
         </div>
 
@@ -275,7 +281,7 @@ export function PartOrders() {
               <ClearableInput
                 value={smartFilter}
                 onChange={(e) => setSmartFilter(e.target.value)}
-                placeholder="Filter by RO#, Sales Order #, VIN, Shop, Dealer"
+                placeholder={t('partsOrder.list.searchPlaceholder')}
                 className="pl-10"
               />
             </div>
@@ -289,7 +295,7 @@ export function PartOrders() {
                   className="rounded-full bg-muted"
                 />
                 <Label htmlFor="my-orders" className="flex items-center gap-2 text-sm font-medium cursor-pointer">
-                  Only View Parts Orders that are waiting On Me
+                  {t('partsOrder.list.onlyWaitingOnMe')}
                 </Label>
               </div>
             )}
@@ -299,38 +305,38 @@ export function PartOrders() {
           <div className="flex flex-wrap items-center gap-3 mb-6">
             <Select value={filterByPartsOrderNumber} onValueChange={(value) => setTypeOfOrder(value)}>
               <SelectTrigger className="w-48 bg-muted">
-                <SelectValue placeholder="Type of Order" />
+                <SelectValue placeholder={t('partsOrder.list.typePlaceholder')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="0">Parts Order</SelectItem>
-                <SelectItem value="1">Supplement #1</SelectItem>
-                <SelectItem value="2">Supplement #2</SelectItem>
-                <SelectItem value="3">Supplement #3</SelectItem>
+                <SelectItem value="all">{t('partsOrder.list.type.all')}</SelectItem>
+                <SelectItem value="0">{t('partsOrder.types.0')}</SelectItem>
+                <SelectItem value="1">{t('partsOrder.types.1')}</SelectItem>
+                <SelectItem value="2">{t('partsOrder.types.2')}</SelectItem>
+                <SelectItem value="3">{t('partsOrder.types.3')}</SelectItem>
               </SelectContent>
             </Select>
 
             <Select value={filterByStatus} onValueChange={(value) => setFilterByStatus(value)}>
               <SelectTrigger className="w-48 bg-muted">
-                <SelectValue placeholder="Status" />
+                <SelectValue placeholder={t('partsOrder.list.statusPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="CsrReview">CSR Review</SelectItem>
-                <SelectItem value="CsrRejected">CSR Rejected</SelectItem>
-                <SelectItem value="DealershipProcessing">Dealer Processing</SelectItem>
-                <SelectItem value="DealershipShipped">Dealer Shipped</SelectItem>
-                <SelectItem value="ShopReceived">Shop Received</SelectItem>
-                <SelectItem value="RepairCompleted">Repair Completed</SelectItem>
+                <SelectItem value="all">{t('partsOrder.list.status.all')}</SelectItem>
+                <SelectItem value="CsrReview">{t('partsOrder.status.CsrReview')}</SelectItem>
+                <SelectItem value="CsrRejected">{t('partsOrder.status.CsrRejected')}</SelectItem>
+                <SelectItem value="DealershipProcessing">{t('partsOrder.status.DealershipProcessing')}</SelectItem>
+                <SelectItem value="DealershipShipped">{t('partsOrder.status.DealershipShipped')}</SelectItem>
+                <SelectItem value="ShopReceived">{t('partsOrder.status.ShopReceived')}</SelectItem>
+                <SelectItem value="RepairCompleted">{t('partsOrder.status.RepairCompleted')}</SelectItem>
               </SelectContent>
             </Select>
 
             <Select value={filterByRegionId} onValueChange={(value) => setCsrRegion(value)}>
               <SelectTrigger className="w-48 bg-muted">
-                <SelectValue placeholder="CSR Region" />
+                <SelectValue placeholder={t('partsOrder.list.regionPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Regions</SelectItem>
+                <SelectItem value="all">{t('partsOrder.list.region.all')}</SelectItem>
                 {user?.regions?.map((region) => (
                   <SelectItem key={region.id} value={region.id?.toString() || ''}>
                     {region.name}
@@ -340,7 +346,7 @@ export function PartOrders() {
             </Select>
 
             <div className="flex items-center gap-2">
-              <span className="text-sm font-medium">Date Submitted Range</span>
+              <span className="text-sm font-medium">{t('partsOrder.list.dateRangeLabel')}</span>
               <Select
                 value={dateSubmittedRange}
                 onValueChange={(value) => {
@@ -352,19 +358,19 @@ export function PartOrders() {
                 }}
               >
                 <SelectTrigger className="w-48 bg-muted">
-                  <SelectValue placeholder="ALL Dates" />
+                  <SelectValue placeholder={t('partsOrder.list.dateRangePlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Dates</SelectItem>
-                  <SelectItem value="7">Past 7 days</SelectItem>
-                  <SelectItem value="30">Past 30 Days</SelectItem>
-                  <SelectItem value="month-to-date">Month-To-Date</SelectItem>
-                  <SelectItem value="quarter-to-date">Quarter-To-Date</SelectItem>
-                  <SelectItem value="year-to-date">Year-To-Date</SelectItem>
-                  <SelectItem value="last-month">Last Month</SelectItem>
-                  <SelectItem value="last-quarter">Last Quarter</SelectItem>
-                  <SelectItem value="last-year">Last Year</SelectItem>
-                  <SelectItem value="custom">Custom</SelectItem>
+                  <SelectItem value="all">{t('partsOrder.list.dateRangeOptions.all')}</SelectItem>
+                  <SelectItem value="7">{t('partsOrder.list.dateRangeOptions.7')}</SelectItem>
+                  <SelectItem value="30">{t('partsOrder.list.dateRangeOptions.30')}</SelectItem>
+                  <SelectItem value="month-to-date">{t('partsOrder.list.dateRangeOptions.month-to-date')}</SelectItem>
+                  <SelectItem value="quarter-to-date">{t('partsOrder.list.dateRangeOptions.quarter-to-date')}</SelectItem>
+                  <SelectItem value="year-to-date">{t('partsOrder.list.dateRangeOptions.year-to-date')}</SelectItem>
+                  <SelectItem value="last-month">{t('partsOrder.list.dateRangeOptions.last-month')}</SelectItem>
+                  <SelectItem value="last-quarter">{t('partsOrder.list.dateRangeOptions.last-quarter')}</SelectItem>
+                  <SelectItem value="last-year">{t('partsOrder.list.dateRangeOptions.last-year')}</SelectItem>
+                  <SelectItem value="custom">{t('partsOrder.list.dateRangeOptions.custom')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -381,7 +387,7 @@ export function PartOrders() {
                 onClose={(date) => {
                   fetchPartsOrders(true, date);
                 }}
-                placeholder="Select date range"
+                placeholder={t('partsOrder.list.dateRangePickerPlaceholder')}
                 disabled={false}
               />
             )}
@@ -392,22 +398,22 @@ export function PartOrders() {
             <Table ref={partsOrderRef}>
               <TableHeader>
                 <TableRow className="bg-muted">
-                  <TableHead className="font-semibold text-foreground">RO #</TableHead>
-                  <TableHead className="font-semibold text-foreground">Sales #</TableHead>
-                  <TableHead className="font-semibold text-foreground">Type</TableHead>
-                  <TableHead className="font-semibold text-foreground">VIN</TableHead>
-                  <TableHead className="font-semibold text-foreground">Year/Make/Model</TableHead>
-                  <TableHead className="font-semibold text-foreground">Status</TableHead>
-                  <TableHead className="font-semibold text-foreground">Shop</TableHead>
-                  <TableHead className="font-semibold text-foreground">Dealer</TableHead>
-                  <TableHead className="font-semibold text-foreground">CSR Region</TableHead>
+                  <TableHead className="font-semibold text-foreground">{t('partsOrder.list.tableHeaders.ro')}</TableHead>
+                  <TableHead className="font-semibold text-foreground">{t('partsOrder.list.tableHeaders.sales')}</TableHead>
+                  <TableHead className="font-semibold text-foreground">{t('partsOrder.list.tableHeaders.type')}</TableHead>
+                  <TableHead className="font-semibold text-foreground">{t('partsOrder.list.tableHeaders.vin')}</TableHead>
+                  <TableHead className="font-semibold text-foreground">{t('partsOrder.list.tableHeaders.ymm')}</TableHead>
+                  <TableHead className="font-semibold text-foreground">{t('partsOrder.list.tableHeaders.status')}</TableHead>
+                  <TableHead className="font-semibold text-foreground">{t('partsOrder.list.tableHeaders.shop')}</TableHead>
+                  <TableHead className="font-semibold text-foreground">{t('partsOrder.list.tableHeaders.dealer')}</TableHead>
+                  <TableHead className="font-semibold text-foreground">{t('partsOrder.list.tableHeaders.csrRegion')}</TableHead>
                   <SortableTableHead
                     field="dateCreated"
                     currentSortBy={sortBy}
                     currentAscending={sortAscending}
                     onSort={handleSort}
                   >
-                    Date Submitted
+                    {t('partsOrder.list.tableHeaders.dateSubmitted')}
                   </SortableTableHead>
                   <SortableTableHead
                     field="dateClosed"
@@ -415,7 +421,7 @@ export function PartOrders() {
                     currentAscending={sortAscending}
                     onSort={handleSort}
                   >
-                    Date Closed
+                    {t('partsOrder.list.tableHeaders.dateClosed')}
                   </SortableTableHead>
                 </TableRow>
               </TableHeader>
@@ -423,7 +429,7 @@ export function PartOrders() {
                 {loading ? (
                   <TableRow>
                     <TableCell colSpan={11} className="py-8 text-center">
-                      loading...
+                      {t('partsOrder.list.loading')}
                     </TableCell>
                   </TableRow>
                 ) : orders.length === 0 ? (
@@ -434,8 +440,8 @@ export function PartOrders() {
                           <EmptyMedia variant="icon">
                             <TableIcon className="w-4 h-4" />
                           </EmptyMedia>
-                          <EmptyTitle>No data to display</EmptyTitle>
-                          <EmptyDescription>No results could be found.</EmptyDescription>
+                          <EmptyTitle>{t('partsOrder.list.empty.title')}</EmptyTitle>
+                          <EmptyDescription>{t('partsOrder.list.empty.description')}</EmptyDescription>
                         </EmptyHeader>
                       </Empty>
                     </TableCell>
@@ -505,7 +511,7 @@ export function PartOrders() {
                                     <AlertCircle className="w-4 h-4 text-yellow-600 cursor-pointer" />
                                   </TooltipTrigger>
                                   <TooltipContent>
-                                    <p>Ordered from an alternate dealer</p>
+                                    <p>{t('partsOrder.list.tooltip.orderedFromAlternateDealer')}</p>
                                   </TooltipContent>
                                 </Tooltip>
                               </TooltipProvider>

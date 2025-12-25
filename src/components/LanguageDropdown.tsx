@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { useTranslation } from '@/context/i18n-provider'
+import { useTranslation } from 'react-i18next'
 
 const languages = [
   { code: 'en' as const, label: 'English' },
@@ -19,7 +19,8 @@ export function LanguageDropdown() {
   // const cookieName = getLanguageCookieName()
   // const savedLang = getCookie(cookieName) || 'en'
   // const [selected, setSelected] = useState(savedLang)
-  const { language, setLanguage } = useTranslation()
+  const { i18n } = useTranslation()
+  const currentLang = i18n.language || (typeof window !== 'undefined' ? localStorage.getItem('i18nextLng') || 'en' : 'en')
 
 
   // const handleSelect = (code: string) => {
@@ -46,11 +47,18 @@ export function LanguageDropdown() {
         {languages.map((lang) => (
           <DropdownMenuItem
             key={lang.code}
-            onClick={() => setLanguage(lang.code)}
+                onClick={() => {
+                  i18n.changeLanguage(lang.code)
+                  try {
+                    localStorage.setItem('i18nextLng', lang.code)
+                  } catch (e) {
+                    /* ignore */
+                  }
+                }}
             className='flex cursor-pointer items-center justify-between'
           >
             <span>{lang.label}</span>
-            {language === lang.code && <Check className='h-4 w-4 text-black' />}
+            {currentLang === lang.code && <Check className='h-4 w-4 text-black' />}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

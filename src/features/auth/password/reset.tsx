@@ -58,7 +58,7 @@ export function ResetPassword() {
         },
         status404: () => {
           // Link is invalid or expired
-          toast.error('Reset link is invalid or has expired.')
+          toast.error(t('auth.resetPassword.errors.invalidLink'))
           setIsLinkValid(false)
           setIsValidating(false)
           // Do not redirect immediately，Let the user see the error message
@@ -66,7 +66,7 @@ export function ResetPassword() {
         },
         error: () => {
           // Network errors, etc.
-          toast.error('Failed to validate reset link. Please try again.')
+          toast.error(t('auth.resetPassword.errors.validateFailed'))
           setIsValidating(false)
           // ✅ Reset on error ref，Allow retry
           hasValidatedRef.current = false
@@ -80,12 +80,12 @@ export function ResetPassword() {
     e.preventDefault()
 
     if (password !== confirmPassword) {
-      toast.error('Passwords do not match.')
+      toast.error(t('auth.resetPassword.errors.passwordMismatch'))
       return
     }
 
     if (password.length < 8) {
-      toast.error('Password must be at least 8 characters.')
+      toast.error(t('auth.resetPassword.errors.passwordTooShort'))
       return
     }
 
@@ -96,7 +96,7 @@ export function ResetPassword() {
       const request = UpdatePasswordRequest.create({ newPassword: password })
       authApi.updatePassword(request, {
         status200: () => {
-          toast.success('Your password has been successfully updated.')
+          toast.success(t('auth.resetPassword.success'))
           // After password update is successful，Clear session and redirect to login page
           auth.reset()
           navigate({ to: '/login' })
@@ -105,7 +105,7 @@ export function ResetPassword() {
         
       })
     } catch (error) {
-      toast.error('Failed to reset password. Please try again.')
+      toast.error(t('auth.resetPassword.errors.resetFailed'))
       setIsLoading(false)
     }
   }
@@ -123,24 +123,23 @@ export function ResetPassword() {
         <div className='flex flex-1 flex-col items-center justify-center px-4 py-8'>
           <div className='w-full max-w-md space-y-6 text-center'>
             <h1 className='text-foreground text-2xl font-bold'>
-              Invalid Reset Link
+              {t('auth.resetPassword.invalidLink.title')}
             </h1>
             <p className='text-muted-foreground'>
-              The password reset link is invalid or has expired. Please request
-              a new one.
+              {t('auth.resetPassword.invalidLink.description')}
             </p>
             <div className='flex justify-center gap-4'>
               <Link
                 to='/password/forgot'
                 className='rounded-full px-4 py-2 transition-colors'
               >
-                Request New Link
+                {t('auth.resetPassword.invalidLink.requestNew')}
               </Link>
               <Link
                 to='/login'
                 className='text-foreground hover:bg-muted/50 rounded-full border px-4 py-2 transition-colors'
               >
-                Back to Login
+                {t('auth.resetPassword.invalidLink.backToLogin')}
               </Link>
             </div>
           </div>
@@ -179,7 +178,7 @@ export function ResetPassword() {
           {/* Lower part：Reset password form */}
           <div className='space-y-8'>
             <h1 className='text-foreground text-center text-3xl font-bold'>
-              Change Password
+              {t('auth.resetPassword.title')}
             </h1>
 
             <form onSubmit={handleSubmit} className='space-y-6'>
@@ -189,14 +188,14 @@ export function ResetPassword() {
                   htmlFor='password'
                   className='text-foreground text-sm font-medium'
                 >
-                  New Password
+                  {t('auth.resetPassword.newPassword')}
                 </Label>
                 <div className='relative'>
                   <Lock className='text-muted-foreground absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2' />
                   <Input
                     id='password'
                     type='password'
-                    placeholder='Enter new password'
+                    placeholder={t('auth.resetPassword.newPasswordPlaceholder')}
                     className='h-12 rounded-full pl-11 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100'
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -212,14 +211,14 @@ export function ResetPassword() {
                   htmlFor='confirm'
                   className='text-foreground text-sm font-medium'
                 >
-                  Confirm Password
+                  {t('auth.resetPassword.confirmPassword')}
                 </Label>
                 <div className='relative'>
                   <Lock className='text-muted-foreground absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2' />
                   <Input
                     id='confirm'
                     type='password'
-                    placeholder='Confirm new password'
+                    placeholder={t('auth.resetPassword.confirmPasswordPlaceholder')}
                     className='h-12 rounded-full pl-11 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100'
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
@@ -234,7 +233,7 @@ export function ResetPassword() {
                   to='/login'
                   className='text-sm font-medium text-cyan-600 transition-colors hover:text-cyan-700'
                 >
-                  Back to Login
+                  {t('auth.resetPassword.backToLogin')}
                 </Link>
               </div>
 
@@ -245,7 +244,7 @@ export function ResetPassword() {
                 className='h-12 w-full rounded-full font-medium shadow-md transition-all'
                 disabled={isLoading}
               >
-                {isLoading ? 'Updating...' : 'Update'}
+                {isLoading ? t('auth.resetPassword.updating') : t('auth.resetPassword.update')}
               </Button>
             </form>
           </div>

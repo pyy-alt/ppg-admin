@@ -10,7 +10,7 @@ import { type PersonType } from '@/js/models/enum/PersonTypeEnum'
 import { X } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/auth-store'
-import { useTranslation } from '@/context/i18n-provider'
+import { useTranslation } from 'react-i18next';
 import { useDialogWithConfirm } from '@/hooks/use-dialog-with-confirm'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'

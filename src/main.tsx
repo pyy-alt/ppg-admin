@@ -9,7 +9,6 @@ import { refreshUserData } from '@/lib/auth';
 import { handleServerError } from '@/lib/handle-server-error';
 import { DirectionProvider } from './context/direction-provider';
 import { FontProvider } from './context/font-provider';
-import { I18nProvider } from './context/i18n-provider';
 import { ThemeProvider } from './context/theme-provider';
 import { shouldRedirectToLoginOn404 } from './lib/api-404-config';
 // Generated Routes
@@ -17,6 +16,8 @@ import { routeTree } from './routeTree.gen';
 // import { useGlobal404Store } from './stores/global-404-store'
 // Styles
 import './styles/index.css';
+import './i18n';
+
 
 /**
  * Initialize authentication status
@@ -138,7 +139,6 @@ function InitAuthInner() {
 
   return null; // Do not render anything
 }
-
 
 export default function InitAuth() {
   return <InitAuthInner />;
@@ -263,15 +263,13 @@ if (!rootElement.innerHTML) {
   root.render(
     <StrictMode>
       <QueryClientProvider client={queryClient}>
-        <I18nProvider>
-          <ThemeProvider>
-            <FontProvider>
-              <DirectionProvider>
-                  <RouterProvider router={router} />
-              </DirectionProvider>
-            </FontProvider>
-          </ThemeProvider>
-        </I18nProvider>
+        <ThemeProvider>
+          <FontProvider>
+            <DirectionProvider>
+              <RouterProvider router={router} />
+            </DirectionProvider>
+          </FontProvider>
+        </ThemeProvider>
       </QueryClientProvider>
     </StrictMode>
   );

@@ -7,8 +7,10 @@ import vwAmerica from '@/assets/img/login/vw_a.png'
 import vwCanada from '@/assets/img/login/vw_c.png'
 import background from '@/assets/img/login/welcome_bg.png'
 import { useBrand } from '@/context/brand-context'
+import { useTranslation } from 'react-i18next'
 
 export default function WelcomeGate() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [selectedCard, setSelectedCard] = useState<string | null>(null)
   const { setBrand } = useBrand()
@@ -17,28 +19,28 @@ export default function WelcomeGate() {
     {
       id: 'audi-america',
       img: audiAmerica,
-      alt: 'Audi Authorized Collision Repair - Group of America',
+      alt: t('auth.welcomeGate.audiAmerica'),
       brandPrefix: 'audi',
       region: 'america',
     },
     {
       id: 'vw-america',
       img: vwAmerica,
-      alt: 'Volkswagen Certified Collision Repair Facility Program - Group of America',
+      alt: t('auth.welcomeGate.vwAmerica'),
       brandPrefix: 'vw',
       region: 'america',
     },
     {
       id: 'audi-canada',
       img: audiCanada,
-      alt: 'Audi Authorized Collision Repair - Group of Canada',
+      alt: t('auth.welcomeGate.audiCanada'),
       brandPrefix: 'audi',
       region: 'canada',
     },
     {
       id: 'vw-canada',
       img: vwCanada,
-      alt: 'Volkswagen Certified Collision Repair Facility Program - Group of Canada',
+      alt: t('auth.welcomeGate.vwCanada'),
       brandPrefix: 'vw',
       region: 'canada',
     },
@@ -64,7 +66,7 @@ export default function WelcomeGate() {
       <div className='absolute inset-0'>
         <img
           src={background}
-          alt='Collision repair background'
+          alt={t('auth.welcomeGate.backgroundAlt')}
           className='h-full w-full object-cover'
         />
       </div>
@@ -73,7 +75,7 @@ export default function WelcomeGate() {
       <div className='z-10 w-full max-w-6xl px-4 sm:px-8'>
         {/* Top title area */}
         <h1 className='text-center text-5xl font-bold tracking-tight text-white md:text-6xl'>
-          Restricted Parts Tracker
+          {t('auth.welcomeGate.title')}
         </h1>
         {/* Four-square certification logo */}
         <div className='mt-10 grid grid-cols-2 gap-6'>
@@ -100,10 +102,10 @@ export default function WelcomeGate() {
       <div className='z-10 mt-10 flex items-center justify-center gap-4 text-white'>
         <Globe className='h-5 w-5' />
         <div className='flex items-center gap-4 text-sm font-medium'>
-          <button className='transition hover:text-gray-600'>English</button>
+          <button className='transition hover:text-gray-600'>{t('auth.welcomeGate.language.english')}</button>
           <span>|</span>
           <button className='text-gray-500 transition hover:text-gray-700'>
-            Français
+            {t('auth.welcomeGate.language.french')}
           </button>
         </div>
       </div>
