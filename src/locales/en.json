@@ -21,7 +21,10 @@
       "title": "No data to display",
       "description": "No results could be found."
     },
-    "select": "Select"
+    "select": "Select",
+    "discardTitle": "Discard Changes?",
+    "discardDescription": "You have unsaved changes. Are you sure you want to close? All your changes will be lost.",
+    "remove": "Remove"
   },
   "auth": {
     "login": {
@@ -229,6 +232,54 @@
     "type": {
       "partsOrder": "Parts Order",
       "supplement": "Supplement {{n}}"
+    },
+    "dialog": {
+      "resubmitTitle": "Resubmit Parts Order",
+      "editSupplement": "Edit Supplement #{{num}}",
+      "newSupplement": "New Supplement #{{num}}",
+      "editTitle": "Edit Parts Order",
+      "newTitle": "New Parts Order"
+    },
+    "section": {
+      "supplementInfo": "Supplement #{{num}} Information",
+      "info": "Parts Order Information",
+      "submitted": "Order Submitted",
+      "approved": "Order Approved",
+      "shipped": "Order Shipped",
+      "salesOrder": "Sales Order #",
+      "requestedParts": "Requested Part Numbers",
+      "comment": "Comment"
+    },
+    "toast": {
+      "saveSuccess": "Parts Order saved successfully",
+      "saveError": "Error saving parts order"
+    },
+    "form": {
+      "partNumber": {
+        "label": "Part {{num}}",
+        "placeholder": "Enter part number",
+        "required": "Part number is required"
+      },
+      "comment": {
+        "placeholder": "Enter comment"
+      }
+    },
+    "button": {
+      "addPart": "Add a Part",
+      "resubmitting": "Resubmitting...",
+      "resubmit": "Resubmit Request",
+      "updating": "Updating...",
+      "saving": "Saving...",
+      "update": "Update",
+      "save": "Save"
+    },
+    "attachments": {
+      "estimate": "Estimate"
+    },
+    "dropzone": {
+      "dropPdf": "Drop your PDF files here...",
+      "instructionPdf": "Drop your PDF files here or",
+      "clickToBrowse": "click to browse"
     }
   },
   "shop": {
@@ -475,6 +526,9 @@
       "model": {
         "label": "Model",
         "placeholder": "Enter Model"
+      },
+      "ymm": {
+        "label": "Year/Make/Model"
       }
     },
     "attachments": {

@@ -21,7 +21,10 @@
       "title": "Aucune donnée à afficher",
       "description": "Aucun résultat n'a été trouvé."
     },
-    "select": "Sélectionner"
+    "select": "Sélectionner",
+    "discardTitle": "Abandonner les modifications ?",
+    "discardDescription": "Vous avez des modifications non enregistrées. Êtes-vous sûr de vouloir fermer ? Toutes vos modifications seront perdues.",
+    "remove": "Supprimer"
   },
   "auth": {
     "login": {
@@ -229,6 +232,54 @@
     "type": {
       "partsOrder": "Commande de pièces",
       "supplement": "Supplément {{n}}"
+    },
+    "dialog": {
+      "resubmitTitle": "Resoumettre la commande de pièces",
+      "editSupplement": "Modifier le supplément n°{{num}}",
+      "newSupplement": "Nouveau supplément n°{{num}}",
+      "editTitle": "Modifier la commande de pièces",
+      "newTitle": "Nouvelle commande de pièces"
+    },
+    "section": {
+      "supplementInfo": "Informations sur le supplément n°{{num}}",
+      "info": "Informations sur la commande de pièces",
+      "submitted": "Commande soumise",
+      "approved": "Commande approuvée",
+      "shipped": "Commande expédiée",
+      "salesOrder": "N° de commande de vente",
+      "requestedParts": "Numéros de pièces demandées",
+      "comment": "Commentaire"
+    },
+    "toast": {
+      "saveSuccess": "Commande de pièces enregistrée avec succès",
+      "saveError": "Erreur lors de l'enregistrement de la commande de pièces"
+    },
+    "form": {
+      "partNumber": {
+        "label": "Pièce {{num}}",
+        "placeholder": "Saisissez le numéro de pièce",
+        "required": "Le numéro de pièce est requis"
+      },
+      "comment": {
+        "placeholder": "Saisissez un commentaire"
+      }
+    },
+    "button": {
+      "addPart": "Ajouter une pièce",
+      "resubmitting": "Resoumission en cours...",
+      "resubmit": "Resoumettre la demande",
+      "updating": "Mise à jour en cours...",
+      "saving": "Enregistrement en cours...",
+      "update": "Mettre à jour",
+      "save": "Enregistrer"
+    },
+    "attachments": {
+      "estimate": "Estimation"
+    },
+    "dropzone": {
+      "dropPdf": "Déposez vos fichiers PDF ici...",
+      "instructionPdf": "Déposez vos fichiers PDF ici ou",
+      "clickToBrowse": "cliquez pour parcourir"
     }
   },
   "shop": {
@@ -475,6 +526,9 @@
       "model": {
         "label": "Modèle",
         "placeholder": "Saisissez le modèle"
+      },
+      "ymm": {
+        "label": "Année/Marque/Modèle"
       }
     },
     "attachments": {

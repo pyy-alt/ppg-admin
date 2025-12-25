@@ -1,89 +1,65 @@
-import { useEffect, useState } from 'react'
-import { z } from 'zod'
-import { useForm, useFieldArray } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import RequestApi from '@/js/clients/base/OrderApi'
-import PartsOrder from '@/js/models/PartsOrder'
-import type RepairOrder from '@/js/models/RepairOrder'
-import FileAssetFileAssetTypeEnum from '@/js/models/enum/FileAssetFileAssetTypeEnum'
-import {
-  X,
-  Package,
-  Paperclip,
-  Upload,
-  Plus,
-  Trash2,
-  Loader2,
-  NotebookPen,
-} from 'lucide-react'
-import { useDropzone } from 'react-dropzone'
-import { toast } from 'sonner'
-import { convertFilesToFileAssets, formatDateOnly } from '@/lib/utils'
-import { useDialogWithConfirm } from '@/hooks/use-dialog-with-confirm'
-import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog'
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Separator } from '@/components/ui/separator'
-
-// import { useAuthStore } from '@/stores/auth-store'
-// import { type PersonType } from '@/js/models/enum/PersonTypeEnum'
+// src/components/PartsOrderDialog.tsx
+import { useEffect, useState } from 'react';
+import { z } from 'zod';
+import { useForm, useFieldArray } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import RequestApi from '@/js/clients/base/OrderApi';
+import PartsOrder from '@/js/models/PartsOrder';
+import type RepairOrder from '@/js/models/RepairOrder';
+import FileAssetFileAssetTypeEnum from '@/js/models/enum/FileAssetFileAssetTypeEnum';
+import { X, Trash2, Loader2, NotebookPen, Package, Paperclip, Upload, Plus } from 'lucide-react';
+import { useDropzone } from 'react-dropzone';
+import { toast } from 'sonner';
+import { convertFilesToFileAssets, formatDateOnly } from '@/lib/utils';
+import { useDialogWithConfirm } from '@/hooks/use-dialog-with-confirm';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { useTranslation } from 'react-i18next'; // 新增导入
 
 const formSchema = z.object({
-  parts: z.array(
-    z.object({ number: z.string().min(1, 'Part number is required') })
-  ),
+  parts: z.array(z.object({ number: z.string().min(1, 'partsOrder.form.partNumber.required') })),
   // Virtual field，Used to display attachment errors
   _estimateFile: z.string().optional(),
-})
+});
 
-type FormValues = z.infer<typeof formSchema>
+type FormValues = z.infer<typeof formSchema>;
 
 // Define initial data type
 export type PartsOrderData = {
-  id?: number
-  parts?: string[]
-  shopRo?: string
-  orderFromDealership?: string
-  customer?: string
-  vin?: string
-  make?: string
-  year?: string
-  model?: string
-  salesOrderNumber?: string
-  partsOrderNumber?: number // 0 = Original order, 1+ = Supplemental order
-  isAlternateDealer?: boolean // Is it from an alternate dealer
-  alternateDealerName?: string // Alternate dealer name
-  alternateDealerId?: string // Alternate dealerID
-  status?: string // Order status，Used to determine if approved/Reject
-  estimateFileAssets?: File[] | null
-  [key: string]: any
-}
+  id?: number;
+  parts?: string[];
+  shopRo?: string;
+  orderFromDealership?: string;
+  customer?: string;
+  vin?: string;
+  make?: string;
+  year?: string;
+  model?: string;
+  salesOrderNumber?: string;
+  partsOrderNumber?: number; // 0 = Original order, 1+ = Supplemental order
+  isAlternateDealer?: boolean; // Is it from an alternate dealer
+  alternateDealerName?: string; // Alternate dealer name
+  alternateDealerId?: string; // Alternate dealerID
+  status?: string; // Order status，Used to determine if approved/Reject
+  estimateFileAssets?: File[] | null;
+  [key: string]: any;
+};
 
 type PartsOrderDialogProps = {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  mode?: 'create' | 'edit'
-  initialData?: PartsOrderData | undefined
-  defaultDealership?: string // Default dealer name
-  initRepaitOrderData?: RepairOrder
-  onSuccess?: () => void
-  isReject?: boolean
-  onHandleResubmit?: (comment: string) => void
-}
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  mode?: 'create' | 'edit';
+  initialData?: PartsOrderData | undefined;
+  defaultDealership?: string; // Default dealer name
+  initRepaitOrderData?: RepairOrder;
+  onSuccess?: () => void;
+  isReject?: boolean;
+  onHandleResubmit?: (comment: string) => void;
+};
 
 export function PartsOrderDialog({
   open,
@@ -95,101 +71,92 @@ export function PartsOrderDialog({
   onSuccess,
   onHandleResubmit,
 }: PartsOrderDialogProps) {
-  const [estimateFiles, setEstimateFiles] = useState<File[]>([])
+  const { t } = useTranslation(); // 新增：获取 t 函数
+
+  const [estimateFiles, setEstimateFiles] = useState<File[]>([]);
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       parts: [{ number: '' }, { number: '' }, { number: '' }, { number: '' }],
     },
-  })
-  const [loading, setLoading] = useState(false)
-  const [comment, setComment] = useState('')
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [comment, setComment] = useState('');
+
   // Use confirmation hook
   const { handleCloseRequest, ConfirmDialogComponent } = useDialogWithConfirm({
     form,
     hasUnsavedFiles: estimateFiles.length > 0, // Check for files
     onClose: () => {
-      form.reset()
-      setEstimateFiles([])
-      onOpenChange(false)
+      form.reset();
+      setEstimateFiles([]);
+      onOpenChange(false);
     },
-    title: 'Discard Changes?',
-    description:
-      'You have unsaved changes. Are you sure you want to close? All your changes will be lost.',
-  })
+    title: t('common.discardTitle'),
+    description: t('common.discardDescription'),
+  });
+
   // Edit the original parts order directly after creating a new repair order Reassign
   if (initialData && Array.isArray(initialData)) {
-    initialData = initialData[0]
+    initialData = initialData[0];
   }
-  // ✅ Get current user role
-  // const { auth } = useAuthStore()
-  // const userType = auth.user?.person?.type as PersonType | undefined
-  // TODO=======
-  // const [salesOrderNumber, setSalesOrderNumber] = useState(initialData?.salesOrderNumber || '')
 
   // Modify handleClose Use new logic
   const handleClose = () => {
-    handleCloseRequest()
-  }
+    handleCloseRequest();
+  };
+
   // Modify Dialog of onOpenChange
   const handleDialogOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
       // Try to close
-      handleCloseRequest()
-      return false // Prevent default close behavior
+      handleCloseRequest();
+      return false; // Prevent default close behavior
     }
-    return true
-  }
+    return true;
+  };
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: 'parts',
-  })
+  });
 
   // Determine if it is a supplemental order
-  const isSupplement =
-    initialData?.partsOrderNumber !== undefined &&
-    initialData.partsOrderNumber > 0
-
-  // Determine if it is from an alternate dealer
-  // const isFromAlternateDealer = initialData?.isAlternateDealer === true
-
-  // Determine if in CSR Approve/Before rejecting（Editable）
-  // const canEdit = !initialData?.status ||
-  //   ['CsrReview', 'DealershipProcessing'].includes(initialData.status)
+  const isSupplement = initialData?.partsOrderNumber !== undefined && initialData.partsOrderNumber > 0;
 
   // Generate title based on mode
   const getDialogTitle = () => {
     if (isReject) {
-      return 'Resubmit Parts Order'
+      return t('partsOrder.dialog.resubmitTitle');
     }
     if (isSupplement) {
       // Supplemental order
-      const supplementNum = initialData?.partsOrderNumber || 1
+      const supplementNum = initialData?.partsOrderNumber || 1;
       if (initialData?.parts && initialData.parts?.length > 0) {
-        return `Edit Supplement #${supplementNum}`
+        return t('partsOrder.dialog.editSupplement', { num: supplementNum });
       } else {
-        return `New Supplement #${supplementNum}`
+        return t('partsOrder.dialog.newSupplement', { num: supplementNum });
       }
     } else {
       // Original parts order
       if (initialData && initialData?.id) {
-        return 'Edit Parts Order'
+        return t('partsOrder.dialog.editTitle');
       } else {
-        return 'New Parts Order'
+        return t('partsOrder.dialog.newTitle');
       }
     }
-  }
+  };
 
   // Get second part title
   const getPartsOrderSectionTitle = () => {
     if (isSupplement) {
-      const supplementNum = initialData?.partsOrderNumber || 1
-      return `Supplement #${supplementNum} Information`
+      const supplementNum = initialData?.partsOrderNumber || 1;
+      return t('partsOrder.section.supplementInfo', { num: supplementNum });
     } else {
-      return 'Parts Order Information'
+      return t('partsOrder.section.info');
     }
-  }
+  };
 
   // When initialData changes，Reset form
   useEffect(() => {
@@ -198,258 +165,194 @@ export function PartsOrderDialog({
       const parts =
         initialData.parts && initialData.parts.length > 0
           ? initialData.parts.map((part) => ({ number: part }))
-          : [{ number: '' }]
-
+          : [{ number: '' }];
       form.reset({
         parts: parts.length > 0 ? parts : [{ number: '' }],
-      })
-
+      });
       // Use setTimeout Move setState to the next event loop
       // setTimeout(() => {
-      //   setEstimateFiles(initialData.estimateFileAssets || [])
+      // setEstimateFiles(initialData.estimateFileAssets || [])
       // }, 0)
-      const pdfList = (initialData.estimateFileAssets || []).map(
-        (item: any) => {
-          item.name = item.filename
-          item.viewUrl = import.meta.env.VITE_API_URL + item.viewUrl
-          return item
-        }
-      )
-      setEstimateFiles(pdfList || [])
+      const pdfList = (initialData.estimateFileAssets || []).map((item: any) => {
+        item.name = item.filename;
+        item.viewUrl = import.meta.env.VITE_API_URL + item.viewUrl;
+        return item;
+      });
+      setEstimateFiles(pdfList || []);
     } else if (open && mode === 'create') {
       // New mode：Reset to default value
       form.reset({
         parts: [{ number: '' }],
-      })
-      setEstimateFiles([])
+      });
+      setEstimateFiles([]);
     }
-  }, [open, initialData, mode, form])
+  }, [open, initialData, mode, form]);
 
   const onSubmit = async (data: FormValues) => {
     // Verify if attachment has been uploaded（In new mode or edit mode but no files yet）
     // if (
-    //   estimateFiles &&
-    //   estimateFiles.length === 0 &&
-    //   (mode === 'create' || !initialData?.estimateFileAssets?.length)
+    // estimateFiles &&
+    // estimateFiles.length === 0 &&
+    // (mode === 'create' || !initialData?.estimateFileAssets?.length)
     // ) {
-    //   form.setError('_estimateFile', {
-    //     type: 'manual',
-    //     message: 'Estimate PDF is required',
-    //   })
-    //   // Scroll to error position
-    //   const errorElement = document.querySelector('[data-estimate-error]')
-    //   if (errorElement) {
-    //     errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    //   }
-    //   return
+    // form.setError('_estimateFile', {
+    // type: 'manual',
+    // message: 'Estimate PDF is required',
+    // })
+    // // Scroll to error position
+    // const errorElement = document.querySelector('[data-estimate-error]')
+    // if (errorElement) {
+    // errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
     // }
-
+    // return
+    // }
     // Filter out files withIDfiles
-    const newFiles = estimateFiles.filter((f): f is File => f instanceof File)
-
+    const newFiles = estimateFiles.filter((f): f is File => f instanceof File);
     // Convert file to FileAsset Array
-    const estimateFileAssets = await convertFilesToFileAssets(
-      newFiles,
-      FileAssetFileAssetTypeEnum.ESTIMATE
-    )
-
+    const estimateFileAssets = await convertFilesToFileAssets(newFiles, FileAssetFileAssetTypeEnum.ESTIMATE);
     try {
-      const api = new RequestApi()
+      const api = new RequestApi();
       const partsOrder = (PartsOrder as any).create({
         ...initialData,
         parts: data.parts.map((part) => part.number),
-        estimateFileAssets:
-          estimateFileAssets.length > 0 ? estimateFileAssets : estimateFiles,
+        estimateFileAssets: estimateFileAssets.length > 0 ? estimateFileAssets : estimateFiles,
         repairOrder: initRepaitOrderData,
-      })
-      setLoading(true)
+      });
+      setLoading(true);
       return new Promise((resolve, reject) => {
         api.partsOrderSave(partsOrder, {
           status200: () => {
-            toast.success('Parts Order saved successfully')
-            onOpenChange(false)
-            onSuccess?.()
-            setLoading(false)
-            resolve(void 0)
+            toast.success(t('partsOrder.toast.saveSuccess'));
+            onOpenChange(false);
+            onSuccess?.();
+            setLoading(false);
+            resolve(void 0);
           },
           error: (error) => {
-            toast.error('Error saving parts order:', error)
-            setLoading(false)
-            reject(void 0)
+            toast.error(t('partsOrder.toast.saveError'));
+            setLoading(false);
+            reject(void 0);
           },
           else: (_statusCode: number, responseText: string) => {
-            toast.error(responseText)
-            setLoading(false)
-            reject(void 0)
+            toast.error(responseText);
+            setLoading(false);
+            reject(void 0);
           },
-        })
-      })
+        });
+      });
     } catch (error: unknown) {
-      setLoading(false)
-      toast.error('Error saving parts order:', error as any)
+      setLoading(false);
+      toast.error(t('partsOrder.toast.saveError'));
     }
-  }
+  };
+
   // Modify useDropzone to support multiple files
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: { 'application/pdf': ['.pdf'] },
     // Remove maxFiles Limit，or set to a larger number
     // maxFiles: 1,
     onDrop: (acceptedFiles) => {
-      setEstimateFiles((prevFiles) => [...prevFiles, ...acceptedFiles])
+      setEstimateFiles((prevFiles) => [...prevFiles, ...acceptedFiles]);
     },
-  })
+  });
 
   // Delete single file
   const removeFile = (index: number) => {
-    setEstimateFiles((prev) => prev.filter((_, i) => i !== index))
-  }
+    setEstimateFiles((prev) => prev.filter((_, i) => i !== index));
+  };
 
   return (
     <>
-      <Dialog
-        open={open}
-        onOpenChange={(newOpen) => handleDialogOpenChange(newOpen)}
-      >
-        <DialogContent className='flex max-h-[90vh] flex-col p-0 sm:max-w-4xl'>
+      <Dialog open={open} onOpenChange={(newOpen) => handleDialogOpenChange(newOpen)}>
+        <DialogContent className="flex max-h-[90vh] flex-col p-0 sm:max-w-4xl">
           {/* Fixed header - Unified style */}
-          <DialogHeader className='shrink-0'>
-            <DialogTitle className='px-6 py-4 text-2xl font-semibold'>
-              {getDialogTitle()}
-            </DialogTitle>
+          <DialogHeader className="shrink-0">
+            <DialogTitle className="px-6 py-4 text-2xl font-semibold">{getDialogTitle()}</DialogTitle>
             <Separator />
-
             <button
               onClick={handleClose}
-              className='ring-offset-background focus:ring-ring absolute top-4 right-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-none'
+              className="absolute transition-opacity rounded-sm ring-offset-background focus:ring-ring top-4 right-4 opacity-70 hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-none"
             >
-              <X className='h-4 w-4' />
-              <span className='sr-only'>Close</span>
+              <X className="w-4 h-4" />
+              <span className="sr-only">{t('common.close')}</span>
             </button>
           </DialogHeader>
-
           <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className='flex min-h-0 flex-1 flex-col'
-            >
+            <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0">
               {/* Scrollable content area */}
-              <div className='flex-1 overflow-y-auto px-6 py-6'>
+              <div className="flex-1 px-6 py-6 overflow-y-auto">
                 {/* 1. Repair Order Information（Read-only） */}
-                <section className='mb-8'>
-                  <div className='mb-5 flex items-center gap-3'>
-                    <Package className='text-foreground h-5 w-5' />
-                    <h3 className='text-foreground text-lg font-semibold'>
-                      Repair Order Information
-                    </h3>
+                <section className="mb-8">
+                  <div className="flex items-center gap-3 mb-5">
+                    <Package className="w-5 h-5 text-foreground" />
+                    <h3 className="text-lg font-semibold text-foreground">{t('repairOrder.section.info')}</h3>
                   </div>
-                  <div className='bg-muted/50 grid grid-cols-1 gap-4 rounded-lg p-5 md:grid-cols-3'>
+                  <div className="grid grid-cols-1 gap-4 p-5 rounded-lg bg-muted/50 md:grid-cols-3">
                     <div>
-                      <Label className='text-muted-foreground text-xs'>
-                        Shop RO #
-                      </Label>
-                      <p className='font-medium'>
-                        {initRepaitOrderData?.roNumber || '---'}
-                      </p>
+                      <Label className="text-xs text-muted-foreground">{t('repairOrder.form.roNumber.label')}</Label>
+                      <p className="font-medium">{initRepaitOrderData?.roNumber || '---'}</p>
                     </div>
                     <div>
-                      <Label className='text-muted-foreground text-xs'>
-                        Order From Dealership
-                      </Label>
-                      {initRepaitOrderData?.dealership.name || '---'}
+                      <Label className="text-xs text-muted-foreground">{t('repairOrder.form.dealership.label')}</Label>
+                      <p className="font-medium">{initRepaitOrderData?.dealership.name || '---'}</p>
                     </div>
                     <div>
-                      <Label className='text-muted-foreground text-xs'>
-                        Customer
-                      </Label>
-                      <p className='font-medium'>
-                        {initRepaitOrderData?.customer || '---'}
-                      </p>
+                      <Label className="text-xs text-muted-foreground">{t('repairOrder.form.customer.label')}</Label>
+                      <p className="font-medium">{initRepaitOrderData?.customer || '---'}</p>
                     </div>
                     <div>
-                      <Label className='text-muted-foreground text-xs'>
-                        VIN
-                      </Label>
-                      <p className='font-medium'>
-                        {initRepaitOrderData?.vin || '---'}
-                      </p>
+                      <Label className="text-xs text-muted-foreground">{t('repairOrder.form.vin.label')}</Label>
+                      <p className="font-medium">{initRepaitOrderData?.vin || '---'}</p>
                     </div>
                     <div>
-                      <Label className='text-muted-foreground text-xs'>
-                        Year/Make/Model
-                      </Label>
-                      <p className='font-medium'>
-                        {initRepaitOrderData?.year &&
-                        initRepaitOrderData?.make &&
-                        initRepaitOrderData?.model
+                      <Label className="text-xs text-muted-foreground">{t('repairOrder.form.ymm.label')}</Label>
+                      <p className="font-medium">
+                        {initRepaitOrderData?.year && initRepaitOrderData?.make && initRepaitOrderData?.model
                           ? `${initRepaitOrderData?.year} ${initRepaitOrderData?.make} ${initRepaitOrderData?.model}`
                           : '---'}
                       </p>
                     </div>
                   </div>
                 </section>
-
-                <Separator className='my-8' />
-
+                <Separator className="my-8" />
                 {/* 2. Parts Order Information / Supplement Information（Read-only） */}
-                <section className='mb-8'>
-                  <div className='mb-5 flex items-center gap-3'>
-                    <Package className='text-foreground h-5 w-5' />
-                    <h3 className='text-foreground text-lg font-semibold'>
-                      {getPartsOrderSectionTitle()}
-                    </h3>
+                <section className="mb-8">
+                  <div className="flex items-center gap-3 mb-5">
+                    <Package className="w-5 h-5 text-foreground" />
+                    <h3 className="text-lg font-semibold text-foreground">{getPartsOrderSectionTitle()}</h3>
                   </div>
-                  <div className='grid grid-cols-3 gap-8 text-sm'>
+                  <div className="grid grid-cols-3 gap-8 text-sm">
                     <div>
-                      <Label className='text-muted-foreground'>
-                        Order Submitted
-                      </Label>
-                      <p className='mt-1 font-medium'>
-                        {initialData?.dateSubmitted
-                          ? formatDateOnly(initialData?.dateSubmitted)
-                          : '---'}
-                        {'  by ' + '   '}
-                        {initialData?.submittedByPerson.firstName +
-                          ' ' +
-                          initialData?.submittedByPerson.lastName}
+                      <Label className="text-muted-foreground">{t('partsOrder.section.submitted')}</Label>
+                      <p className="mt-1 font-medium">
+                        {initialData?.dateSubmitted ? formatDateOnly(initialData?.dateSubmitted) : '---'}
+                        {' by ' + ' '}
+                        {initialData?.submittedByPerson.firstName + ' ' + initialData?.submittedByPerson.lastName}
                       </p>
                     </div>
                     <div>
-                      <Label className='text-muted-foreground'>
-                        Order Approved
-                      </Label>
-                      <p className='mt-1 font-medium'>
-                        {initialData?.dateReviewed
-                          ? formatDateOnly(initialData?.dateReviewed)
-                          : '---'}
-                        {initialData?.reviewedByPerson && '  by ' + '   '}
+                      <Label className="text-muted-foreground">{t('partsOrder.section.approved')}</Label>
+                      <p className="mt-1 font-medium">
+                        {initialData?.dateReviewed ? formatDateOnly(initialData?.dateReviewed) : '---'}
+                        {initialData?.reviewedByPerson && ' by ' + ' '}
                         {initialData?.reviewedByPerson &&
-                          initialData?.reviewedByPerson.firstName +
-                            ' ' +
-                            initialData?.reviewedByPerson.lastName}
+                          initialData?.reviewedByPerson.firstName + ' ' + initialData?.reviewedByPerson.lastName}
                       </p>
                     </div>
                     <div>
-                      <Label className='text-muted-foreground'>
-                        Order Shipped
-                      </Label>
-                      <p className='mt-1 font-medium'>
-                        {initialData?.dateShipped
-                          ? formatDateOnly(initialData?.dateShipped)
-                          : '---'}
-                        {initialData?.shippedByPerson && '  by ' + '   '}
+                      <Label className="text-muted-foreground">{t('partsOrder.section.shipped')}</Label>
+                      <p className="mt-1 font-medium">
+                        {initialData?.dateShipped ? formatDateOnly(initialData?.dateShipped) : '---'}
+                        {initialData?.shippedByPerson && ' by ' + ' '}
                         {initialData?.shippedByPerson &&
-                          initialData?.shippedByPerson.firstName +
-                            ' ' +
-                            initialData?.shippedByPerson.lastName}
+                          initialData?.shippedByPerson.firstName + ' ' + initialData?.shippedByPerson.lastName}
                       </p>
                     </div>
                     {/* Display in edit mode Sales Order Number */}
                     {initialData?.id && initialData?.salesOrderNumber && (
                       <div>
-                        <Label className='text-muted-foreground'>
-                          Sales Order #
-                        </Label>
-                        <p className='mt-1 font-medium'>
+                        <Label className="text-muted-foreground">{t('partsOrder.section.salesOrder')}</Label>
+                        <p className="mt-1 font-medium">
                           {initialData.salesOrderNumber || '---'}
                           {/* // TODO======== */}
                           {/* {
@@ -462,38 +365,31 @@ export function PartsOrderDialog({
                     )}
                   </div>
                 </section>
-
-                <Separator className='my-8' />
-
+                <Separator className="my-8" />
                 {/* 3. Requested Part Numbers + Attachments Side by side */}
-                <div className='grid grid-cols-1 gap-12 md:grid-cols-2'>
+                <div className="grid grid-cols-1 gap-12 md:grid-cols-2">
                   {/* Left：Parts input */}
                   <section>
-                    <div className='mb-5 flex items-center gap-3'>
-                      <Package className='text-foreground h-5 w-5' />
-                      <h3 className='text-foreground text-lg font-semibold'>
-                        Requested Part Numbers
+                    <div className="flex items-center gap-3 mb-5">
+                      <Package className="w-5 h-5 text-foreground" />
+                      <h3 className="text-lg font-semibold text-foreground">
+                        {t('partsOrder.section.requestedParts')}
                       </h3>
                     </div>
-                    <div className='space-y-4'>
+                    <div className="space-y-4">
                       {fields.map((field, i) => (
-                        <div key={field.id} className='flex items-center gap-3'>
-                          <span className='text-muted-foreground w-12 text-sm'>
-                            Part {i + 1}
+                        <div key={field.id} className="flex items-center gap-3">
+                          <span className="w-12 text-sm text-muted-foreground">
+                            {t('partsOrder.form.partNumber.label', { num: i + 1 })}
                           </span>
                           <FormField
-                            disabled={
-                              initialData?.status === 'DealershipProcessing'
-                            }
+                            disabled={initialData?.status === 'DealershipProcessing'}
                             control={form.control}
                             name={`parts.${i}.number`}
                             render={({ field }) => (
-                              <FormItem className='flex-1'>
+                              <FormItem className="flex-1">
                                 <FormControl>
-                                  <Input
-                                    placeholder='Enter part number'
-                                    {...field}
-                                  />
+                                  <Input placeholder={t('partsOrder.form.partNumber.placeholder')} {...field} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -501,100 +397,89 @@ export function PartsOrderDialog({
                           />
                           {fields.length > 1 && (
                             <Button
-                              disabled={
-                                initialData?.status === 'DealershipProcessing'
-                              }
-                              type='button'
-                              variant='ghost'
-                              size='icon'
+                              disabled={initialData?.status === 'DealershipProcessing'}
+                              type="button"
+                              variant="ghost"
+                              size="icon"
                               onClick={() => remove(i)}
                             >
-                              <Trash2 className='text-destructive h-4 w-4' />
+                              <Trash2 className="w-4 h-4 text-destructive" />
                             </Button>
                           )}
                         </div>
                       ))}
                       <Button
-                        disabled={
-                          initialData?.status === 'DealershipProcessing'
-                        }
-                        type='button'
-                        variant='outline'
-                        size='sm'
+                        disabled={initialData?.status === 'DealershipProcessing'}
+                        type="button"
+                        variant="outline"
+                        size="sm"
                         onClick={() => append({ number: '' })}
                       >
-                        <Plus className='mr-2 h-4 w-4' /> Add a Part
+                        <Plus className="w-4 h-4 mr-2" /> {t('partsOrder.button.addPart')}
                       </Button>
                     </div>
                   </section>
-
                   {/* Right：Estimate PDF Upload */}
                   <section>
-                    <div className='mb-5 flex items-center gap-3'>
-                      <Paperclip className='text-foreground h-5 w-5' />
-                      <h3 className='text-foreground text-lg font-semibold'>
-                        Attachments
-                      </h3>
+                    <div className="flex items-center gap-3 mb-5">
+                      <Paperclip className="w-5 h-5 text-foreground" />
+                      <h3 className="text-lg font-semibold text-foreground">{t('repairOrder.section.attachments')}</h3>
                     </div>
-                    <div className='space-y-3'>
-                      <Label className='text-foreground text-sm font-medium'>
-                        Estimate
+                    <div className="space-y-3">
+                      <Label className="text-sm font-medium text-foreground">
+                        {t('partsOrder.attachments.estimate')}
                         {/* Required only when in add mode or edit mode and there are no files yet */}
-                        {(mode === 'create' ||
-                          !initialData?.estimateFileAssets?.length) && (
-                          <span className='text-destructive'>*</span>
+                        {(mode === 'create' || !initialData?.estimateFileAssets?.length) && (
+                          <span className="text-destructive">*</span>
                         )}
                       </Label>
                       <div
                         {...getRootProps()}
                         className={`flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-10 text-center transition-all ${isDragActive ? 'border-primary bg-muted' : 'border-border hover:border-primary'}`}
                       >
-                        <input
-                          {...getInputProps()}
-                          disabled={
-                            initialData?.status === 'DealershipProcessing'
-                          }
-                        />
-                        <Upload className='text-muted-foreground mb-3 h-12 w-12' />
-
-                        <p className='text-muted-foreground text-sm'>
-                          Drop your PDF files here or{' '}
-                          <span className='text-primary hover:underline'>
-                            click to browse
-                          </span>
+                        <input {...getInputProps()} disabled={initialData?.status === 'DealershipProcessing'} />
+                        <Upload className="w-12 h-12 mb-3 text-muted-foreground" />
+                        <p className="text-sm text-muted-foreground">
+                          {isDragActive ? (
+                            t('partsOrder.dropzone.dropPdf')
+                          ) : (
+                            <>
+                              {t('partsOrder.dropzone.instructionPdf')}{' '}
+                              <span className="text-primary hover:underline">
+                                {t('partsOrder.dropzone.clickToBrowse')}
+                              </span>
+                            </>
+                          )}
                         </p>
                       </div>
                       <div>
                         {estimateFiles && estimateFiles.length > 0 && (
-                          <div className='w-full space-y-2'>
+                          <div className="w-full space-y-2">
                             {estimateFiles.map((file: any, index) => (
                               <div
                                 key={`${file.name}-${index}`}
-                                className='flex items-center justify-between rounded-md p-1.5'
+                                className="flex items-center justify-between rounded-md p-1.5"
                               >
-                                <div
-                                  className='flex-1 truncate'
-                                  title={file.name}
-                                >
+                                <div className="flex-1 truncate" title={file.name}>
                                   <a
                                     href={file.viewUrl}
-                                    className='cursor-pointer truncate text-sm font-medium text-blue-500 underline'
+                                    className="text-sm font-medium text-blue-500 underline truncate cursor-pointer"
                                   >
                                     {file.name || file.filename}
                                   </a>
-                                  {/* <p className='text-muted-foreground text-xs'>
+                                  {/* <p className='text-xs text-muted-foreground'>
                                   {(file.size / 1024).toFixed(2)} KB
                                 </p> */}
                                 </div>
                                 <button
-                                  type='button'
+                                  type="button"
                                   onClick={(e) => {
-                                    e.stopPropagation()
-                                    removeFile(index)
+                                    e.stopPropagation();
+                                    removeFile(index);
                                   }}
-                                  className='text-destructive ml-2 text-xs hover:underline'
+                                  className="ml-2 text-xs text-destructive hover:underline"
                                 >
-                                  Remove
+                                  {t('common.remove')}
                                 </button>
                               </div>
                             ))}
@@ -603,9 +488,7 @@ export function PartsOrderDialog({
                       </div>
                       {/* Display error message */}
                       {form.formState.errors._estimateFile && (
-                        <p className='text-destructive text-sm'>
-                          {form.formState.errors._estimateFile.message}
-                        </p>
+                        <p className="text-sm text-destructive">{form.formState.errors._estimateFile.message}</p>
                       )}
                     </div>
                   </section>
@@ -613,64 +496,59 @@ export function PartsOrderDialog({
                 <div>
                   {/* If it isisRejece Must be filledcommentInformation */}
                   {isReject && (
-                    <div className='mt-6'>
-                      <h3 className='flex items-center gap-3 text-lg font-medium'>
-                        <NotebookPen className='text-muted-foreground w5 h-5' />
-                        Comment
+                    <div className="mt-6">
+                      <h3 className="flex items-center gap-3 text-lg font-medium">
+                        <NotebookPen className="h-5 text-muted-foreground w5" />
+                        {t('partsOrder.section.comment')}
                       </h3>
                       <Input
-                        type='textarea'
-                        placeholder='Enter comment'
+                        type="textarea"
+                        placeholder={t('partsOrder.form.comment.placeholder')}
                         value={comment}
-                        className='mt-2 h-11'
+                        className="mt-2 h-11"
                         onChange={(e) => setComment(e.target.value)}
                       />
                     </div>
                   )}
                 </div>
               </div>
-
               {/* Fixed bottom - Unified style */}
-              <DialogFooter className='bg-muted/50 w-full flex-shrink-0 border-t px-6 py-4 backdrop-blur'>
-                <div className='flex w-full justify-end gap-3'>
-                  <Button type='button' variant='outline' onClick={handleClose}>
-                    Cancel
+              <DialogFooter className="flex-shrink-0 w-full px-6 py-4 border-t bg-muted/50 backdrop-blur">
+                <div className="flex justify-end w-full gap-3">
+                  <Button type="button" variant="outline" onClick={handleClose}>
+                    {t('common.cancel')}
                   </Button>
                   {isReject ? (
                     <Button
-                      type='button'
+                      type="button"
                       onClick={async () => {
-                        setLoading(true)
-                        await onSubmit(form.getValues() as FormValues)
-                        await onHandleResubmit?.(comment)
-                        setLoading(false)
+                        setLoading(true);
+                        await onSubmit(form.getValues() as FormValues);
+                        await onHandleResubmit?.(comment);
+                        setLoading(false);
                       }}
                       disabled={loading}
                     >
                       {loading ? (
                         <>
-                          <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                          Resubmitting...
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          {t('partsOrder.button.resubmitting')}
                         </>
                       ) : (
-                        'Resubmit Request'
+                        t('partsOrder.button.resubmit')
                       )}
                     </Button>
                   ) : (
-                    <Button
-                      type='submit'
-                      variant='default'
-                      disabled={loading || form.formState.isSubmitting}
-                    >
+                    <Button type="submit" variant="default" disabled={loading || form.formState.isSubmitting}>
                       {loading || form.formState.isSubmitting ? (
                         <>
-                          <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                          {initialData?.id ? 'Updating...' : 'Saving...'}
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          {initialData?.id ? t('partsOrder.button.updating') : t('partsOrder.button.saving')}
                         </>
                       ) : initialData?.id ? (
-                        'Update'
+                        t('partsOrder.button.update')
                       ) : (
-                        'Save'
+                        t('partsOrder.button.save')
                       )}
                     </Button>
                   )}
@@ -682,5 +560,5 @@ export function PartsOrderDialog({
       </Dialog>
       {ConfirmDialogComponent}
     </>
-  )
+  );
 }
