@@ -1,5 +1,6 @@
 import { useLocation } from '@tanstack/react-router';
 import { createContext, useContext, ReactNode, useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 type Brand = 'audi' | 'vw';
 type Region = 'america' | 'canada';
@@ -19,11 +20,18 @@ export function BrandProvider({ children }: { children: ReactNode }) {
   const location = useLocation();
   const [brand, setBrandState] = useState<Brand>('audi');
   const [region, setRegionState] = useState<Region>('america');
+  const { i18n } = useTranslation();
 
   // Key！Restore after refresh
   useEffect(() => {
     const urlBrand = location.search.brand as Brand | undefined;
     const urlRegion = location.search.region as Region | undefined;
+    const urlLang =  (location.search as Record<string, unknown>).lang as string | undefined
+
+    if (urlLang) {
+      const code = urlLang === 'fr' ? 'fr-CA' : 'en';
+      i18n.changeLanguage(code);
+    }
 
     if (urlBrand && urlRegion && ['audi', 'vw'].includes(urlBrand) && ['america', 'canada'].includes(urlRegion)) {
       setBrandState(urlBrand);
