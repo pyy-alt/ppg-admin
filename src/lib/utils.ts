@@ -189,7 +189,7 @@ export const calculateDateRange = (preset: string) => {
  */
 export const formatDateOnly = (
   date: Date | string | number | undefined | null,
-  includeSeconds = true
+  includeSeconds = false
 ): string | undefined => {
   if (!date) return undefined
 

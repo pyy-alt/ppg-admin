@@ -1,9 +1,11 @@
+// src/components/Timeline.tsx
 import { Check, X } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth-store';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Trans, useTranslation } from 'react-i18next';
+import { formatDateOnly } from '@/lib/utils';
 
 const STAGES = ['OrderReview', 'OrderFulfillment', 'OrderReceived', 'RepairCompleted'] as const;
 const STATUSES = [
@@ -17,7 +19,6 @@ const STATUSES = [
 
 type Stage = (typeof STAGES)[number];
 type Status = (typeof STATUSES)[number];
-
 type PersonType = 'Shop' | 'Csr' | 'Dealership' | 'ProgramAdministrator' | 'FieldStaff';
 
 type ActivityLogItem = {
@@ -63,20 +64,6 @@ interface TimelineItem {
   canApprove?: boolean;
   canReject?: boolean;
 }
-
-const formatDateTime = (date: Date | string | null | undefined): string => {
-  if (!date) return '';
-  const d = typeof date === 'string' ? new Date(date) : date;
-  if (isNaN(d.getTime())) return '';
-  return d.toLocaleString('en-US', {
-    month: '2-digit',
-    day: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-};
-
 const formatPersonName = (person: { firstName?: string; lastName?: string } | null | undefined): string => {
   if (!person) return '';
   return `${person.firstName || ''} ${person.lastName || ''}`.trim();
@@ -152,6 +139,7 @@ export function Timeline({
   };
 
   const activityLog = getActivityLogInfo();
+
   const getVisibleStagesForRole = (): Stage[] => {
     const THREE_STAGES: Stage[] = ['OrderReview', 'OrderFulfillment', 'OrderReceived'];
     return THREE_STAGES;
@@ -296,28 +284,19 @@ export function Timeline({
   return (
     <Card className="p-6">
       <h2 className="mb-6 text-2xl font-bold">{t('timeline.title')}</h2>
-      <div className="space-y-8">
-        {timelineItems.map((item, index) => {
-          const isRejected = item.stage === 'OrderReview' && item.status === 'rejected' && userType === 'Shop';
-          const canResubmit = isRejected;
-          const canMarkReceived =
-            item.stage === 'OrderReceived' &&
-            (item.status === 'completed' || item.status === 'waiting') &&
-            onMarkReceived &&
-            userType === 'Shop';
-          const canMarkShipped =
-            item.stage === 'OrderFulfillment' &&
-            (item.status === 'waiting' || (item.status === 'completed' && status === 'DealershipShipped')) &&
-            onMarkShipped &&
-            userType === 'Dealership' &&
-            !dateReceived;
-          const canApproveReject = item.canApprove && item.canReject && userType === 'Csr' && onApprove && onReject;
 
+      {/* 时间线容器：左侧留出空间用于连线 */}
+      <div className="relative pl-12">
+        {timelineItems.map((item, index) => {
+          const isLast = index === timelineItems.length - 1;
+          const isCompleted = item.status === 'completed' || item.status === 'approved';
           return (
-            <div key={item.id} className="flex gap-4">
-              <div className="flex flex-col items-center">
+            <div key={item.id} className="relative flex items-start min-h-32">
+              {/* 左侧：圆点 + 连线 */}
+              <div className="absolute top-0 left-0 flex items-start h-full">
+                {/* 圆点 */}
                 <div
-                  className={`flex h-6 w-6 items-center justify-center rounded-full p-1 text-sm font-bold text-white ${
+                  className={`relative z-10 flex h-6 w-6 shrink-0  items-center justify-center rounded-full  text-white ${
                     item.status === 'approved' || item.status === 'completed'
                       ? 'bg-green-600'
                       : item.status === 'rejected'
@@ -328,18 +307,27 @@ export function Timeline({
                   }`}
                 >
                   {item.status === 'approved' || item.status === 'completed' ? (
-                    <Check className="w-5 h-5" />
+                    <Check className="w-4 h-4" />
                   ) : item.status === 'rejected' ? (
-                    <X className="w-5 h-5" />
+                    <X className="w-4 h-4" />
                   ) : (
-                    item.id
+                    <span>{item.id}</span>
                   )}
                 </div>
-                {index < timelineItems.length - 1 && <div className="w-px h-full mt-2 border-l border-gray-300" />}
+
+                {/* 向下连线：仅在非最后一个节点时绘制，且充满剩余高度 */}
+                {!isLast && (
+                  <div
+                    className={`absolute left-3 top-0 w-0.5  h-full ${isCompleted ? 'bg-green-600' : 'bg-gray-300'}`}
+                  />
+                )}
               </div>
-              <div className="flex-1 pb-8">
-                <div className="flex items-center gap-2 p-2 mb-1">
-                  <h3 className="font-semibold">{item.title}</h3>
+
+              {/* 右侧内容区域 */}
+              <div className="flex-1 pb-12 ml-8">
+                {/* 标题 + Badge */}
+                <div className="flex items-center gap-3 mb-3">
+                  <h3 className="text-lg font-semibold">{item.title}</h3>
                   {getStatusBadge(item)}
                 </div>
 
@@ -357,7 +345,7 @@ export function Timeline({
                                   : 'timeline.log.submitted'
                               }
                               values={{
-                                date: formatDateTime(activityLog.submitted.dateCreated),
+                                date: formatDateOnly(activityLog.submitted.dateCreated),
                                 by: formatPersonName(activityLog.submitted.person),
                               }}
                               components={{ strong: <strong /> }}
@@ -374,7 +362,7 @@ export function Timeline({
                                     : 'timeline.log.rejected'
                                 }
                                 values={{
-                                  date: formatDateTime(activityLog.rejected.dateCreated),
+                                  date: formatDateOnly(activityLog.rejected.dateCreated),
                                   by: formatPersonName(activityLog.rejected.person),
                                 }}
                                 components={{
@@ -399,7 +387,7 @@ export function Timeline({
                                   : 'timeline.log.resubmitted'
                               }
                               values={{
-                                date: formatDateTime(activityLog.resubmitted.dateCreated),
+                                date: formatDateOnly(activityLog.resubmitted.dateCreated),
                                 by: formatPersonName(activityLog.resubmitted.person),
                               }}
                               components={{ strong: <strong /> }}
@@ -415,7 +403,7 @@ export function Timeline({
                                   : 'timeline.log.approved'
                               }
                               values={{
-                                date: formatDateTime(activityLog.approved.dateCreated),
+                                date: formatDateOnly(activityLog.approved.dateCreated),
                                 by: formatPersonName(activityLog.approved.person),
                               }}
                               components={{
@@ -436,7 +424,7 @@ export function Timeline({
                                 : 'timeline.log.submittedBasic'
                             }
                             values={{
-                              date: formatDateTime(dateSubmitted),
+                              date: formatDateOnly(dateSubmitted),
                               by: formatPersonName(submittedByPerson),
                             }}
                             components={{ strong: <strong /> }}
@@ -461,7 +449,7 @@ export function Timeline({
                                   : 'timeline.log.shipped'
                               }
                               values={{
-                                date: formatDateTime(activityLog.shipped.dateCreated),
+                                date: formatDateOnly(activityLog.shipped.dateCreated),
                                 by: formatPersonName(activityLog.shipped.person),
                               }}
                               components={{ strong: <strong /> }}
@@ -477,7 +465,7 @@ export function Timeline({
                                   : 'timeline.log.unshipped'
                               }
                               values={{
-                                date: formatDateTime(activityLog.unshipped.dateCreated),
+                                date: formatDateOnly(activityLog.unshipped.dateCreated),
                                 by: formatPersonName(activityLog.unshipped.person),
                               }}
                               components={{ strong: <strong /> }}
@@ -495,7 +483,7 @@ export function Timeline({
                                 : 'timeline.log.submittedBasic'
                             }
                             values={{
-                              date: formatDateTime(dateSubmitted),
+                              date: formatDateOnly(dateSubmitted),
                               by: formatPersonName(submittedByPerson),
                             }}
                             components={{ strong: <strong /> }}
@@ -520,29 +508,13 @@ export function Timeline({
                                   : 'timeline.log.received'
                               }
                               values={{
-                                date: formatDateTime(activityLog.received.dateCreated),
+                                date: formatDateOnly(activityLog.received.dateCreated),
                                 by: formatPersonName(activityLog.received.person),
                               }}
                               components={{ strong: <strong /> }}
                             />
                           </p>
                         )}
-                        {/* {activityLog.unreceived && (
-                          <p className="text-muted-foreground">
-                            <Trans
-                              i18nKey={
-                                formatPersonName(activityLog.unreceived.person)
-                                  ? 'timeline.log.unreceivedWithBy'
-                                  : 'timeline.log.unreceived'
-                              }
-                              values={{
-                                date: formatDateTime(activityLog.unreceived.dateCreated),
-                                by: formatPersonName(activityLog.unreceived.person),
-                              }}
-                              components={{ strong: <strong /> }}
-                            />
-                          </p>
-                        )} */}
                       </>
                     ) : (
                       dateSubmitted && (
@@ -554,7 +526,7 @@ export function Timeline({
                                 : 'timeline.log.submittedBasic'
                             }
                             values={{
-                              date: formatDateTime(dateSubmitted),
+                              date: formatDateOnly(dateSubmitted),
                               by: formatPersonName(submittedByPerson),
                             }}
                             components={{ strong: <strong /> }}
@@ -566,7 +538,7 @@ export function Timeline({
                 )}
 
                 {/* Action Buttons */}
-                {canApproveReject && (
+                {item.canApprove && item.canReject && userType === 'Csr' && onApprove && onReject && (
                   <div className="flex flex-col gap-2">
                     <p className="mb-3 text-sm">{t('timeline.requestPending')}</p>
                     <div className="flex gap-2">
@@ -581,41 +553,49 @@ export function Timeline({
                     </div>
                   </div>
                 )}
-                {canResubmit && (
+                {item.stage === 'OrderReview' && item.status === 'rejected' && userType === 'Shop' && onResubmit && (
                   <div className="mt-4">
                     <Button size="sm" variant="outline" onClick={onResubmit} className="bg-gray-100 hover:bg-gray-200">
                       {t('timeline.button.resubmit')}
                     </Button>
                   </div>
                 )}
-                {canMarkShipped && (
-                  <div className="mt-4">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => onMarkShipped(status as Status)}
-                      className="bg-gray-100 hover:bg-gray-200"
-                    >
-                      {status === 'DealershipShipped'
-                        ? t('timeline.button.unmarkShipped')
-                        : t('timeline.button.markShipped')}
-                    </Button>
-                  </div>
-                )}
-                {canMarkReceived && status !== 'RepairCompleted' && (
-                  <div className="mt-4">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => onMarkReceived(status as Status)}
-                      className="bg-gray-100 hover:bg-gray-200"
-                    >
-                      {status === 'ShopReceived'
-                        ? t('timeline.button.unmarkReceived')
-                        : t('timeline.button.markReceived')}
-                    </Button>
-                  </div>
-                )}
+                {item.stage === 'OrderFulfillment' &&
+                  (item.status === 'waiting' || (item.status === 'completed' && status === 'DealershipShipped')) &&
+                  onMarkShipped &&
+                  userType === 'Dealership' &&
+                  !dateReceived && (
+                    <div className="mt-4">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => onMarkShipped(status as Status)}
+                        className="bg-gray-100 hover:bg-gray-200"
+                      >
+                        {status === 'DealershipShipped'
+                          ? t('timeline.button.unmarkShipped')
+                          : t('timeline.button.markShipped')}
+                      </Button>
+                    </div>
+                  )}
+                {item.stage === 'OrderReceived' &&
+                  (item.status === 'completed' || item.status === 'waiting') &&
+                  onMarkReceived &&
+                  userType === 'Shop' &&
+                  status !== 'RepairCompleted' && (
+                    <div className="mt-4">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => onMarkReceived(status as Status)}
+                        className="bg-gray-100 hover:bg-gray-200"
+                      >
+                        {status === 'ShopReceived'
+                          ? t('timeline.button.unmarkReceived')
+                          : t('timeline.button.markReceived')}
+                      </Button>
+                    </div>
+                  )}
               </div>
             </div>
           );

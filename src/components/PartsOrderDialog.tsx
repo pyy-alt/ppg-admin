@@ -19,6 +19,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { useTranslation } from 'react-i18next'; // 新增导入
+import { useLocation } from '@tanstack/react-router';
 
 const formSchema = z.object({
   parts: z.array(z.object({ number: z.string().min(1, 'partsOrder.form.partNumber.required') })),
@@ -75,6 +76,8 @@ export function PartsOrderDialog({
   onSuccess,
   onHandleResubmit,
 }: PartsOrderDialogProps) {
+  const location = useLocation(); // 获取当前路由信息
+  const currentPathname = location.pathname;  
   const { t } = useTranslation();
   const [estimateFiles, setEstimateFiles] = useState<File[]>([]);
   const form = useForm<FormValues>({
@@ -146,7 +149,7 @@ export function PartsOrderDialog({
         : t('partsOrder.dialog.newSupplement', { num: supplementNum }); // 或 newSupplement
     }
 
-    return initialData?.id ? t('partsOrder.dialog.editTitle') : t('partsOrder.dialog.newTitle');
+    return initialData?.id && currentPathname.split('/').length>2 ? t('partsOrder.dialog.editTitle') : t('partsOrder.dialog.newTitle');
   };
 
   const getPartsOrderSectionTitle = () => {
@@ -274,10 +277,8 @@ export function PartsOrderDialog({
     <>
       <Dialog open={open} onOpenChange={(newOpen) => handleDialogOpenChange(newOpen)}>
         <DialogContent className="flex max-h-[90vh] flex-col p-0 sm:max-w-4xl">
-          {/* Fixed header - Unified style */}
-          <DialogHeader className="shrink-0">
-            <DialogTitle className="px-6 py-4 text-2xl font-semibold">{getDialogTitle()}</DialogTitle>
-            <Separator />
+          <DialogHeader className="flex justify-center shrink-0">
+            <DialogTitle className="px-6 py-3 text-2xl font-semibold">{getDialogTitle()}</DialogTitle>
             <button
               onClick={handleClose}
               className="absolute transition-opacity rounded-sm ring-offset-background focus:ring-ring top-4 right-4 opacity-70 hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-none"
@@ -285,14 +286,13 @@ export function PartsOrderDialog({
               <X className="w-4 h-4" />
               <span className="sr-only">{t('common.close')}</span>
             </button>
+            <Separator />
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0">
-              {/* Scrollable content area */}
-              <div className="flex-1 px-6 py-6 overflow-y-auto">
-                {/* 1. Repair Order Information（Read-only） */}
+              <div className="flex-1 px-6 py-2 overflow-y-auto">
                 <section className="mb-8">
-                  <div className="flex items-center gap-3 mb-5">
+                  <div className="flex items-center gap-3 mb-2">
                     <Package className="w-5 h-5 text-foreground" />
                     <h3 className="text-lg font-semibold text-foreground">{t('repairOrder.section.info')}</h3>
                   </div>
@@ -323,9 +323,9 @@ export function PartsOrderDialog({
                     </div>
                   </div>
                 </section>
-                <Separator className="my-8" />
+                <Separator className='mb-8' />
                 {/* 2. Parts Order Information / Supplement Information（Read-only） */}
-                <section className="mb-8">
+                <section>
                   <div className="flex items-center gap-3 mb-5">
                     <Package className="w-5 h-5 text-foreground" />
                     <h3 className="text-lg font-semibold text-foreground">{getPartsOrderSectionTitle()}</h3>
