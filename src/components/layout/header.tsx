@@ -156,7 +156,7 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
                           : auth.user.person?.dealership?.name && auth.user.person?.dealership?.dealershipNumber
                             ? `${auth.user.person?.dealership?.name}(${auth.user.person?.dealership?.dealershipNumber}) | ${auth.user.person?.type}`
                             : auth.user.person?.csrRegion
-                              ? `${auth.user.person?.csrRegion?.name} | ${auth.user.person?.type}`
+                              ? `${auth.user.person?.csrRegion?.name} | CSR`
                               : auth.user.person?.type === 'ProgramAdministrator'
                                 ? t('header.programAdministrator')
                                 : auth.user.person?.type
@@ -186,7 +186,9 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
                             ? `${auth.user.person?.dealership?.name}(${auth.user.person?.dealership?.dealershipNumber}) | ${auth.user.person?.type}`
                             : auth.user.person?.type === 'ProgramAdministrator'
                               ? t('header.programAdministrator')
-                              : auth.user.person?.type
+                              : auth.user.person?.type === 'Csr'
+                                ? 'CSR'
+                                : auth.user.person?.type
                         : t('header.notLoggedIn')}
                     </p>
                   </div>

@@ -77,9 +77,7 @@ const formatDateTime = (date: Date | string | null | undefined): string => {
   });
 };
 
-const formatPersonName = (
-  person: { firstName?: string; lastName?: string } | null | undefined
-): string => {
+const formatPersonName = (person: { firstName?: string; lastName?: string } | null | undefined): string => {
   if (!person) return '';
   return `${person.firstName || ''} ${person.lastName || ''}`.trim();
 };
@@ -127,10 +125,10 @@ export function Timeline({
       orderReviewActivityLogItems && orderReviewActivityLogItems.length > 0
         ? orderReviewActivityLogItems
         : orderFulfillmentActivityLogItems && orderFulfillmentActivityLogItems.length > 0
-        ? orderFulfillmentActivityLogItems
-        : orderReceivedActivityLogItems && orderReceivedActivityLogItems.length > 0
-        ? orderReceivedActivityLogItems
-        : ([] as ActivityLogItem[]);
+          ? orderFulfillmentActivityLogItems
+          : orderReceivedActivityLogItems && orderReceivedActivityLogItems.length > 0
+            ? orderReceivedActivityLogItems
+            : ([] as ActivityLogItem[]);
 
     const submitted = logList.find((item: ActivityLogItem) => item?.type === 'Submitted');
     const rejected = logList.find((item: ActivityLogItem) => item?.type === 'Rejected');
@@ -154,7 +152,6 @@ export function Timeline({
   };
 
   const activityLog = getActivityLogInfo();
-
   const getVisibleStagesForRole = (): Stage[] => {
     const THREE_STAGES: Stage[] = ['OrderReview', 'OrderFulfillment', 'OrderReceived'];
     return THREE_STAGES;
@@ -167,11 +164,7 @@ export function Timeline({
     if (stage === 'OrderFulfillment' && status === 'DealershipShipped' && dateShipped) {
       effectiveStage = 'OrderReceived';
     }
-    if (
-      stage === 'OrderReceived' &&
-      (status === 'ShopReceived' || status === 'RepairCompleted') &&
-      dateReceived
-    ) {
+    if (stage === 'OrderReceived' && (status === 'ShopReceived' || status === 'RepairCompleted') && dateReceived) {
       effectiveStage = 'RepairCompleted';
     }
 
@@ -314,8 +307,7 @@ export function Timeline({
             userType === 'Shop';
           const canMarkShipped =
             item.stage === 'OrderFulfillment' &&
-            (item.status === 'waiting' ||
-              (item.status === 'completed' && status === 'DealershipShipped')) &&
+            (item.status === 'waiting' || (item.status === 'completed' && status === 'DealershipShipped')) &&
             onMarkShipped &&
             userType === 'Dealership' &&
             !dateReceived;
@@ -329,10 +321,10 @@ export function Timeline({
                     item.status === 'approved' || item.status === 'completed'
                       ? 'bg-green-600'
                       : item.status === 'rejected'
-                      ? 'bg-red-500'
-                      : item.status === 'waiting'
-                      ? 'bg-black'
-                      : 'bg-gray-400'
+                        ? 'bg-red-500'
+                        : item.status === 'waiting'
+                          ? 'bg-black'
+                          : 'bg-gray-400'
                   }`}
                 >
                   {item.status === 'approved' || item.status === 'completed' ? (
@@ -535,7 +527,7 @@ export function Timeline({
                             />
                           </p>
                         )}
-                        {activityLog.unreceived && (
+                        {/* {activityLog.unreceived && (
                           <p className="text-muted-foreground">
                             <Trans
                               i18nKey={
@@ -550,7 +542,7 @@ export function Timeline({
                               components={{ strong: <strong /> }}
                             />
                           </p>
-                        )}
+                        )} */}
                       </>
                     ) : (
                       dateSubmitted && (

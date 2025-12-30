@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import { z } from 'zod';
+import { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import RequestApi from '@/js/clients/base/OrderApi';
@@ -23,6 +22,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { useTranslation } from 'react-i18next'; // 新增：引入 useTranslation
+import z from 'zod';
 
 const formSchema = z.object({
   roNumber: z.string().min(1, 'repairOrder.form.roNumber.required'),
@@ -69,11 +69,9 @@ const startYear = currentYear + 1;
 
 export default function RepairOrderDialog({ open, onOpenChange, onSuccess, initialData }: RepairOrderDialogProps) {
   const { t } = useTranslation();
-
   const isEdit = !!initialData;
   const [structuralMeasurementFileAssets, setStructuralMeasurementFileAssets] = useState<any[]>([]);
   const [preRepairPhotoFileAssets, setPreRepairPhotoFileAssets] = useState<any[]>([]);
-
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -90,6 +88,8 @@ export default function RepairOrderDialog({ open, onOpenChange, onSuccess, initi
   const [orderFromDealerships, setOrderFromDealerships] = useState<any[]>([]);
   const user = useAuthStore((state) => state.auth.user);
 
+  const createdUrls = useRef<Set<string>>(new Set());
+
   const performClose: () => void = () => {
     onOpenChange(false);
     setTimeout(() => {
@@ -99,7 +99,7 @@ export default function RepairOrderDialog({ open, onOpenChange, onSuccess, initi
     }, 200);
   };
 
-  const { handleCloseRequest, ConfirmDialogComponent } = useDialogWithConfirm({
+  const { ConfirmDialogComponent } = useDialogWithConfirm({
     form,
     hasUnsavedFiles: structuralMeasurementFileAssets.length > 0 || preRepairPhotoFileAssets.length > 0,
     onClose: performClose,
@@ -108,12 +108,14 @@ export default function RepairOrderDialog({ open, onOpenChange, onSuccess, initi
   });
 
   const handleClose = () => {
-    handleCloseRequest();
+    // handleCloseRequest();
+    performClose();
   };
 
   const handleDialogOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
-      handleCloseRequest();
+      // handleCloseRequest();
+      performClose();
     }
     return true;
   };
@@ -145,10 +147,12 @@ export default function RepairOrderDialog({ open, onOpenChange, onSuccess, initi
       return [];
     }
   };
-
   useEffect(() => {
     getOrderFromDealership();
-    if (initialData) {
+  }, []);
+
+  useEffect(() => {
+    if (initialData && open) {
       if (initialData.year && typeof initialData.year === 'number') initialData.year = String(initialData.year);
       form.reset({
         roNumber: initialData.roNumber,
@@ -184,7 +188,7 @@ export default function RepairOrderDialog({ open, onOpenChange, onSuccess, initi
       setStructuralMeasurementFileAssets([]);
       setPreRepairPhotoFileAssets([]);
     }
-  }, [initialData, form]);
+  }, [initialData, form, open]);
 
   const onSubmit = async (data: FormValues) => {
     try {
@@ -251,7 +255,6 @@ export default function RepairOrderDialog({ open, onOpenChange, onSuccess, initi
             });
             api.repairOrderCreate(model, {
               status200: (response) => {
-                console.log('Repair Order created successfully:', response);
                 onSuccess?.({
                   ...data,
                   structuralMeasurementFileAssets,
@@ -281,6 +284,45 @@ export default function RepairOrderDialog({ open, onOpenChange, onSuccess, initi
     }
   };
 
+  const handlePreview = (file: any) => {
+    let previewUrl: string;
+
+    if (file instanceof File) {
+      previewUrl = URL.createObjectURL(file);
+      createdUrls.current.add(previewUrl);
+    } else {
+      previewUrl = file.viewUrl || file.relativePath;
+    }
+
+    window.open(previewUrl, '_blank');
+  };
+  const removeFile = (index: number, files: any, title: string) => {
+    // onFilesChange(files.filter((_: any, idx: number) => idx !== i));
+    const file = files[index];
+    title.includes('Photo')
+      ? setPreRepairPhotoFileAssets((prev) => {
+          const newFiles = prev.filter((_, i) => i !== index);
+          if (file instanceof File) {
+            const potentialUrl = Array.from(createdUrls.current).find((url) => url.startsWith('blob:'));
+            if (potentialUrl) {
+              URL.revokeObjectURL(potentialUrl);
+              createdUrls.current.delete(potentialUrl);
+            }
+          }
+          return newFiles;
+        })
+      : setStructuralMeasurementFileAssets((prev) => {
+          const newFiles = prev.filter((_, i) => i !== index);
+          if (file instanceof File) {
+            const potentialUrl = Array.from(createdUrls.current).find((url) => url.startsWith('blob:'));
+            if (potentialUrl) {
+              URL.revokeObjectURL(potentialUrl);
+              createdUrls.current.delete(potentialUrl);
+            }
+          }
+          return newFiles;
+        });
+  };
   const DropZone = ({
     title,
     icon: Icon,
@@ -313,10 +355,6 @@ export default function RepairOrderDialog({ open, onOpenChange, onSuccess, initi
       accept: getAcceptConfig(),
       multiple: true,
       onDrop: (acceptedFiles) => {
-        console.log(
-          acceptedFiles.length,
-          acceptedFiles.map((f) => f.name)
-        );
         onFilesChange([...files, ...acceptedFiles]);
       },
     });
@@ -360,28 +398,32 @@ export default function RepairOrderDialog({ open, onOpenChange, onSuccess, initi
         </Button>
         {files.length > 0 && (
           <div className="space-y-2">
-            {files.map((file: any, i: number) => (
-              <div
-                key={`${file.name}-${i}-${file.size}`}
-                className="flex items-center justify-between px-3 py-2 transition-colors rounded-md"
-              >
-                <a className="flex items-center gap-2 text-blue-500 cursor-pointer" href={file.viewUrl} target="_blank">
-                  {title.includes('Photo') ? <ImageIcon className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
-                  <span className="text-sm text-blue-500 underline truncate max-w-48">{file.name}</span>
-                </a>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onFilesChange(files.filter((_: any, idx: number) => idx !== i));
-                  }}
-                  className="p-1 transition-colors rounded text-destructive hover:bg-destructive/10 hover:text-destructive focus:ring-destructive focus:ring-2 focus:ring-offset-1 focus:outline-none"
-                  aria-label={t('repairOrder.dropzone.removeFile', { name: file.name })}
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
+            {files.map((file: any, i: number) => {
+              const key = file.viewUrl ? file.viewUrl : `${file.name}-${i}`;
+              return (
+                <div key={key} className="flex items-center justify-between px-3 py-2 transition-colors rounded-md">
+                  <button
+                    type="button"
+                    className="flex items-center gap-2 text-blue-500 cursor-pointer"
+                    onClick={() => handlePreview(file)}
+                  >
+                    {title.includes('Photo') ? <ImageIcon className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
+                    <span className="text-sm text-blue-500 underline truncate max-w-48">{file.name}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeFile(i, files, title);
+                    }}
+                    className="p-1 transition-colors rounded text-destructive hover:bg-destructive/10 hover:text-destructive focus:ring-destructive focus:ring-2 focus:ring-offset-1 focus:outline-none"
+                    aria-label={t('repairOrder.dropzone.removeFile', { name: file.name })}
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

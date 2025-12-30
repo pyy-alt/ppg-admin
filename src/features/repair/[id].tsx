@@ -36,7 +36,8 @@ export function RepairOrderDetail() {
   const [isOpen, setOpen] = useState(false);
   const [isApprovalDialogOpen, setIsApprovalDialogOpen] = useState(false);
   const [isReject, setIsReject] = useState(false);
-
+  const [nextSupplementNum, setNextSupplementNum] = useState(0);
+  const [isSupplementMode, setIsSupplementMode] = useState(false);
   const { auth } = useAuthStore();
   const userType = auth.user?.person?.type as PersonType | undefined;
   const { user } = useAuthStore((state) => state.auth);
@@ -209,7 +210,7 @@ export function RepairOrderDetail() {
         });
         api.partsOrderSubmitWorkflowAction(request, {
           status200: () => {
-            toast.success(t('repairOrder.detail.shippedSuccess'));
+            // toast.success(t('repairOrder.detail.shippedSuccess'));
             getPartsOrderDetail();
             resolve(true);
           },
@@ -237,7 +238,7 @@ export function RepairOrderDetail() {
         });
         api.partsOrderSubmitWorkflowAction(request, {
           status200: () => {
-            toast.success(t('repairOrder.detail.receivedSuccess'));
+            // toast.success(t('repairOrder.detail.receivedSuccess'));
             getPartsOrderDetail();
             resolve(true);
           },
@@ -293,6 +294,24 @@ export function RepairOrderDetail() {
   const handleTimelineReject = () => {
     setIsApprovalDialogOpen(true);
     setIsReject(true);
+  };
+  const handleOpenDialog = (type: 'newOriginal' | 'edit' | 'newSupplement', data?: any) => {
+    let supplementMode = false;
+    let supplementNum = 1;
+
+    if (type === 'newSupplement') {
+      supplementMode = true;
+      supplementNum = initPartsOrderData?.length ?? 0;
+    } else if (type === 'edit') {
+      supplementMode = data?.partsOrderNumber !== undefined && data.partsOrderNumber > 0;
+      supplementNum = supplementMode ? data.partsOrderNumber : 1;
+    }
+
+    setIsSupplementMode(supplementMode);
+    setNextSupplementNum(supplementNum);
+    setSelectedPartsOrderData(data ?? undefined);
+    setOpenPartsOrderDialog(true);
+    setIsReject(false);
   };
 
   useEffect(() => {
@@ -366,15 +385,14 @@ export function RepairOrderDetail() {
               ) && userType === 'Shop' ? (
                 <Button
                   onClick={() => setIsMarkRepairAsCompleteDialogOpen(true)}
-                  size="sm"
-                  className="text-xs font-medium bg-green-600 h-9"
+                  className="font-medium bg-green-600 h-9"
                 >
                   <Check className="mr-1.5 h-3.5 w-3.5" />
                   {t('repairOrder.detail.markComplete')}
                 </Button>
               ) : null}
               {userType === 'Shop' && initPartsOrderData?.every((order: any) => order.status !== 'RepairCompleted') ? (
-                <Button size="sm" variant="outline" className="text-xs font-medium h-9" onClick={() => setOpen(true)}>
+                <Button variant="outline" className="font-medium h-9" onClick={() => setOpen(true)}>
                   <Pencil className="mr-1.5 h-3.5 w-3.5" />
                   {t('repairOrder.detail.editRepairOrder')}
                 </Button>
@@ -415,11 +433,11 @@ export function RepairOrderDetail() {
               </div>
               <div>
                 <span className="text-muted-foreground">{t('repairOrder.detail.dateClosed')}</span>
-                <p className="text-muted-foreground">
+                <p className="font-medium">
                   {formatDateOnly(initRepaitOrderData?.dateClosed as Date) || '--'}
                   {initRepaitOrderData?.dateClosed && ' by '}
                   {initRepaitOrderData?.dateClosed && (selectedPartsOrderData as any)?.reviewedByPerson?.firstName}{' '}
-                  {(selectedPartsOrderData as any)?.reviewedByPerson?.lastName}
+                  {initRepaitOrderData?.dateClosed && (selectedPartsOrderData as any)?.reviewedByPerson?.lastName}
                 </p>
               </div>
             </div>
@@ -491,7 +509,6 @@ export function RepairOrderDetail() {
                 <>
                   <Button
                     variant={currentIndex === 0 ? 'default' : 'outline'}
-                    size="sm"
                     onClick={() => {
                       const partsOrder = initPartsOrderData.find((po: any) => po.partsOrderNumber === 0);
                       setCurrentIndex(0);
@@ -526,13 +543,8 @@ export function RepairOrderDetail() {
             ) &&
               userType === 'Shop' && (
                 <Button
-                  onClick={() => {
-                    setSelectedPartsOrderData(undefined);
-                    setOpenPartsOrderDialog(true);
-                    setIsReject(false);
-                  }}
+                  onClick={() => handleOpenDialog('newSupplement')}
                   variant="outline"
-                  size="sm"
                   className="font-medium rounded-lg h-9"
                 >
                   <Plus className="mr-1.5 h-3.5 w-3.5" />
@@ -560,13 +572,9 @@ export function RepairOrderDetail() {
                         (selectedPartsOrderData as any)?.stage !== 'OrderReceived' &&
                         (selectedPartsOrderData as any)?.status !== 'RepairCompleted') ? (
                         <Button
-                          onClick={() => {
-                            setSelectedPartsOrderData(selectedPartsOrderData);
-                            setOpenPartsOrderDialog(true);
-                          }}
-                          size="sm"
+                          onClick={() => handleOpenDialog('edit', selectedPartsOrderData)}
                           variant="outline"
-                          className="px-4 text-xs h-9"
+                          className="px-4 h-9"
                         >
                           <Pencil className="h-3.5 w-3.5" />
                           {t('repairOrder.detail.editPartsOrder')}
@@ -599,11 +607,12 @@ export function RepairOrderDetail() {
                           <a
                             key={file.id}
                             href={`${import.meta.env.VITE_API_URL + file.viewUrl}`}
-                            className="text-blue-700 underline hover:underline"
+                            className="block my-2 text-blue-700 underline hover:underline"
                             target="_blank"
                             rel="noreferrer"
                           >
                             {file.filename}
+                            <br />
                           </a>
                         ))) ||
                         t('repairOrder.detail.noEstimateFile')}
@@ -631,9 +640,16 @@ export function RepairOrderDetail() {
       </div>
       <PartsOrderDialog
         open={openPartsOrderDialog}
-        onOpenChange={setOpenPartsOrderDialog}
+        onOpenChange={(newOpen) => {
+          setOpenPartsOrderDialog(newOpen);
+          if (!newOpen) {
+            getPartsOrderDetail();
+          }
+        }}
         initialData={selectedPartsOrderData}
         initRepaitOrderData={initRepaitOrderData}
+        supplementNumber={isSupplementMode ? nextSupplementNum : 0}
+        isSupplementMode={isSupplementMode}
         onSuccess={() => {
           getPartsOrderDetail();
         }}

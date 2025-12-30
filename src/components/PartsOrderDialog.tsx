@@ -1,5 +1,5 @@
 // src/components/PartsOrderDialog.tsx
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { z } from 'zod';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -54,6 +54,8 @@ type PartsOrderDialogProps = {
   onOpenChange: (open: boolean) => void;
   mode?: 'create' | 'edit';
   initialData?: PartsOrderData | undefined;
+  isSupplementMode?: boolean;
+  supplementNumber?: number;
   defaultDealership?: string; // Default dealer name
   initRepaitOrderData?: RepairOrder;
   onSuccess?: () => void;
@@ -66,13 +68,14 @@ export function PartsOrderDialog({
   onOpenChange,
   isReject = false,
   initialData,
+  isSupplementMode,
+  supplementNumber,
   mode = 'create',
   initRepaitOrderData,
   onSuccess,
   onHandleResubmit,
 }: PartsOrderDialogProps) {
-  const { t } = useTranslation(); // 新增：获取 t 函数
-
+  const { t } = useTranslation();
   const [estimateFiles, setEstimateFiles] = useState<File[]>([]);
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -85,7 +88,7 @@ export function PartsOrderDialog({
   const [comment, setComment] = useState('');
 
   // Use confirmation hook
-  const { handleCloseRequest, ConfirmDialogComponent } = useDialogWithConfirm({
+  const { ConfirmDialogComponent } = useDialogWithConfirm({
     form,
     hasUnsavedFiles: estimateFiles.length > 0, // Check for files
     onClose: () => {
@@ -97,21 +100,26 @@ export function PartsOrderDialog({
     description: t('common.discardDescription'),
   });
 
+  const createdUrls = useRef<Set<string>>(new Set());
+
   // Edit the original parts order directly after creating a new repair order Reassign
   if (initialData && Array.isArray(initialData)) {
     initialData = initialData[0];
   }
 
-  // Modify handleClose Use new logic
   const handleClose = () => {
-    handleCloseRequest();
+    // handleCloseRequest();
+    form.reset();
+    setEstimateFiles([]);
+    onOpenChange(false);
   };
 
-  // Modify Dialog of onOpenChange
   const handleDialogOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
-      // Try to close
-      handleCloseRequest();
+      // handleCloseRequest();
+      form.reset();
+      setEstimateFiles([]);
+      onOpenChange(false);
       return false; // Prevent default close behavior
     }
     return true;
@@ -123,39 +131,29 @@ export function PartsOrderDialog({
   });
 
   // Determine if it is a supplemental order
-  const isSupplement = initialData?.partsOrderNumber !== undefined && initialData.partsOrderNumber > 0;
-
-  // Generate title based on mode
+  const isSupplement =
+    isSupplementMode ?? (initialData?.partsOrderNumber !== undefined && initialData.partsOrderNumber > 0);
+  const supplementNum = supplementNumber ?? (initialData?.partsOrderNumber ?? 0) + 1;
   const getDialogTitle = () => {
     if (isReject) {
       return t('partsOrder.dialog.resubmitTitle');
     }
+
     if (isSupplement) {
-      // Supplemental order
-      const supplementNum = initialData?.partsOrderNumber || 1;
-      if (initialData?.parts && initialData.parts?.length > 0) {
-        return t('partsOrder.dialog.editSupplement', { num: supplementNum });
-      } else {
-        return t('partsOrder.dialog.newSupplement', { num: supplementNum });
-      }
-    } else {
-      // Original parts order
-      if (initialData && initialData?.id) {
-        return t('partsOrder.dialog.editTitle');
-      } else {
-        return t('partsOrder.dialog.newTitle');
-      }
+      const isEditMode = !!initialData?.id;
+      return isEditMode
+        ? t('partsOrder.dialog.editSupplement', { num: supplementNum })
+        : t('partsOrder.dialog.newSupplement', { num: supplementNum }); // 或 newSupplement
     }
+
+    return initialData?.id ? t('partsOrder.dialog.editTitle') : t('partsOrder.dialog.newTitle');
   };
 
-  // Get second part title
   const getPartsOrderSectionTitle = () => {
     if (isSupplement) {
-      const supplementNum = initialData?.partsOrderNumber || 1;
       return t('partsOrder.section.supplementInfo', { num: supplementNum });
-    } else {
-      return t('partsOrder.section.info');
     }
+    return t('partsOrder.section.info');
   };
 
   // When initialData changes，Reset form
@@ -189,24 +187,6 @@ export function PartsOrderDialog({
   }, [open, initialData, mode, form]);
 
   const onSubmit = async (data: FormValues) => {
-    // Verify if attachment has been uploaded（In new mode or edit mode but no files yet）
-    // if (
-    // estimateFiles &&
-    // estimateFiles.length === 0 &&
-    // (mode === 'create' || !initialData?.estimateFileAssets?.length)
-    // ) {
-    // form.setError('_estimateFile', {
-    // type: 'manual',
-    // message: 'Estimate PDF is required',
-    // })
-    // // Scroll to error position
-    // const errorElement = document.querySelector('[data-estimate-error]')
-    // if (errorElement) {
-    // errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    // }
-    // return
-    // }
-    // Filter out files withIDfiles
     const newFiles = estimateFiles.filter((f): f is File => f instanceof File);
     // Convert file to FileAsset Array
     const estimateFileAssets = await convertFilesToFileAssets(newFiles, FileAssetFileAssetTypeEnum.ESTIMATE);
@@ -252,15 +232,44 @@ export function PartsOrderDialog({
     // Remove maxFiles Limit，or set to a larger number
     // maxFiles: 1,
     onDrop: (acceptedFiles) => {
+      console.log(acceptedFiles);
       setEstimateFiles((prevFiles) => [...prevFiles, ...acceptedFiles]);
     },
   });
 
-  // Delete single file
-  const removeFile = (index: number) => {
-    setEstimateFiles((prev) => prev.filter((_, i) => i !== index));
+  const handlePreview = (file: any) => {
+    let previewUrl: string;
+
+    if (file instanceof File) {
+      previewUrl = URL.createObjectURL(file);
+      createdUrls.current.add(previewUrl);
+    } else {
+      previewUrl = file.viewUrl || file.relativePath;
+    }
+
+    window.open(previewUrl, '_blank');
   };
 
+  const removeFile = (index: number) => {
+    const file = estimateFiles[index];
+    setEstimateFiles((prev) => {
+      const newFiles = prev.filter((_, i) => i !== index);
+      if (file instanceof File) {
+        const potentialUrl = Array.from(createdUrls.current).find((url) => url.startsWith('blob:'));
+        if (potentialUrl) {
+          URL.revokeObjectURL(potentialUrl);
+          createdUrls.current.delete(potentialUrl);
+        }
+      }
+      return newFiles;
+    });
+  };
+  useEffect(() => {
+    return () => {
+      createdUrls.current.forEach((url) => URL.revokeObjectURL(url));
+      createdUrls.current.clear();
+    };
+  }, []);
   return (
     <>
       <Dialog open={open} onOpenChange={(newOpen) => handleDialogOpenChange(newOpen)}>
@@ -455,34 +464,37 @@ export function PartsOrderDialog({
                       <div>
                         {estimateFiles && estimateFiles.length > 0 && (
                           <div className="w-full space-y-2">
-                            {estimateFiles.map((file: any, index) => (
-                              <div
-                                key={`${file.name}-${index}`}
-                                className="flex items-center justify-between rounded-md p-1.5"
-                              >
-                                <div className="flex-1 truncate" title={file.name}>
-                                  <a
-                                    href={file.viewUrl}
-                                    className="text-sm font-medium text-blue-500 underline truncate cursor-pointer"
-                                  >
-                                    {file.name || file.filename}
-                                  </a>
-                                  {/* <p className='text-xs text-muted-foreground'>
+                            {estimateFiles.map((file: any, index) => {
+                              const key = file.viewUrl ? file.viewUrl : `${file.name}-${index}`;
+                              return (
+                                <div key={key} className="flex items-center justify-between rounded-md p-1.5">
+                                  <div className="flex-1 truncate" title={file.name}>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        handlePreview(file);
+                                      }}
+                                      className="text-sm font-medium text-blue-500 underline truncate cursor-pointer"
+                                    >
+                                      {file.name || file.filename}
+                                    </button>
+                                    {/* <p className='text-xs text-muted-foreground'>
                                   {(file.size / 1024).toFixed(2)} KB
                                 </p> */}
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      removeFile(index);
+                                    }}
+                                    className="ml-2 text-xs text-destructive hover:underline"
+                                  >
+                                    <X className="w-4 h-4" />
+                                  </button>
                                 </div>
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    removeFile(index);
-                                  }}
-                                  className="ml-2 text-xs text-destructive hover:underline"
-                                >
-                                  {t('common.remove')}
-                                </button>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         )}
                       </div>

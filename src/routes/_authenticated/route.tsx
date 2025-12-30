@@ -1,5 +1,10 @@
 import { useEffect, useMemo } from 'react';
-import { createFileRoute, Outlet, useLocation, useNavigate } from '@tanstack/react-router';
+import {
+  createFileRoute,
+  Outlet,
+  useLocation,
+  useNavigate,
+} from '@tanstack/react-router';
 import type Session from '@/js/models/Session';
 import { type PersonType } from '@/js/models/enum/PersonTypeEnum';
 import { useAuthStore } from '@/stores/auth-store';
@@ -7,7 +12,7 @@ import { useLoadingStore } from '@/stores/loading-store';
 import { Loading } from '@/components/Loading';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { HeaderOnlyLayout } from '@/components/layout/header-only-layout';
-// import WelcomeGate from '@/features/auth/welcomeGate';
+import WelcomeGate from '@/features/auth/welcomeGate';
 
 declare global {
   interface Window {
@@ -16,122 +21,95 @@ declare global {
   }
 }
 
-// ============================================================================
-// Constant Definition
-// ============================================================================
-
-/** Routes without a sidebar */
 const ROUTES_WITHOUT_SIDEBAR = ['/parts_orders'] as const;
 
-/** Role Permission Configuration */
-type RoleConfig = {
-  /** Redirect target when accessing a forbidden route */
-  forbiddenRoute: string;
-  /** Default redirection target when accessing the root path. */
-  defaultRoute: string;
-  /** List of allowed prefix routes */
-  allowedRoutes: string[];
-};
-
-const ROLE_REDIRECT_CONFIG: Record<PersonType, RoleConfig> = {
-  ProgramAdministrator: {
-    forbiddenRoute: '/admin/parts_orders',
-    defaultRoute: '/admin/parts_orders',
-    allowedRoutes: ['/admin', '/parts_orders', '/repair_orders'],
-  },
-  Shop: {
-    forbiddenRoute: '/repair_orders',
-    defaultRoute: '/repair_orders',
-    allowedRoutes: ['/repair_orders'],
-  },
-  Csr: {
-    forbiddenRoute: '/parts_orders',
-    defaultRoute: '/parts_orders',
-    allowedRoutes: ['/parts_orders', '/repair_orders'],
-  },
-  Dealership: {
-    forbiddenRoute: '/parts_orders',
-    defaultRoute: '/parts_orders',
-    allowedRoutes: ['/parts_orders', '/repair_orders'], // Only access to the parts order list is allowed.
-    // Note：Repair the order details page. /repair_orders/:id Will be processed through precondition verification.
-  },
-  FieldStaff: {
-    forbiddenRoute: '/parts_orders',
-    defaultRoute: '/parts_orders',
-    allowedRoutes: ['/parts_orders'],
-  },
-};
-
-// ============================================================================
-// Utility function
-// ============================================================================
-
-/**
- * Determine if the path matches the allowed list.
- * @param path Current Path
- * @param allowedRoutes Allowed route prefix list
- * @returns Is access allowed?
- */
-function isPathAllowed(path: string, allowedRoutes: string[]): boolean {
-  if (path === '/') return false; // The root path needs to be redirected.
-  return allowedRoutes.some((route) => path === route || path.startsWith(route + '/'));
-}
-
-/**
- * Get redirect target
- * @param path Current Path
- * @param userType User Type
- * @returns Redirect target or null
- */
-function getRedirectTarget(path: string, userType: PersonType | undefined): string | null {
+const getRedirectTarget = (
+  path: string,
+  userType: PersonType | undefined,
+): string | null => {
   if (!userType) return null;
 
-  const config = ROLE_REDIRECT_CONFIG[userType];
-
-  // If accessing the root path，Redirecting to the default route.
+  // 根路径统一处理
   if (path === '/') {
-    return config.defaultRoute;
+    switch (userType) {
+      case 'ProgramAdministrator':
+        return '/admin/parts_orders';
+      case 'Shop':
+        return '/repair_orders';
+      default:
+        return '/parts_orders';
+    }
   }
 
-  // If the path is in the allowlist，No redirection
-  if (isPathAllowed(path, config.allowedRoutes)) {
+  // ProgramAdministrator：特殊路径转换
+  if (userType === 'ProgramAdministrator') {
+    if (path === '/parts_orders' || path.startsWith('/parts_orders/')) {
+      return '/admin/parts_orders';
+    }
     return null;
   }
 
-  // Other situations are redirected to the forbidden route.（That is the default route.）
-  return config.forbiddenRoute;
-}
+  // Shop：禁止零件订单和管理员页面，允许维修单及其详情
+  if (userType === 'Shop') {
+    if (
+      path.startsWith('/parts_orders/') ||
+      path === '/parts_orders' ||
+      path.startsWith('/admin/')
+    ) {
+      return '/repair_orders';
+    }
+    return null;
+  }
 
-/**
- * Set up debugging tools in development mode.
- * @param auth User data in the certified storage.
- */
+  // Csr & Dealership：允许维修单详情，禁止直接访问列表以外的路径
+  if (userType === 'Csr' || userType === 'Dealership') {
+    if (path.startsWith('/repair_orders/')) {
+      return null; // 允许直接访问详情页
+    }
+    if (
+      path === '/repair_orders' ||
+      path.startsWith('/admin/') ||
+      path.startsWith('/parts_orders/')
+    ) {
+      return '/parts_orders';
+    }
+    return null;
+  }
+
+  // FieldStaff：严格限制在零件订单
+  if (userType === 'FieldStaff') {
+    if (
+      path.startsWith('/repair_orders/') ||
+      path === '/repair_orders' ||
+      path.startsWith('/admin/')
+    ) {
+      return '/parts_orders';
+    }
+    return null;
+  }
+
+  // 其他未知角色默认导向零件订单
+  if (path.startsWith('/admin/')) {
+    return '/parts_orders';
+  }
+  return null;
+};
+
 function setupDevTools(auth: any): void {
-  if (!import.meta.env.DEV || !auth.user) return;
+  if (!import.meta.env.DEV || !auth.user?.person) return;
 
   window.switchUserType = (type: PersonType) => {
-    if (!auth.user?.person) return;
-
-    const updatedPerson = {
-      ...auth.user.person,
-      type: type,
-    };
-
+    const updatedPerson = { ...auth.user!.person, type };
     const mockSession = {
-      guid: auth.user.guid,
+      guid: auth.user!.guid,
       person: updatedPerson,
-      hash: auth.user.hash,
+      hash: auth.user!.hash,
     } as Session;
-
     auth.setUser(mockSession);
-    console.log(`[DevTools] User type has been switched to: ${type}`);
+    console.log(`[DevTools] 用户类型已切换为: ${type}`);
   };
 
-  window.getUserType = () => {
-    const type = auth.user?.person?.type;
-    console.log('[DevTools] Current user type:', type);
-    return type;
-  };
+  window.getUserType = () => auth.user?.person?.type;
 }
 
 function AuthenticatedRouteComponent() {
@@ -142,77 +120,46 @@ function AuthenticatedRouteComponent() {
   const userType = auth.user?.person?.type;
   const isAdmin = userType === 'ProgramAdministrator';
 
-  // ============================================================================
-  // Development Model：Set up debugging tools
-  // ============================================================================
   useEffect(() => {
     setupDevTools(auth);
-  }, [auth]);
+  }, [auth.user]);
 
-  // ============================================================================
-  // Routing Redirection Logic
-  // ============================================================================
   useEffect(() => {
-    // If checking the certification status or unverified.，Then do not process the redirection.
     if (auth.loginStatus === 'checking' || auth.loginStatus !== 'authenticated') {
       return;
     }
 
-    const redirectTarget = getRedirectTarget(location.pathname, userType);
-    if (redirectTarget) {
-      navigate({ to: redirectTarget, replace: true });
+    const target = getRedirectTarget(location.pathname, userType);
+    if (target) {
+      navigate({ to: target, replace: true });
     }
   }, [auth.loginStatus, userType, location.pathname, navigate]);
 
-  // ============================================================================
-  // Calculate derived states.
-  // ============================================================================
-
-  /**
-   * Are you being redirected?
-   * When users access illegal routes，Will be redirected.，At this moment, the loading screen is displayed.
-   */
   const isRedirecting = useMemo(() => {
-    if (auth.loginStatus !== 'authenticated') return false;
-    return getRedirectTarget(location.pathname, userType) !== null;
+    return (
+      auth.loginStatus === 'authenticated' &&
+      getRedirectTarget(location.pathname, userType) !== null
+    );
   }, [auth.loginStatus, location.pathname, userType]);
 
-  /**
-   * Is a sidebar needed?
-   * Only specific routes do not require a sidebar.
-   */
   const needsSidebar = useMemo(() => {
     return !ROUTES_WITHOUT_SIDEBAR.some(
-      (route) => location.pathname === route || location.pathname.startsWith(route + '/')
+      (route) => location.pathname === route || location.pathname.startsWith(`${route}/`),
     );
   }, [location.pathname]);
 
-  // ============================================================================
-  // Rendering logic
-  // ============================================================================
-
-  // 1. Checking certification status，Show loading interface
   if (auth.loginStatus === 'checking') {
     return <Loading />;
   }
 
-  // 2. Unverified，Display login page
   if (auth.loginStatus !== 'authenticated') {
-    navigate({ to: '/login', replace: true });
-    return <Loading />;
-    // return <WelcomeGate />
+    return <WelcomeGate />;
   }
 
-  // 3. Redirecting，Display loading interface
   if (isRedirecting) {
     return <Loading />;
   }
 
-  // ============================================================================
-  // 4. Rendering layout
-  // ============================================================================
-
-  // Determine the layout to be used.：Only routes that require a sidebar and are for administrators use the full layout.
   const useFullLayout = isAdmin && needsSidebar;
 
   return (
@@ -225,9 +172,8 @@ function AuthenticatedRouteComponent() {
         </HeaderOnlyLayout>
       )}
 
-      {/* Global loading overlay */}
       {isLoading && (
-        <div className="fixed inset-0 flex items-center justify-center z-9999 bg-black/20 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/20 backdrop-blur-sm">
           <Loading />
         </div>
       )}
@@ -236,12 +182,5 @@ function AuthenticatedRouteComponent() {
 }
 
 export const Route = createFileRoute('/_authenticated')({
-  beforeLoad: () => {
-    // Attention：Do not check the certification status here.，Because：
-    // 1. Cookie Yes HttpOnly，The front end cannot read.
-    // 2. InitAuth It is asynchronous.，Needs time to verify.
-    // 3. Let the component layer handle authentication checks and redirection.，Can be updated responsively.
-    // If not logged in，Zilu will handle the redirection.
-  },
   component: AuthenticatedRouteComponent,
 });

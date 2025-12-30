@@ -196,6 +196,14 @@ export function RepairOrderList() {
   const navigate = useNavigate();
   const router = useRouter();
 
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [
+    smartFilter,
+    filterByStatus,
+    dateRangePreset
+  ]);
   useEffect(() => {
     if (!user) return;
     const userType = user?.person?.type;

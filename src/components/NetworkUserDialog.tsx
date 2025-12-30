@@ -7,7 +7,7 @@ import PersonCreateModel from '@/js/models/Person';
 import type Person from '@/js/models/Person';
 import Region from '@/js/models/Region';
 import { type PersonType } from '@/js/models/enum/PersonTypeEnum';
-import { X } from 'lucide-react';
+import { Pause, Play, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/auth-store';
 import { useTranslation } from 'react-i18next';
@@ -21,6 +21,7 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import PersonEditStatusRequest from '@/js/models/PersonEditStatusRequest';
 
 const formSchema = z.object({
   firstName: z.string().min(1, 'user.form.firstName.required'),
@@ -102,7 +103,7 @@ export default function NetworkUserDialog({
   const showRegionSelector = selectedRole === 'FieldStaff';
   const showCsrRegionSelector = selectedRole === 'Csr';
 
-  const { handleCloseRequest, ConfirmDialogComponent } = useDialogWithConfirm({
+  const { ConfirmDialogComponent } = useDialogWithConfirm({
     form,
     onClose: () => {
       form.reset();
@@ -111,6 +112,76 @@ export default function NetworkUserDialog({
     title: t('common.discardTitle'),
     description: t('common.discardDescription'),
   });
+
+  const handleDeactivate = async (id: number) => {
+    try {
+      return await new Promise((resolve, reject) => {
+        const request = PersonEditStatusRequest.create({
+          personId: id,
+          action: 'Deactivate',
+        });
+        const personApi = new PersonApi();
+        personApi.editStatus(request, {
+          status200: () => {
+            resolve(true);
+          },
+          error: (error) => {
+            reject(error);
+          },
+          else: (_statusCode, message) => {
+            reject(new Error(message));
+          },
+        });
+      });
+    } catch (error) {
+      toast.error(t('team.dialog.deactivateFailed'));
+      console.error(error);
+    }
+  };
+
+  const handleReactivate = async (id: number) => {
+    try {
+      return await new Promise((resolve, reject) => {
+        const request = PersonEditStatusRequest.create({
+          personId: id,
+          action: 'Reactivate',
+        });
+        const personApi = new PersonApi();
+        personApi.editStatus(request, {
+          status200: () => {
+            resolve(true);
+          },
+          error: (error) => {
+            reject(error);
+          },
+          else: (_statusCode, message) => {
+            reject(new Error(message));
+          },
+        });
+      });
+    } catch (error) {
+      toast.error(t('team.dialog.reactivateFailed'));
+      console.error(error);
+    }
+  };
+  const renderActionButtons = (member: any) => {
+    switch (member?.status) {
+      case 'Active':
+        return (
+          <Button size="sm" variant="outline" onClick={() => handleDeactivate(member.id)}>
+            <Pause className="mr-1 h-3.5 w-3.5" /> {t('team.button.deactivate')}
+          </Button>
+        );
+      case 'Inactive':
+        return (
+          <Button size="sm" variant="outline" onClick={() => handleReactivate(member.id)}>
+            <Play className="mr-1 h-3.5 w-3.5" /> {t('team.button.reactivate')}
+          </Button>
+        );
+      default:
+        return null;
+    }
+  };
 
   const onSubmit = async (data: FormValues) => {
     try {
@@ -121,7 +192,9 @@ export default function NetworkUserDialog({
         type: data.role as PersonType,
         id: initialValues?.id || undefined, // ✅ Edit mode requires id，Creation mode is undefined
         csrRegion: data.csrRegion ? Region.create({ id: data.csrRegion.id, name: data.csrRegion.name }) : undefined,
-        fieldStaffRegions: data.fieldStaffRegions ? data.fieldStaffRegions.map((r) => Region.create(r)) : [],
+        fieldStaffRegions: data.fieldStaffRegions ? Region.createArray(data.fieldStaffRegions) : [],
+
+        // fieldStaffRegions: data.fieldStaffRegions ? data.fieldStaffRegions.map((r) => Region.create(r)) : [],
       });
 
       const personApi = new PersonApi();
@@ -173,7 +246,9 @@ export default function NetworkUserDialog({
 
   const handleOpenChange = (isOpen: boolean) => {
     if (!isOpen) {
-      handleCloseRequest();
+      // handleCloseRequest();
+      form.reset();
+      onOpenChange(false);
     } else {
       onOpenChange(true);
     }
@@ -190,7 +265,7 @@ export default function NetworkUserDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className=" sm:max-w-2xl">
           {/* Fixed header - Unified style */}
           <DialogHeader className="shrink-0">
             <DialogTitle className="px-6 py-4 text-2xl font-semibold">
@@ -340,19 +415,22 @@ export default function NetworkUserDialog({
                   </div>
                 </div>
               )}
-              <DialogFooter className="gap-3 pt-4 mt-4">
-                <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
-                  {t('common.cancel')}
-                </Button>
-                <Button type="submit" variant="default" disabled={form.formState.isSubmitting}>
-                  {initialValues
-                    ? form.formState.isSubmitting
-                      ? t('common.updating')
-                      : t('common.update')
-                    : form.formState.isSubmitting
-                      ? t('common.creating')
-                      : t('common.create')}
-                </Button>
+              <DialogFooter className="pt-4 mt-4 flex justify-between w-full">
+                <div className="flex-1">{renderActionButtons(initialValues)}</div>
+                <div className="flex items-center gap-3">
+                  <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
+                    {t('common.cancel')}
+                  </Button>
+                  <Button type="submit" variant="default" disabled={form.formState.isSubmitting}>
+                    {initialValues
+                      ? form.formState.isSubmitting
+                        ? t('common.updating')
+                        : t('common.update')
+                      : form.formState.isSubmitting
+                        ? t('common.creating')
+                        : t('common.create')}
+                  </Button>
+                </div>
               </DialogFooter>
             </form>
           </Form>
