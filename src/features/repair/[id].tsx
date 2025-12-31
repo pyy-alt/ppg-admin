@@ -314,6 +314,27 @@ export function RepairOrderDetail() {
     setIsReject(false);
   };
 
+  const showIcon = (orderAny: any) => {
+    // shop
+    if(orderAny.stage === 'OrderReview' && orderAny.status==='CsrRejected' && userType==='Shop' ){
+       return <AlertTriangle className="w-4 h-4 text-destructive" />;
+    }else if(orderAny.stage==='OrderReceived' && orderAny.status==='DealershipShipped' && userType==='Shop' ){
+      return <AlertTriangle className="w-4 h-4 text-destructive" />;
+    }else if(orderAny.stage==='OrderFulfillment' && orderAny.status==='DealershipShipped' && userType==='Shop' ){
+      return <AlertTriangle className="w-4 h-4 text-destructive" />;
+    }
+    // Dealership
+    if(orderAny.stage==='OrderFulfillment' && orderAny.status==='DealershipProcessing' && userType==='Dealership' ){
+      return <AlertTriangle className="w-4 h-4 text-destructive" />;
+    }
+    // Csr
+    if(orderAny.stage=='OrderReview' && orderAny.status==='CsrReview' && userType==='Csr' ){
+      return <AlertTriangle className="w-4 h-4 text-destructive" />;
+
+    }
+    return null;
+  };
+
   useEffect(() => {
     if (initPartsOrderData && initPartsOrderData.length > 0) {
       const index = initPartsOrderData.findIndex((po: any) => po.id === Number(partId));
@@ -515,6 +536,7 @@ export function RepairOrderDetail() {
                       setSelectedPartsOrderData(partsOrder);
                     }}
                   >
+                    {showIcon(initPartsOrderData.find((po: any) => po.partsOrderNumber === 0))}
                     {t('repairOrder.detail.partsOrder')}
                   </Button>
                   {initPartsOrderData
@@ -528,7 +550,7 @@ export function RepairOrderDetail() {
                           setCurrentIndex(index + 1);
                         }}
                       >
-                        {partsOrder.hasAlert && <AlertTriangle className="w-4 h-4 text-destructive" />}
+                        {showIcon(partsOrder)}
                         {t('repairOrder.detail.supplement')} {partsOrder.partsOrderNumber}
                       </Button>
                     ))}

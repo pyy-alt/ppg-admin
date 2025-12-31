@@ -268,7 +268,7 @@ export default function NetworkUserDialog({
         <DialogContent className=" sm:max-w-2xl">
           {/* Fixed header - Unified style */}
           <DialogHeader className="shrink-0">
-            <DialogTitle className="px-6 py-4 text-2xl font-semibold">
+            <DialogTitle className="py-2 text-2xl font-semibold ">
               {initialValues ? t('user.dialog.editTitle') : t('user.dialog.addTitle')}
             </DialogTitle>
             <Separator />
@@ -290,7 +290,7 @@ export default function NetworkUserDialog({
                     <FormItem>
                       <FormLabel>{t('user.form.firstName.label')}</FormLabel>
                       <FormControl>
-                        <Input placeholder={t('user.form.firstName.placeholder')} {...field} />
+                        <Input  {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -303,7 +303,7 @@ export default function NetworkUserDialog({
                     <FormItem>
                       <FormLabel>{t('user.form.lastName.label')}</FormLabel>
                       <FormControl>
-                        <Input placeholder={t('user.form.lastName.placeholder')} {...field} />
+                        <Input {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -317,7 +317,7 @@ export default function NetworkUserDialog({
                   <FormItem>
                     <FormLabel>{t('user.form.email.label')}</FormLabel>
                     <FormControl>
-                      <Input type="email" placeholder={t('user.form.email.placeholder')} {...field} />
+                      <Input type="email"  {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -415,7 +415,7 @@ export default function NetworkUserDialog({
                   </div>
                 </div>
               )}
-              <DialogFooter className="pt-4 mt-4 flex justify-between w-full">
+              <DialogFooter className="flex justify-between w-full pt-4 mt-4">
                 <div className="flex-1">{renderActionButtons(initialValues)}</div>
                 <div className="flex items-center gap-3">
                   <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>

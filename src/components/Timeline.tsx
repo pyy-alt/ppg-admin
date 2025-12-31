@@ -257,15 +257,16 @@ export function Timeline({
     if (userType === 'Shop' && item.stage === 'OrderReview' && item.status === 'rejected') {
       return <Badge className="text-blue-700 bg-blue-100">{t('timeline.badge.waitingOnYou')}</Badge>;
     }
+    if (userType === 'Shop' && item.stage === 'OrderReceived' && item.status === 'waiting') {
+      return <Badge className="text-blue-700 bg-blue-100">{t('timeline.badge.waitingOnYou')}</Badge>;
+    }
     if (userType === 'Shop' && item.stage === 'OrderFulfillment' && item.status === 'waiting') {
       return <Badge className="bg-orange-400 text-muted">{t('timeline.badge.pendingDealer')}</Badge>;
     }
     if (userType === 'Dealership' && item.stage === 'OrderFulfillment' && item.status === 'waiting') {
       return <Badge className="text-blue-700 bg-blue-100">{t('timeline.badge.waitingOnYou')}</Badge>;
     }
-    if (userType === 'Shop' && item.stage === 'OrderReceived' && item.status === 'waiting') {
-      return <Badge className="text-blue-700 bg-blue-100">{t('timeline.badge.waitingOnYou')}</Badge>;
-    }
+    
     if (
       (userType === 'Dealership' || userType === 'Csr') &&
       item.stage === 'OrderReceived' &&

@@ -209,7 +209,7 @@
         "placeholder": "Type of Order"
       },
       "status": {
-        "all": "All Status",
+        "all": "All Statuses",
         "placeholder": "Status"
       },
       "region": {
@@ -347,7 +347,7 @@
       "searchPlaceholder": "Filter by Name, #, City",
       "statusPlaceholder": "Status",
       "status": {
-        "all": "All Status",
+        "all": "All Statuses",
         "certified": "Certified",
         "closed": "Closed",
         "inProcess": "In-Process",
@@ -439,7 +439,7 @@
       },
       "role": {
         "label": "Role",
-        "placeholder": "Select role",
+        "placeholder": "Select",
         "required": "Please select a role"
       },
       "csrRegion": {
@@ -491,7 +491,7 @@
       "searchPlaceholder": "Filter by RO#, Order #, VIN, Customer",
       "statusPlaceholder": "Status",
       "status": {
-        "all": "All Status"
+        "all": "All Statuses"
       },
       "dateRangePlaceholder": "Date Range",
       "showRepairCompleted": "Show Repair Completed",

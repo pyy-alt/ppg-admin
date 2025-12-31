@@ -14,7 +14,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
@@ -141,9 +140,9 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
           {isShowUser && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex items-center justify-center gap-3 pr-2 transition-colors rounded-full hover:bg-white/10">
+                <button className="flex items-center justify-center gap-3 pr-2 transition-colors rounded-full hover:bg-white/10 focus-visible:outline-none">
                   <div className="text-left text-white">
-                    <p className="text-sm font-medium leading-none">
+                    <p className="mb-1 text-sm font-medium leading-none">
                       {auth.user
                         ? `${auth.user.person?.firstName} ${auth.user.person?.lastName}`.trim() ||
                           auth.user.person?.email
@@ -152,7 +151,7 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
                     <p className="text-xs text-gray-400">
                       {auth.user
                         ? auth.user.person?.shop?.name && auth.user.person?.shop?.shopNumber
-                          ? `${auth.user.person?.shop?.name}(${auth.user.person?.shop?.shopNumber}) | ${auth.user.person?.type}`
+                          ? `${auth.user.person?.shop?.name}(${auth.user.person?.shop?.shopNumber}) | ${auth.user.person?.type} Staff`
                           : auth.user.person?.dealership?.name && auth.user.person?.dealership?.dealershipNumber
                             ? `${auth.user.person?.dealership?.name}(${auth.user.person?.dealership?.dealershipNumber}) | ${auth.user.person?.type}`
                             : auth.user.person?.csrRegion
@@ -170,7 +169,7 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
               </DropdownMenuTrigger>
               {/* Menu right aligned */}
               <DropdownMenuContent align="end" className="w-56 mt-2">
-                <DropdownMenuLabel className="font-normal">
+                {/* <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium">
                       {auth.user
@@ -192,8 +191,8 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
                         : t('header.notLoggedIn')}
                     </p>
                   </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
+                </DropdownMenuLabel> */}
+                {/* <DropdownMenuSeparator /> */}
                 {auth?.user?.person?.type !== PersonTypeEnum.CSR && (
                   <DropdownMenuItem className="cursor-pointer" onSelect={() => handleSelect('team')}>
                     <Users className="w-4 h-4 mr-2" />

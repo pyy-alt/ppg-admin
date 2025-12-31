@@ -461,10 +461,7 @@ export default function RepairOrderDialog({ open, onOpenChange, onSuccess, initi
                     render={({ field }) => (
                       <FormItem className="flex flex-col space-y-1">
                         <FormLabel>
-                          {t('repairOrder.form.roNumber.label')}{' '}
-                          {isEdit && (
-                            <span className="text-xs text-muted-foreground">({t('repairOrder.form.readOnly')})</span>
-                          )}
+                          {t('repairOrder.form.roNumber.label')}
                         </FormLabel>
                         <FormControl>
                           <Input
@@ -503,17 +500,13 @@ export default function RepairOrderDialog({ open, onOpenChange, onSuccess, initi
                         <FormLabel>{t('repairOrder.form.dealership.label')}</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
-                            <SelectTrigger className="min-w-[250px]">
+                            <SelectTrigger className="w-full">
                               <SelectValue placeholder={t('common.select')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
                             {orderFromDealerships.map((dealership) => (
-                              <SelectItem
-                                key={dealership.id}
-                                value={dealership.id?.toString() || ''}
-                                className="py-2 pr-8 text-left whitespace-normal"
-                              >
+                              <SelectItem key={dealership.id} value={dealership.id?.toString() || ''}>
                                 {dealership.name} | {dealership.dealershipNumber}{' '}
                                 {dealership.isShowText ? `(${t('repairOrder.form.assignedDealer')})` : ''}
                               </SelectItem>
@@ -527,88 +520,97 @@ export default function RepairOrderDialog({ open, onOpenChange, onSuccess, initi
                     )}
                   />
                 </div>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                  <FormField
-                    control={form.control}
-                    name="vin"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col space-y-1">
-                        <FormLabel>{t('repairOrder.form.vin.label')}</FormLabel>
-                        <FormControl>
-                          <Input placeholder={t('repairOrder.form.vin.placeholder')} {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="make"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col space-y-1">
-                        <FormLabel>{t('repairOrder.form.make.label')}</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-12">
+                  <div className="md:col-span-6">
+                    <FormField
+                      control={form.control}
+                      name="vin"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col space-y-1">
+                          <FormLabel>{t('repairOrder.form.vin.label')}</FormLabel>
                           <FormControl>
-                            <SelectTrigger className="w-[250px]">
-                              <SelectValue placeholder={t('common.select')} />
-                            </SelectTrigger>
+                            <Input placeholder={t('repairOrder.form.vin.placeholder')} {...field} />
                           </FormControl>
-                          <SelectContent>
-                            <SelectItem value="Volkswagen" key="Volkswagen">
-                              Volkswagen
-                            </SelectItem>
-                            <SelectItem value="Audi" key="Audi">
-                              Audi
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="year"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col space-y-1">
-                        <FormLabel>{t('repairOrder.form.year.label')}</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <FormField
+                      control={form.control}
+                      name="make"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col space-y-1">
+                          <FormLabel>{t('repairOrder.form.make.label')}</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder={t('common.select')} />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="Volkswagen" key="Volkswagen">
+                                Volkswagen
+                              </SelectItem>
+                              <SelectItem value="Audi" key="Audi">
+                                Audi
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <FormField
+                      control={form.control}
+                      name="year"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col space-y-1">
+                          <FormLabel>{t('repairOrder.form.year.label')}</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder={t('common.select')} />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {Array.from({ length: listLength }, (_, i) => {
+                                const yearValue = startYear - i;
+                                return (
+                                  <SelectItem key={yearValue} value={`${yearValue}`}>
+                                    {yearValue}
+                                  </SelectItem>
+                                );
+                              })}
+                            </SelectContent>
+                          </Select>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <FormField
+                      control={form.control}
+                      name="model"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t('repairOrder.form.model.label')}</FormLabel>
                           <FormControl>
-                            <SelectTrigger className="w-[250px]">
-                              <SelectValue placeholder={t('common.select')} />
-                            </SelectTrigger>
+                            <Input
+                              className="w-full"
+                              placeholder={t('repairOrder.form.model.placeholder')}
+                              {...field}
+                            />
                           </FormControl>
-                          <SelectContent>
-                            {Array.from({ length: listLength }, (_, i) => {
-                              const yearValue = startYear - i;
-                              return (
-                                <SelectItem key={yearValue} value={`${yearValue}`}>
-                                  {yearValue}
-                                </SelectItem>
-                              );
-                            })}
-                          </SelectContent>
-                        </Select>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                  <FormField
-                    control={form.control}
-                    name="model"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t('repairOrder.form.model.label')}</FormLabel>
-                        <FormControl>
-                          <Input placeholder={t('repairOrder.form.model.placeholder')} {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </div>
               </div>
-              <Separator />
               <div className="space-y-8">
                 <div className="flex items-center gap-2">
                   <Upload className="w-5 h-5 text-foreground" />

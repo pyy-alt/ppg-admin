@@ -114,7 +114,7 @@ export function RepairOrderList() {
         shopId: Number(shopId),
         smartFilter: smartFilter || undefined,
         filterByStatus: statusFilter,
-        showRepairCompleted: !showRepairCompleted,
+        showRepairCompleted: showRepairCompleted,
         dateLastSubmittedFrom,
         dateLastSubmittedTo,
       });
@@ -196,14 +196,9 @@ export function RepairOrderList() {
   const navigate = useNavigate();
   const router = useRouter();
 
-
   useEffect(() => {
     setCurrentPage(1);
-  }, [
-    smartFilter,
-    filterByStatus,
-    dateRangePreset
-  ]);
+  }, [smartFilter, filterByStatus, dateRangePreset]);
   useEffect(() => {
     if (!user) return;
     const userType = user?.person?.type;
@@ -229,9 +224,11 @@ export function RepairOrderList() {
     const isOver7Days = diffMs >= SEVEN_DAYS_MS;
     const hasAlertPartsStatus =
       orderAny?.partsOrders?.length > 0 &&
-      orderAny.partsOrders.some((val: any) => val.status === 'ShopReceived' || val.status === 'CsrRejected');
-    const isShopAndOver7Days = isOver7Days && user?.person?.type === 'Shop';
-    if (hasAlertPartsStatus || isShopAndOver7Days) {
+      orderAny.partsOrders.some(
+        (val: any) =>
+          val.status === 'ShopReceived' || val.status === 'CsrRejected' || val.status === 'DealershipShipped'
+      );
+    if ((hasAlertPartsStatus || isOver7Days) && user?.person?.type === 'Shop') {
       return <AlertTriangle className="w-4 h-4 text-destructive" />;
     }
     return null;

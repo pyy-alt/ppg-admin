@@ -209,7 +209,7 @@
         "placeholder": "Type de commande"
       },
       "status": {
-        "all": "Tous les statuts",
+        "all": "Tous les Statuses",
         "placeholder": "Statut"
       },
       "region": {
@@ -347,7 +347,7 @@
       "searchPlaceholder": "Filtrer par nom, n°, ville",
       "statusPlaceholder": "Statut",
       "status": {
-        "all": "Tous les statuts",
+        "all": "Tous les Statuses",
         "certified": "Certifié",
         "closed": "Fermé",
         "inProcess": "En cours",
@@ -439,7 +439,7 @@
       },
       "role": {
         "label": "Rôle",
-        "placeholder": "Sélectionner un rôle",
+        "placeholder": "Sélectionner",
         "required": "Veuillez sélectionner un rôle"
       },
       "csrRegion": {
@@ -491,7 +491,7 @@
       "searchPlaceholder": "Filtrer par n° RO, n° commande, NIV, client",
       "statusPlaceholder": "Statut",
       "status": {
-        "all": "Tous les statuts"
+        "all": "Tous les Statuses"
       },
       "dateRangePlaceholder": "Plage de dates",
       "showRepairCompleted": "Afficher les réparations terminées",
