@@ -18,6 +18,7 @@ import ViewTeamDialog, { TeamMember } from '@/components/ViewTeamDialog';
 import { ClearableInput } from '@/components/clearable-input';
 import { SortableTableHead } from '@/components/SortableTableHead';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from '@tanstack/react-router';
 
 export function Shops() {
   const { t } = useTranslation();
@@ -41,6 +42,8 @@ export function Shops() {
   const [sortBy, setSortBy] = useState('');
 
   const [sortAscending, setSortAscending] = useState(false); // false 为降序（最新在前）
+
+  const navigate= useNavigate()
 
   const getTeamMembers = async (
     userType: 'Shop' | 'Dealership',
@@ -415,12 +418,12 @@ export function Shops() {
                         <TableCell className="font-medium text-blue-600">
                           <span
                             className="cursor-pointer hover:underline"
-                            // onClick={() => {
-                            //   navigate({
-                            //     to: '/repair_orders',
-                            //     search: { id: shop.id },
-                            //   });
-                            // }}
+                            onClick={() => {
+                              navigate({
+                                to: '/repair_orders',
+                                search: { id: shop.id },
+                              });
+                            }}
                           >
                             {shop.name || '--'}
                           </span>
