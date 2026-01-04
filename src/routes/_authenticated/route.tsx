@@ -1,10 +1,5 @@
 import { useEffect, useMemo } from 'react';
-import {
-  createFileRoute,
-  Outlet,
-  useLocation,
-  useNavigate,
-} from '@tanstack/react-router';
+import { createFileRoute, Outlet, useLocation, useNavigate } from '@tanstack/react-router';
 import type Session from '@/js/models/Session';
 import { type PersonType } from '@/js/models/enum/PersonTypeEnum';
 import { useAuthStore } from '@/stores/auth-store';
@@ -12,8 +7,6 @@ import { useLoadingStore } from '@/stores/loading-store';
 import { Loading } from '@/components/Loading';
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 import { HeaderOnlyLayout } from '@/components/layout/header-only-layout';
-import WelcomeGate from '@/features/auth/welcomeGate';
-
 declare global {
   interface Window {
     switchUserType?: (type: PersonType) => void;
@@ -23,10 +16,7 @@ declare global {
 
 const ROUTES_WITHOUT_SIDEBAR = ['/parts_orders'] as const;
 
-const getRedirectTarget = (
-  path: string,
-  userType: PersonType | undefined,
-): string | null => {
+const getRedirectTarget = (path: string, userType: PersonType | undefined): string | null => {
   if (!userType) return null;
 
   // 根路径统一处理
@@ -51,11 +41,7 @@ const getRedirectTarget = (
 
   // Shop：禁止零件订单和管理员页面，允许维修单及其详情
   if (userType === 'Shop') {
-    if (
-      path.startsWith('/parts_orders/') ||
-      path === '/parts_orders' ||
-      path.startsWith('/admin/')
-    ) {
+    if (path.startsWith('/parts_orders/') || path === '/parts_orders' || path.startsWith('/admin/')) {
       return '/repair_orders';
     }
     return null;
@@ -66,11 +52,7 @@ const getRedirectTarget = (
     if (path.startsWith('/repair_orders/')) {
       return null; // 允许直接访问详情页
     }
-    if (
-      path === '/repair_orders' ||
-      path.startsWith('/admin/') ||
-      path.startsWith('/parts_orders/')
-    ) {
+    if (path === '/repair_orders' || path.startsWith('/admin/') || path.startsWith('/parts_orders/')) {
       return '/parts_orders';
     }
     return null;
@@ -78,11 +60,7 @@ const getRedirectTarget = (
 
   // FieldStaff：严格限制在零件订单
   if (userType === 'FieldStaff') {
-    if (
-      path.startsWith('/repair_orders/') ||
-      path === '/repair_orders' ||
-      path.startsWith('/admin/')
-    ) {
+    if (path.startsWith('/repair_orders/') || path === '/repair_orders' || path.startsWith('/admin/')) {
       return '/parts_orders';
     }
     return null;
@@ -136,15 +114,12 @@ function AuthenticatedRouteComponent() {
   }, [auth.loginStatus, userType, location.pathname, navigate]);
 
   const isRedirecting = useMemo(() => {
-    return (
-      auth.loginStatus === 'authenticated' &&
-      getRedirectTarget(location.pathname, userType) !== null
-    );
+    return auth.loginStatus === 'authenticated' && getRedirectTarget(location.pathname, userType) !== null;
   }, [auth.loginStatus, location.pathname, userType]);
 
   const needsSidebar = useMemo(() => {
     return !ROUTES_WITHOUT_SIDEBAR.some(
-      (route) => location.pathname === route || location.pathname.startsWith(`${route}/`),
+      (route) => location.pathname === route || location.pathname.startsWith(`${route}/`)
     );
   }, [location.pathname]);
 
@@ -153,7 +128,9 @@ function AuthenticatedRouteComponent() {
   }
 
   if (auth.loginStatus !== 'authenticated') {
-    return <WelcomeGate />;
+    navigate({ to: '/login', replace: true });
+    return;
+    // return <WelcomeGate />;
   }
 
   if (isRedirecting) {
