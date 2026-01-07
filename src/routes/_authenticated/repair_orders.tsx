@@ -6,6 +6,7 @@ import { RepairOrderList } from '@/features/repair/orders'
 function RepairOrdersComponent() {
   const { isAuthenticated, isLoading } = useAuthenticated()
   const location = useLocation() // ✅ Add this line.
+  
   if (isLoading || !isAuthenticated) {
     return <Loading />
   }

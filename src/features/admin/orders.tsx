@@ -20,7 +20,7 @@ import { DateRangePicker } from '@/components/DateRangePicker';
 import { DataTablePagination } from '@/components/data-table-pagination';
 import { ClearableInput } from '@/components/clearable-input';
 import { SortableTableHead } from '@/components/SortableTableHead';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 export function PartOrders() {
   const { user } = useAuthStore((state) => state.auth);
   const [filterByWaitingOnMe, setOnlyMyOrders] = useState<boolean>(false);
@@ -297,7 +297,7 @@ export function PartOrders() {
                   className="rounded-full bg-muted"
                 />
                 <Label htmlFor="my-orders" className="flex items-center gap-2 text-sm font-medium cursor-pointer">
-                  {t('partsOrder.list.onlyWaitingOnMe')}
+                  <Trans i18nKey="partsOrder.list.onlyWaitingOnMe" components={{ strong: <strong /> }} />
                 </Label>
               </div>
             )}

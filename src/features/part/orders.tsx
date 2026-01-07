@@ -3,7 +3,7 @@ import { useNavigate } from '@tanstack/react-router';
 import OrderApi from '@/js/clients/base/OrderApi';
 import PartsOrderSearchRequest from '@/js/models/PartsOrderSearchRequest';
 import ResultParameter from '@/js/models/ResultParameter';
-import { Search, Download, AlertCircle, TableIcon } from 'lucide-react';
+import { Search, Download, AlertCircle, TableIcon, AlertTriangle } from 'lucide-react';
 import { DateRange } from 'react-day-picker';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/auth-store';
@@ -20,11 +20,11 @@ import { DateRangePicker } from '@/components/DateRangePicker';
 import { DataTablePagination } from '@/components/data-table-pagination';
 import { ClearableInput } from '@/components/clearable-input';
 import { SortableTableHead } from '@/components/SortableTableHead';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 export function PartOrders() {
   const { user } = useAuthStore((state) => state.auth);
-  const [filterByWaitingOnMe, setOnlyMyOrders] = useState<boolean>(true);
+  const [filterByWaitingOnMe, setOnlyMyOrders] = useState<boolean>(false);
   const [dateSubmittedFrom, setFromDate] = useState<Date | undefined>(undefined);
   const [dateSubmittedTo, setToDate] = useState<Date | undefined>(undefined);
   const [dateSubmittedRange, setDateSubmittedRange] = useState<string>('all');
@@ -306,7 +306,7 @@ export function PartOrders() {
                   className="rounded-full bg-muted"
                 />
                 <Label htmlFor="my-orders" className="flex items-center gap-2 text-sm font-medium cursor-pointer">
-                  {t('partsOrder.list.onlyViewWaitingOnMe')}
+                  <Trans i18nKey="partsOrder.list.onlyWaitingOnMe" components={{ strong: <strong /> }} />
                 </Label>
               </div>
             )}
@@ -343,7 +343,9 @@ export function PartOrders() {
               </SelectContent>
             </Select>
 
-            <Select value={filterByRegionId} onValueChange={(value) => setCsrRegion(value)}>
+            {
+              user?.person?.type === 'ProgramAdministrator' || user?.person?.type === 'FieldStaff' && (
+                <Select value={filterByRegionId} onValueChange={(value) => setCsrRegion(value)}>
                 <SelectTrigger className="w-48 bg-muted">
                   <SelectValue placeholder={t('partsOrder.list.region.placeholder')} />
                 </SelectTrigger>
@@ -356,6 +358,8 @@ export function PartOrders() {
                 ))}
               </SelectContent>
             </Select>
+              )
+            }
 
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">{t('partsOrder.list.dateRangeLabel')}</span>
@@ -496,6 +500,7 @@ export function PartOrders() {
                             });
                           }}
                         >
+                          {order.status==='CsrReview' && <AlertTriangle className="w-4 h-4 text-destructive" />}
                           {roNumber}
                         </TableCell>
                         <TableCell>{salesOrder}</TableCell>

@@ -25,7 +25,9 @@
     "select": "Select",
     "discardTitle": "Discard Changes?",
     "discardDescription": "You have unsaved changes. Are you sure you want to close? All your changes will be lost.",
-    "remove": "Remove"
+    "remove": "Remove",
+    "reject": "Reject",
+    "approve": "Approve"
   },
   "profile": {
     "dialog": {
@@ -163,7 +165,7 @@
       "title": "Parts Order List",
       "report": "Report",
       "searchPlaceholder": "Filter by RO#, Sales Order #, VIN, Shop, Dealer",
-      "onlyWaitingOnMe": "Only view parts orders that are waiting on me",
+      "onlyWaitingOnMe": "Only view parts orders that are <strong>waiting on me</strong>",
       "typePlaceholder": "Type of Order",
       "statusPlaceholder": "Status",
       "regionPlaceholder": "CSR Region",
@@ -551,6 +553,7 @@
       "postRepairPhotos": "Post-Repair Photos",
       "salesOrder": "Sales Order #",
       "editPartsOrder": "Edit Parts Order",
+      "editSupplement": "Edit Supplement {{num}}",
       "requestedParts": "Requested Parts",
       "noPartsRequested": "-- No parts requested",
       "partsEstimate": "Parts Estimate",

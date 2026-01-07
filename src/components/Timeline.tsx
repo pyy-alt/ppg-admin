@@ -245,6 +245,7 @@ export function Timeline({
   };
 
   const getStatusBadge = (item: TimelineItem) => {
+    console.log(userType, item.stage, item.status);
     if (userType === 'Csr' && item.stage === 'OrderReview' && status === 'CsrReview' && item.status === 'waiting') {
       return <Badge className="text-white bg-blue-700">{t('timeline.badge.waitingOnYou')}</Badge>;
     }

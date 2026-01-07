@@ -228,7 +228,8 @@ export function RepairOrderList() {
         (val: any) =>
           val.status === 'ShopReceived' || val.status === 'CsrRejected' || val.status === 'DealershipShipped'
       );
-    if ((hasAlertPartsStatus || isOver7Days) && user?.person?.type === 'Shop') {
+      const isRepairCompleted=orderAny.partsOrders.every((val: any) => val.status === 'RepairCompleted');
+    if ((hasAlertPartsStatus || (isOver7Days && !isRepairCompleted)) && user?.person?.type === 'Shop') {
       return <AlertTriangle className="w-4 h-4 text-destructive" />;
     }
     return null;

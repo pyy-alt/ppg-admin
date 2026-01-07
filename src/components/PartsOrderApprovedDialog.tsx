@@ -1,10 +1,22 @@
 import { useState } from 'react';
 import type RepairOrder from '@/js/models/RepairOrder';
-import { Check, X, FileText, Package, NotebookPen, Loader2 } from 'lucide-react';
+import {
+  Check,
+  X,
+  FileText,
+  Package,
+  NotebookPen,
+  Loader2,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDateOnly } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
@@ -62,7 +74,9 @@ export default function PartsOrderApprovedDialog({
         resolve(void 0);
       } catch (error) {
         toast.error(
-          t('partsOrder.approveDialog.actionFailed', { action: isReject ? t('common.reject') : t('common.approve') })
+          t('partsOrder.approveDialog.actionFailed', {
+            action: isReject ? t('common.reject') : t('common.approve'),
+          })
         );
         resolve(void 0);
       } finally {
@@ -81,7 +95,9 @@ export default function PartsOrderApprovedDialog({
             ) : (
               <Check className="p-1 text-white bg-green-500 rounded-full h-7 w-7" />
             )}
-            {isReject ? t('partsOrder.approveDialog.rejectTitle') : t('partsOrder.approveDialog.approveTitle')}
+            {isReject
+              ? t('partsOrder.approveDialog.rejectTitle')
+              : t('partsOrder.approveDialog.approveTitle')}
           </DialogTitle>
           <Separator />
           <button
@@ -101,25 +117,48 @@ export default function PartsOrderApprovedDialog({
             </h3>
             <div className="grid grid-cols-1 text-sm gap-x-12 gap-y-6 sm:grid-cols-3">
               <div>
-                <Label className="text-muted-foreground">{t('repairOrder.form.roNumber.label')}</Label>
-                <p className="text-foreground mt-1.5 font-medium">{initRepaitOrderData?.roNumber || '--'}</p>
-              </div>
-              <div>
-                <Label className="text-muted-foreground">{t('repairOrder.form.dealership.label')}</Label>
-                <p className="text-foreground mt-1.5 font-medium">{initRepaitOrderData?.dealership?.name || '--'}</p>
-              </div>
-              <div>
-                <Label className="text-muted-foreground">{t('repairOrder.form.customer.label')}</Label>
-                <p className="text-foreground mt-1.5 font-medium">{initRepaitOrderData?.customer || '--'}</p>
-              </div>
-              <div>
-                <Label className="text-muted-foreground">{t('repairOrder.form.vin.label')}</Label>
-                <p className="text-foreground mt-1.5">{initRepaitOrderData?.vin || '--'}</p>
-              </div>
-              <div>
-                <Label className="text-muted-foreground">{t('repairOrder.form.ymm.label')}</Label>
+                <Label className="text-muted-foreground">
+                  {t('repairOrder.form.roNumber.label')}
+                </Label>
                 <p className="text-foreground mt-1.5 font-medium">
-                  {initRepaitOrderData?.year}/{initRepaitOrderData?.make}/{initRepaitOrderData?.model}
+                  {initRepaitOrderData?.roNumber || '--'}
+                </p>
+              </div>
+              <div>
+                <Label className="text-muted-foreground">
+                  {t('repairOrder.form.dealership.label')}
+                </Label>
+                <p className="text-foreground mt-1.5 font-medium">
+                  {initRepaitOrderData?.dealership?.name || '--'}
+                </p>
+              </div>
+              <div className="hidden sm:block"></div>
+              <div>
+                <Label className="text-muted-foreground">
+                  {t('repairOrder.form.vin.label')}
+                </Label>
+                <p className="text-foreground mt-1.5">
+                  {initRepaitOrderData?.vin || '--'}
+                </p>
+              </div>
+              <div>
+                <Label className="text-muted-foreground">
+                  {t('repairOrder.form.ymm.label')}
+                </Label>
+                <p className="text-foreground mt-1.5 font-medium">
+                  {initRepaitOrderData?.year &&
+                  initRepaitOrderData?.make &&
+                  initRepaitOrderData?.model
+                    ? `${initRepaitOrderData?.year} ${initRepaitOrderData?.make} ${initRepaitOrderData?.model}`
+                    : '---'}
+                </p>
+              </div>
+              <div>
+                <Label className="text-muted-foreground">
+                  {t('repairOrder.form.customer.label')}
+                </Label>
+                <p className="text-foreground mt-1.5 font-medium">
+                  {initRepaitOrderData?.customer || '--'}
                 </p>
               </div>
             </div>
@@ -133,9 +172,13 @@ export default function PartsOrderApprovedDialog({
             </h3>
             <div className="grid grid-cols-1 text-sm gap-x-12 gap-y-6 sm:grid-cols-3">
               <div>
-                <Label className="text-muted-foreground">{t('partsOrder.section.submitted')}</Label>
+                <Label className="text-muted-foreground">
+                  {t('partsOrder.section.submitted')}
+                </Label>
                 <p className="mt-1.5">
-                  {formatDateOnly(initRepaitOrderData?.dateLastSubmitted as Date) || '--'}
+                  {formatDateOnly(
+                    initRepaitOrderData?.dateLastSubmitted as Date
+                  ) || '--'}
                   {' by '}
                   {selectPartsOrderData?.submittedByPerson?.firstName +
                     ' ' +
@@ -143,10 +186,13 @@ export default function PartsOrderApprovedDialog({
                 </p>
               </div>
               <div>
-                <Label className="text-muted-foreground">{t('partsOrder.section.approved')}</Label>
+                <Label className="text-muted-foreground">
+                  {t('partsOrder.section.approved')}
+                </Label>
                 {(initRepaitOrderData?.dateClosed && (
                   <p className="mt-1.5 font-medium">
-                    {formatDateOnly(initRepaitOrderData?.dateClosed as Date) || '--'}
+                    {formatDateOnly(initRepaitOrderData?.dateClosed as Date) ||
+                      '--'}
                     {' by '}
                     {selectPartsOrderData?.reviewedByPerson?.firstName +
                       ' ' +
@@ -155,10 +201,13 @@ export default function PartsOrderApprovedDialog({
                 )) || <p className="text-muted-foreground mt-1.5">--</p>}
               </div>
               <div>
-                <Label className="text-muted-foreground">{t('partsOrder.section.shipped')}</Label>
+                <Label className="text-muted-foreground">
+                  {t('partsOrder.section.shipped')}
+                </Label>
                 {(selectPartsOrderData?.shippedByPerson?.dateLastAccess && (
                   <p className="text-muted-foreground mt-1.5">
-                    {selectPartsOrderData?.shippedByPerson?.dateLastAccess || '--'}
+                    {selectPartsOrderData?.shippedByPerson?.dateLastAccess ||
+                      '--'}
                     {' by '}
                     {selectPartsOrderData?.shippedByPerson?.firstName +
                       ' ' +
@@ -196,7 +245,6 @@ export default function PartsOrderApprovedDialog({
                 </Label>
                 <Input
                   id="sales-order"
-                  placeholder={t('partsOrder.approveDialog.salesOrderPlaceholder')}
                   className="mt-2 h-11"
                   value={salesOrder}
                   onChange={(e) => setSalesOrder(e.target.value.trim())}
@@ -207,19 +255,29 @@ export default function PartsOrderApprovedDialog({
         </div>
         {/* Footer */}
         <div className="flex items-center justify-end gap-3 px-6 py-4 border-t bg-muted/30">
-          <Button variant="outline" size="lg" onClick={() => onOpenChange(false)}>
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={() => onOpenChange(false)}
+          >
             {t('common.cancel')}
           </Button>
           <Button
             size="lg"
-            className={isReject ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}
+            className={
+              isReject
+                ? 'bg-red-600 hover:bg-red-700'
+                : 'bg-green-600 hover:bg-green-700'
+            }
             onClick={handleApprove}
             disabled={isLoading}
           >
             {isLoading ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                {isReject ? t('partsOrder.button.rejecting') : t('partsOrder.button.approving')}
+                {isReject
+                  ? t('partsOrder.button.rejecting')
+                  : t('partsOrder.button.approving')}
               </>
             ) : isReject ? (
               t('common.reject')
