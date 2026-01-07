@@ -1,5 +1,10 @@
 import { useEffect, useMemo } from 'react';
-import { createFileRoute, Outlet, useLocation, useNavigate } from '@tanstack/react-router';
+import {
+  createFileRoute,
+  Outlet,
+  useLocation,
+  useNavigate,
+} from '@tanstack/react-router';
 import type Session from '@/js/models/Session';
 import { type PersonType } from '@/js/models/enum/PersonTypeEnum';
 import { useAuthStore } from '@/stores/auth-store';
@@ -16,7 +21,10 @@ declare global {
 
 const ROUTES_WITHOUT_SIDEBAR = ['/parts_orders'] as const;
 
-const getRedirectTarget = (path: string, userType: PersonType | undefined): string | null => {
+const getRedirectTarget = (
+  path: string,
+  userType: PersonType | undefined
+): string | null => {
   if (!userType) return null;
 
   // 根路径统一处理
@@ -41,7 +49,11 @@ const getRedirectTarget = (path: string, userType: PersonType | undefined): stri
 
   // Shop：禁止零件订单和管理员页面，允许维修单及其详情
   if (userType === 'Shop') {
-    if (path.startsWith('/parts_orders/') || path === '/parts_orders' || path.startsWith('/admin/')) {
+    if (
+      path.startsWith('/parts_orders/') ||
+      path === '/parts_orders' ||
+      path.startsWith('/admin/')
+    ) {
       return '/repair_orders';
     }
     return null;
@@ -52,7 +64,11 @@ const getRedirectTarget = (path: string, userType: PersonType | undefined): stri
     if (path.startsWith('/repair_orders/')) {
       return null; // 允许直接访问详情页
     }
-    if (path === '/repair_orders' || path.startsWith('/admin/') || path.startsWith('/parts_orders/')) {
+    if (
+      path === '/repair_orders' ||
+      path.startsWith('/admin/') ||
+      path.startsWith('/parts_orders/')
+    ) {
       return '/parts_orders';
     }
     return null;
@@ -60,7 +76,11 @@ const getRedirectTarget = (path: string, userType: PersonType | undefined): stri
 
   // FieldStaff：严格限制在零件订单
   if (userType === 'FieldStaff') {
-    if (path.startsWith('/repair_orders/') || path === '/repair_orders' || path.startsWith('/admin/')) {
+    if (
+      path.startsWith('/repair_orders/') ||
+      path === '/repair_orders' ||
+      path.startsWith('/admin/')
+    ) {
       return '/parts_orders';
     }
     return null;
@@ -103,7 +123,10 @@ function AuthenticatedRouteComponent() {
   }, [auth.user]);
 
   useEffect(() => {
-    if (auth.loginStatus === 'checking' || auth.loginStatus !== 'authenticated') {
+    if (
+      auth.loginStatus === 'checking' ||
+      auth.loginStatus !== 'authenticated'
+    ) {
       return;
     }
 
@@ -113,24 +136,45 @@ function AuthenticatedRouteComponent() {
     }
   }, [auth.loginStatus, userType, location.pathname, navigate]);
 
+  // 处理未认证状态的延迟跳转，给 InitAuth 时间完成认证检查
+  useEffect(() => {
+    if (auth.loginStatus !== 'unauthenticated') {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      // 再次检查状态，如果仍然是 unauthenticated 才跳转
+      const { auth: currentAuth } = useAuthStore.getState();
+      if (currentAuth.loginStatus === 'unauthenticated') {
+        navigate({ to: '/login', replace: true });
+      }
+    }, 100); // 给 InitAuth 100ms 时间完成检查
+
+    return () => clearTimeout(timer);
+  }, [auth.loginStatus, navigate]);
+
   const isRedirecting = useMemo(() => {
-    return auth.loginStatus === 'authenticated' && getRedirectTarget(location.pathname, userType) !== null;
+    return (
+      auth.loginStatus === 'authenticated' &&
+      getRedirectTarget(location.pathname, userType) !== null
+    );
   }, [auth.loginStatus, location.pathname, userType]);
 
   const needsSidebar = useMemo(() => {
     return !ROUTES_WITHOUT_SIDEBAR.some(
-      (route) => location.pathname === route || location.pathname.startsWith(`${route}/`)
+      (route) =>
+        location.pathname === route || location.pathname.startsWith(`${route}/`)
     );
   }, [location.pathname]);
 
+  // 等待认证检查完成
   if (auth.loginStatus === 'checking') {
     return <Loading />;
   }
 
-  if (auth.loginStatus !== 'authenticated') {
-    navigate({ to: '/login', replace: true });
-    return;
-    // return <WelcomeGate />;
+  // 只有在确认未认证时才显示 Loading（跳转由 useEffect 处理）
+  if (auth.loginStatus === 'unauthenticated') {
+    return <Loading />;
   }
 
   if (isRedirecting) {
