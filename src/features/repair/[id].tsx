@@ -405,14 +405,14 @@ export function RepairOrderDetail() {
         />
         <div className="absolute -translate-y-1/2 top-1/2 left-6">
           <p className="text-3xl font-bold text-white">
-            {user?.person?.shop?.name || user?.person?.csrRegion?.name || '--'}
+            {initRepaitOrderData && initRepaitOrderData.shop?.name || '--'}
           </p>
           <p className="flex items-center mt-4 space-x-4 text-sm text-gray-200">
             <Warehouse className="w-5 h-5 text-white" />
             <span>
               {t('repairOrder.detail.assignedDealership')}:{' '}
-              {user?.person?.shop?.sponsorDealership.name ?? '--'} (
-              {user?.person?.shop?.sponsorDealership.dealershipNumber})
+              {initRepaitOrderData && initRepaitOrderData.shop?.sponsorDealership.name || '--'} (
+              {initRepaitOrderData && initRepaitOrderData.shop?.sponsorDealership.dealershipNumber})
             </span>
             <Users className="w-5 h-5 ml-6 text-white" />
             <span>
@@ -431,7 +431,7 @@ export function RepairOrderDetail() {
                 aria-hidden="true"
               />
               <span className="truncate">
-                {user?.person?.shop?.shopNumber ?? '--'}
+                {initRepaitOrderData && initRepaitOrderData.shop?.shopNumber ||'--'}
               </span>
             </div>
             <div className="my-1 grid grid-cols-[24px_1fr] items-center gap-2">

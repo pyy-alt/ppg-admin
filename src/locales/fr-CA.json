@@ -463,6 +463,9 @@
     }
   },
   "repairOrder": {
+    "validation": {
+      "atLeastOneAttachment": "Veuillez télécharger au moins un fichier (document de mesure structurelle ou photo avant réparation)"
+    },
     "messages": {
       "loadFailed": "Échec du chargement du bon de réparation",
       "createFailed": "Échec de la création du bon de réparation",

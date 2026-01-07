@@ -15,11 +15,31 @@ import { useAuthStore } from '@/stores/auth-store';
 import { convertFilesToFileAssets } from '@/lib/utils';
 import { useDialogWithConfirm } from '@/hooks/use-dialog-with-confirm';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  useFormField,
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { useTranslation } from 'react-i18next'; // 新增：引入 useTranslation
 import z from 'zod';
@@ -27,11 +47,18 @@ import z from 'zod';
 const formSchema = z.object({
   roNumber: z.string().min(1, 'repairOrder.form.roNumber.required'),
   customer: z.string().min(1, 'repairOrder.form.customer.required'),
-  vin: z.string().min(17, 'repairOrder.form.vin.min').max(17, 'repairOrder.form.vin.max').optional().or(z.literal('')),
+  vin: z
+    .string()
+    .min(17, 'repairOrder.form.vin.min')
+    .max(17, 'repairOrder.form.vin.max')
+    .optional()
+    .or(z.literal('')),
   make: z.string().optional(),
   year: z.string().optional(),
   model: z.string().optional(),
-  orderFromDealershipId: z.string().min(1, 'repairOrder.form.dealership.required'),
+  orderFromDealershipId: z
+    .string()
+    .min(1, 'repairOrder.form.dealership.required'),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -67,11 +94,20 @@ const currentYear = new Date().getFullYear();
 const listLength = currentYear + 1 - 1949;
 const startYear = currentYear + 1;
 
-export default function RepairOrderDialog({ open, onOpenChange, onSuccess, initialData }: RepairOrderDialogProps) {
+export default function RepairOrderDialog({
+  open,
+  onOpenChange,
+  onSuccess,
+  initialData,
+}: RepairOrderDialogProps) {
   const { t } = useTranslation();
   const isEdit = !!initialData;
-  const [structuralMeasurementFileAssets, setStructuralMeasurementFileAssets] = useState<any[]>([]);
-  const [preRepairPhotoFileAssets, setPreRepairPhotoFileAssets] = useState<any[]>([]);
+  const [structuralMeasurementFileAssets, setStructuralMeasurementFileAssets] =
+    useState<any[]>([]);
+  const [preRepairPhotoFileAssets, setPreRepairPhotoFileAssets] = useState<
+    any[]
+  >([]);
+  const [attachmentError, setAttachmentError] = useState<string>('');
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -90,18 +126,44 @@ export default function RepairOrderDialog({ open, onOpenChange, onSuccess, initi
 
   const createdUrls = useRef<Set<string>>(new Set());
 
+  const TranslatedFormMessage = () => {
+    const { error, formMessageId } = useFormField();
+    const { t } = useTranslation();
+
+    if (!error) {
+      return null;
+    }
+
+    const message = error.message || '';
+    // 如果消息是翻译键（包含点号），则尝试翻译
+    const translatedMessage = message.includes('.') ? t(message) : message;
+
+    return (
+      <p
+        data-slot="form-message"
+        id={formMessageId}
+        className="text-destructive text-sm"
+      >
+        {translatedMessage}
+      </p>
+    );
+  };
+
   const performClose: () => void = () => {
     onOpenChange(false);
     setTimeout(() => {
       form.reset();
       setStructuralMeasurementFileAssets([]);
       setPreRepairPhotoFileAssets([]);
+      setAttachmentError(''); // clear error message
     }, 200);
   };
 
   const { ConfirmDialogComponent } = useDialogWithConfirm({
     form,
-    hasUnsavedFiles: structuralMeasurementFileAssets.length > 0 || preRepairPhotoFileAssets.length > 0,
+    hasUnsavedFiles:
+      structuralMeasurementFileAssets.length > 0 ||
+      preRepairPhotoFileAssets.length > 0,
     onClose: performClose,
     title: t('repairOrder.dialog.discardTitle'),
     description: t('repairOrder.dialog.discardDescription'),
@@ -131,7 +193,9 @@ export default function RepairOrderDialog({ open, onOpenChange, onSuccess, initi
           if (response.organizations && response.organizations.length > 0) {
             const dealerships = response.organizations;
             for (let i = 0; i < dealerships.length; i++) {
-              if (dealerships[i].id === user?.person?.shop?.sponsorDealership.id) {
+              if (
+                dealerships[i].id === user?.person?.shop?.sponsorDealership.id
+              ) {
                 dealerships[i].isShowText = true;
                 break;
               } else {
@@ -153,7 +217,8 @@ export default function RepairOrderDialog({ open, onOpenChange, onSuccess, initi
 
   useEffect(() => {
     if (initialData && open) {
-      if (initialData.year && typeof initialData.year === 'number') initialData.year = String(initialData.year);
+      if (initialData.year && typeof initialData.year === 'number')
+        initialData.year = String(initialData.year);
       form.reset({
         roNumber: initialData.roNumber,
         customer: initialData.customer,
@@ -163,17 +228,21 @@ export default function RepairOrderDialog({ open, onOpenChange, onSuccess, initi
         model: initialData.model || '',
         orderFromDealershipId: initialData.dealership?.id?.toString() || '',
       });
-      const imgList = (initialData.preRepairPhotoFileAssets || []).map((item: any) => {
-        item.name = item.filename;
-        item.viewUrl = import.meta.env.VITE_API_URL + item.viewUrl;
-        return item;
-      });
+      const imgList = (initialData.preRepairPhotoFileAssets || []).map(
+        (item: any) => {
+          item.name = item.filename;
+          item.viewUrl = import.meta.env.VITE_API_URL + item.viewUrl;
+          return item;
+        }
+      );
       setPreRepairPhotoFileAssets(imgList || []);
-      const pdfList = (initialData.structuralMeasurementFileAssets || []).map((item: any) => {
-        item.name = item.filename;
-        item.viewUrl = import.meta.env.VITE_API_URL + item.viewUrl;
-        return item;
-      });
+      const pdfList = (initialData.structuralMeasurementFileAssets || []).map(
+        (item: any) => {
+          item.name = item.filename;
+          item.viewUrl = import.meta.env.VITE_API_URL + item.viewUrl;
+          return item;
+        }
+      );
       setStructuralMeasurementFileAssets(pdfList || []);
     } else {
       form.reset({
@@ -183,7 +252,7 @@ export default function RepairOrderDialog({ open, onOpenChange, onSuccess, initi
         make: '',
         year: '',
         model: '',
-        orderFromDealershipId: undefined,
+        orderFromDealershipId: '',
       });
       setStructuralMeasurementFileAssets([]);
       setPreRepairPhotoFileAssets([]);
@@ -192,10 +261,32 @@ export default function RepairOrderDialog({ open, onOpenChange, onSuccess, initi
 
   const onSubmit = async (data: FormValues) => {
     try {
+      if (
+        structuralMeasurementFileAssets.length === 0 &&
+        preRepairPhotoFileAssets.length === 0
+      ) {
+        setAttachmentError(t('repairOrder.validation.atLeastOneAttachment'));
+        // 滚动到附件区域
+        setTimeout(() => {
+          const attachmentsSection = document.querySelector(
+            '[data-attachments-section]'
+          );
+          attachmentsSection?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+          });
+        }, 100);
+        return;
+      }
+      setAttachmentError(''); // clear before error message
       const api = new RequestApi();
       try {
-        const newPhotoFiles = preRepairPhotoFileAssets.filter((f): f is File => f instanceof File);
-        const newStructuralFiles = structuralMeasurementFileAssets.filter((f): f is File => f instanceof File);
+        const newPhotoFiles = preRepairPhotoFileAssets.filter(
+          (f): f is File => f instanceof File
+        );
+        const newStructuralFiles = structuralMeasurementFileAssets.filter(
+          (f): f is File => f instanceof File
+        );
         const preRepairPhotoFileAssetsToUpload = await convertFilesToFileAssets(
           newPhotoFiles,
           FileAssetFileAssetTypeEnum.PRE_REPAIR_PHOTO
@@ -216,9 +307,13 @@ export default function RepairOrderDialog({ open, onOpenChange, onSuccess, initi
           year: data.year,
           model: data.model,
           structuralMeasurementFileAssets:
-            structuralFileAssetsToUpload.length > 0 ? structuralFileAssetsToUpload : structuralMeasurementFileAssets,
+            structuralFileAssetsToUpload.length > 0
+              ? structuralFileAssetsToUpload
+              : structuralMeasurementFileAssets,
           preRepairPhotoFileAssets:
-            preRepairPhotoFileAssetsToUpload.length > 0 ? preRepairPhotoFileAssetsToUpload : preRepairPhotoFileAssets,
+            preRepairPhotoFileAssetsToUpload.length > 0
+              ? preRepairPhotoFileAssetsToUpload
+              : preRepairPhotoFileAssets,
           dealership,
           shop: user?.person?.shop || initialData?.shop || null,
         };
@@ -303,7 +398,9 @@ export default function RepairOrderDialog({ open, onOpenChange, onSuccess, initi
       ? setPreRepairPhotoFileAssets((prev) => {
           const newFiles = prev.filter((_, i) => i !== index);
           if (file instanceof File) {
-            const potentialUrl = Array.from(createdUrls.current).find((url) => url.startsWith('blob:'));
+            const potentialUrl = Array.from(createdUrls.current).find((url) =>
+              url.startsWith('blob:')
+            );
             if (potentialUrl) {
               URL.revokeObjectURL(potentialUrl);
               createdUrls.current.delete(potentialUrl);
@@ -314,7 +411,9 @@ export default function RepairOrderDialog({ open, onOpenChange, onSuccess, initi
       : setStructuralMeasurementFileAssets((prev) => {
           const newFiles = prev.filter((_, i) => i !== index);
           if (file instanceof File) {
-            const potentialUrl = Array.from(createdUrls.current).find((url) => url.startsWith('blob:'));
+            const potentialUrl = Array.from(createdUrls.current).find((url) =>
+              url.startsWith('blob:')
+            );
             if (potentialUrl) {
               URL.revokeObjectURL(potentialUrl);
               createdUrls.current.delete(potentialUrl);
@@ -345,7 +444,8 @@ export default function RepairOrderDialog({ open, onOpenChange, onSuccess, initi
         return {
           'application/pdf': ['.pdf'],
           'application/msword': ['.doc'],
-          'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+            ['.docx'],
         };
       }
       return undefined;
@@ -356,6 +456,9 @@ export default function RepairOrderDialog({ open, onOpenChange, onSuccess, initi
       multiple: true,
       onDrop: (acceptedFiles) => {
         onFilesChange([...files, ...acceptedFiles]);
+        if (attachmentError) {
+          setAttachmentError('');
+        }
       },
     });
 
@@ -375,11 +478,19 @@ export default function RepairOrderDialog({ open, onOpenChange, onSuccess, initi
           <Icon className="w-12 h-12 mx-auto text-muted-foreground" />
           <p className="mt-2 text-sm text-muted-foreground">
             {isDragActive ? (
-              <>{t('repairOrder.dropzone.dropHere', { type: title.toLowerCase() })}</>
+              <>
+                {t('repairOrder.dropzone.dropHere', {
+                  type: title.toLowerCase(),
+                })}
+              </>
             ) : (
               <>
-                {t('repairOrder.dropzone.instruction', { type: title.toLowerCase() })}{' '}
-                <span className="text-primary hover:underline">{t('repairOrder.dropzone.clickToBrowse')}</span>
+                {t('repairOrder.dropzone.instruction', {
+                  type: title.toLowerCase(),
+                })}{' '}
+                <span className="text-primary hover:underline">
+                  {t('repairOrder.dropzone.clickToBrowse')}
+                </span>
               </>
             )}
           </p>
@@ -401,23 +512,48 @@ export default function RepairOrderDialog({ open, onOpenChange, onSuccess, initi
             {files.map((file: any, i: number) => {
               const key = file.viewUrl ? file.viewUrl : `${file.name}-${i}`;
               return (
-                <div key={key} className="flex items-center justify-between px-3 py-2 transition-colors rounded-md">
+                <div
+                  key={key}
+                  className="flex items-center justify-between px-3 py-2 transition-colors rounded-md"
+                >
                   <button
                     type="button"
                     className="flex items-center gap-2 text-blue-500 cursor-pointer"
                     onClick={() => handlePreview(file)}
                   >
-                    {title.includes('Photo') ? <ImageIcon className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
-                    <span className="text-sm text-blue-500 underline truncate max-w-48">{file.name}</span>
+                    {title.includes('Photo') ? (
+                      <ImageIcon className="w-4 h-4" />
+                    ) : (
+                      <FileText className="w-4 h-4" />
+                    )}
+                    <span className="text-sm text-blue-500 underline truncate max-w-48">
+                      {file.name}
+                    </span>
                   </button>
                   <button
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       removeFile(i, files, title);
+                      const remainingFiles = files.filter(
+                        (_: any, idx: number) => idx !== i
+                      );
+                      const otherFiles = title.includes('Photo')
+                        ? structuralMeasurementFileAssets
+                        : preRepairPhotoFileAssets;
+                      if (
+                        remainingFiles.length === 0 &&
+                        otherFiles.length === 0
+                      ) {
+                        setAttachmentError(
+                          t('repairOrder.validation.atLeastOneAttachment')
+                        );
+                      }
                     }}
                     className="p-1 transition-colors rounded text-destructive hover:bg-destructive/10 hover:text-destructive focus:ring-destructive focus:ring-2 focus:ring-offset-1 focus:outline-none"
-                    aria-label={t('repairOrder.dropzone.removeFile', { name: file.name })}
+                    aria-label={t('repairOrder.dropzone.removeFile', {
+                      name: file.name,
+                    })}
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -435,7 +571,9 @@ export default function RepairOrderDialog({ open, onOpenChange, onSuccess, initi
       <DialogContent className="flex max-h-[90vh] w-[90%] flex-col sm:max-w-7xl">
         <DialogHeader className="shrink-0">
           <DialogTitle className="text-2xl font-semibold">
-            {isEdit ? t('repairOrder.dialog.editTitle') : t('repairOrder.dialog.newTitle')}
+            {isEdit
+              ? t('repairOrder.dialog.editTitle')
+              : t('repairOrder.dialog.newTitle')}
           </DialogTitle>
           <Separator />
           <button
@@ -448,11 +586,40 @@ export default function RepairOrderDialog({ open, onOpenChange, onSuccess, initi
         </DialogHeader>
         <div className="flex-1 px-6 py-4 -mx-6 overflow-y-auto scroll-smooth">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="pb-4 space-y-8" id="repair-order-form">
+            <form
+              onSubmit={form.handleSubmit(
+                onSubmit,
+                // 第二个参数：验证失败时的回调
+                () => {
+                  // 即使表单验证失败，也检查附件
+                  if (
+                    structuralMeasurementFileAssets.length === 0 &&
+                    preRepairPhotoFileAssets.length === 0
+                  ) {
+                    setAttachmentError(
+                      t('repairOrder.validation.atLeastOneAttachment')
+                    );
+                    setTimeout(() => {
+                      const attachmentsSection = document.querySelector(
+                        '[data-attachments-section]'
+                      );
+                      attachmentsSection?.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start',
+                      });
+                    }, 100);
+                  }
+                }
+              )}
+              className="pb-4 space-y-8"
+              id="repair-order-form"
+            >
               <div className="space-y-6">
                 <div className="flex items-center gap-2">
                   <FileText className="w-5 h-5 text-foreground" />
-                  <h3 className="text-lg font-medium">{t('repairOrder.section.info')}</h3>
+                  <h3 className="text-lg font-medium">
+                    {t('repairOrder.section.info')}
+                  </h3>
                 </div>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                   <FormField
@@ -465,14 +632,16 @@ export default function RepairOrderDialog({ open, onOpenChange, onSuccess, initi
                         </FormLabel>
                         <FormControl>
                           <Input
-                            placeholder={t('repairOrder.form.roNumber.placeholder')}
+                            placeholder={t(
+                              'repairOrder.form.roNumber.placeholder'
+                            )}
                             {...field}
                             disabled={isEdit}
                             className={isEdit ? 'bg-muted' : ''}
                           />
                         </FormControl>
                         <div className="flex min-h-[20px] items-start">
-                          <FormMessage />
+                          <TranslatedFormMessage />
                         </div>
                       </FormItem>
                     )}
@@ -482,12 +651,19 @@ export default function RepairOrderDialog({ open, onOpenChange, onSuccess, initi
                     name="customer"
                     render={({ field }) => (
                       <FormItem className="flex flex-col space-y-1">
-                        <FormLabel>{t('repairOrder.form.customer.label')}</FormLabel>
+                        <FormLabel>
+                          {t('repairOrder.form.customer.label')}
+                        </FormLabel>
                         <FormControl>
-                          <Input placeholder={t('repairOrder.form.customer.placeholder')} {...field} />
+                          <Input
+                            placeholder={t(
+                              'repairOrder.form.customer.placeholder'
+                            )}
+                            {...field}
+                          />
                         </FormControl>
                         <div className="flex min-h-[20px] items-start">
-                          <FormMessage />
+                          <TranslatedFormMessage />
                         </div>
                       </FormItem>
                     )}
@@ -497,8 +673,13 @@ export default function RepairOrderDialog({ open, onOpenChange, onSuccess, initi
                     name="orderFromDealershipId"
                     render={({ field }) => (
                       <FormItem className="flex flex-col space-y-1">
-                        <FormLabel>{t('repairOrder.form.dealership.label')}</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
+                        <FormLabel>
+                          {t('repairOrder.form.dealership.label')}
+                        </FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
                           <FormControl>
                             <SelectTrigger className="w-full">
                               <SelectValue placeholder={t('common.select')} />
@@ -506,15 +687,21 @@ export default function RepairOrderDialog({ open, onOpenChange, onSuccess, initi
                           </FormControl>
                           <SelectContent>
                             {orderFromDealerships.map((dealership) => (
-                              <SelectItem key={dealership.id} value={dealership.id?.toString() || ''}>
-                                {dealership.name} | {dealership.dealershipNumber}{' '}
-                                {dealership.isShowText ? `(${t('repairOrder.form.assignedDealer')})` : ''}
+                              <SelectItem
+                                key={dealership.id}
+                                value={dealership.id?.toString() || ''}
+                              >
+                                {dealership.name} |{' '}
+                                {dealership.dealershipNumber}{' '}
+                                {dealership.isShowText
+                                  ? `(${t('repairOrder.form.assignedDealer')})`
+                                  : ''}
                               </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
                         <div className="flex min-h-[20px] items-start">
-                          <FormMessage />
+                          <TranslatedFormMessage />
                         </div>
                       </FormItem>
                     )}
@@ -527,11 +714,18 @@ export default function RepairOrderDialog({ open, onOpenChange, onSuccess, initi
                       name="vin"
                       render={({ field }) => (
                         <FormItem className="flex flex-col space-y-1">
-                          <FormLabel>{t('repairOrder.form.vin.label')}</FormLabel>
+                          <FormLabel>
+                            {t('repairOrder.form.vin.label')}
+                          </FormLabel>
                           <FormControl>
-                            <Input placeholder={t('repairOrder.form.vin.placeholder')} {...field} />
+                            <Input
+                              placeholder={t(
+                                'repairOrder.form.vin.placeholder'
+                              )}
+                              {...field}
+                            />
                           </FormControl>
-                          <FormMessage />
+                          <TranslatedFormMessage />
                         </FormItem>
                       )}
                     />
@@ -542,8 +736,13 @@ export default function RepairOrderDialog({ open, onOpenChange, onSuccess, initi
                       name="make"
                       render={({ field }) => (
                         <FormItem className="flex flex-col space-y-1">
-                          <FormLabel>{t('repairOrder.form.make.label')}</FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
+                          <FormLabel>
+                            {t('repairOrder.form.make.label')}
+                          </FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
+                          >
                             <FormControl>
                               <SelectTrigger className="w-full">
                                 <SelectValue placeholder={t('common.select')} />
@@ -568,8 +767,13 @@ export default function RepairOrderDialog({ open, onOpenChange, onSuccess, initi
                       name="year"
                       render={({ field }) => (
                         <FormItem className="flex flex-col space-y-1">
-                          <FormLabel>{t('repairOrder.form.year.label')}</FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
+                          <FormLabel>
+                            {t('repairOrder.form.year.label')}
+                          </FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
+                          >
                             <FormControl>
                               <SelectTrigger className="w-full">
                                 <SelectValue placeholder={t('common.select')} />
@@ -579,7 +783,10 @@ export default function RepairOrderDialog({ open, onOpenChange, onSuccess, initi
                               {Array.from({ length: listLength }, (_, i) => {
                                 const yearValue = startYear - i;
                                 return (
-                                  <SelectItem key={yearValue} value={`${yearValue}`}>
+                                  <SelectItem
+                                    key={yearValue}
+                                    value={`${yearValue}`}
+                                  >
                                     {yearValue}
                                   </SelectItem>
                                 );
@@ -596,25 +803,33 @@ export default function RepairOrderDialog({ open, onOpenChange, onSuccess, initi
                       name="model"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('repairOrder.form.model.label')}</FormLabel>
+                          <FormLabel>
+                            {t('repairOrder.form.model.label')}
+                          </FormLabel>
                           <FormControl>
                             <Input
                               className="w-full"
-                              placeholder={t('repairOrder.form.model.placeholder')}
+                              placeholder={t(
+                                'repairOrder.form.model.placeholder'
+                              )}
                               {...field}
                             />
                           </FormControl>
-                          <FormMessage />
+                          <FormMessage>
+                            <TranslatedFormMessage />
+                          </FormMessage>
                         </FormItem>
                       )}
                     />
                   </div>
                 </div>
               </div>
-              <div className="space-y-8">
+              <div className="space-y-8" data-attachments-section>
                 <div className="flex items-center gap-2">
                   <Upload className="w-5 h-5 text-foreground" />
-                  <h3 className="text-lg font-medium">{t('repairOrder.section.attachments')}</h3>
+                  <h3 className="text-lg font-medium">
+                    {t('repairOrder.section.attachments')}
+                  </h3>
                 </div>
                 <div className="grid gap-8 md:grid-cols-2">
                   <DropZone
@@ -631,7 +846,17 @@ export default function RepairOrderDialog({ open, onOpenChange, onSuccess, initi
                     onFilesChange={setPreRepairPhotoFileAssets}
                     accept="image/*"
                   />
+                  {/* 在两个 DropZone 下方显示错误提示 */}
+{attachmentError && (
+  <div className="col-span-2 px-4 py-3 text-sm font-medium text-destructive bg-destructive/10 border-2 border-destructive/30 rounded-md">
+    <div className="flex items-center gap-2">
+      <X className="w-4 h-4" />
+      <span>{attachmentError}</span>
+    </div>
+  </div>
+)}
                 </div>
+               
               </div>
             </form>
           </Form>
@@ -640,7 +865,12 @@ export default function RepairOrderDialog({ open, onOpenChange, onSuccess, initi
           <Button type="button" variant="outline" onClick={handleClose}>
             {t('common.cancel')}
           </Button>
-          <Button form="repair-order-form" type="submit" variant="default" disabled={form.formState.isSubmitting}>
+          <Button
+            form="repair-order-form"
+            type="submit"
+            variant="default"
+            disabled={form.formState.isSubmitting}
+          >
             {form.formState.isSubmitting
               ? isEdit
                 ? t('repairOrder.button.updating')

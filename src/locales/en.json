@@ -462,6 +462,9 @@
     }
   },
   "repairOrder": {
+    "validation": {
+      "atLeastOneAttachment": "Please upload at least one attachment (structural measurement document or pre-repair photo)"
+    },
     "messages": {
       "loadFailed": "Failed to load repair order",
       "createFailed": "Failed to create repair order",
@@ -604,15 +607,18 @@
     "form": {
       "roNumber": {
         "label": "Shop RO #",
-        "placeholder": "Enter Shop RO #"
+        "placeholder": "Enter Shop RO #",
+        "required": "Shop RO # is required"
       },
       "readOnly": "Read-only",
       "customer": {
         "label": "Customer",
-        "placeholder": "Customer name"
+        "placeholder": "Customer name",
+        "required": "Customer name is required"
       },
       "dealership": {
-        "label": "Order From Dealership"
+        "label": "Order From Dealership",
+        "required": "Order From Dealership is required"
       },
       "assignedDealer": "Assigned Dealer",
       "vin": {
@@ -635,7 +641,8 @@
     },
     "attachments": {
       "structural": "Structural Measurements",
-      "preRepairPhotos": "Pre-Repair Photos"
+      "preRepairPhotos": "Pre-Repair Photos",
+      "required": "Structural Measurements or Pre-Repair Photos is required"
     },
     "completeDialog": {
       "title": "Mark Repair as Complete",
