@@ -26,6 +26,8 @@ import { DataTablePagination } from '@/components/data-table-pagination';
 import { ClearableInput } from '@/components/clearable-input';
 import { useTranslation } from 'react-i18next';
 import OrganizationApi from '@/js/clients/base/OrganizationApi';
+import PersonSearchRequest from '@/js/models/PersonSearchRequest';
+import PersonApi from '@/js/clients/base/PersonApi';
 
 interface RepairOrderListProps {
   repairOrders: [];
@@ -34,6 +36,7 @@ interface RepairOrderListProps {
 
 export function RepairOrderList() {
   const { t } = useTranslation();
+  const [userNams, setUserName] = useState<string>('');
 
   const { user } = useAuthStore((state) => state.auth);
   const [dateLastSubmittedFrom, setFromDate] = useState<Date | undefined>(undefined);
@@ -109,6 +112,7 @@ export function RepairOrderList() {
       api.shopGet(id, {
         status200: (response) => {
           setTopShopData(response); // 保存 Shop 数据
+          getOrderDetailTopInfo(response.region?.id); // 获取 Field Staff 信息
         },
         error: (error) => {
           console.error('获取 Shop 详情失败:', error);
@@ -118,6 +122,37 @@ export function RepairOrderList() {
       console.error(e);
     }
   };
+
+  const getOrderDetailTopInfo = async (regionId?: number) => {
+    const filterByRegionId = regionId || user?.person?.shop?.region?.id;
+    if (!filterByRegionId) return;
+
+    try {
+      const request = PersonSearchRequest.create({
+        type: 'Network',
+        filterByRegionId,
+      });
+      const personApi = new PersonApi();
+
+      personApi.search(request, {
+        status200: (response) => {
+          const users = response.persons.filter(
+            (val: any) => val.status === 'Active'
+          );
+          const userNames = users
+            .map((val: any) => `${val.firstName} ${val.lastName}`)
+            .join(', ');
+          setUserName(userNames);
+        },
+        error: (error) => {
+          console.error('获取 Field Staff 失败:', error);
+        },
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const getRepairOrders = async (flag?: boolean | undefined, date?: DateRange | undefined) => {
     try {
       const api = new RequestApi();
@@ -217,6 +252,9 @@ export function RepairOrderList() {
   useEffect(() => {
     if (id && !user?.person?.shop) {
       getTopShopDetail(id.toString());
+    } else if (user?.person?.shop) {
+      // 如果用户有 shop 数据，直接获取 Field Staff 信息
+      getOrderDetailTopInfo();
     }
   }, [id, user]);
 
@@ -314,22 +352,26 @@ export function RepairOrderList() {
           alt={brand === 'vw' ? t('brand.vw') : t('brand.audi')}
           className="object-cover w-full h-full mt-6"
         />
-        <div className="absolute -translate-y-1/2 top-1/2 left-6">
-          <p className="text-3xl font-bold text-white">
+        <div className="absolute -translate-y-1/2 top-1/2 left-6 right-[360px] pr-4">
+          <p className="text-3xl font-bold text-white truncate">
             {user?.person?.shop?.name ?? topShopData?.name ?? '--'}
           </p>
-          <p className="flex items-center mt-4 space-x-4 text-sm text-gray-200">
-            <Warehouse className="w-5 h-5 text-white" />
-            <span>
-              {t('repairOrder.list.assignedDealership')}:{' '}
-              {user?.person?.shop?.sponsorDealership?.name ?? topShopData?.sponsorDealership?.name ?? '--'} (
-              {user?.person?.shop?.sponsorDealership?.dealershipNumber ?? topShopData?.sponsorDealership?.dealershipNumber ?? '--'})
-            </span>
-            <Users className="w-5 h-5 ml-6 text-white" />
-            <span>
-              {t('repairOrder.list.fieldSupportTeam')}: {user?.person?.firstName ?? '--'} {user?.person?.lastName ?? ''}
-            </span>
-          </p>
+          <div className="mt-4 space-y-2 text-sm text-gray-200">
+            <div className="flex items-start gap-2">
+              <Warehouse className="w-5 h-5 mt-0.5 text-white flex-shrink-0" />
+              <span className="break-words">
+                {t('repairOrder.list.assignedDealership')}:{' '}
+                {user?.person?.shop?.sponsorDealership?.name ?? topShopData?.sponsorDealership?.name ?? '--'} (
+                {user?.person?.shop?.sponsorDealership?.dealershipNumber ?? topShopData?.sponsorDealership?.dealershipNumber ?? '--'})
+              </span>
+            </div>
+            <div className="flex items-start gap-2">
+              <Users className="w-5 h-5 mt-0.5 text-white flex-shrink-0" />
+              <span className="break-words">
+                {t('repairOrder.list.fieldSupportTeam')}: {userNams}
+              </span>
+            </div>
+          </div>
         </div>
         <div className="absolute top-1/2 right-6 max-w-[320px] -translate-y-1/2 text-sm text-gray-100">
           <div className="grid gap-1">

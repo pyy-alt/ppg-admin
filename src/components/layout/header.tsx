@@ -150,7 +150,7 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
                         : t('header.user')}
                     </p>
                     {/* Shop/Dealership Name */}
-                    <p className="text-xs text-gray-400 mb-1">
+                    <p className="text-xs text-white mb-1">
                       {auth.user
                         ? auth.user.person?.shop?.name && auth.user.person?.shop?.shopNumber
                           ? `${auth.user.person?.shop?.name} (${auth.user.person?.shop?.shopNumber})`
@@ -162,7 +162,7 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
                         : t('header.notLoggedIn')}
                     </p>
                     {/* Role - On its own line */}
-                    <p className="text-xs text-gray-400">
+                    <p className="text-xs text-white">
                       {auth.user
                         ? auth.user.person?.type === 'Shop'
                           ? t('header.shopStaff')
@@ -178,7 +178,7 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
                         : ''}
                     </p>
                   </div>
-                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
