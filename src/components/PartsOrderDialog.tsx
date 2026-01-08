@@ -167,6 +167,9 @@ export function PartsOrderDialog({
     return t('partsOrder.section.info');
   };
 
+  // Check if it's a new order (not edit mode)
+  const isNewOrder = getDialogTitle() === t('partsOrder.dialog.newTitle')
+
   // When initialData changes，Reset form
   useEffect(() => {
     if (open && initialData) {
@@ -412,29 +415,54 @@ export function PartsOrderDialog({
                   <div className="grid grid-cols-3 gap-8 text-sm">
                     <div>
                       <Label className="text-muted-foreground">{t('partsOrder.section.submitted')}</Label>
-                      <p className="mt-1 font-medium">
-                        {initialData?.dateSubmitted ? formatDateOnly(initialData?.dateSubmitted) : '---'}
-                        {' by ' + ' '}
-                        {initialData?.submittedByPerson.firstName + ' ' + initialData?.submittedByPerson.lastName}
-                      </p>
+                      {!isNewOrder && initialData?.dateSubmitted ? (
+                        <p className="mt-1 font-medium">
+                          {formatDateOnly(initialData.dateSubmitted)}
+                          {initialData.submittedByPerson && (
+                            <>
+                              {' '}{t('common.by')}{' '}
+                              {initialData.submittedByPerson.firstName}{' '}
+                              {initialData.submittedByPerson.lastName}
+                            </>
+                          )}
+                        </p>
+                      ) : (
+                        <p className="mt-1 font-medium">---</p>
+                      )}
                     </div>
                     <div>
                       <Label className="text-muted-foreground">{t('partsOrder.section.approved')}</Label>
-                      <p className="mt-1 font-medium">
-                        {initialData?.dateReviewed ? formatDateOnly(initialData?.dateReviewed) : '---'}
-                        {initialData?.reviewedByPerson && ' by ' + ' '}
-                        {initialData?.reviewedByPerson &&
-                          initialData?.reviewedByPerson.firstName + ' ' + initialData?.reviewedByPerson.lastName}
-                      </p>
+                      {!isNewOrder && initialData?.dateReviewed ? (
+                        <p className="mt-1 font-medium">
+                          {formatDateOnly(initialData.dateReviewed)}
+                          {initialData.reviewedByPerson && (
+                            <>
+                              {' '}{t('common.by')}{' '}
+                              {initialData.reviewedByPerson.firstName}{' '}
+                              {initialData.reviewedByPerson.lastName}
+                            </>
+                          )}
+                        </p>
+                      ) : (
+                        <p className="mt-1 font-medium">---</p>
+                      )}
                     </div>
                     <div>
                       <Label className="text-muted-foreground">{t('partsOrder.section.shipped')}</Label>
-                      <p className="mt-1 font-medium">
-                        {initialData?.dateShipped ? formatDateOnly(initialData?.dateShipped) : '---'}
-                        {initialData?.shippedByPerson && ' by ' + ' '}
-                        {initialData?.shippedByPerson &&
-                          initialData?.shippedByPerson.firstName + ' ' + initialData?.shippedByPerson.lastName}
-                      </p>
+                      {!isNewOrder && initialData?.dateShipped ? (
+                        <p className="mt-1 font-medium">
+                          {formatDateOnly(initialData.dateShipped)}
+                          {initialData.shippedByPerson && (
+                            <>
+                              {' '}{t('common.by')}{' '}
+                              {initialData.shippedByPerson.firstName}{' '}
+                              {initialData.shippedByPerson.lastName}
+                            </>
+                          )}
+                        </p>
+                      ) : (
+                        <p className="mt-1 font-medium">---</p>
+                      )}
                     </div>
                     {/* Display in edit mode Sales Order Number */}
                     {initialData?.id && (

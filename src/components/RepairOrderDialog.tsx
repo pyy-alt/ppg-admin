@@ -847,16 +847,15 @@ export default function RepairOrderDialog({
                     accept="image/*"
                   />
                   {/* 在两个 DropZone 下方显示错误提示 */}
-{attachmentError && (
-  <div className="col-span-2 px-4 py-3 text-sm font-medium text-destructive bg-destructive/10 border-2 border-destructive/30 rounded-md">
-    <div className="flex items-center gap-2">
-      <X className="w-4 h-4" />
-      <span>{attachmentError}</span>
-    </div>
-  </div>
-)}
+                  {attachmentError && (
+                    <div className="col-span-2 px-4 py-3 text-sm font-medium text-destructive bg-destructive/10 border-2 border-destructive/30 rounded-md">
+                      <div className="flex items-center gap-2">
+                        <X className="w-4 h-4" />
+                        <span>{attachmentError}</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
-               
               </div>
             </form>
           </Form>
