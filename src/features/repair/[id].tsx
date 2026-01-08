@@ -4,6 +4,7 @@ import RequestApi from '@/js/clients/base/OrderApi';
 import type PartsOrder from '@/js/models/PartsOrder';
 import PartsOrderWorkflowActionRequest from '@/js/models/PartsOrderWorkflowActionRequest';
 import type RepairOrder from '@/js/models/RepairOrder';
+import FileAssetFileAssetTypeEnum from '@/js/models/enum/FileAssetFileAssetTypeEnum';
 import { type PersonType } from '@/js/models/enum/PersonTypeEnum';
 import {
   AlertTriangle,
@@ -20,7 +21,7 @@ import { toast } from 'sonner';
 import audiNav from '@/assets/img/repair/audi.png';
 import vwNav from '@/assets/img/repair/vw.png';
 import { useAuthStore } from '@/stores/auth-store';
-import { formatDateOnly } from '@/lib/utils';
+import { formatDateOnly, convertFilesToFileAssets } from '@/lib/utils';
 import { useBrand } from '@/context/brand-context';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -279,12 +280,18 @@ export function RepairOrderDetail() {
 
   const handleMarkRepairAsComplete = async (photos: File[]) => {
     try {
+      // Convert File[] to FileAsset[]
+      const postRepairPhotoFileAssets = await convertFilesToFileAssets(
+        photos,
+        FileAssetFileAssetTypeEnum.POST_REPAIR_PHOTO
+      );
+      
       await new Promise<boolean>((resolve, reject) => {
         const api = new RequestApi();
         const request = {
+          ...(initRepaitOrderData as any), // 先展开 initRepaitOrderData
           id: (initRepaitOrderData as any).id,
-          preRepairPhotoFileAssets: photos,
-          ...(initRepaitOrderData as any),
+          postRepairPhotoFileAssets: postRepairPhotoFileAssets, // 然后覆盖 postRepairPhotoFileAssets
         };
         api.repairOrderComplete(request, {
           status200: () => {
@@ -418,7 +425,9 @@ export function RepairOrderDetail() {
             <span>
               {user?.person?.type === 'ProgramAdministrator'
                 ? t('user.type.admin')
-                : user?.person?.type}
+                : user?.person?.type === 'Csr'
+                  ? 'CSR'
+                  : user?.person?.type}
               : {user?.person?.firstName} {user?.person?.lastName}
             </span>
           </p>
@@ -508,7 +517,7 @@ export function RepairOrderDetail() {
                 <span className="text-muted-foreground">
                   {t('repairOrder.detail.vin')}
                 </span>
-                <p>{initRepaitOrderData?.vin || '--'}</p>
+                <p className="font-medium">{initRepaitOrderData?.vin || '--'}</p>
               </div>
               <div>
                 <span className="text-muted-foreground">
@@ -525,7 +534,7 @@ export function RepairOrderDetail() {
                 <span className="text-muted-foreground">
                   {t('repairOrder.detail.dateSubmitted')}
                 </span>
-                <p>
+                <p className="font-medium">
                   {formatDateOnly(
                     initRepaitOrderData?.dateLastSubmitted as Date
                   ) || '--'}{' '}
@@ -573,7 +582,7 @@ export function RepairOrderDetail() {
                     ? initRepaitOrderData.preRepairPhotoFileAssets.map((f) => (
                         <a
                           key={f.id}
-                          href={`${import.meta.env.VITE_API_URL}${f.downloadUrl}`}
+                          href={`${import.meta.env.VITE_API_URL}${f.viewUrl}`}
                           className="text-blue-700 underline hover:underline"
                           target="_blank"
                           rel="noreferrer"
@@ -597,7 +606,7 @@ export function RepairOrderDetail() {
                         (f) => (
                           <a
                             key={f.id}
-                            href={`${import.meta.env.VITE_API_URL}${f.downloadUrl}`}
+                            href={`${import.meta.env.VITE_API_URL}${f.viewUrl}`}
                             className="text-blue-700 underline hover:underline"
                             target="_blank"
                             rel="noreferrer"
@@ -619,7 +628,7 @@ export function RepairOrderDetail() {
                     ? initRepaitOrderData.postRepairPhotoFileAssets.map((f) => (
                         <a
                           key={f.id}
-                          href={f.downloadUrl}
+                          href={`${import.meta.env.VITE_API_URL}${f.viewUrl}`}
                           className="text-blue-700 underline hover:underline"
                           target="_blank"
                           rel="noreferrer"

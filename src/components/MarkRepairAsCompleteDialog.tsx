@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type RepairOrder from '@/js/models/RepairOrder';
-import { X, FileText, Paperclip, Upload, Camera, Trash2 } from 'lucide-react';
+import { X, FileText, Paperclip, Upload, Camera, Trash2, AlertTriangle } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -25,26 +25,52 @@ export function MarkRepairAsCompleteDialog({
   const { t } = useTranslation();
 
   const [photos, setPhotos] = useState<File[]>([]);
+  const [photoError, setPhotoError] = useState<string>('');
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  // 当对话框打开/关闭时清空数据
+  useEffect(() => {
+    if (!open) {
+      setPhotos([]);
+      setPhotoError('');
+    }
+  }, [open]);
+
+  const { getRootProps, getInputProps, isDragActive,open: openCamera } = useDropzone({
     accept: { 'image/*': [] },
     onDrop: (acceptedFiles) => {
       setPhotos((prev) => [...prev, ...acceptedFiles]);
+      if (acceptedFiles.length > 0) {
+        setPhotoError(''); // 清除错误
+      }
     },
   });
 
   const removePhoto = (index: number) => {
-    setPhotos((prev) => prev.filter((_, i) => i !== index));
+    const newPhotos = photos.filter((_, i) => i !== index);
+    setPhotos(newPhotos);
+    // 如果删除后没有照片了，设置错误
+    if (newPhotos.length === 0) {
+      setPhotoError(t('repairOrder.completeDialog.photoRequired'));
+    }
   };
 
   const handleComplete = () => {
-    if (photos.length === 0) return toast.error(t('repairOrder.completeDialog.photoRequired'));
+    if (photos.length === 0) {
+      setPhotoError(t('repairOrder.completeDialog.photoRequired'));
+      toast.error(t('repairOrder.completeDialog.photoRequired'));
+      // 滚动到附件区域
+      const attachmentsSection = document.querySelector('[data-attachments-section]');
+      if (attachmentsSection) {
+        attachmentsSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return;
+    }
+    setPhotoError('');
     onComplete?.(photos);
     onOpenChange(false);
   };
 
   const handleClose = () => {
-    setPhotos([]);
     onOpenChange(false);
   };
 
@@ -99,7 +125,7 @@ export function MarkRepairAsCompleteDialog({
           </section>
           <Separator className="bg-border/60" />
           {/* Section 2: Attachments - Post-Repair Photos */}
-          <section>
+          <section data-attachments-section>
             <h3 className="flex items-center gap-3 mb-6 text-lg font-medium">
               <Paperclip className="w-6 h-6 text-muted-foreground" />
               {t('repairOrder.section.attachments')}
@@ -119,10 +145,10 @@ export function MarkRepairAsCompleteDialog({
                 <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
                 <p className="text-muted-foreground">
                   {isDragActive ? (
-                    t('repairOrder.dropzone.dropHere')
+                    t('repairOrder.dropzone.dropHere', { type: t('repairOrder.completeDialog.photos') })
                   ) : (
                     <>
-                      {t('repairOrder.dropzone.instruction')}{' '}
+                      {t('repairOrder.dropzone.instruction', { type: t('repairOrder.completeDialog.photos') })}{' '}
                       <span className="font-medium text-primary hover:underline">
                         {t('repairOrder.dropzone.clickToBrowse')}
                       </span>
@@ -130,8 +156,18 @@ export function MarkRepairAsCompleteDialog({
                   )}
                 </p>
               </div>
+              {/* 错误提示 */}
+              {photoError && (
+                <div className="flex items-start gap-2 p-3 text-sm border rounded-md bg-destructive/10 border-destructive/20 text-destructive">
+                  <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                  <p>{photoError}</p>
+                </div>
+              )}
               {/* Open Camera Button（Optional） */}
-              <Button variant="outline" size="sm" className="w-fit">
+              <Button variant="outline" size="sm" className="w-fit"   onClick={(e) => {
+            e.preventDefault();
+            openCamera();
+          }}>
                 <Camera className="w-4 h-4 mr-2" />
                 {t('repairOrder.dropzone.openCamera')}
               </Button>

@@ -651,6 +651,7 @@
     "completeDialog": {
       "title": "Marquer la réparation comme terminée",
       "postRepairPhotos": "Photos après réparation",
+      "photos": "photos",
       "photoRequired": "Veuillez télécharger au moins une photo",
       "button": "Marquer la réparation comme terminée"
     },
@@ -880,6 +881,9 @@
     "user": "Utilisateur",
     "notLoggedIn": "Non connecté",
     "programAdministrator": "Administrateur du programme",
+    "shopStaff": "Personnel du magasin",
+    "dealershipStaff": "Personnel du concessionnaire",
+    "fieldStaff": "Personnel sur le terrain",
     "viewTeam": "Voir l'équipe",
     "editProfile": "Modifier le profil",
     "logout": "Déconnexion",

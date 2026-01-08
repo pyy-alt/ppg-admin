@@ -277,7 +277,13 @@ export function Users() {
 												{user.status === 'Inactive' ? <span className="text-gray-400">{user.email}</span> : user.email}
 											</TableCell>
 											<TableCell>
-												{user.status === 'Inactive' ? <span className="text-gray-400">{user.type}</span> : user.type}
+												{user.status === 'Inactive' ? (
+													<span className="text-gray-400">
+														{user.type === 'Csr' ? 'CSR' : user.type}
+													</span>
+												) : (
+													user.type === 'Csr' ? 'CSR' : user.type
+												)}
 											</TableCell>
 											<TableCell className={user.status === 'Inactive' ? 'text-gray-400' : ''}>
 												{user.type === 'Csr'

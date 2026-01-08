@@ -654,6 +654,7 @@
     "completeDialog": {
       "title": "Mark Repair as Complete",
       "postRepairPhotos": "Post-Repair Photos",
+      "photos": "photos",
       "photoRequired": "Please upload at least one photo",
       "button": "Mark Repair as Complete"
     },
@@ -883,6 +884,9 @@
     "user": "User",
     "notLoggedIn": "Not logged in",
     "programAdministrator": "Program Administrator",
+    "shopStaff": "Shop Staff",
+    "dealershipStaff": "Dealership Staff",
+    "fieldStaff": "Field Staff",
     "viewTeam": "View Team",
     "editProfile": "Edit Profile",
     "logout": "Logout",

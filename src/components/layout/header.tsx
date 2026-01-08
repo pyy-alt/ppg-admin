@@ -112,7 +112,7 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
   return (
     <>
       <header
-        className={`bg-header fixed top-0 right-0 left-0 z-50 flex h-16 w-full items-center justify-between px-6 text-white ${className || ''} `}
+        className={`bg-header fixed top-0 right-0 left-0 z-50 flex h-20 w-full items-center justify-between px-6 text-white ${className || ''} `}
         {...props}
       >
         {/* Left: Logo + Title */}
@@ -127,11 +127,11 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
           />
           <div>
             {logo === vwLogo ? (
-              <span className="font-medium text-blue-500">{t('header.vw')} </span>
+              <span className="font-medium text-lg text-blue-500">{t('header.vw')} </span>
             ) : (
-              <span className="font-medium text-red-500">{t('header.audi')}</span>
+              <span className="font-medium text-lg text-red-500">{t('header.audi')}</span>
             )}
-            <span className="text-sm font-medium text-white">{t('common.restrictedPartsTracker')}</span>
+            <span className="text-base font-medium text-white">{t('common.restrictedPartsTracker')}</span>
           </div>
         </div>
         {/* Right: Globe + User Dropdown */}
@@ -142,24 +142,42 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center justify-center gap-3 pr-2 transition-colors rounded-full hover:bg-white/10 focus-visible:outline-none">
                   <div className="text-left text-white">
-                    <p className="mb-1 text-sm font-medium leading-none">
+                    {/* User Name - Larger font */}
+                    <p className="mb-2 text-base font-semibold leading-none">
                       {auth.user
                         ? `${auth.user.person?.firstName} ${auth.user.person?.lastName}`.trim() ||
                           auth.user.person?.email
                         : t('header.user')}
                     </p>
-                    <p className="text-xs text-gray-400">
+                    {/* Shop/Dealership Name */}
+                    <p className="text-xs text-gray-400 mb-1">
                       {auth.user
                         ? auth.user.person?.shop?.name && auth.user.person?.shop?.shopNumber
-                          ? `${auth.user.person?.shop?.name}(${auth.user.person?.shop?.shopNumber}) | ${auth.user.person?.type} Staff`
+                          ? `${auth.user.person?.shop?.name} (${auth.user.person?.shop?.shopNumber})`
                           : auth.user.person?.dealership?.name && auth.user.person?.dealership?.dealershipNumber
-                            ? `${auth.user.person?.dealership?.name}(${auth.user.person?.dealership?.dealershipNumber}) | ${auth.user.person?.type}`
+                            ? `${auth.user.person?.dealership?.name} (${auth.user.person?.dealership?.dealershipNumber})`
                             : auth.user.person?.csrRegion
-                              ? `${auth.user.person?.csrRegion?.name} | CSR`
+                              ? auth.user.person?.csrRegion?.name
                               : auth.user.person?.type === 'ProgramAdministrator'
                                 ? t('header.programAdministrator')
-                                : auth.user.person?.type
+                                : ''
                         : t('header.notLoggedIn')}
+                    </p>
+                    {/* Role - On its own line */}
+                    <p className="text-xs text-gray-400">
+                      {auth.user
+                        ? auth.user.person?.type === 'Shop'
+                          ? t('header.shopStaff')
+                          : auth.user.person?.type === 'Dealership'
+                            ? t('header.dealershipStaff')
+                            : auth.user.person?.type === 'Csr'
+                              ? 'CSR'
+                              : auth.user.person?.type === 'ProgramAdministrator'
+                                ? t('header.programAdministrator')
+                                : auth.user.person?.type === 'FieldStaff'
+                                  ? t('header.fieldStaff')
+                                  : auth.user.person?.type
+                        : ''}
                     </p>
                   </div>
                   <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -193,7 +211,7 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
                   </div>
                 </DropdownMenuLabel> */}
                 {/* <DropdownMenuSeparator /> */}
-                {auth?.user?.person?.type !== PersonTypeEnum.CSR && (
+                {auth?.user?.person?.type !== PersonTypeEnum.CSR && auth?.user?.person?.type !== PersonTypeEnum.FIELD_STAFF && (
                   <DropdownMenuItem className="cursor-pointer" onSelect={() => handleSelect('team')}>
                     <Users className="w-4 h-4 mr-2" />
                     <span>{t('header.viewTeam')}</span>

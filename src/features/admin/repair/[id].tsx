@@ -341,7 +341,12 @@ export function RepairOrderDetail() {
             <Users className="w-5 h-5 ml-6 text-white" />
             <span>
               {' '}
-              { user?.person?.type==='ProgramAdministrator'? t('user.list.role.programAdministrator') : user?.person?.type  }: {user?.person?.firstName} {user?.person?.lastName}
+              { user?.person?.type==='ProgramAdministrator'
+                ? t('user.list.role.programAdministrator') 
+                : user?.person?.type === 'Csr'
+                  ? 'CSR'
+                  : user?.person?.type
+              }: {user?.person?.firstName} {user?.person?.lastName}
             </span>
           </p>
         </div>

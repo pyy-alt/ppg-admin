@@ -187,35 +187,53 @@ export const calculateDateRange = (preset: string) => {
  * @param includeSeconds Whether to display seconds（Default true）
  * @returns string | undefined
  */
+/**
+ * 格式化日期时间
+ * @param date - Date对象、ISO字符串、时间戳或其他可转换为Date的值
+ * @param options - 格式化选项
+ * @returns 格式化后的日期时间字符串
+ * 
+ * @example
+ * formatDateOnly(new Date()) // "01/08/2026 3:30 PM"
+ * formatDateOnly("2025-12-15T23:26:32-08:00") // "12/15/2025 11:26 PM"
+ * formatDateOnly(date, { includeSeconds: true }) // "01/08/2026 3:30:45 PM"
+ * formatDateOnly(date, { useUTC: true }) // 使用UTC时间
+ */
 export const formatDateOnly = (
   date: Date | string | number | undefined | null,
-  includeSeconds = false
+  options: {
+    includeSeconds?: boolean;
+    useUTC?: boolean;
+  } = {}
 ): string | undefined => {
-  if (!date) return undefined
+  if (!date) return undefined;
 
-  const d = new Date(date)
+  const { includeSeconds = false, useUTC = false } = options;
 
-  // Determine if the date is valid
-  if (isNaN(d.getTime())) return undefined
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return undefined;
 
-  const year = d.getFullYear()
-  const month = String(d.getMonth() + 1).padStart(2, '0') // Month starts from0Start
-  const day = String(d.getDate()).padStart(2, '0')
+  // 使用 Intl.DateTimeFormat 获取更准确的本地化格式
+  const dateFormatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: useUTC ? 'UTC' : undefined,
+    month: '2-digit',
+    day: '2-digit',
+    year: 'numeric',
+  });
 
-  let hours = d.getHours()
-  const minutes = String(d.getMinutes()).padStart(2, '0')
-  const seconds = String(d.getSeconds()).padStart(2, '0')
+  const timeFormatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: useUTC ? 'UTC' : undefined,
+    hour: 'numeric',
+    minute: '2-digit',
+    second: includeSeconds ? '2-digit' : undefined,
+    hour12: true,
+  });
 
-  const ampm = hours >= 12 ? 'PM' : 'AM'
-  hours = hours % 12
-  hours = hours || 12 // 0Display as12
+  const datePart = dateFormatter.format(d); // "MM/DD/YYYY"
+  const timePart = timeFormatter.format(d); // "H:MM AM/PM" or "H:MM:SS AM/PM"
 
-  const timeStr = includeSeconds
-    ? `${hours}:${minutes}:${seconds} ${ampm}`
-    : `${hours}:${minutes} ${ampm}`
-
-  return `${month}/${day}/${year} ${timeStr}`
-}
+  return `${datePart} ${timePart}`;
+};
 export const exportCurrentPageToCSV = (
   data: any[],
   headers: string[],

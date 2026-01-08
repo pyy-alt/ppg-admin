@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { z } from 'zod';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -81,6 +81,7 @@ export default function NetworkUserDialog({
         csrRegion: initialValues.csrRegion,
         fieldStaffRegions: initialValues.fieldStaffRegions,
       });
+      setPreviousRole(initialValues.type as 'ProgramAdministrator' | 'Csr' | 'FieldStaff' | undefined);
     } else if (!initialValues && open) {
       // ✅ If none initialValues，Reset to default value
       form.reset({
@@ -91,6 +92,7 @@ export default function NetworkUserDialog({
         csrRegion: undefined,
         fieldStaffRegions: [],
       });
+      setPreviousRole(undefined);
     }
   }, [initialValues, open, form]);
 
@@ -99,6 +101,9 @@ export default function NetworkUserDialog({
     control: form.control,
     name: 'role',
   });
+  
+  // Track previous role to detect actual role changes
+  const [previousRole, setPreviousRole] = useState<typeof selectedRole>(undefined);
 
   const showRegionSelector = selectedRole === 'FieldStaff';
   const showCsrRegionSelector = selectedRole === 'Csr';
@@ -256,11 +261,17 @@ export default function NetworkUserDialog({
 
   // When switching roles，Clear regions Field
   useEffect(() => {
-    if (selectedRole) {
-      form.setValue('csrRegion', undefined);
-      form.setValue('fieldStaffRegions', []);
+    // Only clear when role actually changes to a different value
+    if (selectedRole && selectedRole !== previousRole) {
+      if (selectedRole !== 'Csr') {
+        form.setValue('csrRegion', undefined);
+      }
+      if (selectedRole !== 'FieldStaff') {
+        form.setValue('fieldStaffRegions', []);
+      }
+      setPreviousRole(selectedRole);
     }
-  }, [selectedRole, form]);
+  }, [selectedRole, previousRole, form]);
 
   return (
     <>

@@ -236,8 +236,11 @@ export function PartsOrderDialog({
       const api = new RequestApi();
       const partsOrder = (PartsOrder as any).create({
         ...initialData,
-        parts: data.parts.map((part) => part.number),
-        estimateFileAssets: estimateFileAssets.length > 0 ? estimateFileAssets : estimateFiles,
+        // CSR only edits sales order number, keep original parts and attachments
+        parts: isCsr ? initialData?.parts : data.parts.map((part) => part.number),
+        estimateFileAssets: isCsr 
+          ? initialData?.estimateFileAssets 
+          : (estimateFileAssets.length > 0 ? estimateFileAssets : estimateFiles),
         salesOrderNumber: salesOrderNumber, // Include sales order number
         repairOrder: initRepaitOrderData,
       });
