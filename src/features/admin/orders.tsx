@@ -336,7 +336,7 @@ export function PartOrders() {
     <div className="min-h-scree">
       {/* Header */}
       <div className="bg-background">
-        <div className="flex items-center justify-between px-6 py-4">
+        <div className="flex items-center justify-between px-6 py-4 mt-5">
           <h1 className="text-2xl font-bold text-foreground">{t('partsOrder.list.title')}</h1>
           <Button onClick={exportCSV}>
             <Download className="w-4 h-4 mr-2" />
@@ -566,9 +566,12 @@ export function PartOrders() {
                         <TableCell
                           className="text-blue-600 underline cursor-pointer"
                           onClick={() => {
+                            const orderId = order.repairOrder.id;
+                            const partId = order.id;
+                            const ids = orderId.toString() + ',' + partId;
                             navigate({
                               to: '/repair_orders/$id',
-                              params: { id: order.repairOrder.id.toString() },
+                              params: { id: ids },
                             });
                           }}
                         >

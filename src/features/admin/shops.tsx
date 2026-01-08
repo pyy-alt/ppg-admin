@@ -26,7 +26,6 @@ export function Shops() {
   const [currentPage, setCurrentPage] = useState(1);
   const [smartFilter, setSmartFilter] = useState('');
   const [filterByShopStatus, setFilterByShopStatus] = useState<string>('Certified');
-  const [filterByShopCertification, setFilterByShopCertification] = useState<string>('all');
   const [filterByRegionId, setFilterByRegionId] = useState<string>('all');
   const [shops, setShops] = useState<any[]>([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -108,11 +107,6 @@ export function Shops() {
         requestParams.filterByShopStatus = filterByShopStatus;
       }
 
-      // Handle certification filtering
-      if (filterByShopCertification !== 'all') {
-        requestParams.filterByShopCertification = filterByShopCertification;
-      }
-
       // Add pagination parameters
       const resultParameter = ResultParameter.create({
         resultsLimitOffset: (currentPage - 1) * itemsPerPage,
@@ -161,7 +155,7 @@ export function Shops() {
     );
 
     return () => clearTimeout(timeoutId);
-  }, [smartFilter, filterByShopStatus, filterByShopCertification, filterByRegionId, user, sortBy, sortAscending]);
+  }, [smartFilter, filterByShopStatus, filterByRegionId, user, sortBy, sortAscending]);
 
   // ✅ Individually call when page number changes（Do not reset page number）
   useEffect(() => {
@@ -185,10 +179,6 @@ export function Shops() {
 
       if (filterByShopStatus !== 'all') {
         requestParams.filterByShopStatus = filterByShopStatus;
-      }
-
-      if (filterByShopCertification !== 'all') {
-        requestParams.filterByShopCertification = filterByShopCertification;
       }
 
       // 不分页，获取所有数据
@@ -328,18 +318,6 @@ export function Shops() {
               </SelectContent>
             </Select>
 
-            {/* <Select value={filterByShopCertification} onValueChange={(value) => setFilterByShopCertification(value)}>
-              <SelectTrigger className="w-48 bg-muted">
-                <SelectValue placeholder={t('shop.list.certificationPlaceholder')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t('shop.list.certification.all')}</SelectItem>
-                <SelectItem value="AudiHybrid">{t('shop.list.certification.audiHybrid')}</SelectItem>
-                <SelectItem value="AudiUltra">{t('shop.list.certification.audiUltra')}</SelectItem>
-                <SelectItem value="VW">{t('shop.list.certification.vw')}</SelectItem>
-              </SelectContent>
-            </Select> */}
-
             <Select value={filterByRegionId} onValueChange={(value) => setFilterByRegionId(value)}>
               <SelectTrigger className="w-48 bg-muted">
                 <SelectValue placeholder={t('shop.list.regionPlaceholder')} />
@@ -466,7 +444,6 @@ export function Shops() {
                     const dealerNumber = dealer?.dealershipNumber || '--';
                     const region = shop.region?.name || '--';
                     const statusValue = shop.status || '--';
-                    // const certificationValue = shop.filterByShopCertification || '--';
 
                     return (
                       <TableRow key={shop.id} className="hover:bg-background">

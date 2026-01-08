@@ -142,7 +142,7 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center justify-center gap-3 pr-2 focus:outline-none focus-visible:outline-none active:outline-none">
-                  <div className="text-left text-white">
+                  <div className="text-right text-white">
                     {/* User Name - Larger font */}
                     <p className="mb-2 text-base font-semibold leading-none text-right">
                       {auth.user
@@ -151,7 +151,7 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
                         : t('header.user')}
                     </p>
                     {/* Shop/Dealership Name */}
-                    <p className="text-xs text-white mb-1">
+                    <p className="text-xs text-white mb-1 text-right">
                       {auth.user
                         ? auth.user.person?.shop?.name && auth.user.person?.shop?.shopNumber
                           ? `${auth.user.person?.shop?.name} (${auth.user.person?.shop?.shopNumber})`
