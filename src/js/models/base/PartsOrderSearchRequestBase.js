@@ -11,7 +11,7 @@ import ResultParameter from "../ResultParameter";
  * @property {boolean} filterByWaitingOnMe
  * @property {number} filterByShopId (int64)
  * @property {number} filterByDealershipId (int64)
- * @property {number} filterByPartsOrderNumber (integer) 0=original Parts Order.  1=Supplement #1.  2=Supplement #2.  3=Supplement #3.  Etc.
+ * @property {number} filterByPartsOrderNumber (integer) 0=original Parts Order.  1=Supplement #1.  2=Supplement #2.  3=Supplement #3.  4=Supplement #4 and above
  * @property {'CsrReview'|'CsrRejected'|'DealershipProcessing'|'DealershipShipped'|'ShopReceived'|'RepairCompleted'} filterByStatus
  * @property {number} filterByRegionId (int64) ignored if type is Shop or Dealership
  * @property {Date} dateSubmittedFrom (date only)
@@ -36,7 +36,7 @@ class PartsOrderSearchRequestBase extends ModelBaseClass {
 	 */
 	'filterByDealershipId';
 	/**
-	 * 0=original Parts Order.  1=Supplement #1.  2=Supplement #2.  3=Supplement #3.  Etc.
+	 * 0=original Parts Order.  1=Supplement #1.  2=Supplement #2.  3=Supplement #3.  4=Supplement #4 and above
 	 * @type {number} filterByPartsOrderNumber (integer)
 	 */
 	'filterByPartsOrderNumber';

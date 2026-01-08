@@ -3,6 +3,72 @@ import DefaultClientOptions from "../DefaultClientOptions";
 
 export default class FileAssetApi extends ClientBaseClass {
 	/**
+	 * This API call should never be called directly -- this is merely a placeholder so that the front-end can call a URL to generate and have the user download a CSV report
+	 * @param {string} dateFrom
+	 * @param {string} dateTo
+	 * @param {string} filename
+	 * @param {string} partsordernumber
+	 * @param {'CsrReview'|'CsrRejected'|'DealershipProcessing'|'DealershipShipped'|'ShopReceived'|'RepairCompleted'} status
+	 * @param {string} regionid
+	 * @param {{status200: function(string), status404: function(string), error: function(error), else: function(integer, string)}} responseHandler
+	 * @param {ClientOptions|null} options optional overrides on the DefaultClientOptions
+	 */
+	getPartsOrderReport(dateFrom, dateTo, filename, partsordernumber, status, regionid, responseHandler, options) {
+		responseHandler = this.generateResponseHandler(responseHandler, options);
+
+		const queryArray = [];
+		if ((partsordernumber !== undefined) && (partsordernumber !== null) && (partsordernumber.length)) queryArray.push('partsOrderNumber=' + encodeURIComponent(partsordernumber));
+		if ((status !== undefined) && (status !== null) && (status.length)) queryArray.push('status=' + encodeURIComponent(status));
+		if ((regionid !== undefined) && (regionid !== null) && (regionid.length)) queryArray.push('regionId=' + encodeURIComponent(regionid));
+
+		const url = '/file_asset/report/parts_orders/' +
+			(dateFrom ? encodeURIComponent(dateFrom) : '') + '/' +
+			(dateTo ? encodeURIComponent(dateTo) : '') + '/' +
+			(filename ? encodeURIComponent(filename) : '') +
+			(queryArray.length ? '?' + queryArray.join('&') : '');
+
+		// noinspection Duplicates
+		this.executeApiCall(url, 'get', null, null, options)
+			.then(response => {
+				if (options) {
+					if (options.onApiProcessResponse) options.onApiProcessResponse(url, 'get', response);
+				} else if (DefaultClientOptions.onApiProcessResponse) {
+					DefaultClientOptions.onApiProcessResponse(url, 'get', response);
+				}
+
+				switch (response.status) {
+				case 200:
+					if (responseHandler.status200) {
+						response.text()
+							.then(responseText => {
+								responseHandler.status200(responseText);
+							})
+							.catch(responseHandler.error);
+						return;
+					}
+					break;
+				case 404:
+					if (responseHandler.status404) {
+						response.text()
+							.then(responseText => {
+								responseHandler.status404(responseText);
+							})
+							.catch(responseHandler.error);
+						return;
+					}
+					break;
+				}
+
+				// If we are here, we basically have a response statusCode that we were npt expecting or are not set to handle
+				// Go ahead and fall back to the catch-all
+				this.handleUnhandledResponse(response, responseHandler);
+			})
+			.catch(error => {
+				responseHandler.error(error);
+			});
+	}
+
+	/**
 	 * This should never be called directly -- this is merely a placeholder so that the viewUrl in FileAsset will work correctly.
 	 * @param {string} type
 	 * @param {string} fileAssetIdentifier

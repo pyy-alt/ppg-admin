@@ -201,7 +201,7 @@ export default class PersonApi extends ClientBaseClass {
 	}
 
 	/**
-	 * [ProgramAdministrator] Updates a Person's status (e.g. activate, deactivate, approve registration)
+	 * [ProgramAdministrator] Updates a Person's status (e.g. activate, deactivate, approve registration).  Note, if deactivating a user that hasn't yet confirmed, this will perform a DELETE.
 	 * @param {PersonEditStatusRequest} request
 	 * @param {{status200: function(string), status403: function(string), status404: function(string), error: function(error), else: function(integer, string)}} responseHandler
 	 * @param {ClientOptions|null} options optional overrides on the DefaultClientOptions

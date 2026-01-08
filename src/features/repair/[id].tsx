@@ -61,7 +61,6 @@ export function RepairOrderDetail() {
   const [isSupplementMode, setIsSupplementMode] = useState(false);
   const { auth } = useAuthStore();
   const userType = auth.user?.person?.type as PersonType | undefined;
-  const { user } = useAuthStore((state) => state.auth);
   const { brand } = useBrand();
   const navImg = brand === 'vw' ? vwNav : audiNav;
 

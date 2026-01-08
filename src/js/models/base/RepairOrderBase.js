@@ -2,6 +2,7 @@ import ModelBaseClass from "@quasidea/oas-client-react/lib/ModelBaseClass";
 import RepairOrder from "../RepairOrder";
 import ModelProxyClass from "./ModelProxyClass";
 import Organization from "../Organization";
+import Person from "../Person";
 import FileAsset from "../FileAsset";
 
 
@@ -17,6 +18,8 @@ import FileAsset from "../FileAsset";
  * @property {string} make
  * @property {number} year (integer)
  * @property {string} model
+ * @property {Person} createdBy
+ * @property {Person} closedBy
  * @property {Date} dateLastSubmitted (date and time)
  * @property {Date} dateClosed (date and time)
  * @property {Date} dateCreated (date and time)
@@ -61,6 +64,14 @@ class RepairOrderBase extends ModelBaseClass {
 	 * @type {string} model
 	 */
 	model;
+	/**
+	 * @type {Person} createdBy
+	 */
+	'createdBy';
+	/**
+	 * @type {Person} closedBy
+	 */
+	'closedBy';
 	/**
 	 * @type {Date} dateLastSubmitted (date and time)
 	 */
@@ -128,6 +139,8 @@ const _modelDefinition = [
 	ModelBaseClass.createModelProperty('make', 'string'),
 	ModelBaseClass.createModelProperty('year', 'integer'),
 	ModelBaseClass.createModelProperty('model', 'string'),
+	ModelBaseClass.createModelProperty('createdBy', 'Person'),
+	ModelBaseClass.createModelProperty('closedBy', 'Person'),
 	ModelBaseClass.createModelProperty('dateLastSubmitted', 'datetime'),
 	ModelBaseClass.createModelProperty('dateClosed', 'datetime'),
 	ModelBaseClass.createModelProperty('dateCreated', 'datetime'),
