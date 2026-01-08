@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import PersonApi from '@/js/clients/base/PersonApi';
 import PersonEditStatusRequest from '@/js/models/PersonEditStatusRequest';
 import type { PersonStatus } from '@/js/models/enum/PersonStatusEnum';
-import { X, Users, Check, XCircle, Pause, Play } from 'lucide-react';
+import { X, Users, Check, XCircle, Pause, Play, ChevronUp, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -43,10 +43,48 @@ export default function AdminViewTeamDialog({ open, onOpenChange, teamMembers, o
   const [members, setMembers] = useState<TeamMember[]>(teamMembers ?? []);
   const [isConfirmRejectOpen, setIsConfirmRejectOpen] = useState(false);
   const [selectedMemberId, setSelectedMemberId] = useState<number | null>(null);
+  const [sortBy, setSortBy] = useState<keyof TeamMember>('firstName');
+  const [sortAscending, setSortAscending] = useState(true);
 
   useEffect(() => {
     if (teamMembers) setMembers(teamMembers);
   }, [teamMembers]);
+
+  // 排序逻辑
+  const sortedMembers = useMemo(() => {
+    if (!sortBy) return members;
+
+    return [...members].sort((a, b) => {
+      let aValue = a[sortBy];
+      let bValue = b[sortBy];
+
+      // 处理 null 或 undefined 值
+      if (aValue == null) aValue = '';
+      if (bValue == null) bValue = '';
+
+      // 字符串比较
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        const comparison = aValue.localeCompare(bValue);
+        return sortAscending ? comparison : -comparison;
+      }
+
+      // 数字比较
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        return sortAscending ? aValue - bValue : bValue - aValue;
+      }
+
+      return 0;
+    });
+  }, [members, sortBy, sortAscending]);
+
+  const handleSort = (field: keyof TeamMember) => {
+    if (sortBy === field) {
+      setSortAscending(!sortAscending);
+    } else {
+      setSortBy(field);
+      setSortAscending(true);
+    }
+  };
 
   const handleClose = () => onOpenChange(false);
 
@@ -208,6 +246,11 @@ export default function AdminViewTeamDialog({ open, onOpenChange, teamMembers, o
     }
   };
 
+  const renderSortIcon = (field: keyof TeamMember) => {
+    if (sortBy !== field) return null;
+    return sortAscending ? <ChevronUp className="inline w-4 h-4 ml-1" /> : <ChevronDown className="inline w-4 h-4 ml-1" />;
+  };
+
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="flex max-h-[90vh] flex-col sm:max-w-7xl">
@@ -230,16 +273,46 @@ export default function AdminViewTeamDialog({ open, onOpenChange, teamMembers, o
             <table className="w-full">
               <thead className="bg-muted/50">
                 <tr>
-                  <th className="px-6 py-4 text-sm font-medium text-left">{t('team.table.firstName')}</th>
-                  <th className="px-6 py-4 text-sm font-medium text-left">{t('team.table.lastName')}</th>
-                  <th className="px-6 py-4 text-sm font-medium text-left">{t('team.table.email')}</th>
-                  <th className="px-6 py-4 text-sm font-medium text-left">{t('team.table.dateAdded')}</th>
-                  <th className="px-6 py-4 text-sm font-medium text-left">{t('team.table.dateLastAccessed')}</th>
+                  <th 
+                    className="px-6 py-4 text-sm font-medium text-left cursor-pointer select-none hover:bg-muted/70 transition-colors"
+                    onClick={() => handleSort('firstName')}
+                  >
+                    {t('team.table.firstName')}
+                    {renderSortIcon('firstName')}
+                  </th>
+                  <th 
+                    className="px-6 py-4 text-sm font-medium text-left cursor-pointer select-none hover:bg-muted/70 transition-colors"
+                    onClick={() => handleSort('lastName')}
+                  >
+                    {t('team.table.lastName')}
+                    {renderSortIcon('lastName')}
+                  </th>
+                  <th 
+                    className="px-6 py-4 text-sm font-medium text-left cursor-pointer select-none hover:bg-muted/70 transition-colors"
+                    onClick={() => handleSort('email')}
+                  >
+                    {t('team.table.email')}
+                    {renderSortIcon('email')}
+                  </th>
+                  <th 
+                    className="px-6 py-4 text-sm font-medium text-left cursor-pointer select-none hover:bg-muted/70 transition-colors"
+                    onClick={() => handleSort('dateAdded')}
+                  >
+                    {t('team.table.dateAdded')}
+                    {renderSortIcon('dateAdded')}
+                  </th>
+                  <th 
+                    className="px-6 py-4 text-sm font-medium text-left cursor-pointer select-none hover:bg-muted/70 transition-colors"
+                    onClick={() => handleSort('dateLastAccessed')}
+                  >
+                    {t('team.table.dateLastAccessed')}
+                    {renderSortIcon('dateLastAccessed')}
+                  </th>
                   <th className="px-6 py-4 text-sm font-medium text-left">{/* Status / Actions */}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {members.map((member) => (
+                {sortedMembers.map((member) => (
                   <tr key={member.id} className="transition-colors hover:bg-muted/30">
                     <td className={member.status === 'Inactive' ? 'text-gray-400' : 'px-6 py-4 font-medium'}>
                       {member.firstName}
@@ -253,7 +326,7 @@ export default function AdminViewTeamDialog({ open, onOpenChange, teamMembers, o
                     </td>
                   </tr>
                 ))}
-                {members.length === 0 && (
+                {sortedMembers.length === 0 && (
                   <tr>
                     <td colSpan={6} className="px-6 py-6 text-sm text-center text-muted-foreground">
                       {t('team.table.noMembers')}

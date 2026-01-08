@@ -1,6 +1,6 @@
 import PersonStatusEnum from '@/js/models/enum/PersonStatusEnum';
 import PersonTypeEnum, { type PersonType } from '@/js/models/enum/PersonTypeEnum';
-import { X, Store, Users, Pause, Play, Check, XCircle } from 'lucide-react';
+import { X, Store, Users, Pause, Play, Check, XCircle, ChevronUp, ChevronDown } from 'lucide-react';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { Button } from './ui/button';
@@ -9,7 +9,7 @@ import PersonApi from '@/js/clients/base/PersonApi';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import ConfirmDialog from '@/components/ConfirmDialog';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
 type PersonStatus = (typeof PersonStatusEnum)[keyof typeof PersonStatusEnum];
 
@@ -51,6 +51,44 @@ export default function ViewTeamDialog({ open, onOpenChange, teamMembers, onSucc
 
   const [isConfirmRejectOpen, setIsConfirmRejectOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
+  const [sortBy, setSortBy] = useState<keyof TeamMember>('firstName');
+  const [sortAscending, setSortAscending] = useState(true);
+
+  // 排序逻辑
+  const sortedMembers = useMemo(() => {
+    if (!teamMembers || !sortBy) return teamMembers || [];
+
+    return [...teamMembers].sort((a, b) => {
+      let aValue = a[sortBy];
+      let bValue = b[sortBy];
+
+      // 处理 null 或 undefined 值
+      if (aValue == null) aValue = '';
+      if (bValue == null) bValue = '';
+
+      // 字符串比较
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        const comparison = aValue.localeCompare(bValue);
+        return sortAscending ? comparison : -comparison;
+      }
+
+      // 数字比较
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        return sortAscending ? aValue - bValue : bValue - aValue;
+      }
+
+      return 0;
+    });
+  }, [teamMembers, sortBy, sortAscending]);
+
+  const handleSort = (field: keyof TeamMember) => {
+    if (sortBy === field) {
+      setSortAscending(!sortAscending);
+    } else {
+      setSortBy(field);
+      setSortAscending(true);
+    }
+  };
 
   const handleClose = () => {
     onOpenChange(false);
@@ -232,6 +270,11 @@ export default function ViewTeamDialog({ open, onOpenChange, teamMembers, onSucc
     return t('team.view.title.default');
   };
 
+  const renderSortIcon = (field: keyof TeamMember) => {
+    if (sortBy !== field) return null;
+    return sortAscending ? <ChevronUp className="inline w-4 h-4 ml-1" /> : <ChevronDown className="inline w-4 h-4 ml-1" />;
+  };
+
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="flex max-h-[90vh] flex-col sm:max-w-6xl">
@@ -281,18 +324,48 @@ export default function ViewTeamDialog({ open, onOpenChange, teamMembers, onSucc
               <table className="w-full">
                 <thead className="bg-muted/50">
                   <tr>
-                    <th className="px-4 py-3 text-sm font-medium text-left">{t('team.view.table.firstName')}</th>
-                    <th className="px-4 py-3 text-sm font-medium text-left">{t('team.view.table.lastName')}</th>
-                    <th className="px-4 py-3 text-sm font-medium text-left">{t('team.view.table.email')}</th>
-                    <th className="px-4 py-3 text-sm font-medium text-left">{t('team.view.table.dateAdded')}</th>
-                    <th className="px-4 py-3 text-sm font-medium text-left">{t('team.view.table.dateLastAccessed')}</th>
+                    <th 
+                      className="px-4 py-3 text-sm font-medium text-left cursor-pointer select-none hover:bg-muted/70 transition-colors"
+                      onClick={() => handleSort('firstName')}
+                    >
+                      {t('team.view.table.firstName')}
+                      {renderSortIcon('firstName')}
+                    </th>
+                    <th 
+                      className="px-4 py-3 text-sm font-medium text-left cursor-pointer select-none hover:bg-muted/70 transition-colors"
+                      onClick={() => handleSort('lastName')}
+                    >
+                      {t('team.view.table.lastName')}
+                      {renderSortIcon('lastName')}
+                    </th>
+                    <th 
+                      className="px-4 py-3 text-sm font-medium text-left cursor-pointer select-none hover:bg-muted/70 transition-colors"
+                      onClick={() => handleSort('email')}
+                    >
+                      {t('team.view.table.email')}
+                      {renderSortIcon('email')}
+                    </th>
+                    <th 
+                      className="px-4 py-3 text-sm font-medium text-left cursor-pointer select-none hover:bg-muted/70 transition-colors"
+                      onClick={() => handleSort('dateCreated')}
+                    >
+                      {t('team.view.table.dateAdded')}
+                      {renderSortIcon('dateCreated')}
+                    </th>
+                    <th 
+                      className="px-4 py-3 text-sm font-medium text-left cursor-pointer select-none hover:bg-muted/70 transition-colors"
+                      onClick={() => handleSort('dateLastAccess')}
+                    >
+                      {t('team.view.table.dateLastAccessed')}
+                      {renderSortIcon('dateLastAccess')}
+                    </th>
                     <th className="px-4 py-3 text-sm font-medium text-left">{/* Actions */}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {teamMembers &&
-                    teamMembers.length > 0 &&
-                    teamMembers.map((member, idx) => (
+                  {sortedMembers &&
+                    sortedMembers.length > 0 &&
+                    sortedMembers.map((member, idx) => (
                       <tr key={idx} className="transition-colors hover:bg-muted/30">
                         <td className="px-4 py-4 text-sm">{member.firstName}</td>
                         <td className="px-4 py-4 text-sm">{member.lastName}</td>

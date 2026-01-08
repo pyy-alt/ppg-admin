@@ -357,7 +357,7 @@ export function Dealerships() {
                         </TableCell>
                         <TableCell>{dealer.dealershipNumber || '--'}</TableCell>
                         <TableCell
-                          className="font-medium text-center text-blue-600 underline hover:cursor-pointer"
+                          className="font-medium text-center"
                           // onClick={() => {
                           // 	navigate({
                           // 		to: '/repair_orders',
