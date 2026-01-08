@@ -438,13 +438,13 @@ export function RepairOrderList() {
         {/* Filters */}
         <div className="flex flex-col items-center justify-between gap-4 mb-6 lg:flex-row lg:items-center">
           <div className="flex flex-wrap items-center gap-3">
-            <div className="relative w-80">
+            <div className="relative w-90">
               <Search className="absolute w-4 h-4 -translate-y-1/2 text-muted-foreground top-1/2 left-3" />
               <ClearableInput
                 value={smartFilter}
                 onChange={(e) => setSmartFilter(e.target.value)}
                 placeholder={t('repairOrder.list.searchPlaceholder')}
-                className="pl-10 text-sm placeholder:text-xs"
+                className="pl-10"
               />
             </div>
             <Select defaultValue="all" onValueChange={(value) => setFilterByStatus(value)}>
