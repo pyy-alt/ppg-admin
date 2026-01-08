@@ -328,7 +328,7 @@ export function Shops() {
               </SelectContent>
             </Select>
 
-            <Select value={filterByShopCertification} onValueChange={(value) => setFilterByShopCertification(value)}>
+            {/* <Select value={filterByShopCertification} onValueChange={(value) => setFilterByShopCertification(value)}>
               <SelectTrigger className="w-48 bg-muted">
                 <SelectValue placeholder={t('shop.list.certificationPlaceholder')} />
               </SelectTrigger>
@@ -338,7 +338,7 @@ export function Shops() {
                 <SelectItem value="AudiUltra">{t('shop.list.certification.audiUltra')}</SelectItem>
                 <SelectItem value="VW">{t('shop.list.certification.vw')}</SelectItem>
               </SelectContent>
-            </Select>
+            </Select> */}
 
             <Select value={filterByRegionId} onValueChange={(value) => setFilterByRegionId(value)}>
               <SelectTrigger className="w-48 bg-muted">
@@ -465,8 +465,8 @@ export function Shops() {
                     const dealerName = dealer?.name || '--';
                     const dealerNumber = dealer?.dealershipNumber || '--';
                     const region = shop.region?.name || '--';
-                    const statusValue = shop.filterByShopStatus || '--';
-                    const certificationValue = shop.filterByShopCertification || '--';
+                    const statusValue = shop.status || '--';
+                    // const certificationValue = shop.filterByShopCertification || '--';
 
                     return (
                       <TableRow key={shop.id} className="hover:bg-background">
@@ -521,7 +521,7 @@ export function Shops() {
                             {statusValue}
                           </Badge>
                         </TableCell>
-                        <TableCell>{certificationValue}</TableCell>
+                        {/* <TableCell>{certificationValue}</TableCell> */}
                         <TableCell className="text-sm text-muted-foreground">{shop.address || '--'}</TableCell>
                         <TableCell>{shop.city || '--'}</TableCell>
                         <TableCell>{shop.state || '--'}</TableCell>
