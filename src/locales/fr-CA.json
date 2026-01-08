@@ -512,6 +512,7 @@
       "status": {
         "all": "Tous les Statuses"
       },
+      "dateSubmittedRangeLabel": "Plage de dates de soumission",
       "dateRangePlaceholder": "Plage de dates",
       "showRepairCompleted": "Afficher les réparations terminées",
       "empty": {

@@ -512,6 +512,7 @@
       "status": {
         "all": "All Statuses"
       },
+      "dateSubmittedRangeLabel": "Date Submitted Range",
       "dateRangePlaceholder": "Date Range",
       "showRepairCompleted": "Show Repair Completed",
       "empty": {
