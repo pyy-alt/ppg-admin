@@ -485,7 +485,7 @@ export function Shops() {
                         </TableCell>
                         <TableCell>{shop.shopNumber || '--'}</TableCell>
                         <TableCell
-                          className="font-medium text-center text-blue-600 underline"
+                          className="font-medium text-center"
                           // onClick={() => {
                           //   navigate({
                           //     to: '/repair_orders',
