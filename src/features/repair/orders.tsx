@@ -25,6 +25,7 @@ import RepairOrderDialog, { type RepairOrderData } from '@/components/RepairOrde
 import { DataTablePagination } from '@/components/data-table-pagination';
 import { ClearableInput } from '@/components/clearable-input';
 import { useTranslation } from 'react-i18next';
+import OrganizationApi from '@/js/clients/base/OrganizationApi';
 
 interface RepairOrderListProps {
   repairOrders: [];
@@ -52,6 +53,7 @@ export function RepairOrderList() {
   const [selectedPartsOrderData, setSelectedPartsOrderData] = useState<PartsOrder>();
   const [initRepaitOrderData, setInitRepaitOrderData] = useState<RepairOrder>();
   const [displayOrders, setDisplayOrders] = useState<any[]>([]);
+  const [topShopData, setTopShopData] = useState<any>(null); // 存储通过 id 查询到的 Shop 数据
   const location: any = useLocation();
   const id = location.search.id ? Number(location.search.id) : undefined;
   const [range, setRange] = useState<DateRange>();
@@ -101,6 +103,21 @@ export function RepairOrderList() {
     }
   };
 
+  const getTopShopDetail = (id: string) => {
+    try {
+      const api = new OrganizationApi();
+      api.shopGet(id, {
+        status200: (response) => {
+          setTopShopData(response); // 保存 Shop 数据
+        },
+        error: (error) => {
+          console.error('获取 Shop 详情失败:', error);
+        },
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  };
   const getRepairOrders = async (flag?: boolean | undefined, date?: DateRange | undefined) => {
     try {
       const api = new RequestApi();
@@ -196,9 +213,17 @@ export function RepairOrderList() {
   const navigate = useNavigate();
   const router = useRouter();
 
+  // 当有 id 参数且用户没有 shop 数据时，查询 Shop 详情
+  useEffect(() => {
+    if (id && !user?.person?.shop) {
+      getTopShopDetail(id.toString());
+    }
+  }, [id, user]);
+
   useEffect(() => {
     setCurrentPage(1);
   }, [smartFilter, filterByStatus, dateRangePreset]);
+  
   useEffect(() => {
     if (!user) return;
     const userType = user?.person?.type;
@@ -290,16 +315,19 @@ export function RepairOrderList() {
           className="object-cover w-full h-full mt-6"
         />
         <div className="absolute -translate-y-1/2 top-1/2 left-6">
-          <p className="text-3xl font-bold text-white">{user?.person?.shop?.name ?? '--'}</p>
+          <p className="text-3xl font-bold text-white">
+            {user?.person?.shop?.name ?? topShopData?.name ?? '--'}
+          </p>
           <p className="flex items-center mt-4 space-x-4 text-sm text-gray-200">
             <Warehouse className="w-5 h-5 text-white" />
             <span>
-              {t('repairOrder.list.assignedDealership')}: {user?.person?.shop?.sponsorDealership.name ?? '--'} (
-              {user?.person?.shop?.sponsorDealership.dealershipNumber})
+              {t('repairOrder.list.assignedDealership')}:{' '}
+              {user?.person?.shop?.sponsorDealership?.name ?? topShopData?.sponsorDealership?.name ?? '--'} (
+              {user?.person?.shop?.sponsorDealership?.dealershipNumber ?? topShopData?.sponsorDealership?.dealershipNumber ?? '--'})
             </span>
             <Users className="w-5 h-5 ml-6 text-white" />
             <span>
-              {t('repairOrder.list.fieldSupportTeam')}: {user?.person?.firstName} {user?.person?.lastName}
+              {t('repairOrder.list.fieldSupportTeam')}: {user?.person?.firstName ?? '--'} {user?.person?.lastName ?? ''}
             </span>
           </p>
         </div>
@@ -307,18 +335,24 @@ export function RepairOrderList() {
           <div className="grid gap-1">
             <div className="grid grid-cols-[24px_1fr] items-center gap-2">
               <Tag className="w-5 h-5 text-white justify-self-end" aria-hidden="true" />
-              <span className="truncate">{user?.person?.shop?.shopNumber ?? '--'}</span>
+              <span className="truncate">
+                {user?.person?.shop?.shopNumber ?? topShopData?.shopNumber ?? '--'}
+              </span>
             </div>
             <div className="my-1 grid grid-cols-[24px_1fr] items-center gap-2">
               <MapPin className="w-5 h-5 text-white justify-self-end" aria-hidden="true" />
               <span className="truncate">
-                {user?.person?.shop?.address ?? '--'}, {user?.person?.shop?.city ?? '--'},{' '}
-                {user?.person?.shop?.state ?? '--'} {user?.person?.shop?.zip ?? '--'}
+                {user?.person?.shop?.address ?? topShopData?.address ?? '--'},{' '}
+                {user?.person?.shop?.city ?? topShopData?.city ?? '--'},{' '}
+                {user?.person?.shop?.state ?? topShopData?.state ?? '--'}{' '}
+                {user?.person?.shop?.zip ?? topShopData?.zip ?? ''}
               </span>
             </div>
             <div className="grid grid-cols-[24px_1fr] items-center gap-2">
               <Map className="w-5 h-5 text-white justify-self-end" aria-hidden="true" />
-              <span className="truncate">{user?.person?.shop?.region.name ?? '--'}</span>
+              <span className="truncate">
+                {user?.person?.shop?.region?.name ?? topShopData?.region?.name ?? '--'}
+              </span>
             </div>
           </div>
         </div>
