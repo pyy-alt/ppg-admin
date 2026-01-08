@@ -158,9 +158,7 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
                             ? `${auth.user.person?.dealership?.name} (${auth.user.person?.dealership?.dealershipNumber})`
                             : auth.user.person?.csrRegion
                               ? auth.user.person?.csrRegion?.name
-                              : auth.user.person?.type === 'ProgramAdministrator'
-                                ? t('header.programAdministrator')
-                                : ''
+                              : ''
                         : t('header.notLoggedIn')}
                     </p>
                     {/* Role - On its own line */}
