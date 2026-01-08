@@ -281,12 +281,22 @@ export default function RepairOrderDialog({
       setAttachmentError(''); // clear before error message
       const api = new RequestApi();
       try {
+        // 分离新上传的文件和已存在的文件
         const newPhotoFiles = preRepairPhotoFileAssets.filter(
           (f): f is File => f instanceof File
         );
+        const existingPhotoAssets = preRepairPhotoFileAssets.filter(
+          (f) => !(f instanceof File)
+        );
+        
         const newStructuralFiles = structuralMeasurementFileAssets.filter(
           (f): f is File => f instanceof File
         );
+        const existingStructuralAssets = structuralMeasurementFileAssets.filter(
+          (f) => !(f instanceof File)
+        );
+        
+        // 转换新上传的文件为 FileAssets
         const preRepairPhotoFileAssetsToUpload = await convertFilesToFileAssets(
           newPhotoFiles,
           FileAssetFileAssetTypeEnum.PRE_REPAIR_PHOTO
@@ -295,6 +305,17 @@ export default function RepairOrderDialog({
           newStructuralFiles,
           FileAssetFileAssetTypeEnum.STRUCTURAL_MEASUREMENT
         );
+        
+        // 合并已存在的和新上传的附件
+        const allPreRepairPhotoAssets = [
+          ...existingPhotoAssets,
+          ...preRepairPhotoFileAssetsToUpload,
+        ];
+        const allStructuralAssets = [
+          ...existingStructuralAssets,
+          ...structuralFileAssetsToUpload,
+        ];
+        
         const dealership = orderFromDealerships.find(
           (dealership) => dealership.id === Number(data.orderFromDealershipId)
         );
@@ -306,14 +327,8 @@ export default function RepairOrderDialog({
           make: data.make,
           year: data.year,
           model: data.model,
-          structuralMeasurementFileAssets:
-            structuralFileAssetsToUpload.length > 0
-              ? structuralFileAssetsToUpload
-              : structuralMeasurementFileAssets,
-          preRepairPhotoFileAssets:
-            preRepairPhotoFileAssetsToUpload.length > 0
-              ? preRepairPhotoFileAssetsToUpload
-              : preRepairPhotoFileAssets,
+          structuralMeasurementFileAssets: allStructuralAssets,
+          preRepairPhotoFileAssets: allPreRepairPhotoAssets,
           dealership,
           shop: user?.person?.shop || initialData?.shop || null,
         };

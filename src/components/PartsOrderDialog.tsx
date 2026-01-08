@@ -232,9 +232,16 @@ export function PartsOrderDialog({
       setAttachmentError(''); // Clear error message
     }
     
+    // 分离新上传的文件和已存在的文件
     const newFiles = estimateFiles.filter((f): f is File => f instanceof File);
+    const existingFiles = estimateFiles.filter((f) => !(f instanceof File));
+    
     // Convert file to FileAsset Array
     const estimateFileAssets = await convertFilesToFileAssets(newFiles, FileAssetFileAssetTypeEnum.ESTIMATE);
+    
+    // 合并已存在的和新上传的附件
+    const allEstimateAssets = [...existingFiles, ...estimateFileAssets];
+    
     try {
       const api = new RequestApi();
       const partsOrder = (PartsOrder as any).create({
@@ -243,7 +250,7 @@ export function PartsOrderDialog({
         parts: isCsr ? initialData?.parts : data.parts.map((part) => part.number),
         estimateFileAssets: isCsr 
           ? initialData?.estimateFileAssets 
-          : (estimateFileAssets.length > 0 ? estimateFileAssets : estimateFiles),
+          : allEstimateAssets,
         salesOrderNumber: salesOrderNumber, // Include sales order number
         repairOrder: initRepaitOrderData,
       });
