@@ -33,9 +33,12 @@ import RepairOrderDialog, {
 } from '@/components/RepairOrderDialog';
 import { Timeline } from '@/components/Timeline';
 import { useTranslation } from 'react-i18next';
+import PersonSearchRequest from '@/js/models/PersonSearchRequest';
+import PersonApi from '@/js/clients/base/PersonApi';
 
 export function RepairOrderDetail() {
   const { t } = useTranslation();
+  const [userNams, setUserName] = useState<string>('');
 
   const [openPartsOrderDialog, setOpenPartsOrderDialog] = useState(false);
   const [initRepaitOrderData, setInitRepaitOrderData] = useState<RepairOrder>();
@@ -46,7 +49,7 @@ export function RepairOrderDetail() {
   const paramsData = useParams({ from: '/_authenticated/repair_orders/$id' });
   const repairId = paramsData.id.split(',')[0];
   const partId = paramsData.id.split(',')[1];
-  
+
   const [initPartsOrderData, setInitPartsOrderData] = useState<PartsOrder[]>();
   const [selectedPartsOrderData, setSelectedPartsOrderData] =
     useState<PartsOrder>();
@@ -69,6 +72,7 @@ export function RepairOrderDetail() {
         api.repairOrderGet(repairId, {
           status200: (response) => {
             setInitRepaitOrderData(response);
+            getOrderDetailTopInfo();
             resolve(response);
           },
           error: (error) => {
@@ -79,6 +83,38 @@ export function RepairOrderDetail() {
       });
     } catch (e) {
       console.error(e);
+    }
+  };
+
+  const getOrderDetailTopInfo = async () => {
+    const filterByRegionId = initRepaitOrderData?.shop?.region.id;
+    try {
+      const request = PersonSearchRequest.create({
+        type: 'Network',
+        filterByRegionId,
+      });
+      const personApi = new PersonApi();
+
+      personApi.search(request, {
+        status200: (response) => {
+          const users = response.persons.filter(
+            (val: any) => val.status === 'Active'
+          );
+          const userNames = users
+            .map((val: any) => `${val.firstName} ${val.lastName}`)
+            .join(',');
+          setUserName(userNames);
+        },
+        error: (error) => {
+          toast.error(error.message);
+        },
+      });
+    } catch (error) {
+      if (error && typeof error === 'object' && 'message' in error) {
+        toast.error((error as any).message);
+      } else {
+        toast.error('An unexpected error occurred');
+      }
     }
   };
 
@@ -285,7 +321,7 @@ export function RepairOrderDetail() {
         photos,
         FileAssetFileAssetTypeEnum.POST_REPAIR_PHOTO
       );
-      
+
       await new Promise<boolean>((resolve, reject) => {
         const api = new RequestApi();
         const request = {
@@ -410,27 +446,31 @@ export function RepairOrderDetail() {
           alt={brand === 'vw' ? t('brand.vw') : t('brand.audi')}
           className="object-cover w-full h-full mt-6"
         />
-        <div className="absolute -translate-y-1/2 top-1/2 left-6">
-          <p className="text-3xl font-bold text-white">
-            {initRepaitOrderData && initRepaitOrderData.shop?.name || '--'}
+        <div className="absolute -translate-y-1/2 top-1/2 left-6 right-[360px] pr-4">
+          <p className="text-3xl font-bold text-white truncate">
+            {(initRepaitOrderData && initRepaitOrderData.shop?.name) || '--'}
           </p>
-          <p className="flex items-center mt-4 space-x-4 text-sm text-gray-200">
-            <Warehouse className="w-5 h-5 text-white" />
-            <span>
-              {t('repairOrder.detail.assignedDealership')}:{' '}
-              {initRepaitOrderData && initRepaitOrderData.shop?.sponsorDealership.name || '--'} (
-              {initRepaitOrderData && initRepaitOrderData.shop?.sponsorDealership.dealershipNumber})
-            </span>
-            <Users className="w-5 h-5 ml-6 text-white" />
-            <span>
-              {user?.person?.type === 'ProgramAdministrator'
-                ? t('user.type.admin')
-                : user?.person?.type === 'Csr'
-                  ? 'CSR'
-                  : user?.person?.type}
-              : {user?.person?.firstName} {user?.person?.lastName}
-            </span>
-          </p>
+          <div className="mt-4 space-y-2 text-sm text-gray-200">
+            <div className="flex items-start gap-2">
+              <Warehouse className="w-5 h-5 mt-0.5 text-white flex-shrink-0" />
+              <span className="break-words">
+                {t('repairOrder.detail.assignedDealership')}:{' '}
+                {(initRepaitOrderData &&
+                  initRepaitOrderData.shop?.sponsorDealership.name) ||
+                  '--'}{' '}
+                (
+                {initRepaitOrderData &&
+                  initRepaitOrderData.shop?.sponsorDealership.dealershipNumber}
+                )
+              </span>
+            </div>
+            <div className="flex items-start gap-2">
+              <Users className="w-5 h-5 mt-0.5 text-white flex-shrink-0" />
+              <span className="break-words">
+                Field Support Team : {userNams}
+              </span>
+            </div>
+          </div>
         </div>
         <div className="absolute top-1/2 right-6 max-w-[320px] -translate-y-1/2 text-sm text-gray-200">
           <div className="grid gap-1">
@@ -440,7 +480,9 @@ export function RepairOrderDetail() {
                 aria-hidden="true"
               />
               <span className="truncate">
-                {initRepaitOrderData && initRepaitOrderData.shop?.shopNumber ||'--'}
+                {(initRepaitOrderData &&
+                  initRepaitOrderData.shop?.shopNumber) ||
+                  '--'}
               </span>
             </div>
             <div className="my-1 grid grid-cols-[24px_1fr] items-center gap-2">
@@ -449,10 +491,10 @@ export function RepairOrderDetail() {
                 aria-hidden="true"
               />
               <span className="truncate">
-                {user?.person?.shop?.address ?? '--'},{' '}
-                {user?.person?.shop?.city ?? '--'},{' '}
-                {user?.person?.shop?.state ?? '--'}{' '}
-                {user?.person?.shop?.zip ?? '--'}
+                {initRepaitOrderData?.shop?.address ?? '--'},{' '}
+                {initRepaitOrderData?.shop?.city ?? '--'},{' '}
+                {initRepaitOrderData?.shop?.state ?? '--'}{' '}
+                {initRepaitOrderData?.shop?.zip ?? '--'}
               </span>
             </div>
             <div className="grid grid-cols-[24px_1fr] items-center gap-2">
@@ -517,7 +559,9 @@ export function RepairOrderDetail() {
                 <span className="text-muted-foreground">
                   {t('repairOrder.detail.vin')}
                 </span>
-                <p className="font-medium">{initRepaitOrderData?.vin || '--'}</p>
+                <p className="font-medium">
+                  {initRepaitOrderData?.vin || '--'}
+                </p>
               </div>
               <div>
                 <span className="text-muted-foreground">

@@ -253,12 +253,19 @@ export function Timeline({
 
   const getStatusBadge = (item: TimelineItem) => {
     console.log(userType, item.stage, item.status);
+    
+    // CSR 角色
     if (userType === 'Csr' && item.stage === 'OrderReview' && status === 'CsrReview' && item.status === 'waiting') {
       return <Badge className="text-white bg-blue-700">{t('timeline.badge.waitingOnYou')}</Badge>;
     }
     if (userType === 'Csr' && item.stage === 'OrderFulfillment' && item.status === 'waiting') {
       return <Badge className="bg-orange-400 text-muted">{t('timeline.badge.pendingDealer')}</Badge>;
     }
+    if (userType === 'Csr' && item.stage === 'OrderReceived' && item.status === 'waiting') {
+      return <Badge className="bg-orange-400 text-muted">{t('timeline.badge.pendingShop')}</Badge>;
+    }
+    
+    // Shop 角色
     if (userType === 'Shop' && item.stage === 'OrderReview' && status === 'CsrReview' && item.status === 'waiting') {
       return <Badge className="bg-orange-400 text-muted">{t('timeline.badge.pendingCsr')}</Badge>;
     }
@@ -271,20 +278,28 @@ export function Timeline({
     if (userType === 'Shop' && item.stage === 'OrderFulfillment' && item.status === 'waiting') {
       return <Badge className="bg-orange-400 text-muted">{t('timeline.badge.pendingDealer')}</Badge>;
     }
+    
+    // Dealership 角色
     if (userType === 'Dealership' && item.stage === 'OrderFulfillment' && item.status === 'waiting') {
       return <Badge className="text-blue-700 bg-blue-100">{t('timeline.badge.waitingOnYou')}</Badge>;
     }
-    
-    if (
-      (userType === 'Dealership' || userType === 'Csr') &&
-      item.stage === 'OrderReceived' &&
-      item.status === 'waiting'
-    ) {
+    if (userType === 'Dealership' && item.stage === 'OrderReceived' && item.status === 'waiting') {
       return <Badge className="bg-orange-400 text-muted">{t('timeline.badge.pendingShop')}</Badge>;
     }
-    if (item.status === 'waiting' && userType !== 'ProgramAdministrator') {
-      return <Badge className="text-blue-700 bg-blue-100">{t('timeline.badge.waitingOnYou')}</Badge>;
+    
+    // Field Staff 和 Program Administrator 角色 - 只显示 pending badges
+    if ((userType === 'FieldStaff' || userType === 'ProgramAdministrator') && item.status === 'waiting') {
+      if (item.stage === 'OrderReview') {
+        return <Badge className="bg-orange-400 text-muted">{t('timeline.badge.pendingCsr')}</Badge>;
+      }
+      if (item.stage === 'OrderFulfillment') {
+        return <Badge className="bg-orange-400 text-muted">{t('timeline.badge.pendingDealer')}</Badge>;
+      }
+      if (item.stage === 'OrderReceived') {
+        return <Badge className="bg-orange-400 text-muted">{t('timeline.badge.pendingShop')}</Badge>;
+      }
     }
+    
     return null;
   };
 

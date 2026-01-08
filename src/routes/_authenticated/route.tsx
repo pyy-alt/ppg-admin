@@ -60,7 +60,7 @@ const getRedirectTarget = (
   }
 
   // Csr & Dealership：允许维修单详情，禁止直接访问列表以外的路径
-  if (userType === 'Csr' || userType === 'Dealership') {
+  if (userType === 'Csr' || userType === 'Dealership' || userType==='FieldStaff') {
     if (path.startsWith('/repair_orders/')) {
       return null; // 允许直接访问详情页
     }
