@@ -55,6 +55,7 @@ export function Shops() {
       const request: any = PersonSearchRequest.create({
         type: userType,
         organizationId,
+        includeInactiveFlag:true
       });
       const resultParameter = ResultParameter.create({
         resultsOrderBy: 'firstName',

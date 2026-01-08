@@ -55,6 +55,7 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
             : auth.user?.person?.type === 'Dealership'
               ? auth.user?.person?.dealership?.id
               : undefined,
+        includeInactiveFlag: true,
       });
       const resultParameter = ResultParameter.create({
         resultsOrderBy: 'firstName',
@@ -138,15 +139,15 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
         <div className="flex items-center gap-4">
           {/* User Dropdown */}
           {isShowUser && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="flex items-center justify-center gap-3 pr-2 focus:outline-none focus-visible:outline-none active:outline-none">
-                    <div className="text-left text-white">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center justify-center gap-3 pr-2 focus:outline-none focus-visible:outline-none active:outline-none">
+                  <div className="text-left text-white">
                     {/* User Name - Larger font */}
                     <p className="mb-2 text-base font-semibold leading-none text-right">
                       {auth.user
                         ? `${auth.user.person?.firstName} ${auth.user.person?.lastName}`.trim() ||
-                          auth.user.person?.email
+                        auth.user.person?.email
                         : t('header.user')}
                     </p>
                     {/* Shop/Dealership Name */}
