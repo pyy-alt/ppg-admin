@@ -12,6 +12,7 @@ import { useDropzone } from 'react-dropzone';
 import { toast } from 'sonner';
 import { convertFilesToFileAssets, formatDateOnly } from '@/lib/utils';
 import { useDialogWithConfirm } from '@/hooks/use-dialog-with-confirm';
+import { useAuthStore } from '@/stores/auth-store';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
@@ -79,7 +80,14 @@ export function PartsOrderDialog({
   const location = useLocation(); // 获取当前路由信息
   const currentPathname = location.pathname;  
   const { t } = useTranslation();
+  const user = useAuthStore((state) => state.auth.user);
+  const userType = user?.person?.type;
+  const isCsr = userType === 'Csr';
+  
   const [estimateFiles, setEstimateFiles] = useState<File[]>([]);
+  const [attachmentError, setAttachmentError] = useState<string>('');
+  const [partsError, setPartsError] = useState<string>('');
+  const [salesOrderNumber, setSalesOrderNumber] = useState<string>('');
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -170,6 +178,8 @@ export function PartsOrderDialog({
       form.reset({
         parts: parts.length > 0 ? parts : [{ number: '' }],
       });
+      // Initialize sales order number
+      setSalesOrderNumber(initialData.salesOrderNumber || '');
       // Use setTimeout Move setState to the next event loop
       // setTimeout(() => {
       // setEstimateFiles(initialData.estimateFileAssets || [])
@@ -185,11 +195,40 @@ export function PartsOrderDialog({
       form.reset({
         parts: [{ number: '' }],
       });
+      setSalesOrderNumber('');
       setEstimateFiles([]);
     }
   }, [open, initialData, mode, form]);
 
   const onSubmit = async (data: FormValues) => {
+    // CSR only edits sales order number, skip other validations
+    if (!isCsr) {
+      // Validate at least one part number
+      const hasAtLeastOnePart = data.parts.some((part) => part.number.trim() !== '');
+      if (!hasAtLeastOnePart) {
+        setPartsError(t('partsOrder.validation.atLeastOnePart'));
+        toast.error(t('partsOrder.validation.atLeastOnePart'));
+        setTimeout(() => {
+          const partsSection = document.querySelector('[data-parts-section]');
+          partsSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+        return;
+      }
+      setPartsError(''); // Clear error message
+      
+      // Validate at least one attachment
+      if (estimateFiles.length === 0) {
+        setAttachmentError(t('partsOrder.validation.atLeastOneAttachment'));
+        toast.error(t('partsOrder.validation.atLeastOneAttachment'));
+        setTimeout(() => {
+          const attachmentsSection = document.querySelector('[data-attachments-section]');
+          attachmentsSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+        return;
+      }
+      setAttachmentError(''); // Clear error message
+    }
+    
     const newFiles = estimateFiles.filter((f): f is File => f instanceof File);
     // Convert file to FileAsset Array
     const estimateFileAssets = await convertFilesToFileAssets(newFiles, FileAssetFileAssetTypeEnum.ESTIMATE);
@@ -199,6 +238,7 @@ export function PartsOrderDialog({
         ...initialData,
         parts: data.parts.map((part) => part.number),
         estimateFileAssets: estimateFileAssets.length > 0 ? estimateFileAssets : estimateFiles,
+        salesOrderNumber: salesOrderNumber, // Include sales order number
         repairOrder: initRepaitOrderData,
       });
       setLoading(true);
@@ -237,6 +277,10 @@ export function PartsOrderDialog({
     onDrop: (acceptedFiles) => {
       console.log(acceptedFiles);
       setEstimateFiles((prevFiles) => [...prevFiles, ...acceptedFiles]);
+      // Clear error when files are added
+      if (attachmentError) {
+        setAttachmentError('');
+      }
     },
   });
 
@@ -264,6 +308,10 @@ export function PartsOrderDialog({
           createdUrls.current.delete(potentialUrl);
         }
       }
+      // Check if no files left after removal
+      if (newFiles.length === 0) {
+        setAttachmentError(t('partsOrder.validation.atLeastOneAttachment'));
+      }
       return newFiles;
     });
   };
@@ -289,7 +337,35 @@ export function PartsOrderDialog({
             <Separator />
           </DialogHeader>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0">
+            <form 
+              onSubmit={(e) => {
+                e.preventDefault();
+                // Check parts before form validation
+                const formData = form.getValues();
+                const hasAtLeastOnePart = formData.parts.some((part) => part.number.trim() !== '');
+                if (!hasAtLeastOnePart) {
+                  setPartsError(t('partsOrder.validation.atLeastOnePart'));
+                  toast.error(t('partsOrder.validation.atLeastOnePart'));
+                  setTimeout(() => {
+                    const partsSection = document.querySelector('[data-parts-section]');
+                    partsSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }, 100);
+                  return;
+                }
+                // Check attachment before form validation
+                if (estimateFiles.length === 0) {
+                  setAttachmentError(t('partsOrder.validation.atLeastOneAttachment'));
+                  toast.error(t('partsOrder.validation.atLeastOneAttachment'));
+                  setTimeout(() => {
+                    const attachmentsSection = document.querySelector('[data-attachments-section]');
+                    attachmentsSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }, 100);
+                  return;
+                }
+                form.handleSubmit(onSubmit)(e);
+              }} 
+              className="flex flex-col flex-1 min-h-0"
+            >
               <div className="flex-1 px-6 py-2 overflow-y-auto">
                 <section className="mb-8">
                   <div className="flex items-center gap-3 mb-2">
@@ -358,18 +434,22 @@ export function PartsOrderDialog({
                       </p>
                     </div>
                     {/* Display in edit mode Sales Order Number */}
-                    {initialData?.id && initialData?.salesOrderNumber && (
+                    {initialData?.id && (
                       <div>
                         <Label className="text-muted-foreground">{t('partsOrder.section.salesOrder')}</Label>
-                        <p className="mt-1 font-medium">
-                          {initialData.salesOrderNumber || '---'}
-                          {/* // TODO======== */}
-                          {/* {
-                            initialData?.status === 'DealershipProcessing' &&userType === 'Csr' && initialData.stage !== 'RepairCompleted' ? (<Input type='text' value={initialData.salesOrderNumber}
-                           onChange={(e) => setSalesOrderNumber(e.target.value)}
-                              />) : initialData.salesOrderNumber
-                          } */}
-                        </p>
+                        {isCsr && initialData?.status === 'DealershipProcessing' ? (
+                          <Input 
+                            type="text" 
+                            value={salesOrderNumber}
+                            onChange={(e) => setSalesOrderNumber(e.target.value)}
+                            placeholder={t('partsOrder.form.salesOrder.placeholder')}
+                            className="mt-1"
+                          />
+                        ) : (
+                          <p className="mt-1 font-medium">
+                            {initialData.salesOrderNumber || '---'}
+                          </p>
+                        )}
                       </div>
                     )}
                   </div>
@@ -378,11 +458,12 @@ export function PartsOrderDialog({
                 {/* 3. Requested Part Numbers + Attachments Side by side */}
                 <div className="grid grid-cols-1 gap-12 md:grid-cols-2">
                   {/* Left：Parts input */}
-                  <section>
+                  <section data-parts-section>
                     <div className="flex items-center gap-3 mb-5">
                       <Package className="w-5 h-5 text-foreground" />
                       <h3 className="text-lg font-semibold text-foreground">
                         {t('partsOrder.section.requestedParts')}
+                        <span className="text-destructive ml-1">*</span>
                       </h3>
                     </div>
                     <div className="space-y-4">
@@ -392,13 +473,23 @@ export function PartsOrderDialog({
                             {t('partsOrder.form.partNumber.label', { num: i + 1 })}
                           </span>
                           <FormField
-                            disabled={initialData?.status === 'DealershipProcessing'}
+                            disabled={initialData?.status === 'DealershipProcessing' || isCsr}
                             control={form.control}
                             name={`parts.${i}.number`}
                             render={({ field }) => (
                               <FormItem className="flex-1">
                                 <FormControl>
-                                  <Input placeholder={t('partsOrder.form.partNumber.placeholder')} {...field} />
+                                  <Input 
+                                    placeholder={t('partsOrder.form.partNumber.placeholder')} 
+                                    {...field}
+                                    onChange={(e) => {
+                                      field.onChange(e);
+                                      // Clear error when user starts typing
+                                      if (partsError && e.target.value.trim() !== '') {
+                                        setPartsError('');
+                                      }
+                                    }}
+                                  />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -406,7 +497,7 @@ export function PartsOrderDialog({
                           />
                           {fields.length > 1 && (
                             <Button
-                              disabled={initialData?.status === 'DealershipProcessing'}
+                              disabled={initialData?.status === 'DealershipProcessing' || isCsr}
                               type="button"
                               variant="ghost"
                               size="icon"
@@ -418,7 +509,7 @@ export function PartsOrderDialog({
                         </div>
                       ))}
                       <Button
-                        disabled={initialData?.status === 'DealershipProcessing'}
+                        disabled={initialData?.status === 'DealershipProcessing' || isCsr}
                         type="button"
                         variant="outline"
                         size="sm"
@@ -426,10 +517,21 @@ export function PartsOrderDialog({
                       >
                         <Plus className="w-4 h-4 mr-2" /> {t('partsOrder.button.addPart')}
                       </Button>
+                      {/* Display parts error message */}
+                      {partsError && (
+                        <div className="flex items-start gap-2 px-3 py-2.5 text-sm font-medium text-destructive bg-destructive/10 border border-destructive/30 rounded-md">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                          </svg>
+                          <span>{partsError}</span>
+                        </div>
+                      )}
                     </div>
                   </section>
                   {/* Right：Estimate PDF Upload */}
-                  <section>
+                  <section data-attachments-section>
                     <div className="flex items-center gap-3 mb-5">
                       <Paperclip className="w-5 h-5 text-foreground" />
                       <h3 className="text-lg font-semibold text-foreground">{t('repairOrder.section.attachments')}</h3>
@@ -446,7 +548,7 @@ export function PartsOrderDialog({
                         {...getRootProps()}
                         className={`flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-10 text-center transition-all ${isDragActive ? 'border-primary bg-muted' : 'border-border hover:border-primary'}`}
                       >
-                        <input {...getInputProps()} disabled={initialData?.status === 'DealershipProcessing'} />
+                        <input {...getInputProps()} disabled={initialData?.status === 'DealershipProcessing' || isCsr} />
                         <Upload className="w-12 h-12 mb-3 text-muted-foreground" />
                         <p className="text-sm text-muted-foreground">
                           {isDragActive ? (
@@ -482,22 +584,35 @@ export function PartsOrderDialog({
                                   {(file.size / 1024).toFixed(2)} KB
                                 </p> */}
                                   </div>
-                                  <button
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      removeFile(index);
-                                    }}
-                                    className="ml-2 text-xs text-destructive hover:underline"
-                                  >
-                                    <X className="w-4 h-4" />
-                                  </button>
+                                  {!isCsr && (
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        removeFile(index);
+                                      }}
+                                      className="ml-2 text-xs text-destructive hover:underline"
+                                    >
+                                      <X className="w-4 h-4" />
+                                    </button>
+                                  )}
                                 </div>
                               );
                             })}
                           </div>
                         )}
                       </div>
+                      {/* Display attachment error message */}
+                      {attachmentError && (
+                        <div className="flex items-start gap-2 px-3 py-2.5 text-sm font-medium text-destructive bg-destructive/10 border border-destructive/30 rounded-md">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                          </svg>
+                          <span>{attachmentError}</span>
+                        </div>
+                      )}
                       {/* Display error message */}
                       {form.formState.errors._estimateFile && (
                         <p className="text-sm text-destructive">{form.formState.errors._estimateFile.message}</p>
@@ -534,10 +649,37 @@ export function PartsOrderDialog({
                     <Button
                       type="button"
                       onClick={async () => {
+                        // Validate before submitting
+                        const formData = form.getValues();
+                        const hasAtLeastOnePart = formData.parts.some((part) => part.number.trim() !== '');
+                        if (!hasAtLeastOnePart) {
+                          setPartsError(t('partsOrder.validation.atLeastOnePart'));
+                          toast.error(t('partsOrder.validation.atLeastOnePart'));
+                          setTimeout(() => {
+                            const partsSection = document.querySelector('[data-parts-section]');
+                            partsSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                          }, 100);
+                          return;
+                        }
+                        if (estimateFiles.length === 0) {
+                          setAttachmentError(t('partsOrder.validation.atLeastOneAttachment'));
+                          toast.error(t('partsOrder.validation.atLeastOneAttachment'));
+                          setTimeout(() => {
+                            const attachmentsSection = document.querySelector('[data-attachments-section]');
+                            attachmentsSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                          }, 100);
+                          return;
+                        }
+                        
                         setLoading(true);
-                        await onSubmit(form.getValues() as FormValues);
-                        await onHandleResubmit?.(comment);
-                        setLoading(false);
+                        try {
+                          await onSubmit(formData as FormValues);
+                          await onHandleResubmit?.(comment);
+                        } catch (error) {
+                          // Error already handled in onSubmit
+                        } finally {
+                          setLoading(false);
+                        }
                       }}
                       disabled={loading}
                     >

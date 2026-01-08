@@ -309,7 +309,14 @@
       },
       "comment": {
         "placeholder": "Saisissez un commentaire"
+      },
+      "salesOrder": {
+        "placeholder": "Saisissez le numéro de commande de vente"
       }
+    },
+    "validation": {
+      "atLeastOneAttachment": "Veuillez télécharger au moins une pièce jointe d'estimation",
+      "atLeastOnePart": "Veuillez saisir au moins un numéro de pièce"
     },
     "button": {
       "addPart": "Ajouter une pièce",

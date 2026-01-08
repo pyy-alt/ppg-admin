@@ -308,7 +308,14 @@
       },
       "comment": {
         "placeholder": "Enter comment"
+      },
+      "salesOrder": {
+        "placeholder": "Enter sales order number"
       }
+    },
+    "validation": {
+      "atLeastOneAttachment": "Please upload at least one estimate attachment",
+      "atLeastOnePart": "Please enter at least one part number"
     },
     "button": {
       "addPart": "Add a Part",
