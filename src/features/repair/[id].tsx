@@ -503,7 +503,7 @@ export function RepairOrderDetail() {
                 aria-hidden="true"
               />
               <span className="truncate">
-                {user?.person?.shop?.region.name ?? '--'}
+                {initRepaitOrderData?.shop?.region.name ?? '--'}
               </span>
             </div>
           </div>
