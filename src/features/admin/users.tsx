@@ -18,6 +18,7 @@ import NetworkUserDialog from '@/components/NetworkUserDialog'
 import { ClearableInput } from '@/components/clearable-input'
 import { DataTablePagination } from '@/components/data-table-pagination'
 import { useTranslation } from 'react-i18next';
+import { SortableTableHead } from '@/components/SortableTableHead'
 
 type filterByNetworkRoleType = 'Csr' | 'FieldStaff' | 'ProgramAdministrator'
 export function Users() {
@@ -35,6 +36,8 @@ export function Users() {
 	const [smartFilter, setSmartFilter] = useState('')
 	const [filterByNetworkRole, setFilterByNetworkRole] = useState<filterByNetworkRoleType | undefined>(undefined)
 	const [includeInactiveFlag, setIncludeInactiveFlag] = useState(false)
+	const [sortBy, setSortBy] = useState('')
+	const [sortAscending, setSortAscending] = useState(false)
 
 	const [selectedRegionId, setSelectedRegionId] = useState<string>('all')
 
@@ -59,6 +62,8 @@ export function Users() {
 		filterByRegionId: number | undefined,
 		filterByNetworkRole?: filterByNetworkRoleType,
 		page: number = 1,
+		sortBy: string = '',
+		sortAscending: boolean = false,
 	) => {
 		try {
 			const request = PersonSearchRequest.create({
@@ -72,8 +77,8 @@ export function Users() {
 			const resultParameter = ResultParameter.create({
 				resultsLimitOffset: (page - 1) * itemsPerPage,
 				resultsLimitCount: itemsPerPage,
-				resultsOrderBy: 'dateLastAccess',
-				resultsOrderAscending: false,
+				resultsOrderBy: sortBy || 'dateLastAccess',
+				resultsOrderAscending: sortAscending,
 			})
 
 			;(request as any).resultParameter = resultParameter
@@ -110,18 +115,36 @@ export function Users() {
 		}
 	}
 
+	const handleSort = (field: string) => {
+		if (sortBy === field) {
+			if (sortAscending) {
+				// 当前是升序 → 第三次点击：恢复默认排序
+				setSortBy('')
+				setSortAscending(false)
+			} else {
+				// 当前是降序 → 第二次点击：切换为升序
+				setSortAscending(true)
+			}
+		} else {
+			// 点击新字段 → 第一次点击：按该字段降序排序
+			setSortBy(field)
+			setSortAscending(false)
+		}
+		setCurrentPage(1)
+	}
+
 	// Filter condition changes：Use debounce
 	useDebouncedEffect(
 		() => {
-			getUsers(smartFilter, includeInactiveFlag, currentRegionId, filterByNetworkRole, currentPage)
+			getUsers(smartFilter, includeInactiveFlag, currentRegionId, filterByNetworkRole, currentPage, sortBy, sortAscending)
 		},
-		[smartFilter, includeInactiveFlag, currentRegionId, filterByNetworkRole, currentPage],
+		[smartFilter, includeInactiveFlag, currentRegionId, filterByNetworkRole, currentPage, sortBy, sortAscending],
 		1000,
 	)
 
 	useEffect(() => {
 		setCurrentPage(1)
-	}, [smartFilter, includeInactiveFlag, currentRegionId, filterByNetworkRole])
+	}, [smartFilter, includeInactiveFlag, currentRegionId, filterByNetworkRole, sortBy, sortAscending])
 
 	return (
 		<div className="bg-background text-foreground min-h-screen">
@@ -147,7 +170,7 @@ export function Users() {
 				initialValues={initUser}
 				filterByRegion={selectedRegion}
 				onSuccess={() => {
-					getUsers(smartFilter, includeInactiveFlag, currentRegionId, filterByNetworkRole)
+					getUsers(smartFilter, includeInactiveFlag, currentRegionId, filterByNetworkRole, currentPage, sortBy, sortAscending)
 				}}
 				onError={error => {
 					toast.error(error.message)
@@ -233,7 +256,14 @@ export function Users() {
 							<Table>
 								<TableHeader>
 									<TableRow className="bg-muted">
-										<TableHead className="text-foreground font-semibold">{t('user.list.tableHeaders.firstName')}</TableHead>
+										<SortableTableHead
+											field="firstName"
+											currentSortBy={sortBy}
+											currentAscending={sortAscending}
+											onSort={handleSort}
+										>
+											{t('user.list.tableHeaders.firstName')}
+										</SortableTableHead>
 										<TableHead className="text-foreground font-semibold">{t('user.list.tableHeaders.lastName')}</TableHead>
 										<TableHead className="text-foreground font-semibold">{t('user.list.tableHeaders.email')}</TableHead>
 										<TableHead className="text-foreground font-semibold">{t('user.list.tableHeaders.role')}</TableHead>
@@ -251,27 +281,22 @@ export function Users() {
 													<Pencil className="h-4 w-4 hover:underline" />
 													<span
 														className={
-															user.status === 'Pending'
-																? 'cursor-pointer text-orange-600 hover:underline'
-																: user.status === 'Inactive'
-																	? 'text-gray-400'
-																	: 'text-foreground cursor-pointer hover:underline'
+															user.status === 'Inactive'
+																? 'text-gray-400'
+																: 'text-foreground cursor-pointer hover:underline'
 														}
 													>
-														{user.firstName}
+														{user.status === 'Pending' ? t('user.list.pendingRegistration') : user.firstName}
 													</span>
 												</div>
 											</TableCell>
-											<TableCell
-												className={
-													user.status === 'Inactive'
-														? 'text-gray-400'
-														: user.status === 'Pending'
-															? 'text-orange-600'
-															: ''
+											<TableCell>
+												{user.status === 'Pending' 
+													? t('user.list.pendingRegistration') 
+													: user.status === 'Inactive'
+														? <span className="text-gray-400">{user.lastName}</span>
+														: user.lastName
 												}
-											>
-												{user.lastName}
 											</TableCell>
 											<TableCell className="text-sm">
 												{user.status === 'Inactive' ? <span className="text-gray-400">{user.email}</span> : user.email}
@@ -303,21 +328,15 @@ export function Users() {
 													(user.dateCreated && new Date(user.dateCreated).toLocaleDateString()) || '--'
 												)}
 											</TableCell>
-											<TableCell
-												className={
-													user.status === 'Inactive'
-														? 'text-gray-400'
-														: user.status === 'Pending'
-															? 'text-orange-600'
-															: ''
-												}
-											>
+											<TableCell>
 												{(user.dateLastAccess && new Date(user.dateLastAccess).toLocaleDateString()) ||
 													t('user.list.pendingRegistration')}
 											</TableCell>
 											<TableCell>
 												{user.status === 'Inactive' ? (
 													<span className="text-gray-400">{user.status}</span>
+												) : user.status === 'Pending' ? (
+													<span>Active</span>
 												) : (
 													<span>{user.status}</span>
 												)}

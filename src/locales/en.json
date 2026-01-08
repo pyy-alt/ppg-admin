@@ -407,7 +407,7 @@
       "rolePlaceholder": "Role",
       "role": {
         "all": "All Roles",
-        "csr": "Csr",
+        "csr": "CSR",
         "fieldStaff": "Field Staff",
         "programAdministrator": "Program Administrator"
       },
