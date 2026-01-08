@@ -79,7 +79,7 @@
   "auth": {
     "login": {
       "title": "Login",
-      "emailPlaceholder": "Email",
+      "emailPlaceholder": "Email Address",
       "passwordPlaceholder": "Password",
       "rememberMe": "Remember Me",
       "forgotPassword": "Forgot password",

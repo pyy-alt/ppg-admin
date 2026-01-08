@@ -128,9 +128,9 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
           />
           <div>
             {logo === vwLogo ? (
-              <span className="font-medium text-lg text-blue-500">{t('header.vw')} </span>
+              <span className="font-medium text-lg text-blue-500 mr-2">{t('header.vw')} </span>
             ) : (
-              <span className="font-medium text-lg text-red-500">{t('header.audi')}</span>
+              <span className="font-medium text-lg text-red-500 mr-2">{t('header.audi')}</span>
             )}
             <span className="text-base font-medium text-white">{t('common.restrictedPartsTracker')}</span>
           </div>
@@ -144,14 +144,14 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
                 <button className="flex items-center justify-center gap-3 pr-2 focus:outline-none focus-visible:outline-none active:outline-none">
                   <div className="text-right text-white">
                     {/* User Name - Larger font */}
-                    <p className="mb-2 text-base font-semibold leading-none text-right">
+                    <p className="mb-3 text-base font-semibold leading-none text-right">
                       {auth.user
                         ? `${auth.user.person?.firstName} ${auth.user.person?.lastName}`.trim() ||
                         auth.user.person?.email
                         : t('header.user')}
                     </p>
                     {/* Shop/Dealership Name */}
-                    <p className="text-xs text-white mb-1 text-right">
+                    <p className="text-xs text-white mb-2 text-right">
                       {auth.user
                         ? auth.user.person?.shop?.name && auth.user.person?.shop?.shopNumber
                           ? `${auth.user.person?.shop?.name} (${auth.user.person?.shop?.shopNumber})`

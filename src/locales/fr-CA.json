@@ -79,7 +79,7 @@
   "auth": {
     "login": {
       "title": "Connexion",
-      "emailPlaceholder": "Courriel",
+      "emailPlaceholder": "Courriel Address",
       "passwordPlaceholder": "Mot de passe",
       "rememberMe": "Se souvenir de moi",
       "forgotPassword": "Mot de passe oublié",
