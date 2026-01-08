@@ -724,6 +724,14 @@
       "register": "S'inscrire"
     },
     "complete": {
+      "titles": {
+        "shop": "Inscription d'un nouvel utilisateur atelier",
+        "dealership": "Inscription d'un nouvel utilisateur concessionnaire",
+        "admin": "Inscription d'un nouvel utilisateur",
+        "csr": "Inscription d'un nouvel utilisateur",
+        "fieldStaff": "Inscription d'un nouvel utilisateur",
+        "default": "Inscription d'un nouvel utilisateur"
+      },
       "errors": {
         "invalidParams": "Paramètres de lien d'inscription invalides.",
         "invalidLink": "Le lien d'inscription est invalide ou a expiré.",
@@ -737,6 +745,11 @@
       "sections": {
         "personalInfo": "Renseignements personnels",
         "shopInfo": "Renseignements sur l'atelier",
+        "dealershipInfo": "Renseignements sur le concessionnaire",
+        "organizationInfo": "Renseignements sur l'organisation",
+        "csrInfo": "Renseignements CSR",
+        "adminInfo": "Renseignements sur l'administrateur du programme",
+        "fieldStaffInfo": "Renseignements sur le personnel de terrain",
         "password": "Mot de passe"
       },
       "fields": {

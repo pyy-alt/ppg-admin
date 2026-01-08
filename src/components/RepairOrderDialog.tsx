@@ -568,7 +568,7 @@ export default function RepairOrderDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleDialogOpenChange}>
-      <DialogContent className="flex max-h-[90vh] w-[90%] flex-col sm:max-w-7xl">
+      <DialogContent className="flex max-h-[90vh] w-[95%] flex-col sm:max-w-7xl">
         <DialogHeader className="shrink-0">
           <DialogTitle className="text-2xl font-semibold">
             {isEdit

@@ -727,6 +727,14 @@
       "register": "Register"
     },
     "complete": {
+      "titles": {
+        "shop": "New Shop User Registration",
+        "dealership": "New Dealership User Registration",
+        "admin": "New User Registration",
+        "csr": "New User Registration",
+        "fieldStaff": "New User Registration",
+        "default": "New User Registration"
+      },
       "errors": {
         "invalidParams": "Invalid registration link parameters.",
         "invalidLink": "Registration link is invalid or has expired.",
@@ -740,6 +748,11 @@
       "sections": {
         "personalInfo": "Personal Information",
         "shopInfo": "Shop Information",
+        "dealershipInfo": "Dealership Information",
+        "organizationInfo": "Organization Information",
+        "csrInfo": "CSR Information",
+        "adminInfo": "Program Administrator Information",
+        "fieldStaffInfo": "Field Staff Information",
         "password": "Password"
       },
       "fields": {

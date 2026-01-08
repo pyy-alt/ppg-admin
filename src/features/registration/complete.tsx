@@ -5,7 +5,7 @@ import CompleteRegistrationRequest from '@/js/models/CompleteRegistrationRequest
 import type Session from '@/js/models/Session'
 import { User, Store, Lock, MapPin, EyeOff, Eye } from 'lucide-react'
 import { toast } from 'sonner'
-import bannerImg from '@/assets/img/registration/banner.png'
+import bannerImg from '@/assets/img/registration/banner2.png'
 import { useAuthStore } from '@/stores/auth-store'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -38,6 +38,45 @@ export function RegistrationComplete() {
 
   const authApi = new AuthenticationApi()
   const { auth } = useAuthStore()
+  
+  // 获取用户类型
+  const userType = auth.user?.person?.type
+
+  // 根据用户类型获取标题
+  const getBannerTitle = () => {
+    switch (userType) {
+      case 'Shop':
+        return t('registration.complete.titles.shop')
+      case 'Dealership':
+        return t('registration.complete.titles.dealership')
+      case 'ProgramAdministrator':
+        return t('registration.complete.titles.admin')
+      case 'Csr':
+        return t('registration.complete.titles.csr')
+      case 'FieldStaff':
+        return t('registration.complete.titles.fieldStaff')
+      default:
+        return t('registration.complete.titles.default')
+    }
+  }
+
+  // 根据用户类型获取组织信息标题
+  const getOrganizationSectionTitle = () => {
+    switch (userType) {
+      case 'Shop':
+        return t('registration.complete.sections.shopInfo')
+      case 'Dealership':
+        return t('registration.complete.sections.dealershipInfo')
+      case 'Csr':
+        return t('registration.complete.sections.csrInfo')
+      case 'ProgramAdministrator':
+        return t('registration.complete.sections.adminInfo')
+      case 'FieldStaff':
+        return t('registration.complete.sections.fieldStaffInfo')
+      default:
+        return t('registration.complete.sections.organizationInfo')
+    }
+  }
 
   // ✅ Add ref Prevent duplicate calls
   const hasValidatedRef = useRef(false)
@@ -204,15 +243,15 @@ export function RegistrationComplete() {
       <div className='bg-primary text-primary-foreground relative mt-12 h-32 lg:h-40'>
         <img
           src={bannerImg}
-          alt={t('registration.complete.bannerAlt')}
+          alt={getBannerTitle()}
           className='absolute inset-0 h-full w-full object-cover opacity-70'
           loading='lazy'
         />
-        {/* <div className='relative z-10 flex h-full items-center px-6 lg:px-12'>
+        <div className='relative z-10 flex h-full items-center px-6 lg:px-12'>
           <h1 className='text-2xl font-bold lg:text-4xl'>
-            New Shop User Registration
+            {getBannerTitle()}
           </h1>
-        </div> */}
+        </div>
       </div>
 
       {/* Form body */}
@@ -278,12 +317,12 @@ export function RegistrationComplete() {
             </div>
           </section>
 
-          {/* Shop Information */}
+          {/* Shop/Organization Information */}
           <section className='space-y-6'>
             <div className='flex items-center gap-3'>
               <Store className='text-foreground h-6 w-6' />
               <h2 className='text-foreground text-xl font-semibold'>
-                {t('registration.complete.sections.shopInfo')}
+                {getOrganizationSectionTitle()}
               </h2>
             </div>
 
