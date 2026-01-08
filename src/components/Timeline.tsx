@@ -294,18 +294,20 @@ export function Timeline({
     <Card className="p-6">
       <h2 className="mb-6 text-2xl font-bold">{t('timeline.title')}</h2>
 
-      {/* 时间线容器：左侧留出空间用于连线 */}
-      <div className="relative pl-12">
+      {/* 时间线容器 */}
+      <div className="relative">
         {timelineItems.map((item, index) => {
           const isLast = index === timelineItems.length - 1;
           const isCompleted = item.status === 'completed' || item.status === 'approved';
+          const isCurrentStage = item.status === 'waiting' || item.status === 'rejected';
+          
           return (
-            <div key={item.id} className="relative flex items-start min-h-32">
+            <div key={item.id} className="relative flex min-h-32">
               {/* 左侧：圆点 + 连线 */}
-              <div className="absolute top-0 left-0 flex items-start h-full">
+              <div className="relative flex flex-col items-center mr-6">
                 {/* 圆点 */}
                 <div
-                  className={`relative z-10 flex h-6 w-6 shrink-0  items-center justify-center rounded-full  text-white ${
+                  className={`relative z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-white ${
                     item.status === 'approved' || item.status === 'completed'
                       ? 'bg-green-600'
                       : item.status === 'rejected'
@@ -320,23 +322,25 @@ export function Timeline({
                   ) : item.status === 'rejected' ? (
                     <X className="w-4 h-4" />
                   ) : (
-                    <span>{item.id}</span>
+                    <span className="text-sm">{item.id}</span>
                   )}
                 </div>
 
-                {/* 向下连线：仅在非最后一个节点时绘制，且充满剩余高度 */}
+                {/* 向下连线：仅在非最后一个节点时绘制 */}
                 {!isLast && (
                   <div
-                    className={`absolute left-3 top-0 w-0.5  h-full ${isCompleted ? 'bg-green-600' : 'bg-gray-300'}`}
+                    className={`w-0.5 flex-1 mt-1 ${isCompleted ? 'bg-green-600' : 'bg-gray-300'}`}
                   />
                 )}
               </div>
 
               {/* 右侧内容区域 */}
-              <div className="flex-1 pb-12 ml-8">
-                {/* 标题 + Badge */}
-                <div className="flex items-center gap-3 mb-3">
-                  <h3 className="text-lg font-semibold">{item.title}</h3>
+              <div className="flex-1 pb-12">
+                {/* 标题 + Badge - 与数字垂直居中对齐 */}
+                <div className="flex items-center gap-3 mb-3 -mt-1">
+                  <h3 className={`text-lg ${isCurrentStage ? 'font-bold' : 'font-semibold'}`}>
+                    {item.title}
+                  </h3>
                   {getStatusBadge(item)}
                 </div>
 
