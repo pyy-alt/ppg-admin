@@ -500,7 +500,7 @@ export function PartOrders() {
                     {t('partsOrder.list.tableHeaders.csrRegion')}
                   </TableHead>
                   <SortableTableHead
-                    field="dateCreated"
+                    field="dateSubmitted"
                     currentSortBy={sortBy}
                     currentAscending={sortAscending}
                     onSort={handleSort}
