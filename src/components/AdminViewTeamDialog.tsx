@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useTranslation } from 'react-i18next';
+import ConfirmDialog from '@/components/ConfirmDialog';
 
 interface TeamMember {
   id: number;
@@ -40,6 +41,8 @@ export default function AdminViewTeamDialog({ open, onOpenChange, teamMembers, o
   const { t } = useTranslation(); // 新增：获取 t 函数
 
   const [members, setMembers] = useState<TeamMember[]>(teamMembers ?? []);
+  const [isConfirmRejectOpen, setIsConfirmRejectOpen] = useState(false);
+  const [selectedMemberId, setSelectedMemberId] = useState<number | null>(null);
 
   useEffect(() => {
     if (teamMembers) setMembers(teamMembers);
@@ -161,6 +164,18 @@ export default function AdminViewTeamDialog({ open, onOpenChange, teamMembers, o
     }
   };
 
+  const handleRejectClick = (id: number) => {
+    setSelectedMemberId(id);
+    setIsConfirmRejectOpen(true);
+  };
+
+  const handleConfirmReject = async () => {
+    if (selectedMemberId !== null) {
+      await handleReject(selectedMemberId);
+      setSelectedMemberId(null);
+    }
+  };
+
   const renderActionButtons = (member: TeamMember) => {
     switch (member.status) {
       case 'Active':
@@ -183,7 +198,7 @@ export default function AdminViewTeamDialog({ open, onOpenChange, teamMembers, o
             <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => handleApprove(member.id)}>
               <Check className="mr-1 h-3.5 w-3.5" /> {t('team.button.approve')}
             </Button>
-            <Button size="sm" variant="destructive" onClick={() => handleReject(member.id)}>
+            <Button size="sm" variant="destructive" onClick={() => handleRejectClick(member.id)}>
               <XCircle className="mr-1 h-3.5 w-3.5" /> {t('team.button.reject')}
             </Button>
           </div>
@@ -253,6 +268,18 @@ export default function AdminViewTeamDialog({ open, onOpenChange, teamMembers, o
           <Button onClick={handleClose}>{t('common.close')}</Button>
         </DialogFooter>
       </DialogContent>
+
+      {/* Confirm Reject Dialog */}
+      <ConfirmDialog
+        open={isConfirmRejectOpen}
+        onOpenChange={setIsConfirmRejectOpen}
+        onConfirm={handleConfirmReject}
+        title={t('common.confirmAction')}
+        description={t('common.confirmDescription')}
+        confirmText={t('common.confirm')}
+        cancelText={t('common.cancel')}
+        variant="danger"
+      />
     </Dialog>
   );
 }

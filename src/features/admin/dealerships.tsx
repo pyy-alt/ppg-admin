@@ -161,12 +161,52 @@ export function Dealerships() {
     setCurrentPage(1);
   }, [smartFilter]);
 
-  const getFlattenedCurrentPageData = () => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    const pageData = dealerships.slice(startIndex, endIndex);
+  // 获取所有数据用于导出（不分页）
+  const fetchAllDataForExport = async (): Promise<any[]> => {
+    if (!user) return [];
 
-    return pageData.map((order: any) => {
+    try {
+      const api = new OrganizationApi();
+
+      // 构建请求参数（与 fetchDealerships 相同，但不分页）
+      const requestParams: any = {
+        type: 'Dealership',
+        smartFilter: smartFilter || undefined,
+      };
+
+      // 不分页，获取所有数据
+      const resultParameter = ResultParameter.create({
+        resultsLimitOffset: 0,
+        resultsLimitCount: 999999,
+        resultsOrderBy: sortBy,
+        resultsOrderAscending: sortAscending,
+      });
+      requestParams.resultParameter = resultParameter;
+
+      const request = OrganizationSearchRequest.create(requestParams);
+
+      return new Promise((resolve, reject) => {
+        api.search(request, {
+          status200: (response: any) => {
+            resolve(response.organizations || []);
+          },
+          error: (error: any) => {
+            reject(error);
+          },
+          status403: () => {
+            resolve([]);
+          },
+        });
+      });
+    } catch (error) {
+      console.error('获取导出数据失败:', error);
+      return [];
+    }
+  };
+
+  // 格式化数据用于导出
+  const getFlattenedAllData = (allDealerships: any[]) => {
+    return allDealerships.map((order: any) => {
       return {
         Name: order.name,
         Number: order.dealershipNumber,
@@ -178,12 +218,17 @@ export function Dealerships() {
       };
     });
   };
+
   const exportCSV = async () => {
     try {
-      const flattenedData = getFlattenedCurrentPageData();
+      toast.loading(t('common.messages.exportLoading'));
+      const allDealerships = await fetchAllDataForExport();
+      const flattenedData = getFlattenedAllData(allDealerships);
       const result = await exportCurrentPageToCSV(flattenedData, headers, 'Manage_Dealers');
+      toast.dismiss();
       result ? toast.success(t('common.messages.exportSuccess')) : null;
     } catch (error) {
+      toast.dismiss();
       toast.error(t('common.messages.exportFailed'));
     }
   };

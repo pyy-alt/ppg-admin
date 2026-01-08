@@ -8,6 +8,8 @@ import PersonEditStatusRequest from '@/js/models/PersonEditStatusRequest';
 import PersonApi from '@/js/clients/base/PersonApi';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import ConfirmDialog from '@/components/ConfirmDialog';
+import { useState } from 'react';
 
 type PersonStatus = (typeof PersonStatusEnum)[keyof typeof PersonStatusEnum];
 
@@ -46,6 +48,9 @@ interface ViewDealerTeamDialogProps {
 
 export default function ViewTeamDialog({ open, onOpenChange, teamMembers, onSuccess }: ViewDealerTeamDialogProps) {
   const { t } = useTranslation();
+
+  const [isConfirmRejectOpen, setIsConfirmRejectOpen] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
 
   const handleClose = () => {
     onOpenChange(false);
@@ -173,6 +178,18 @@ export default function ViewTeamDialog({ open, onOpenChange, teamMembers, onSucc
     }
   };
 
+  const handleRejectClick = (member: TeamMember) => {
+    setSelectedMember(member);
+    setIsConfirmRejectOpen(true);
+  };
+
+  const handleConfirmReject = async () => {
+    if (selectedMember) {
+      await handleReject(selectedMember);
+      setSelectedMember(null);
+    }
+  };
+
   const renderActionButtons = (member: TeamMember) => {
     switch (member.status) {
       case 'Active':
@@ -195,7 +212,7 @@ export default function ViewTeamDialog({ open, onOpenChange, teamMembers, onSucc
             <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => handleApprove(member)}>
               <Check className="mr-1 h-3.5 w-3.5" /> {t('team.view.approve')}
             </Button>
-            <Button size="sm" variant="destructive" onClick={() => handleReject(member)}>
+            <Button size="sm" variant="destructive" onClick={() => handleRejectClick(member)}>
               <XCircle className="mr-1 h-3.5 w-3.5" /> {t('team.view.reject')}
             </Button>
           </div>
@@ -298,6 +315,18 @@ export default function ViewTeamDialog({ open, onOpenChange, teamMembers, onSucc
           <Button onClick={handleClose}>{t('common.close')}</Button>
         </DialogFooter>
       </DialogContent>
+
+      {/* Confirm Reject Dialog */}
+      <ConfirmDialog
+        open={isConfirmRejectOpen}
+        onOpenChange={setIsConfirmRejectOpen}
+        onConfirm={handleConfirmReject}
+        title={t('common.confirmAction')}
+        description={t('common.confirmDescription')}
+        confirmText={t('common.confirm')}
+        cancelText={t('common.cancel')}
+        variant="danger"
+      />
     </Dialog>
   );
 }

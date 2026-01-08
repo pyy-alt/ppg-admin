@@ -108,33 +108,40 @@ export function Timeline({
   } = partsOrder;
 
   const getActivityLogInfo = () => {
-    const logList =
-      orderReviewActivityLogItems && orderReviewActivityLogItems.length > 0
-        ? orderReviewActivityLogItems
-        : orderFulfillmentActivityLogItems && orderFulfillmentActivityLogItems.length > 0
-          ? orderFulfillmentActivityLogItems
-          : orderReceivedActivityLogItems && orderReceivedActivityLogItems.length > 0
-            ? orderReceivedActivityLogItems
-            : ([] as ActivityLogItem[]);
+    // 为每个阶段分别获取活动日志
+    const orderReviewLogs = orderReviewActivityLogItems || [];
+    const orderFulfillmentLogs = orderFulfillmentActivityLogItems || [];
+    const orderReceivedLogs = orderReceivedActivityLogItems || [];
 
-    const submitted = logList.find((item: ActivityLogItem) => item?.type === 'Submitted');
-    const rejected = logList.find((item: ActivityLogItem) => item?.type === 'Rejected');
-    const resubmitted = logList.find((item: ActivityLogItem) => item?.type === 'Resubmitted');
-    const approved = logList.find((item: ActivityLogItem) => item?.type === 'Approved');
-    const shipped = logList.find((item: ActivityLogItem) => item?.type === 'Shipped');
-    const unshipped = logList.find((item: ActivityLogItem) => item?.type === 'Unshipped');
-    const received = logList.find((item: ActivityLogItem) => item?.type === 'Received');
-    const unreceived = logList.find((item: ActivityLogItem) => item?.type === 'Unreceived');
+    // Order Review 阶段的活动
+    const submitted = orderReviewLogs.find((item: ActivityLogItem) => item?.type === 'Submitted');
+    const rejected = orderReviewLogs.find((item: ActivityLogItem) => item?.type === 'Rejected');
+    const resubmitted = orderReviewLogs.find((item: ActivityLogItem) => item?.type === 'Resubmitted');
+    const approved = orderReviewLogs.find((item: ActivityLogItem) => item?.type === 'Approved');
+
+    // Order Fulfillment 阶段的活动
+    const shipped = orderFulfillmentLogs.find((item: ActivityLogItem) => item?.type === 'Shipped');
+    const unshipped = orderFulfillmentLogs.find((item: ActivityLogItem) => item?.type === 'Unshipped');
+
+    // Order Received 阶段的活动
+    const received = orderReceivedLogs.find((item: ActivityLogItem) => item?.type === 'Received');
+    const unreceived = orderReceivedLogs.find((item: ActivityLogItem) => item?.type === 'Unreceived');
 
     return {
-      submitted,
-      rejected,
-      resubmitted,
-      approved,
-      shipped,
-      unshipped,
-      received,
-      unreceived,
+      orderReview: {
+        submitted,
+        rejected,
+        resubmitted,
+        approved,
+      },
+      orderFulfillment: {
+        shipped,
+        unshipped,
+      },
+      orderReceived: {
+        received,
+        unreceived,
+      },
     };
   };
 
@@ -336,103 +343,82 @@ export function Timeline({
                 {/* Order Review Stage */}
                 {item.stage === 'OrderReview' && (
                   <div className="space-y-2 text-sm">
-                    {activityLog ? (
+                    {activityLog.orderReview.submitted && (
+                      <p className="text-muted-foreground">
+                        <Trans
+                          i18nKey={
+                            formatPersonName(activityLog.orderReview.submitted.person)
+                              ? 'timeline.log.submittedWithBy'
+                              : 'timeline.log.submitted'
+                          }
+                          values={{
+                            date: formatDateOnly(activityLog.orderReview.submitted.dateCreated),
+                            by: formatPersonName(activityLog.orderReview.submitted.person),
+                          }}
+                          components={{ strong: <strong /> }}
+                        />
+                      </p>
+                    )}
+                    {activityLog.orderReview.rejected && (
                       <>
-                        {activityLog.submitted && (
-                          <p className="text-muted-foreground">
-                            <Trans
-                              i18nKey={
-                                formatPersonName(activityLog.submitted.person)
-                                  ? 'timeline.log.submittedWithBy'
-                                  : 'timeline.log.submitted'
-                              }
-                              values={{
-                                date: formatDateOnly(activityLog.submitted.dateCreated),
-                                by: formatPersonName(activityLog.submitted.person),
-                              }}
-                              components={{ strong: <strong /> }}
-                            />
-                          </p>
-                        )}
-                        {activityLog.rejected && (
-                          <>
-                            <p className="text-muted-foreground">
-                              <Trans
-                                i18nKey={
-                                  formatPersonName(activityLog.rejected.person)
-                                    ? 'timeline.log.rejectedWithBy'
-                                    : 'timeline.log.rejected'
-                                }
-                                values={{
-                                  date: formatDateOnly(activityLog.rejected.dateCreated),
-                                  by: formatPersonName(activityLog.rejected.person),
-                                }}
-                                components={{
-                                  strong: <strong />,
-                                  rejected: <span className="font-semibold text-red-600" />,
-                                }}
-                              />
-                            </p>
-                            {activityLog.rejected.comment && (
-                              <p className="text-muted-foreground">
-                                {t('timeline.log.reason', { reason: activityLog.rejected.comment })}
-                              </p>
-                            )}
-                          </>
-                        )}
-                        {activityLog.resubmitted && (
-                          <p className="text-muted-foreground">
-                            <Trans
-                              i18nKey={
-                                formatPersonName(activityLog.resubmitted.person)
-                                  ? 'timeline.log.resubmittedWithBy'
-                                  : 'timeline.log.resubmitted'
-                              }
-                              values={{
-                                date: formatDateOnly(activityLog.resubmitted.dateCreated),
-                                by: formatPersonName(activityLog.resubmitted.person),
-                              }}
-                              components={{ strong: <strong /> }}
-                            />
-                          </p>
-                        )}
-                        {activityLog.approved && (
-                          <p className="text-muted-foreground">
-                            <Trans
-                              i18nKey={
-                                formatPersonName(activityLog.approved.person)
-                                  ? 'timeline.log.approvedWithBy'
-                                  : 'timeline.log.approved'
-                              }
-                              values={{
-                                date: formatDateOnly(activityLog.approved.dateCreated),
-                                by: formatPersonName(activityLog.approved.person),
-                              }}
-                              components={{
-                                strong: <strong />,
-                                approved: <span className="font-semibold text-green-600" />,
-                              }}
-                            />
-                          </p>
-                        )}
-                      </>
-                    ) : (
-                      dateSubmitted && (
                         <p className="text-muted-foreground">
                           <Trans
                             i18nKey={
-                              formatPersonName(submittedByPerson)
-                                ? 'timeline.log.submittedBasicWithBy'
-                                : 'timeline.log.submittedBasic'
+                              formatPersonName(activityLog.orderReview.rejected.person)
+                                ? 'timeline.log.rejectedWithBy'
+                                : 'timeline.log.rejected'
                             }
                             values={{
-                              date: formatDateOnly(dateSubmitted),
-                              by: formatPersonName(submittedByPerson),
+                              date: formatDateOnly(activityLog.orderReview.rejected.dateCreated),
+                              by: formatPersonName(activityLog.orderReview.rejected.person),
                             }}
-                            components={{ strong: <strong /> }}
+                            components={{
+                              strong: <strong />,
+                              rejected: <span className="font-semibold text-red-600" />,
+                            }}
                           />
                         </p>
-                      )
+                        {activityLog.orderReview.rejected.comment && (
+                          <p className="text-muted-foreground">
+                            {t('timeline.log.reason', { reason: activityLog.orderReview.rejected.comment })}
+                          </p>
+                        )}
+                      </>
+                    )}
+                    {activityLog.orderReview.resubmitted && (
+                      <p className="text-muted-foreground">
+                        <Trans
+                          i18nKey={
+                            formatPersonName(activityLog.orderReview.resubmitted.person)
+                              ? 'timeline.log.resubmittedWithBy'
+                              : 'timeline.log.resubmitted'
+                          }
+                          values={{
+                            date: formatDateOnly(activityLog.orderReview.resubmitted.dateCreated),
+                            by: formatPersonName(activityLog.orderReview.resubmitted.person),
+                          }}
+                          components={{ strong: <strong /> }}
+                        />
+                      </p>
+                    )}
+                    {activityLog.orderReview.approved && (
+                      <p className="text-muted-foreground">
+                        <Trans
+                          i18nKey={
+                            formatPersonName(activityLog.orderReview.approved.person)
+                              ? 'timeline.log.approvedWithBy'
+                              : 'timeline.log.approved'
+                          }
+                          values={{
+                            date: formatDateOnly(activityLog.orderReview.approved.dateCreated),
+                            by: formatPersonName(activityLog.orderReview.approved.person),
+                          }}
+                          components={{
+                            strong: <strong />,
+                            approved: <span className="font-semibold text-green-600" />,
+                          }}
+                        />
+                      </p>
                     )}
                   </div>
                 )}
@@ -440,58 +426,37 @@ export function Timeline({
                 {/* Order Fulfillment Stage */}
                 {item.stage === 'OrderFulfillment' && (
                   <div className="space-y-2 text-sm">
-                    {activityLog ? (
-                      <>
-                        {activityLog.shipped && (
-                          <p className="text-muted-foreground">
-                            <Trans
-                              i18nKey={
-                                formatPersonName(activityLog.shipped.person)
-                                  ? 'timeline.log.shippedWithBy'
-                                  : 'timeline.log.shipped'
-                              }
-                              values={{
-                                date: formatDateOnly(activityLog.shipped.dateCreated),
-                                by: formatPersonName(activityLog.shipped.person),
-                              }}
-                              components={{ strong: <strong /> }}
-                            />
-                          </p>
-                        )}
-                        {activityLog.unshipped && (
-                          <p className="text-muted-foreground">
-                            <Trans
-                              i18nKey={
-                                formatPersonName(activityLog.unshipped.person)
-                                  ? 'timeline.log.unshippedWithBy'
-                                  : 'timeline.log.unshipped'
-                              }
-                              values={{
-                                date: formatDateOnly(activityLog.unshipped.dateCreated),
-                                by: formatPersonName(activityLog.unshipped.person),
-                              }}
-                              components={{ strong: <strong /> }}
-                            />
-                          </p>
-                        )}
-                      </>
-                    ) : (
-                      dateSubmitted && (
-                        <p className="text-muted-foreground">
-                          <Trans
-                            i18nKey={
-                              formatPersonName(submittedByPerson)
-                                ? 'timeline.log.submittedBasicWithBy'
-                                : 'timeline.log.submittedBasic'
-                            }
-                            values={{
-                              date: formatDateOnly(dateSubmitted),
-                              by: formatPersonName(submittedByPerson),
-                            }}
-                            components={{ strong: <strong /> }}
-                          />
-                        </p>
-                      )
+                    {activityLog.orderFulfillment.shipped && (
+                      <p className="text-muted-foreground">
+                        <Trans
+                          i18nKey={
+                            formatPersonName(activityLog.orderFulfillment.shipped.person)
+                              ? 'timeline.log.shippedWithBy'
+                              : 'timeline.log.shipped'
+                          }
+                          values={{
+                            date: formatDateOnly(activityLog.orderFulfillment.shipped.dateCreated),
+                            by: formatPersonName(activityLog.orderFulfillment.shipped.person),
+                          }}
+                          components={{ strong: <strong /> }}
+                        />
+                      </p>
+                    )}
+                    {activityLog.orderFulfillment.unshipped && (
+                      <p className="text-muted-foreground">
+                        <Trans
+                          i18nKey={
+                            formatPersonName(activityLog.orderFulfillment.unshipped.person)
+                              ? 'timeline.log.unshippedWithBy'
+                              : 'timeline.log.unshipped'
+                          }
+                          values={{
+                            date: formatDateOnly(activityLog.orderFulfillment.unshipped.dateCreated),
+                            by: formatPersonName(activityLog.orderFulfillment.unshipped.person),
+                          }}
+                          components={{ strong: <strong /> }}
+                        />
+                      </p>
                     )}
                   </div>
                 )}
@@ -499,42 +464,37 @@ export function Timeline({
                 {/* Order Received Stage */}
                 {item.stage === 'OrderReceived' && (
                   <div className="space-y-2 text-sm">
-                    {activityLog ? (
-                      <>
-                        {activityLog.received && (
-                          <p className="text-muted-foreground">
-                            <Trans
-                              i18nKey={
-                                formatPersonName(activityLog.received.person)
-                                  ? 'timeline.log.receivedWithBy'
-                                  : 'timeline.log.received'
-                              }
-                              values={{
-                                date: formatDateOnly(activityLog.received.dateCreated),
-                                by: formatPersonName(activityLog.received.person),
-                              }}
-                              components={{ strong: <strong /> }}
-                            />
-                          </p>
-                        )}
-                      </>
-                    ) : (
-                      dateSubmitted && (
-                        <p className="text-muted-foreground">
-                          <Trans
-                            i18nKey={
-                              formatPersonName(submittedByPerson)
-                                ? 'timeline.log.submittedBasicWithBy'
-                                : 'timeline.log.submittedBasic'
-                            }
-                            values={{
-                              date: formatDateOnly(dateSubmitted),
-                              by: formatPersonName(submittedByPerson),
-                            }}
-                            components={{ strong: <strong /> }}
-                          />
-                        </p>
-                      )
+                    {activityLog.orderReceived.received && (
+                      <p className="text-muted-foreground">
+                        <Trans
+                          i18nKey={
+                            formatPersonName(activityLog.orderReceived.received.person)
+                              ? 'timeline.log.receivedWithBy'
+                              : 'timeline.log.received'
+                          }
+                          values={{
+                            date: formatDateOnly(activityLog.orderReceived.received.dateCreated),
+                            by: formatPersonName(activityLog.orderReceived.received.person),
+                          }}
+                          components={{ strong: <strong /> }}
+                        />
+                      </p>
+                    )}
+                    {activityLog.orderReceived.unreceived && (
+                      <p className="text-muted-foreground">
+                        <Trans
+                          i18nKey={
+                            formatPersonName(activityLog.orderReceived.unreceived.person)
+                              ? 'timeline.log.unreceivedWithBy'
+                              : 'timeline.log.unreceived'
+                          }
+                          values={{
+                            date: formatDateOnly(activityLog.orderReceived.unreceived.dateCreated),
+                            by: formatPersonName(activityLog.orderReceived.unreceived.person),
+                          }}
+                          components={{ strong: <strong /> }}
+                        />
+                      </p>
                     )}
                   </div>
                 )}

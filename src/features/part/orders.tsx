@@ -50,12 +50,75 @@ export function PartOrders() {
 
   const [range, setRange] = useState<DateRange>();
 
-  const getFlattenedCurrentPageData = () => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    const pageData = orders.slice(startIndex, endIndex);
+  // 获取所有数据用于导出（不分页）
+  const fetchAllDataForExport = async (): Promise<any[]> => {
+    if (!user) return [];
 
-    return pageData.map((order: any) => {
+    try {
+      const api = new OrderApi();
+
+      const dateFrom = dateSubmittedFrom ? formatDateOnly(dateSubmittedFrom) : undefined;
+      const dateTo = dateSubmittedTo ? formatDateOnly(dateSubmittedTo) : undefined;
+
+      // 构建请求参数（与 fetchPartsOrders 相同，但不分页）
+      const requestParams: any = {
+        smartFilter,
+        filterByWaitingOnMe,
+        filterByDealershipId: user?.person?.type === 'Dealership' ? user?.person?.dealership.id : undefined,
+      };
+
+      if (filterByPartsOrderNumber !== 'all') {
+        requestParams.filterByPartsOrderNumber = parseInt(filterByPartsOrderNumber);
+      }
+
+      if (filterByStatus !== 'all') {
+        requestParams.filterByStatus = filterByStatus;
+      }
+      
+      if (filterByRegionId !== 'all') {
+        requestParams.filterByRegionId = parseInt(filterByRegionId);
+      }
+
+      // 不添加分页参数，获取所有数据
+      const resultParameter = ResultParameter.create({
+        resultsLimitOffset: 0,
+        resultsLimitCount: 999999, // 获取所有数据
+        resultsOrderBy: sortBy || 'dateCreated',
+        resultsOrderAscending: sortAscending,
+      });
+      requestParams.resultParameter = resultParameter;
+
+      const request = PartsOrderSearchRequest.create(requestParams);
+      
+      if (dateFrom) {
+        (request as any).dateSubmittedFrom = dateFrom;
+      }
+      if (dateTo) {
+        (request as any).dateSubmittedTo = dateTo;
+      }
+
+      return new Promise((resolve, reject) => {
+        api.partsOrderSearch(request, {
+          status200: (response: any) => {
+            resolve(response.partOrders || []);
+          },
+          error: (error: any) => {
+            reject(error);
+          },
+          else: () => {
+            resolve([]);
+          },
+        });
+      });
+    } catch (error) {
+      console.error('获取导出数据失败:', error);
+      return [];
+    }
+  };
+
+  // 格式化数据用于导出
+  const getFlattenedAllData = (allOrders: any[]) => {
+    return allOrders.map((order: any) => {
       const ro = order.repairOrder || {};
       const shop = ro.shop || {};
       const dealer = ro.dealership || {};
@@ -75,12 +138,17 @@ export function PartOrders() {
       };
     });
   };
+
   const exportCSV = async () => {
     try {
-      const flattenedData = getFlattenedCurrentPageData();
+      toast.loading(t('partsOrder.list.exportLoading'));
+      const allOrders = await fetchAllDataForExport(); // 获取所有数据
+      const flattenedData = getFlattenedAllData(allOrders); // 格式化数据
       const result = await exportCurrentPageToCSV(flattenedData, headers);
+      toast.dismiss();
       result ? toast.success(t('partsOrder.list.exportSuccess')) : null;
     } catch (error) {
+      toast.dismiss();
       toast.error(t('partsOrder.list.exportFailed'));
     }
   };
