@@ -800,7 +800,7 @@ export function RepairOrderDetail() {
                       <h4 className="mb-3 font-medium text-muted-foreground">
                         {t('repairOrder.detail.requestedParts')}
                       </h4>
-                      <ol className="pl-5 space-y-2 text-foreground/90">
+                      <ol className=" space-y-2 text-foreground/90">
                         {((selectedPartsOrderData as any)?.parts?.length > 0 &&
                           (selectedPartsOrderData as any)?.parts?.map(
                             (part: string, idx: number) => (
