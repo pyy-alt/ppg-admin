@@ -36,8 +36,8 @@ export function Users() {
 	const [smartFilter, setSmartFilter] = useState('')
 	const [filterByNetworkRole, setFilterByNetworkRole] = useState<filterByNetworkRoleType | undefined>(undefined)
 	const [includeInactiveFlag, setIncludeInactiveFlag] = useState(false)
-	const [sortBy, setSortBy] = useState('')
-	const [sortAscending, setSortAscending] = useState(false)
+	const [sortBy, setSortBy] = useState('firstName')
+	const [sortAscending, setSortAscending] = useState(true)
 
 	const [selectedRegionId, setSelectedRegionId] = useState<string>('all')
 
