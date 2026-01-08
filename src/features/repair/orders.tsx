@@ -217,21 +217,67 @@ export function RepairOrderList() {
   }, [smartFilter, filterByStatus, showRepairCompleted, user, currentPage, dateRangePreset]);
 
   const showIcon = (orderAny: any) => {
-    if (!orderAny.dateLastSubmitted) return null;
-    const submittedDate = new Date(orderAny.dateLastSubmitted);
-    const diffMs = Date.now() - submittedDate.getTime();
-    const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
-    const isOver7Days = diffMs >= SEVEN_DAYS_MS;
-    const hasAlertPartsStatus =
-      orderAny?.partsOrders?.length > 0 &&
-      orderAny.partsOrders.some(
-        (val: any) =>
-          val.status === 'ShopReceived' || val.status === 'CsrRejected' || val.status === 'DealershipShipped'
-      );
-      const isRepairCompleted=orderAny.partsOrders.every((val: any) => val.status === 'RepairCompleted');
-    if ((hasAlertPartsStatus || (isOver7Days && !isRepairCompleted)) && user?.person?.type === 'Shop') {
-      return <AlertTriangle className="w-4 h-4 text-destructive" />;
+    const userType = user?.person?.type;
+    
+    // Field Staff 和 Admin 永远不显示警告图标（只读权限）
+    if (userType === 'FieldStaff' || userType === 'ProgramAdministrator') {
+      return null;
     }
+
+    if (!orderAny?.partsOrders || orderAny.partsOrders.length === 0) {
+      return null;
+    }
+
+    // Shop 角色的警告条件
+    if (userType === 'Shop') {
+      // 条件1: 有任何订单被 CSR 拒绝（需要重新提交）
+      const hasRejected = orderAny.partsOrders.some((part: any) => part.status === 'CsrRejected');
+      
+      // 条件2: 有零件已经发货到达（需要标记接收）
+      const hasShipped = orderAny.partsOrders.some((part: any) => part.status === 'DealershipShipped');
+      
+      // 条件3: 所有零件已收到超过7天，但维修未完成（需要上传照片并标记完成）
+      const allPartsReceived = orderAny.partsOrders.every(
+        (part: any) => part.status === 'ShopReceived' || part.status === 'RepairCompleted'
+      );
+      const hasReceivedParts = orderAny.partsOrders.some((part: any) => part.status === 'ShopReceived');
+      const allRepairCompleted = orderAny.partsOrders.every((part: any) => part.status === 'RepairCompleted');
+      
+      let isOver7DaysSinceReceived = false;
+      if (allPartsReceived && hasReceivedParts && !allRepairCompleted && orderAny.dateLastSubmitted) {
+        const submittedDate = new Date(orderAny.dateLastSubmitted);
+        const diffMs = Date.now() - submittedDate.getTime();
+        const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+        isOver7DaysSinceReceived = diffMs >= SEVEN_DAYS_MS;
+      }
+      
+      if (hasRejected || hasShipped || isOver7DaysSinceReceived) {
+        return <AlertTriangle className="w-4 h-4 text-destructive" />;
+      }
+    }
+
+    // Dealership 角色的警告条件
+    if (userType === 'Dealership') {
+      // 条件: 订单已被 CSR 批准，等待经销商处理或标记出货
+      const hasPendingForDealer = orderAny.partsOrders.some(
+        (part: any) => part.status === 'DealershipProcessing'
+      );
+      
+      if (hasPendingForDealer) {
+        return <AlertTriangle className="w-4 h-4 text-destructive" />;
+      }
+    }
+
+    // CSR 角色的警告条件
+    if (userType === 'Csr') {
+      // 条件: 新订单请求提交，等待 CSR 审核批准或拒绝
+      const hasPendingReview = orderAny.partsOrders.some((part: any) => part.status === 'CsrReview');
+      
+      if (hasPendingReview) {
+        return <AlertTriangle className="w-4 h-4 text-destructive" />;
+      }
+    }
+
     return null;
   };
 

@@ -265,6 +265,43 @@ export function PartOrders() {
     }
   };
 
+  // 判断是否显示警告图标
+  const showIcon = (order: any) => {
+    const userType = user?.person?.type;
+    const status = order.status;
+    
+    // Field Staff 和 Admin 永远不显示警告图标（只读权限）
+    if (userType === 'FieldStaff' || userType === 'ProgramAdministrator') {
+      return false;
+    }
+
+    // Shop 角色的警告条件
+    if (userType === 'Shop') {
+      // 订单被 CSR 拒绝（需要重新提交）
+      if (status === 'CsrRejected') return true;
+      
+      // 零件已发货（需要标记接收）
+      if (status === 'DealershipShipped') return true;
+      
+      // 零件已收到（需要处理）
+      if (status === 'ShopReceived') return true;
+    }
+
+    // Dealership 角色的警告条件
+    if (userType === 'Dealership') {
+      // 等待经销商处理或标记出货
+      if (status === 'DealershipProcessing') return true;
+    }
+
+    // CSR 角色的警告条件
+    if (userType === 'Csr') {
+      // 等待 CSR 审核批准或拒绝
+      if (status === 'CsrReview') return true;
+    }
+
+    return false;
+  };
+
   const handleSort = (field: string) => {
     if (sortBy === field) {
       if (sortAscending) {
@@ -568,7 +605,7 @@ export function PartOrders() {
                             });
                           }}
                         >
-                          {order.status==='CsrReview' && <AlertTriangle className="w-4 h-4 text-destructive" />}
+                          {showIcon(order) && <AlertTriangle className="w-4 h-4 text-destructive" />}
                           {roNumber}
                         </TableCell>
                         <TableCell>{salesOrder}</TableCell>
