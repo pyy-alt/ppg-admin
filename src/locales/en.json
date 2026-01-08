@@ -477,7 +477,8 @@
   },
   "repairOrder": {
     "validation": {
-      "atLeastOneAttachment": "Please upload at least one attachment (structural measurement document or pre-repair photo)"
+      "atLeastOneAttachment": "Please upload at least one attachment (structural measurement document or pre-repair photo)",
+      "bothAttachmentsRequired": "Both structural measurement document and pre-repair photos are required"
     },
     "messages": {
       "loadFailed": "Failed to load repair order",

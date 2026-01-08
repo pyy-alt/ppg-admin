@@ -262,10 +262,10 @@ export default function RepairOrderDialog({
   const onSubmit = async (data: FormValues) => {
     try {
       if (
-        structuralMeasurementFileAssets.length === 0 &&
+        structuralMeasurementFileAssets.length === 0 ||
         preRepairPhotoFileAssets.length === 0
       ) {
-        setAttachmentError(t('repairOrder.validation.atLeastOneAttachment'));
+        setAttachmentError(t('repairOrder.validation.bothAttachmentsRequired'));
         // 滚动到附件区域
         setTimeout(() => {
           const attachmentsSection = document.querySelector(
@@ -557,11 +557,11 @@ export default function RepairOrderDialog({
                         ? structuralMeasurementFileAssets
                         : preRepairPhotoFileAssets;
                       if (
-                        remainingFiles.length === 0 &&
+                        remainingFiles.length === 0 ||
                         otherFiles.length === 0
                       ) {
                         setAttachmentError(
-                          t('repairOrder.validation.atLeastOneAttachment')
+                          t('repairOrder.validation.bothAttachmentsRequired')
                         );
                       }
                     }}
@@ -583,7 +583,7 @@ export default function RepairOrderDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleDialogOpenChange}>
-      <DialogContent className="flex max-h-[90vh] w-[95%] flex-col sm:max-w-7xl">
+      <DialogContent className="flex max-h-[90vh] w-[98%] flex-col sm:max-w-[2000px]">
         <DialogHeader className="shrink-0">
           <DialogTitle className="text-2xl font-semibold">
             {isEdit
@@ -608,11 +608,11 @@ export default function RepairOrderDialog({
                 () => {
                   // 即使表单验证失败，也检查附件
                   if (
-                    structuralMeasurementFileAssets.length === 0 &&
+                    structuralMeasurementFileAssets.length === 0 ||
                     preRepairPhotoFileAssets.length === 0
                   ) {
                     setAttachmentError(
-                      t('repairOrder.validation.atLeastOneAttachment')
+                      t('repairOrder.validation.bothAttachmentsRequired')
                     );
                     setTimeout(() => {
                       const attachmentsSection = document.querySelector(

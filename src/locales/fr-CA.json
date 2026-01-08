@@ -477,7 +477,8 @@
   },
   "repairOrder": {
     "validation": {
-      "atLeastOneAttachment": "Veuillez télécharger au moins un fichier (document de mesure structurelle ou photo avant réparation)"
+      "atLeastOneAttachment": "Veuillez télécharger au moins un fichier (document de mesure structurelle ou photo avant réparation)",
+      "bothAttachmentsRequired": "Le document de mesure structurelle et les photos avant réparation sont tous deux requis"
     },
     "messages": {
       "loadFailed": "Échec du chargement du bon de réparation",

@@ -782,9 +782,9 @@ export function RepairOrderDetail() {
                             handleOpenDialog('edit', selectedPartsOrderData)
                           }
                           variant="outline"
-                          className="px-4 h-9"
+                          className="font-medium rounded-lg h-9"
                         >
-                          <Pencil className="h-3.5 w-3.5" />
+                          <Pencil className="mr-1.5 h-3.5 w-3.5" />
                           {(selectedPartsOrderData as any)?.partsOrderNumber > 0
                             ? t('repairOrder.detail.editSupplement', {
                                 num: (selectedPartsOrderData as any)
