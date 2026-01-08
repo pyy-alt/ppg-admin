@@ -462,37 +462,32 @@ export function RepairOrderList() {
               </SelectContent>
             </Select>
             
-            <div className="flex items-center gap-2">
-              <label className="text-sm font-medium">
-                {t('repairOrder.list.dateSubmittedRangeLabel')}
-              </label>
-              <Select
-                defaultValue={dateRangePreset}
-                onValueChange={(value) => {
-                  setRange(undefined);
-                  setDateRangePreset(value);
-                  const { from, to } = calculateDateRange(value);
-                  setFromDate(from);
-                  setToDate(to);
-                }}
-              >
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder={t('repairOrder.list.dateRangePlaceholder')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{t('repairOrder.list.dateRangeOptions.all')}</SelectItem>
-                  <SelectItem value="7">{t('repairOrder.list.dateRangeOptions.7')}</SelectItem>
-                  <SelectItem value="30">{t('repairOrder.list.dateRangeOptions.30')}</SelectItem>
-                  <SelectItem value="month-to-date">{t('repairOrder.list.dateRangeOptions.monthToDate')}</SelectItem>
-                  <SelectItem value="quarter-to-date">{t('repairOrder.list.dateRangeOptions.quarterToDate')}</SelectItem>
-                  <SelectItem value="year-to-date">{t('repairOrder.list.dateRangeOptions.yearToDate')}</SelectItem>
-                  <SelectItem value="last-month">{t('repairOrder.list.dateRangeOptions.lastMonth')}</SelectItem>
-                  <SelectItem value="last-quarter">{t('repairOrder.list.dateRangeOptions.lastQuarter')}</SelectItem>
-                  <SelectItem value="last-year">{t('repairOrder.list.dateRangeOptions.lastYear')}</SelectItem>
-                  <SelectItem value="custom">{t('repairOrder.list.dateRangeOptions.custom')}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <Select
+              defaultValue={dateRangePreset}
+              onValueChange={(value) => {
+                setRange(undefined);
+                setDateRangePreset(value);
+                const { from, to } = calculateDateRange(value);
+                setFromDate(from);
+                setToDate(to);
+              }}
+            >
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder={t('repairOrder.list.dateRangePlaceholder')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t('repairOrder.list.dateRangeOptions.all')}</SelectItem>
+                <SelectItem value="7">{t('repairOrder.list.dateRangeOptions.7')}</SelectItem>
+                <SelectItem value="30">{t('repairOrder.list.dateRangeOptions.30')}</SelectItem>
+                <SelectItem value="month-to-date">{t('repairOrder.list.dateRangeOptions.monthToDate')}</SelectItem>
+                <SelectItem value="quarter-to-date">{t('repairOrder.list.dateRangeOptions.quarterToDate')}</SelectItem>
+                <SelectItem value="year-to-date">{t('repairOrder.list.dateRangeOptions.yearToDate')}</SelectItem>
+                <SelectItem value="last-month">{t('repairOrder.list.dateRangeOptions.lastMonth')}</SelectItem>
+                <SelectItem value="last-quarter">{t('repairOrder.list.dateRangeOptions.lastQuarter')}</SelectItem>
+                <SelectItem value="last-year">{t('repairOrder.list.dateRangeOptions.lastYear')}</SelectItem>
+                <SelectItem value="custom">{t('repairOrder.list.dateRangeOptions.custom')}</SelectItem>
+              </SelectContent>
+            </Select>
             {/* Custom Date Range Picker */}
             {dateRangePreset === 'custom' && (
               <div className="ml-3">
@@ -503,6 +498,7 @@ export function RepairOrderList() {
                     setFromDate(newRange?.from ?? undefined);
                     setToDate(newRange?.to ?? undefined);
                   }}
+                  onClose={() => getRepairOrders(true)}
                   placeholder={t('repairOrder.list.dateRangePickerPlaceholder')}
                   disabled={false}
                 />

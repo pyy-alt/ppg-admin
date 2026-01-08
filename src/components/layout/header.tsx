@@ -143,7 +143,7 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
                   <button className="flex items-center justify-center gap-3 pr-2 focus:outline-none focus-visible:outline-none active:outline-none">
                     <div className="text-left text-white">
                     {/* User Name - Larger font */}
-                    <p className="mb-2 text-base font-semibold leading-none">
+                    <p className="mb-2 text-base font-semibold leading-none text-right">
                       {auth.user
                         ? `${auth.user.person?.firstName} ${auth.user.person?.lastName}`.trim() ||
                           auth.user.person?.email
@@ -162,7 +162,7 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
                         : t('header.notLoggedIn')}
                     </p>
                     {/* Role - On its own line */}
-                    <p className="text-xs text-white">
+                    <p className="text-xs text-white text-right">
                       {auth.user
                         ? auth.user.person?.type === 'Shop'
                           ? t('header.shopStaff')
