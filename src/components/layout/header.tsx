@@ -138,10 +138,10 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
         <div className="flex items-center gap-4">
           {/* User Dropdown */}
           {isShowUser && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="flex items-center justify-center gap-3 pr-2 transition-colors rounded-full hover:bg-white/10 focus-visible:outline-none">
-                  <div className="text-left text-white">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center justify-center gap-3 pr-2 focus:outline-none focus-visible:outline-none active:outline-none">
+                    <div className="text-left text-white">
                     {/* User Name - Larger font */}
                     <p className="mb-2 text-base font-semibold leading-none">
                       {auth.user
@@ -187,30 +187,6 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
               </DropdownMenuTrigger>
               {/* Menu right aligned */}
               <DropdownMenuContent align="end" className="w-56 mt-2">
-                {/* <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium">
-                      {auth.user
-                        ? `${auth.user.person?.firstName} ${auth.user.person?.lastName}`.trim() ||
-                          auth.user.person?.email
-                        : t('header.user')}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {auth.user
-                        ? auth.user.person?.shop?.name && auth.user.person?.shop?.shopNumber
-                          ? `${auth.user.person?.shop?.name}(${auth.user.person?.shop?.shopNumber}) | ${auth.user.person?.type}`
-                          : auth.user.person?.dealership?.name && auth.user.person?.dealership?.dealershipNumber
-                            ? `${auth.user.person?.dealership?.name}(${auth.user.person?.dealership?.dealershipNumber}) | ${auth.user.person?.type}`
-                            : auth.user.person?.type === 'ProgramAdministrator'
-                              ? t('header.programAdministrator')
-                              : auth.user.person?.type === 'Csr'
-                                ? 'CSR'
-                                : auth.user.person?.type
-                        : t('header.notLoggedIn')}
-                    </p>
-                  </div>
-                </DropdownMenuLabel> */}
-                {/* <DropdownMenuSeparator /> */}
                 {auth?.user?.person?.type !== PersonTypeEnum.CSR && auth?.user?.person?.type !== PersonTypeEnum.FIELD_STAFF && (
                   <DropdownMenuItem className="cursor-pointer" onSelect={() => handleSelect('team')}>
                     <Users className="w-4 h-4 mr-2" />
