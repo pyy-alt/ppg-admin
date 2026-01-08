@@ -593,7 +593,16 @@ export function RepairOrderList() {
                         </TableCell>
                         <TableCell>
                           <div className="space-y-1">
-                            {orderAny.salesOrderNumber ? <div>{orderAny.salesOrderNumber}</div> : <div>--</div>}
+                            {orderAny.partsOrders && orderAny.partsOrders.length > 0 ? (
+                              <div>
+                                {orderAny.partsOrders
+                                  .map((part: any) => part.salesOrderNumber)
+                                  .filter((num: string) => num)
+                                  .join(', ') || '--'}
+                              </div>
+                            ) : (
+                              <div>--</div>
+                            )}
                           </div>
                         </TableCell>
                         <TableCell>{orderAny.vin || '--'}</TableCell>
