@@ -586,7 +586,7 @@ export function PartOrders() {
                     const dealer = repairOrder?.dealership
                       ? `${repairOrder.dealership.name || ''} (${repairOrder.dealership.id || ''})`
                       : '--';
-                    const region = user?.person?.csrRegion?.name || '--';
+                    const region = repairOrder?.dealership.region.name || '--';
                     const dateCompleted = formatDate(order.dateSubmitted);
                     const dateClosed = formatDate(repairOrder?.dateClosed);
                     // Determine if there are any remarks.（Order from the backup dealer.）

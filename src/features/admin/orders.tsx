@@ -133,7 +133,7 @@ export function PartOrders() {
         Status: order.status || '--',
         Shop: shop.name ? `${shop.name} (${shop.id})` : '--',
         Dealer: dealer.name ? `${dealer.name} (${dealer.id})` : '--',
-        'CSR Region': ro.region || '--',
+        'CSR Region': dealer.region.name || '--',
         'Date Submitted': formatDate(order.dateSubmitted),
         'Date Closed': formatDate(ro.dateClosed) || '--',
       };
@@ -558,7 +558,7 @@ export function PartOrders() {
                     const dealer = repairOrder?.dealership
                       ? `${repairOrder.dealership.name || ''} (${repairOrder.dealership.id || ''})`
                       : '--';
-                    const region = repairOrder?.region || '--';
+                    const region = repairOrder?.dealership.region.name || '--';
                     const dateCompleted = formatDate(order.dateSubmitted);
                     const dateClosed = formatDate(repairOrder?.dateClosed);
                     // Determine if there is a note (ordered from alternate dealer)
