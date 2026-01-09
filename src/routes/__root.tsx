@@ -29,12 +29,10 @@ function FaviconInitializer() {
 }
 
 function TitleInitializer() {
-  const { brand } = useBrand();
+  const { brand, region } = useBrand();
 
   useEffect(() => {
-    // Determine locale from URL or browser
-    const isCanadian = window.location.hostname.includes('.ca') || 
-                       navigator.language.toLowerCase().includes('ca');
+    const isCanadian = region === 'canada';
     
     let title = '';
     if (brand === 'vw') {
@@ -43,8 +41,27 @@ function TitleInitializer() {
       title = isCanadian ? 'Audi CA Restricted Parts Tracker' : 'Audi Restricted Parts Tracker';
     }
     
+    // Update document title
     document.title = title;
-  }, [brand]);
+    
+    // Update meta title tag
+    const metaTitleTag = document.querySelector('meta[name="title"]');
+    if (metaTitleTag) {
+      metaTitleTag.setAttribute('content', title);
+    }
+    
+    // Update Open Graph title
+    const ogTitleTag = document.querySelector('meta[property="og:title"]');
+    if (ogTitleTag) {
+      ogTitleTag.setAttribute('content', title);
+    }
+    
+    // Update Twitter title
+    const twitterTitleTag = document.querySelector('meta[property="twitter:title"]');
+    if (twitterTitleTag) {
+      twitterTitleTag.setAttribute('content', title);
+    }
+  }, [brand, region]);
 
   return null;
 }
