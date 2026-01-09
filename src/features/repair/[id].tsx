@@ -8,6 +8,7 @@ import FileAssetFileAssetTypeEnum from '@/js/models/enum/FileAssetFileAssetTypeE
 import { type PersonType } from '@/js/models/enum/PersonTypeEnum';
 import {
   AlertTriangle,
+  AlertCircle,
   Check,
   Map,
   MapPin,
@@ -593,9 +594,15 @@ export function RepairOrderDetail() {
                 <span className="text-muted-foreground">
                   {t('repairOrder.detail.submittedTo')}
                 </span>
-                <p className="font-medium">
-                  {initRepaitOrderData?.dealership?.name || '--'} (
-                  {initRepaitOrderData?.dealership?.dealershipNumber})
+                <p className="font-medium flex items-center gap-2">
+                  <span>
+                    {initRepaitOrderData?.dealership?.name || '--'} (
+                    {initRepaitOrderData?.dealership?.dealershipNumber})
+                  </span>
+                  {initRepaitOrderData?.dealership?.id !== 
+                    initRepaitOrderData?.shop?.sponsorDealership?.id && (
+                    <AlertCircle className="w-4 h-4 text-yellow-500" />
+                  )}
                 </p>
               </div>
               <div>
@@ -603,14 +610,9 @@ export function RepairOrderDetail() {
                   {t('repairOrder.detail.dateClosed')}
                 </span>
                 <p className="font-medium">
-                  {formatDateOnly(initRepaitOrderData?.dateClosed as Date) ||
-                    '--'}
-                  {initRepaitOrderData?.dateClosed && ' by '}
-                  {initRepaitOrderData?.dateClosed &&
-                    (selectedPartsOrderData as any)?.reviewedByPerson
-                      ?.firstName}{' '}
-                  {initRepaitOrderData?.dateClosed &&
-                    (selectedPartsOrderData as any)?.reviewedByPerson?.lastName}
+                  {(initRepaitOrderData as any)?.closedBy
+                    ? `${formatDateOnly(initRepaitOrderData?.dateClosed as Date)} by ${(initRepaitOrderData as any)?.closedBy?.firstName || ''} ${(initRepaitOrderData as any)?.closedBy?.lastName || ''}`
+                    : '--'}
                 </p>
               </div>
             </div>
