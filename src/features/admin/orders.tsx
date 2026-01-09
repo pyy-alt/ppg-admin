@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate, useLocation } from '@tanstack/react-router';
 import OrderApi from '@/js/clients/base/OrderApi';
 import PartsOrderSearchRequest from '@/js/models/PartsOrderSearchRequest';
 import ResultParameter from '@/js/models/ResultParameter';
@@ -23,6 +23,8 @@ import { SortableTableHead } from '@/components/SortableTableHead';
 import { Trans, useTranslation } from 'react-i18next';
 export function PartOrders() {
   const { user } = useAuthStore((state) => state.auth);
+  const location: any = useLocation();
+  const dealershipId = location.search.id ? Number(location.search.id) : undefined;
   const [filterByWaitingOnMe, setOnlyMyOrders] = useState<boolean>(false);
   const [dateSubmittedFrom, setFromDate] = useState<Date | undefined>(undefined);
   const [dateSubmittedTo, setToDate] = useState<Date | undefined>(undefined);
@@ -63,7 +65,7 @@ export function PartOrders() {
       const requestParams: any = {
         smartFilter,
         filterByWaitingOnMe,
-        filterByDealershipId: user?.person?.type === 'Dealership' ? user?.person?.dealership.id : undefined,
+        filterByDealershipId: dealershipId || (user?.person?.type === 'Dealership' ? user?.person?.dealership.id : undefined),
       };
 
       if (filterByPartsOrderNumber !== 'all') {
@@ -199,7 +201,7 @@ export function PartOrders() {
       const requestParams: any = {
         smartFilter,
         filterByWaitingOnMe,
-        filterByDealershipId: user?.person?.type === 'Dealership' ? user?.person?.dealership.id : undefined,
+        filterByDealershipId: dealershipId || (user?.person?.type === 'Dealership' ? user?.person?.dealership.id : undefined),
       };
       // Handle order type filtering
       if (filterByPartsOrderNumber !== 'all') {

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from '@tanstack/react-router';
 import OrganizationApi from '@/js/clients/base/OrganizationApi';
 import PersonApi from '@/js/clients/base/PersonApi';
 import OrganizationSearchRequest from '@/js/models/OrganizationSearchRequest';
@@ -19,6 +20,7 @@ import { useTranslation } from 'react-i18next';
 
 export function Dealerships() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { user } = useAuthStore((state) => state.auth);
   const [currentPage, setCurrentPage] = useState(1);
   const [smartFilter, setSmartFilter] = useState('');
@@ -348,23 +350,24 @@ export function Dealerships() {
                       <TableRow key={dealer.id} className="hover:bg-background">
                         <TableCell
                           className="font-medium text-blue-600 cursor-pointer hover:cursor-pointer hover:underline"
-                          // onClick={() => {
-                          // 	navigate({
-                          // 		to: '/parts_orders',
-                          // 	})
-                          // }}
+                          onClick={() => {
+                            navigate({
+                              to: '/admin/parts_orders',
+                              search: { id: dealer.id.toString() },
+                            });
+                          }}
                         >
                           {dealer.name || '--'}
                         </TableCell>
                         <TableCell>{dealer.dealershipNumber || '--'}</TableCell>
                         <TableCell
-                          className="font-medium text-center"
-                          // onClick={() => {
-                          // 	navigate({
-                          // 		to: '/repair_orders',
-                          // 		search: { id: dealer.id.toString() },
-                          // 	})
-                          // }}
+                          className="font-medium text-center cursor-pointer hover:underline"
+                          onClick={() => {
+                            navigate({
+                              to: '/repair_orders',
+                              search: { id: dealer.id.toString() },
+                            });
+                          }}
                         >
                           {dealer.countPendingOrders ?? 0}
                         </TableCell>
