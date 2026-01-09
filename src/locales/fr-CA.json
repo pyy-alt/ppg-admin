@@ -754,6 +754,7 @@
         "shopInfo": "Renseignements sur l'atelier",
         "dealershipInfo": "Renseignements sur le concessionnaire",
         "organizationInfo": "Renseignements sur l'organisation",
+        "roleInfo": "Renseignements sur le rôle",
         "csrInfo": "Renseignements CSR",
         "adminInfo": "Renseignements sur l'administrateur du programme",
         "fieldStaffInfo": "Renseignements sur le personnel de terrain",
@@ -766,6 +767,9 @@
         "shopName": "Nom",
         "shopNumber": "Numéro",
         "address": "Adresse",
+        "role": "Rôle",
+        "region": "Région",
+        "regions": "Régions",
         "password": "Mot de passe",
         "confirmPassword": "Confirmer le mot de passe"
       },

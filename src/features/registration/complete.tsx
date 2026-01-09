@@ -68,11 +68,9 @@ export function RegistrationComplete() {
       case 'Dealership':
         return t('registration.complete.sections.dealershipInfo')
       case 'Csr':
-        return t('registration.complete.sections.csrInfo')
       case 'ProgramAdministrator':
-        return t('registration.complete.sections.adminInfo')
       case 'FieldStaff':
-        return t('registration.complete.sections.fieldStaffInfo')
+        return t('registration.complete.sections.roleInfo')
       default:
         return t('registration.complete.sections.organizationInfo')
     }
@@ -317,7 +315,7 @@ export function RegistrationComplete() {
             </div>
           </section>
 
-          {/* Shop/Organization Information */}
+          {/* Shop/Organization/Role Information */}
           <section className='space-y-6'>
             <div className='flex items-center gap-3'>
               <Store className='text-foreground h-6 w-6' />
@@ -326,55 +324,126 @@ export function RegistrationComplete() {
               </h2>
             </div>
 
-            <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
+            {/* Shop and Dealership: Show Name, Number, Address */}
+            {(userType === 'Shop' || userType === 'Dealership') && (
+              <>
+                <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
+                  <div className='space-y-2'>
+                    <Label
+                      htmlFor='shopName'
+                      className='text-foreground text-sm font-medium'
+                    >
+                      {t('registration.complete.fields.shopName')}
+                    </Label>
+                    <Input
+                      id='shopName'
+                      value={form.shopName}
+                      className='bg-muted h-12 rounded-lg'
+                      disabled
+                    />
+                  </div>
+
+                  <div className='space-y-2'>
+                    <Label
+                      htmlFor='shopNumber'
+                      className='text-foreground text-sm font-medium'
+                    >
+                      {t('registration.complete.fields.shopNumber')}
+                    </Label>
+                    <Input
+                      id='shopNumber'
+                      value={form.shopNumber}
+                      className='bg-muted h-12 rounded-lg'
+                      disabled
+                    />
+                  </div>
+                </div>
+
+                <div className='space-y-2'>
+                  <Label
+                    htmlFor='shopAddress'
+                    className='text-foreground text-sm font-medium'
+                  >
+                    {t('registration.complete.fields.address')}
+                  </Label>
+                  <div className='relative'>
+                    <MapPin className='text-muted-foreground absolute top-3.5 left-3 h-5 w-5' />
+                    <Input
+                      id='shopAddress'
+                      value={form.shopAddress}
+                      className='bg-muted h-12 rounded-lg pl-11'
+                      disabled
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* CSR: Show Role and Region */}
+            {userType === 'Csr' && (
+              <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
+                <div className='space-y-2'>
+                  <Label className='text-foreground text-sm font-medium'>
+                    {t('registration.complete.fields.role')}
+                  </Label>
+                  <Input
+                    value='CSR'
+                    className='bg-muted h-12 rounded-lg'
+                    disabled
+                  />
+                </div>
+                <div className='space-y-2'>
+                  <Label className='text-foreground text-sm font-medium'>
+                    {t('registration.complete.fields.region')}
+                  </Label>
+                  <Input
+                    value={auth.user?.person?.csrRegion?.name || '--'}
+                    className='bg-muted h-12 rounded-lg'
+                    disabled
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Field Staff: Show Role and Regions */}
+            {userType === 'FieldStaff' && (
+              <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
+                <div className='space-y-2'>
+                  <Label className='text-foreground text-sm font-medium'>
+                    {t('registration.complete.fields.role')}
+                  </Label>
+                  <Input
+                    value={t('header.fieldStaff')}
+                    className='bg-muted h-12 rounded-lg'
+                    disabled
+                  />
+                </div>
+                <div className='space-y-2'>
+                  <Label className='text-foreground text-sm font-medium'>
+                    {t('registration.complete.fields.regions')}
+                  </Label>
+                  <Input
+                    value={auth.user?.person?.fieldStaffRegions?.map((r: any) => r.name).join(', ') || '--'}
+                    className='bg-muted h-12 rounded-lg'
+                    disabled
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Program Administrator: Show Role only */}
+            {userType === 'ProgramAdministrator' && (
               <div className='space-y-2'>
-                <Label
-                  htmlFor='shopName'
-                  className='text-foreground text-sm font-medium'
-                >
-                  {t('registration.complete.fields.shopName')}
+                <Label className='text-foreground text-sm font-medium'>
+                  {t('registration.complete.fields.role')}
                 </Label>
                 <Input
-                  id='shopName'
-                  value={form.shopName}
+                  value={t('header.programAdministrator')}
                   className='bg-muted h-12 rounded-lg'
                   disabled
                 />
               </div>
-
-              <div className='space-y-2'>
-                <Label
-                  htmlFor='shopNumber'
-                  className='text-foreground text-sm font-medium'
-                >
-                  {t('registration.complete.fields.shopNumber')}
-                </Label>
-                <Input
-                  id='shopNumber'
-                  value={form.shopNumber}
-                  className='bg-muted h-12 rounded-lg'
-                  disabled
-                />
-              </div>
-            </div>
-
-            <div className='space-y-2'>
-              <Label
-                htmlFor='shopAddress'
-                className='text-foreground text-sm font-medium'
-              >
-                {t('registration.complete.fields.address')}
-              </Label>
-              <div className='relative'>
-                <MapPin className='text-muted-foreground absolute top-3.5 left-3 h-5 w-5' />
-                <Input
-                  id='shopAddress'
-                  value={form.shopAddress}
-                  className='bg-muted h-12 rounded-lg pl-11'
-                  disabled
-                />
-              </div>
-            </div>
+            )}
           </section>
 
           {/* Password */}

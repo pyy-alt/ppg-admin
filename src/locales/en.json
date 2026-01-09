@@ -758,6 +758,7 @@
         "shopInfo": "Shop Information",
         "dealershipInfo": "Dealership Information",
         "organizationInfo": "Organization Information",
+        "roleInfo": "Role Information",
         "csrInfo": "CSR Information",
         "adminInfo": "Program Administrator Information",
         "fieldStaffInfo": "Field Staff Information",
@@ -770,6 +771,9 @@
         "shopName": "Name",
         "shopNumber": "Number",
         "address": "Address",
+        "role": "Role",
+        "region": "Region",
+        "regions": "Regions",
         "password": "Password",
         "confirmPassword": "Confirm Password"
       },
