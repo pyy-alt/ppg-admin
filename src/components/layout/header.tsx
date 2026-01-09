@@ -150,8 +150,8 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
                         auth.user.person?.email
                         : t('header.user')}
                     </p>
-                    {/* Shop/Dealership Name and Role - Horizontal layout */}
-                    <p className="text-xs text-white text-right">
+                    {/* Shop/Dealership Name */}
+                    <p className="text-xs text-white mb-1 text-right">
                       {auth.user
                         ? auth.user.person?.shop?.name && auth.user.person?.shop?.shopNumber
                           ? `${auth.user.person?.shop?.name} (${auth.user.person?.shop?.shopNumber})`
@@ -161,7 +161,9 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
                               ? auth.user.person?.csrRegion?.name
                               : ''
                         : t('header.notLoggedIn')}
-                      {auth.user && (auth.user.person?.shop || auth.user.person?.dealership || auth.user.person?.csrRegion) && ' | '}
+                    </p>
+                    {/* Role - On its own line */}
+                    <p className="text-xs text-white text-right">
                       {auth.user
                         ? auth.user.person?.type === 'Shop'
                           ? t('header.shopStaff')
