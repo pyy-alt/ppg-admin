@@ -407,7 +407,6 @@ export function Shops() {
                     >
                       Status
                     </SortableTableHead>
-                    <TableHead className="font-semibold text-foreground">Certification</TableHead>
                     <TableHead className="font-semibold text-foreground">Address</TableHead>
                     <TableHead className="font-semibold text-foreground">City</TableHead>
                     <TableHead className="font-semibold text-foreground">State</TableHead>
@@ -498,7 +497,6 @@ export function Shops() {
                             {statusValue}
                           </Badge>
                         </TableCell>
-                        {/* <TableCell>{certificationValue}</TableCell> */}
                         <TableCell className="text-sm text-muted-foreground">{shop.address || '--'}</TableCell>
                         <TableCell>{shop.city || '--'}</TableCell>
                         <TableCell>{shop.state || '--'}</TableCell>
