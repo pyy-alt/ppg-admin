@@ -28,7 +28,6 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
   useFormField,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -772,6 +771,9 @@ export default function RepairOrderDialog({
                               </SelectItem>
                             </SelectContent>
                           </Select>
+                          <div className="flex min-h-[20px] items-start">
+                            <TranslatedFormMessage />
+                          </div>
                         </FormItem>
                       )}
                     />
@@ -808,6 +810,9 @@ export default function RepairOrderDialog({
                               })}
                             </SelectContent>
                           </Select>
+                          <div className="flex min-h-[20px] items-start">
+                            <TranslatedFormMessage />
+                          </div>
                         </FormItem>
                       )}
                     />
@@ -817,7 +822,7 @@ export default function RepairOrderDialog({
                       control={form.control}
                       name="model"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="flex flex-col space-y-1">
                           <FormLabel>
                             {t('repairOrder.form.model.label')}
                           </FormLabel>
@@ -830,9 +835,9 @@ export default function RepairOrderDialog({
                               {...field}
                             />
                           </FormControl>
-                          <FormMessage>
+                          <div className="flex min-h-[20px] items-start">
                             <TranslatedFormMessage />
-                          </FormMessage>
+                          </div>
                         </FormItem>
                       )}
                     />
