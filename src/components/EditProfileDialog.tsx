@@ -3,7 +3,9 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import PersonApi from '@/js/clients/base/PersonApi';
+import AuthenticationApi from '@/js/clients/base/AuthenticationApi';
 import PersonBase from '@/js/models/base/PersonBase';
+import UpdatePasswordRequest from '@/js/models/UpdatePasswordRequest';
 import { X, User, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
@@ -11,7 +13,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { refreshUserData } from '@/lib/auth';
-import { useTranslation } from 'react-i18next'; // 新增导入
+import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 
 const formSchema = z
   .object({
@@ -84,32 +87,97 @@ export default function EditProfileDialog({ open, onOpenChange, initialData }: E
     },
   });
 
-  const onSubmit = () => {
-    const personApi = new PersonApi();
-    const request = new PersonBase();
-    request.id = initialData?.id;
-    request.firstName = form.getValues('firstName');
-    request.lastName = form.getValues('lastName');
-    request.email = form.getValues('email');
-    // The interface does not currently support changing the password
-    // request.currentPassword = form.getValues('currentPassword')
-    // request.newPassword = form.getValues('newPassword')
+  /**
+   * 更新個人資料
+   */
+  const updateProfile = (): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      const personApi = new PersonApi();
+      const request = new PersonBase();
+      request.id = initialData?.id;
+      request.firstName = form.getValues('firstName');
+      request.lastName = form.getValues('lastName');
+      request.email = form.getValues('email');
 
-    personApi.edit(request, {
-      status200: () => {
-        onOpenChange(false);
-        form.reset();
-        refreshUserData();
-      },
-      error: (error) => {
-        console.error('Error updating profile:', error);
-      },
-      else: () => {
-        console.error('Unexpected response while updating profile');
-      },
+      personApi.edit(request, {
+        status200: () => {
+          refreshUserData();
+          resolve();
+        },
+        error: (error) => {
+          console.error('Error updating profile:', error);
+          reject(error);
+        },
+        else: (_statusCode, message) => {
+          console.error('Unexpected response while updating profile');
+          reject(new Error(message));
+        },
+      });
     });
-    onOpenChange(false);
-    form.reset();
+  };
+
+  /**
+   * 更新密碼
+   */
+  const updatePassword = (): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      const authApi = new AuthenticationApi();
+      const request = UpdatePasswordRequest.create({
+        currentPassword: form.getValues('currentPassword'),
+        newPassword: form.getValues('newPassword'),
+      });
+
+      authApi.updatePassword(request, {
+        status200: () => {
+          resolve();
+        },
+        status409: (message) => {
+          console.error('Password update conflict:', message);
+          reject(new Error(message));
+        },
+        error: (error) => {
+          console.error('Error updating password:', error);
+          reject(error);
+        },
+        else: (_statusCode, message) => {
+          console.error('Unexpected response while updating password');
+          reject(new Error(message));
+        },
+      });
+    });
+  };
+
+  /**
+   * 表單送出處理
+   */
+  const onSubmit = async () => {
+    try {
+      const hasPasswordFields =
+        form.getValues('currentPassword') || form.getValues('newPassword') || form.getValues('confirmPassword');
+
+      // 更新個人資料
+      await updateProfile();
+
+      // 如果有填寫密碼欄位，則更新密碼
+      if (hasPasswordFields) {
+        await updatePassword();
+        toast.success(t('profile.toast.updateSuccess'));
+      } else {
+        toast.success(t('profile.toast.profileUpdateSuccess'));
+      }
+
+      // 成功後關閉對話框並重置表單
+      onOpenChange(false);
+      form.reset();
+      setShowPasswordSection(false);
+    } catch (error) {
+      // 顯示錯誤訊息
+      if (error instanceof Error) {
+        toast.error(error.message || t('profile.toast.updateFailed'));
+      } else {
+        toast.error(t('profile.toast.updateFailed'));
+      }
+    }
   };
 
   const handleClose = () => {

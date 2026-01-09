@@ -59,21 +59,26 @@
       },
       "currentPassword": {
         "label": "Current Password",
-        "placeholder": "••••••••"
+        "placeholder": ""
       },
       "newPassword": {
         "label": "New Password",
-        "placeholder": "Enter new password"
+        "placeholder": ""
       },
       "confirmPassword": {
         "label": "Confirm Password",
-        "placeholder": "Confirm new password"
+        "placeholder": ""
       },
       "password": {
         "allRequired": "All password fields are required",
         "minLength": "New password must be at least 8 characters",
         "mismatch": "Passwords do not match"
       }
+    },
+    "toast": {
+      "updateSuccess": "Profile and password updated successfully",
+      "profileUpdateSuccess": "Profile updated successfully",
+      "updateFailed": "Failed to update profile. Please try again."
     }
   },
   "auth": {

@@ -247,10 +247,10 @@ export default function ViewTeamDialog({ open, onOpenChange, teamMembers, onSucc
       case 'RegistrationRequested':
         return (
           <div className="flex gap-2">
-            <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => handleApprove(member)}>
+            <Button size="sm" className="bg-[#E9FBEC] text-[#3DAF14] hover:bg-[#d4f5d7] border-0" onClick={() => handleApprove(member)}>
               <Check className="mr-1 h-3.5 w-3.5" /> {t('team.view.approve')}
             </Button>
-            <Button size="sm" variant="destructive" onClick={() => handleRejectClick(member)}>
+            <Button size="sm" className="bg-[#FFE6E6] text-[#DC2626] hover:bg-[#ffd4d4] border-0" onClick={() => handleRejectClick(member)}>
               <XCircle className="mr-1 h-3.5 w-3.5" /> {t('team.view.reject')}
             </Button>
           </div>
@@ -369,7 +369,7 @@ export default function ViewTeamDialog({ open, onOpenChange, teamMembers, onSucc
                       <tr key={idx} className="transition-colors hover:bg-muted/30">
                         <td className="px-4 py-4 text-sm">{member.firstName}</td>
                         <td className="px-4 py-4 text-sm">{member.lastName}</td>
-                        <td className="px-4 py-4 text-sm text-muted-foreground">{member.email}</td>
+                        <td className="px-4 py-4 text-sm">{member.email}</td>
                         <td className="px-4 py-4 text-sm">
                           {(member.dateCreated && new Date(member.dateCreated).toLocaleDateString()) || '--'}
                         </td>
