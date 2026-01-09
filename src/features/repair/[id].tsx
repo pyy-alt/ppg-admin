@@ -26,6 +26,7 @@ import { formatDateOnly, convertFilesToFileAssets } from '@/lib/utils';
 import { useBrand } from '@/context/brand-context';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { MarkRepairAsCompleteDialog } from '@/components/MarkRepairAsCompleteDialog';
 import PartsOrderApprovedDialog from '@/components/PartsOrderApprovedDialog';
 import { PartsOrderDialog } from '@/components/PartsOrderDialog';
@@ -601,7 +602,16 @@ export function RepairOrderDetail() {
                   </span>
                   {initRepaitOrderData?.dealership?.id !== 
                     initRepaitOrderData?.shop?.sponsorDealership?.id && (
-                    <AlertCircle className="w-4 h-4 text-yellow-500" />
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <AlertCircle className="w-4 h-4 text-yellow-500" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Ordered from an alternate dealer</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   )}
                 </p>
               </div>
