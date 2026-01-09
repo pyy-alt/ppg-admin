@@ -10,8 +10,21 @@ import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/auth-store';
 import { exportCurrentPageToCSV } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/components/ui/empty';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import ViewTeamDialog, { TeamMember } from '@/components/ViewTeamDialog';
 import { DataTablePagination } from '@/components/data-table-pagination';
 import { ClearableInput } from '@/components/clearable-input';
@@ -36,7 +49,12 @@ export function Dealerships() {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
 
   const [sortBy, setSortBy] = useState<
-    'name' | 'dealershipNumber' | 'countActiveUsers' | 'countPendingUsers' | 'countPendingOrders' | string
+    | 'name'
+    | 'dealershipNumber'
+    | 'countActiveUsers'
+    | 'countPendingUsers'
+    | 'countPendingOrders'
+    | string
   >('dateLastSubmitted');
   const [sortAscending, setSortAscending] = useState(false); // false 为降序（最新在前）
 
@@ -50,7 +68,7 @@ export function Dealerships() {
       const request: any = PersonSearchRequest.create({
         type: userType,
         organizationId,
-        includeInactiveFlag:true
+        includeInactiveFlag: true,
       });
       const resultParameter = ResultParameter.create({
         resultsOrderBy: 'firstName',
@@ -61,10 +79,16 @@ export function Dealerships() {
       personApi.search(request, {
         status200: (data) => {
           if (useActive === 'Active') {
-            const users = data.persons.filter((item: any) => item.status === 'Active');
+            const users = data.persons.filter(
+              (item: any) => item.status === 'Active'
+            );
             setTeamMembers(users);
           } else if (useActive === 'Pending') {
-            const users = data.persons.filter((item: any) => item.status === 'Pending' || item.status ==='RegistrationRequested');
+            const users = data.persons.filter(
+              (item: any) =>
+                item.status === 'Pending' ||
+                item.status === 'RegistrationRequested'
+            );
             setTeamMembers(users);
           } else {
             setTeamMembers(data.persons);
@@ -227,7 +251,11 @@ export function Dealerships() {
       toast.loading(t('common.messages.exportLoading'));
       const allDealerships = await fetchAllDataForExport();
       const flattenedData = getFlattenedAllData(allDealerships);
-      const result = await exportCurrentPageToCSV(flattenedData, headers, 'Manage_Dealers');
+      const result = await exportCurrentPageToCSV(
+        flattenedData,
+        headers,
+        'Manage_Dealers'
+      );
       toast.dismiss();
       result ? toast.success(t('common.messages.exportSuccess')) : null;
     } catch (error) {
@@ -255,7 +283,9 @@ export function Dealerships() {
       {/* Header */}
       <div className="bg-background">
         <div className="flex items-center justify-between px-6 py-4">
-          <h1 className="text-2xl font-bold text-foreground">{t('dealership.list.title')}</h1>
+          <h1 className="text-2xl font-bold text-foreground">
+            {t('dealership.list.title')}
+          </h1>
           <Button onClick={exportCSV}>
             <Download className="w-4 h-4 mr-2" />
             {t('dealership.list.report')}
@@ -280,7 +310,9 @@ export function Dealerships() {
           {loading ? (
             <div className="overflow-hidden rounded-lg shadow-sm bg-background">
               <div className="flex items-center justify-center py-12">
-                <div className="text-muted-foreground">{t('common.loading')}</div>
+                <div className="text-muted-foreground">
+                  {t('common.loading')}
+                </div>
               </div>
             </div>
           ) : dealerships.length === 0 ? (
@@ -291,7 +323,9 @@ export function Dealerships() {
                     <TableIcon className="w-4 h-4" />
                   </EmptyMedia>
                   <EmptyTitle>{t('common.empty.title')}</EmptyTitle>
-                  <EmptyDescription>{t('common.empty.description')}</EmptyDescription>
+                  <EmptyDescription>
+                    {t('common.empty.description')}
+                  </EmptyDescription>
                 </EmptyHeader>
               </Empty>
             </div>
@@ -325,8 +359,12 @@ export function Dealerships() {
                       >
                         {t('dealership.list.tableHeaders.pendingOrders')}
                       </SortableTableHead>
-                      <TableHead>{t('dealership.list.tableHeaders.city')}</TableHead>
-                      <TableHead>{t('dealership.list.tableHeaders.state')}</TableHead>
+                      <TableHead>
+                        {t('dealership.list.tableHeaders.city')}
+                      </TableHead>
+                      <TableHead>
+                        {t('dealership.list.tableHeaders.state')}
+                      </TableHead>
                       <SortableTableHead
                         field="countActiveUsers"
                         currentSortBy={sortBy}
@@ -360,15 +398,7 @@ export function Dealerships() {
                           {dealer.name || '--'}
                         </TableCell>
                         <TableCell>{dealer.dealershipNumber || '--'}</TableCell>
-                        <TableCell
-                          className="font-medium text-center cursor-pointer hover:underline"
-                          onClick={() => {
-                            navigate({
-                              to: '/repair_orders',
-                              search: { id: dealer.id.toString() },
-                            });
-                          }}
-                        >
+                        <TableCell className="font-medium text-center ">
                           {dealer.countPendingOrders ?? 0}
                         </TableCell>
                         <TableCell>{dealer.city || '--'}</TableCell>
