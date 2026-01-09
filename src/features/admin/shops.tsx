@@ -38,9 +38,17 @@ export function Shops() {
   const [isShowAdminTeam, setIsShowAdminTeam] = useState(false);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
 
-  const [sortBy, setSortBy] = useState('');
+  const [sortBy, setSortBy] = useState<
+    | 'name'
+    | 'shopNumber'
+    | 'countActiveUsers'
+    | 'countPendingUsers'
+    | 'countPendingOrders'
+    | 'region'
+    | string
+  >('name');
 
-  const [sortAscending, setSortAscending] = useState(false); // false 为降序（最新在前）
+  const [sortAscending, setSortAscending] = useState(true); // true 为升序（A-Z）
 
   const navigate= useNavigate()
 
@@ -248,17 +256,17 @@ export function Shops() {
   const handleSort = (field: string) => {
     if (sortBy === field) {
       if (sortAscending) {
-        // 当前是升序 → 第三次点击：恢复默认排序
-        setSortBy(''); // 默认字段
-        setSortAscending(false); // 默认降序
+        // 当前是升序 → 第三次点击：切换为降序
+        setSortAscending(false);
       } else {
-        // 当前是降序 → 第二次点击：切换为升序
-        setSortAscending(true);
+        // 当前是降序 → 第三次点击：恢复默认排序
+        setSortBy('name'); // 默认字段
+        setSortAscending(true); // 默认升序 A-Z
       }
     } else {
-      // 点击新字段 → 第一次点击：按该字段降序排序
+      // 点击新字段 → 第一次点击：按该字段升序排序
       setSortBy(field);
-      setSortAscending(false); // 默认从降序开始（最新在前）
+      setSortAscending(true); // 默认从升序开始（A-Z）
     }
     setCurrentPage(1); // 排序变化时重置到第一页
   };
@@ -419,7 +427,7 @@ export function Shops() {
                       Dealer
                     </SortableTableHead>
                     <SortableTableHead
-                      field="sponsorDealership.name"
+                      field="dealerNumber"
                       currentSortBy={sortBy}
                       currentAscending={sortAscending}
                       onSort={handleSort}
@@ -427,7 +435,7 @@ export function Shops() {
                       Dealer #
                     </SortableTableHead>
                     <SortableTableHead
-                      field="region.name"
+                      field="region"
                       currentSortBy={sortBy}
                       currentAscending={sortAscending}
                       onSort={handleSort}

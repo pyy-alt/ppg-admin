@@ -344,6 +344,7 @@ export function Users() {
 											</TableCell>
 											<TableCell>
 												{user.status === 'Pending' ? (
+													(user.dateLastAccess && new Date(user.dateLastAccess).toLocaleDateString()) || 
 													<span className="italic">{t('user.list.pendingRegistration')}</span>
 												) : (
 													(user.dateLastAccess && new Date(user.dateLastAccess).toLocaleDateString()) || '--'
