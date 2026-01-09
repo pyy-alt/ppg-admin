@@ -260,7 +260,7 @@ export function RepairOrderList() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [smartFilter, filterByStatus, dateRangePreset]);
+  }, [smartFilter, filterByStatus, dateRangePreset, dateLastSubmittedFrom, dateLastSubmittedTo]);
   
   useEffect(() => {
     if (!user) return;
@@ -277,7 +277,7 @@ export function RepairOrderList() {
       smartFilter ? 500 : 0
     );
     return () => clearTimeout(timeoutId);
-  }, [smartFilter, filterByStatus, showRepairCompleted, user, currentPage, dateRangePreset]);
+  }, [smartFilter, filterByStatus, showRepairCompleted, user, currentPage, dateRangePreset, dateLastSubmittedFrom, dateLastSubmittedTo]);
 
   const showIcon = (orderAny: any) => {
     const userType = user?.person?.type;
@@ -498,7 +498,6 @@ export function RepairOrderList() {
                     setFromDate(newRange?.from ?? undefined);
                     setToDate(newRange?.to ?? undefined);
                   }}
-                  onClose={() => getRepairOrders(true)}
                   placeholder={t('repairOrder.list.dateRangePickerPlaceholder')}
                   disabled={false}
                 />

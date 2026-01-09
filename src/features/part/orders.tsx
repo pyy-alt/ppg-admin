@@ -339,6 +339,8 @@ export function PartOrders() {
     filterByStatus,
     filterByRegionId,
     dateSubmittedRange,
+    dateSubmittedFrom,
+    dateSubmittedTo,
     currentPage,
     user,
     sortBy,
@@ -354,6 +356,8 @@ export function PartOrders() {
     filterByStatus,
     filterByRegionId,
     dateSubmittedRange,
+    dateSubmittedFrom,
+    dateSubmittedTo,
   ]);
 
   // Format date display
@@ -505,9 +509,6 @@ export function PartOrders() {
                   // Sync to the original state.，Used for API Inquiry
                   setFromDate(newRange?.from ?? undefined);
                   setToDate(newRange?.to ?? undefined);
-                }}
-                onClose={(date) => {
-                  fetchPartsOrders(true, date);
                 }}
                 placeholder={t('partsOrder.list.dateRangePickerPlaceholder')}
                 disabled={false}

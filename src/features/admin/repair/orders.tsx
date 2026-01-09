@@ -214,7 +214,7 @@ export function RepairOrderList() {
       smartFilter ? 500 : 0
     );
     return () => clearTimeout(timeoutId);
-  }, [smartFilter, filterByStatus, showRepairCompleted, user, currentPage, dateRangePreset]);
+  }, [smartFilter, filterByStatus, showRepairCompleted, user, currentPage, dateRangePreset, dateLastSubmittedFrom, dateLastSubmittedTo]);
 
   const showIcon = (orderAny: any) => {
     if (!orderAny.dateLastSubmitted) return null;
@@ -377,7 +377,6 @@ export function RepairOrderList() {
                     setFromDate(newRange?.from ?? undefined);
                     setToDate(newRange?.to ?? undefined);
                   }}
-                  onClose={() => getRepairOrders(true)}
                   placeholder={t('partsOrder.list.dateRangePickerPlaceholder')}
                   disabled={false}
                 />
