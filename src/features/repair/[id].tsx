@@ -535,7 +535,7 @@ export function RepairOrderDetail() {
               ) ? (
                 <Button
                   variant="outline"
-                  className="font-medium h-9"
+                  className="font-medium rounded-lg h-9"
                   onClick={() => setOpen(true)}
                 >
                   <Pencil className="mr-1.5 h-3.5 w-3.5" />
