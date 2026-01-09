@@ -144,14 +144,14 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
                 <button className="flex items-center justify-center gap-3 pr-2 focus:outline-none focus-visible:outline-none active:outline-none">
                   <div className="text-right text-white">
                     {/* User Name - Larger font */}
-                    <p className="mb-3 text-base font-semibold leading-none text-right">
+                    <p className="mb-2 text-base font-semibold leading-none text-right">
                       {auth.user
                         ? `${auth.user.person?.firstName} ${auth.user.person?.lastName}`.trim() ||
                         auth.user.person?.email
                         : t('header.user')}
                     </p>
-                    {/* Shop/Dealership Name */}
-                    <p className="text-xs text-white mb-2 text-right">
+                    {/* Shop/Dealership Name and Role - Horizontal layout */}
+                    <p className="text-xs text-white text-right">
                       {auth.user
                         ? auth.user.person?.shop?.name && auth.user.person?.shop?.shopNumber
                           ? `${auth.user.person?.shop?.name} (${auth.user.person?.shop?.shopNumber})`
@@ -161,9 +161,7 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
                               ? auth.user.person?.csrRegion?.name
                               : ''
                         : t('header.notLoggedIn')}
-                    </p>
-                    {/* Role - On its own line */}
-                    <p className="text-xs text-white text-right">
+                      {auth.user && (auth.user.person?.shop || auth.user.person?.dealership || auth.user.person?.csrRegion) && ' | '}
                       {auth.user
                         ? auth.user.person?.type === 'Shop'
                           ? t('header.shopStaff')
