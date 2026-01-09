@@ -596,10 +596,7 @@ export function RepairOrderDetail() {
                   {t('repairOrder.detail.submittedTo')}
                 </span>
                 <p className="font-medium flex items-center gap-2">
-                  <span>
-                    {initRepaitOrderData?.dealership?.name || '--'} (
-                    {initRepaitOrderData?.dealership?.dealershipNumber})
-                  </span>
+                
                   {initRepaitOrderData?.dealership?.id !== 
                     initRepaitOrderData?.shop?.sponsorDealership?.id && (
                     <TooltipProvider>
@@ -613,6 +610,10 @@ export function RepairOrderDetail() {
                       </Tooltip>
                     </TooltipProvider>
                   )}
+                    <span>
+                    {initRepaitOrderData?.dealership?.name || '--'} (
+                    {initRepaitOrderData?.dealership?.dealershipNumber})
+                  </span>
                 </p>
               </div>
               <div>
