@@ -55,8 +55,8 @@ export function Dealerships() {
     | 'countPendingUsers'
     | 'countPendingOrders'
     | string
-  >('dateLastSubmitted');
-  const [sortAscending, setSortAscending] = useState(false); // false 为降序（最新在前）
+  >('name');
+  const [sortAscending, setSortAscending] = useState(true); // true 为升序（A-Z）
 
   const getTeamMembers = async (
     userType: 'Shop' | 'Dealership' | 'Network',
@@ -156,8 +156,8 @@ export function Dealerships() {
     if (sortBy === field) {
       if (sortAscending) {
         // 当前是升序 → 第三次点击：恢复默认排序
-        setSortBy('dateLastSubmitted'); // 默认字段
-        setSortAscending(false); // 默认降序
+        setSortBy('name'); // 默认字段
+        setSortAscending(true); // 默认升序 (A-Z)
       } else {
         // 当前是降序 → 第二次点击：切换为升序
         setSortAscending(true);
@@ -165,7 +165,7 @@ export function Dealerships() {
     } else {
       // 点击新字段 → 第一次点击：按该字段降序排序
       setSortBy(field);
-      setSortAscending(false); // 默认从降序开始（最新在前）
+      setSortAscending(false); // 默认从降序开始
     }
     setCurrentPage(1); // 排序变化时重置到第一页
   };
