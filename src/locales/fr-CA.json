@@ -170,7 +170,7 @@
       "title": "Liste des commandes de pièces",
       "report": "Rapport",
       "searchPlaceholder": "Filtrer par n° RO, n° commande vente, NIV, atelier, concessionnaire",
-      "onlyWaitingOnMe": "Afficher uniquement les commandes de pièces <strong>en attente de ma part</strong>",
+      "onlyWaitingOnMe": "Afficher uniquement les commandes de pièces <strong>En attente de ma part</strong>",
       "typePlaceholder": "Type de commande",
       "statusPlaceholder": "Statut",
       "regionPlaceholder": "Région CSR",

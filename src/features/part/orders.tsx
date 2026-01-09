@@ -24,7 +24,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 export function PartOrders() {
   const { user } = useAuthStore((state) => state.auth);
-  const [filterByWaitingOnMe, setOnlyMyOrders] = useState<boolean>(false);
+  const [filterByWaitingOnMe, setOnlyMyOrders] = useState<boolean>(true);
   const [dateSubmittedFrom, setFromDate] = useState<Date | undefined>(undefined);
   const [dateSubmittedTo, setToDate] = useState<Date | undefined>(undefined);
   const [dateSubmittedRange, setDateSubmittedRange] = useState<string>('all');
@@ -605,8 +605,10 @@ export function PartOrders() {
                             });
                           }}
                         >
-                          {showIcon(order) && <AlertTriangle className="w-4 h-4 text-destructive" />}
-                          {roNumber}
+                          <div className="flex items-center gap-2">
+                            {showIcon(order) && <AlertTriangle className="w-4 h-4 text-destructive" />}
+                            <span>{roNumber}</span>
+                          </div>
                         </TableCell>
                         <TableCell>{salesOrder}</TableCell>
                         <TableCell>{type}</TableCell>
