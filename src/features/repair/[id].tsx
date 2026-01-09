@@ -523,7 +523,7 @@ export function RepairOrderDetail() {
               ) && userType === 'Shop' ? (
                 <Button
                   onClick={() => setIsMarkRepairAsCompleteDialogOpen(true)}
-                  className="font-medium bg-green-600 h-9 rounded-lg "
+                  className="font-medium bg-green-600 h-9 rounded-lg w-64"
                 >
                   <Check className="mr-1.5 h-3.5 w-3.5" />
                   {t('repairOrder.detail.markComplete')}
@@ -535,7 +535,7 @@ export function RepairOrderDetail() {
               ) ? (
                 <Button
                   variant="outline"
-                  className="font-medium rounded-lg h-9"
+                  className="font-medium rounded-lg h-9 w-64"
                   onClick={() => setOpen(true)}
                 >
                   <Pencil className="mr-1.5 h-3.5 w-3.5" />
@@ -743,7 +743,7 @@ export function RepairOrderDetail() {
                 <Button
                   onClick={() => handleOpenDialog('newSupplement')}
                   variant="outline"
-                  className="font-medium rounded-lg h-9"
+                  className="font-medium rounded-lg h-9 w-64"
                 >
                   <Plus className="mr-1.5 h-3.5 w-3.5" />
                   {t('repairOrder.detail.supplementalPartsOrder')}
@@ -783,7 +783,7 @@ export function RepairOrderDetail() {
                             handleOpenDialog('edit', selectedPartsOrderData)
                           }
                           variant="outline"
-                          className="font-medium rounded-lg h-9"
+                          className="font-medium rounded-lg h-9 w-64"
                         >
                           <Pencil className="mr-1.5 h-3.5 w-3.5" />
                           {(selectedPartsOrderData as any)?.partsOrderNumber > 0
