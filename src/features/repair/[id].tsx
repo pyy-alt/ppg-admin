@@ -523,7 +523,7 @@ export function RepairOrderDetail() {
               ) && userType === 'Shop' ? (
                 <Button
                   onClick={() => setIsMarkRepairAsCompleteDialogOpen(true)}
-                  className="font-medium bg-green-600 h-9"
+                  className="font-medium bg-green-600 h-9 rounded-lg "
                 >
                   <Check className="mr-1.5 h-3.5 w-3.5" />
                   {t('repairOrder.detail.markComplete')}
@@ -692,6 +692,7 @@ export function RepairOrderDetail() {
                 <>
                   <Button
                     variant={currentIndex === 0 ? 'default' : 'outline'}
+                    className="font-medium rounded-lg h-9"
                     onClick={() => {
                       const partsOrder = initPartsOrderData.find(
                         (po: any) => po.partsOrderNumber === 0
@@ -714,6 +715,7 @@ export function RepairOrderDetail() {
                     )
                     .map((partsOrder: any, index: number) => (
                       <Button
+                        className="font-medium rounded-lg h-9"
                         key={partsOrder.id || index}
                         variant={
                           currentIndex === index + 1 ? 'default' : 'outline'
