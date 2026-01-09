@@ -24,7 +24,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 export function PartOrders() {
   const { user } = useAuthStore((state) => state.auth);
-  const [filterByWaitingOnMe, setOnlyMyOrders] = useState<boolean>(true);
+  const [filterByWaitingOnMe, setOnlyMyOrders] = useState<boolean>(false);
   const [dateSubmittedFrom, setFromDate] = useState<Date | undefined>(undefined);
   const [dateSubmittedTo, setToDate] = useState<Date | undefined>(undefined);
   const [dateSubmittedRange, setDateSubmittedRange] = useState<string>('all');
@@ -414,7 +414,7 @@ export function PartOrders() {
                   onCheckedChange={(checked) => setOnlyMyOrders(checked as boolean)}
                   className="rounded-full bg-muted"
                 />
-                <Label htmlFor="my-orders" className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                <Label htmlFor="my-orders" className="flex items-center gap-1 text-sm font-medium cursor-pointer">
                   <Trans i18nKey="partsOrder.list.onlyWaitingOnMe" components={{ strong: <strong /> }} />
                 </Label>
               </div>

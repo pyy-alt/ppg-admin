@@ -283,7 +283,9 @@ export function Users() {
 														className={
 															user.status === 'Inactive'
 																? 'text-gray-400'
-																: 'text-foreground cursor-pointer hover:underline'
+																: user.status === 'Pending'
+																	? 'text-foreground cursor-pointer hover:underline italic'
+																	: 'text-foreground cursor-pointer hover:underline'
 														}
 													>
 														{user.status === 'Pending' ? t('user.list.pendingRegistration') : user.firstName}
@@ -292,7 +294,7 @@ export function Users() {
 											</TableCell>
 											<TableCell>
 												{user.status === 'Pending' 
-													? t('user.list.pendingRegistration') 
+													? <span className="italic">{t('user.list.pendingRegistration')}</span>
 													: user.status === 'Inactive'
 														? <span className="text-gray-400">{user.lastName}</span>
 														: user.lastName
@@ -304,10 +306,22 @@ export function Users() {
 											<TableCell>
 												{user.status === 'Inactive' ? (
 													<span className="text-gray-400">
-														{user.type === 'Csr' ? 'CSR' : user.type}
+														{user.type === 'Csr' 
+															? 'CSR' 
+															: user.type === 'ProgramAdministrator' 
+																? 'Program Administrator'
+																: user.type === 'FieldStaff'
+																	? 'Field Staff'
+																	: user.type}
 													</span>
 												) : (
-													user.type === 'Csr' ? 'CSR' : user.type
+													user.type === 'Csr' 
+														? 'CSR' 
+														: user.type === 'ProgramAdministrator' 
+															? 'Program Administrator'
+															: user.type === 'FieldStaff'
+																? 'Field Staff'
+																: user.type
 												)}
 											</TableCell>
 											<TableCell className={user.status === 'Inactive' ? 'text-gray-400' : ''}>
@@ -329,8 +343,11 @@ export function Users() {
 												)}
 											</TableCell>
 											<TableCell>
-												{(user.dateLastAccess && new Date(user.dateLastAccess).toLocaleDateString()) ||
-													t('user.list.pendingRegistration')}
+												{user.status === 'Pending' ? (
+													<span className="italic">{t('user.list.pendingRegistration')}</span>
+												) : (
+													(user.dateLastAccess && new Date(user.dateLastAccess).toLocaleDateString()) || '--'
+												)}
 											</TableCell>
 											<TableCell>
 												{user.status === 'Inactive' ? (

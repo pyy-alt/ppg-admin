@@ -371,7 +371,7 @@ export function PartOrders() {
                   onCheckedChange={(checked) => setOnlyMyOrders(checked as boolean)}
                   className="rounded-full bg-muted"
                 />
-                <Label htmlFor="my-orders" className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                <Label htmlFor="my-orders" className="flex items-center gap-1 text-sm font-medium cursor-pointer">
                   <Trans i18nKey="partsOrder.list.onlyWaitingOnMe" components={{ strong: <strong /> }} />
                 </Label>
               </div>
