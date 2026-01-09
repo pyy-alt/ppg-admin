@@ -25,7 +25,7 @@ export function PartOrders() {
   const { user } = useAuthStore((state) => state.auth);
   const location: any = useLocation();
   const dealershipId = location.search.id ? Number(location.search.id) : undefined;
-  const [filterByWaitingOnMe, setOnlyMyOrders] = useState<boolean>(true);
+  const [filterByWaitingOnMe, setOnlyMyOrders] = useState<boolean>(false);
   const [dateSubmittedFrom, setFromDate] = useState<Date | undefined>(undefined);
   const [dateSubmittedTo, setToDate] = useState<Date | undefined>(undefined);
   const [dateSubmittedRange, setDateSubmittedRange] = useState<string>('all');
