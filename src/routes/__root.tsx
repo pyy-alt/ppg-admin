@@ -28,6 +28,27 @@ function FaviconInitializer() {
   return null; // 不渲染任何内容
 }
 
+function TitleInitializer() {
+  const { brand } = useBrand();
+
+  useEffect(() => {
+    // Determine locale from URL or browser
+    const isCanadian = window.location.hostname.includes('.ca') || 
+                       navigator.language.toLowerCase().includes('ca');
+    
+    let title = '';
+    if (brand === 'vw') {
+      title = isCanadian ? 'VW CA Restricted Parts Tracker' : 'VW Restricted Parts Tracker';
+    } else {
+      title = isCanadian ? 'Audi CA Restricted Parts Tracker' : 'Audi Restricted Parts Tracker';
+    }
+    
+    document.title = title;
+  }, [brand]);
+
+  return null;
+}
+
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
 }>()({
@@ -37,6 +58,7 @@ export const Route = createRootRouteWithContext<{
         <BrandProvider>
           <InitAuth />
           <FaviconInitializer />
+          <TitleInitializer />
           {/* In */}
           {/* <Global404Dialog /> */}
           <NavigationProgress />

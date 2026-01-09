@@ -257,6 +257,7 @@ export interface FileRoutesByFullPath {
   '/clerk': typeof ClerkAuthenticatedRouteRoute
   '/registrationResult': typeof RegistrationResultRoute
   '/settings': typeof AuthenticatedSettingsRouteRouteWithChildren
+  '/clerk/': typeof ClerkauthRouteRouteWithChildren
   '/login': typeof authLoginRoute
   '/401': typeof errors401Route
   '/403': typeof errors403Route
@@ -291,8 +292,8 @@ export interface FileRoutesByFullPath {
   '/registration/complete/$id/$guid/$hash': typeof RegistrationCompleteIdGuidHashRoute
 }
 export interface FileRoutesByTo {
-  '/clerk': typeof ClerkAuthenticatedRouteRoute
   '/registrationResult': typeof RegistrationResultRoute
+  '/clerk': typeof ClerkAuthenticatedRouteRoute
   '/login': typeof authLoginRoute
   '/401': typeof errors401Route
   '/403': typeof errors403Route
@@ -373,6 +374,7 @@ export interface FileRouteTypes {
     | '/clerk'
     | '/registrationResult'
     | '/settings'
+    | '/clerk/'
     | '/login'
     | '/401'
     | '/403'
@@ -407,8 +409,8 @@ export interface FileRouteTypes {
     | '/registration/complete/$id/$guid/$hash'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/clerk'
     | '/registrationResult'
+    | '/clerk'
     | '/login'
     | '/401'
     | '/403'
@@ -618,8 +620,8 @@ declare module '@tanstack/react-router' {
     }
     '/clerk/(auth)': {
       id: '/clerk/(auth)'
-      path: ''
-      fullPath: '/clerk'
+      path: '/'
+      fullPath: '/clerk/'
       preLoaderRoute: typeof ClerkauthRouteRouteImport
       parentRoute: typeof ClerkRouteRoute
     }
