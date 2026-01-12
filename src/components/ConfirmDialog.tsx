@@ -52,15 +52,15 @@ export default function ConfirmDialog({
             {title || t('common.confirmAction')}
           </DialogTitle>
         </DialogHeader>
-        <div className="py-4">
-          <p className="text-sm text-foreground">
+        <div className="py-4 pl-[60px]">
+          <p className="text-sm text-foreground text-left">
             {description || t('common.confirmDescription')}
           </p>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <p className="mt-2 text-sm text-muted-foreground text-left">
             {t('common.cannotUndo')}
           </p>
         </div>
-        <DialogFooter className="gap-2 sm:gap-0">
+        <DialogFooter className="gap-3">
           <Button
             variant="outline"
             onClick={handleCancel}
