@@ -48,23 +48,14 @@ export function MarkRepairAsCompleteDialog({
   const removePhoto = (index: number) => {
     const newPhotos = photos.filter((_, i) => i !== index);
     setPhotos(newPhotos);
-    // 如果删除后没有照片了，设置错误
-    if (newPhotos.length === 0) {
-      setPhotoError(t('repairOrder.completeDialog.photoRequired'));
+    // 清除错误（如果有的话）
+    if (photoError) {
+      setPhotoError('');
     }
   };
 
   const handleComplete = () => {
-    if (photos.length === 0) {
-      setPhotoError(t('repairOrder.completeDialog.photoRequired'));
-      toast.error(t('repairOrder.completeDialog.photoRequired'));
-      // 滚动到附件区域
-      const attachmentsSection = document.querySelector('[data-attachments-section]');
-      if (attachmentsSection) {
-        attachmentsSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-      return;
-    }
+    // Post-repair photos 不再是必需的，直接提交
     setPhotoError('');
     onComplete?.(photos);
     onOpenChange(false);
@@ -132,7 +123,7 @@ export function MarkRepairAsCompleteDialog({
             </h3>
             <div className="space-y-4">
               <Label className="font-medium text-foreground">
-                {t('repairOrder.completeDialog.postRepairPhotos')} <span className="text-destructive">*</span>
+                {t('repairOrder.completeDialog.postRepairPhotos')}
               </Label>
               {/* Dropzone */}
               <div
