@@ -857,7 +857,7 @@ export default function RepairOrderDialog({
                     icon={FileText}
                     files={structuralMeasurementFileAssets}
                     onFilesChange={setStructuralMeasurementFileAssets}
-                    accept=".pdf,.doc,.docx"
+                    accept="image/*,.pdf,.doc,.docx"
                   />
                   <DropZone
                     title={t('repairOrder.attachments.preRepairPhotos')}
