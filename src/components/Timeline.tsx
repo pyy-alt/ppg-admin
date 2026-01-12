@@ -113,19 +113,27 @@ export function Timeline({
     const orderFulfillmentLogs = orderFulfillmentActivityLogItems || [];
     const orderReceivedLogs = orderReceivedActivityLogItems || [];
 
-    // Order Review 阶段的活动
-    const submitted = orderReviewLogs.find((item: ActivityLogItem) => item?.type === 'Submitted');
-    const rejected = orderReviewLogs.find((item: ActivityLogItem) => item?.type === 'Rejected');
-    const resubmitted = orderReviewLogs.find((item: ActivityLogItem) => item?.type === 'Resubmitted');
-    const approved = orderReviewLogs.find((item: ActivityLogItem) => item?.type === 'Approved');
+    // Order Review 阶段的活动 - 获取所有记录并按时间排序
+    const submitted = orderReviewLogs.filter((item: ActivityLogItem) => item?.type === 'Submitted')
+      .sort((a, b) => new Date(a?.dateCreated || 0).getTime() - new Date(b?.dateCreated || 0).getTime());
+    const rejected = orderReviewLogs.filter((item: ActivityLogItem) => item?.type === 'Rejected')
+      .sort((a, b) => new Date(a?.dateCreated || 0).getTime() - new Date(b?.dateCreated || 0).getTime());
+    const resubmitted = orderReviewLogs.filter((item: ActivityLogItem) => item?.type === 'Resubmitted')
+      .sort((a, b) => new Date(a?.dateCreated || 0).getTime() - new Date(b?.dateCreated || 0).getTime());
+    const approved = orderReviewLogs.filter((item: ActivityLogItem) => item?.type === 'Approved')
+      .sort((a, b) => new Date(a?.dateCreated || 0).getTime() - new Date(b?.dateCreated || 0).getTime());
 
-    // Order Fulfillment 阶段的活动
-    const shipped = orderFulfillmentLogs.find((item: ActivityLogItem) => item?.type === 'Shipped');
-    const unshipped = orderFulfillmentLogs.find((item: ActivityLogItem) => item?.type === 'Unshipped');
+    // Order Fulfillment 阶段的活动 - 获取所有记录并按时间排序
+    const shipped = orderFulfillmentLogs.filter((item: ActivityLogItem) => item?.type === 'Shipped')
+      .sort((a, b) => new Date(a?.dateCreated || 0).getTime() - new Date(b?.dateCreated || 0).getTime());
+    const unshipped = orderFulfillmentLogs.filter((item: ActivityLogItem) => item?.type === 'Unshipped')
+      .sort((a, b) => new Date(a?.dateCreated || 0).getTime() - new Date(b?.dateCreated || 0).getTime());
 
-    // Order Received 阶段的活动
-    const received = orderReceivedLogs.find((item: ActivityLogItem) => item?.type === 'Received');
-    const unreceived = orderReceivedLogs.find((item: ActivityLogItem) => item?.type === 'Unreceived');
+    // Order Received 阶段的活动 - 获取所有记录并按时间排序
+    const received = orderReceivedLogs.filter((item: ActivityLogItem) => item?.type === 'Received')
+      .sort((a, b) => new Date(a?.dateCreated || 0).getTime() - new Date(b?.dateCreated || 0).getTime());
+    const unreceived = orderReceivedLogs.filter((item: ActivityLogItem) => item?.type === 'Unreceived')
+      .sort((a, b) => new Date(a?.dateCreated || 0).getTime() - new Date(b?.dateCreated || 0).getTime());
 
     return {
       orderReview: {
@@ -362,35 +370,53 @@ export function Timeline({
                 {/* Order Review Stage */}
                 {item.stage === 'OrderReview' && (
                   <div className="space-y-2 text-sm">
-                    {/* 显示初始提交记录 */}
-                    {(activityLog.orderReview.submitted || dateSubmitted) && (
+                    {/* 显示所有提交记录 */}
+                    {activityLog.orderReview.submitted.length > 0 ? (
+                      activityLog.orderReview.submitted.map((log: ActivityLogItem, index: number) => (
+                        <p key={`submitted-${index}`} className="text-muted-foreground">
+                          <Trans
+                            i18nKey={
+                              formatPersonName(log?.person)
+                                ? 'timeline.log.submittedWithBy'
+                                : 'timeline.log.submitted'
+                            }
+                            values={{
+                              date: formatDateOnly(log?.dateCreated),
+                              by: formatPersonName(log?.person),
+                            }}
+                            components={{ strong: <strong /> }}
+                          />
+                        </p>
+                      ))
+                    ) : dateSubmitted && (
                       <p className="text-muted-foreground">
                         <Trans
                           i18nKey={
-                            formatPersonName(activityLog.orderReview.submitted?.person || submittedByPerson)
+                            formatPersonName(submittedByPerson)
                               ? 'timeline.log.submittedWithBy'
                               : 'timeline.log.submitted'
                           }
                           values={{
-                            date: formatDateOnly(activityLog.orderReview.submitted?.dateCreated || dateSubmitted),
-                            by: formatPersonName(activityLog.orderReview.submitted?.person || submittedByPerson),
+                            date: formatDateOnly(dateSubmitted),
+                            by: formatPersonName(submittedByPerson),
                           }}
                           components={{ strong: <strong /> }}
                         />
                       </p>
                     )}
-                    {activityLog.orderReview.rejected && (
-                      <>
+                    {/* 显示所有拒绝记录 */}
+                    {activityLog.orderReview.rejected.map((log: ActivityLogItem, index: number) => (
+                      <div key={`rejected-${index}`}>
                         <p className="text-muted-foreground">
                           <Trans
                             i18nKey={
-                              formatPersonName(activityLog.orderReview.rejected.person)
+                              formatPersonName(log?.person)
                                 ? 'timeline.log.rejectedWithBy'
                                 : 'timeline.log.rejected'
                             }
                             values={{
-                              date: formatDateOnly(activityLog.orderReview.rejected.dateCreated),
-                              by: formatPersonName(activityLog.orderReview.rejected.person),
+                              date: formatDateOnly(log?.dateCreated),
+                              by: formatPersonName(log?.person),
                             }}
                             components={{
                               strong: <strong />,
@@ -398,40 +424,42 @@ export function Timeline({
                             }}
                           />
                         </p>
-                        {activityLog.orderReview.rejected.comment && (
+                        {log?.comment && (
                           <p className="text-muted-foreground">
-                            {t('timeline.log.reason', { reason: activityLog.orderReview.rejected.comment })}
+                            {t('timeline.log.reason', { reason: log.comment })}
                           </p>
                         )}
-                      </>
-                    )}
-                    {activityLog.orderReview.resubmitted && (
-                      <p className="text-muted-foreground">
+                      </div>
+                    ))}
+                    {/* 显示所有重新提交记录 */}
+                    {activityLog.orderReview.resubmitted.map((log: ActivityLogItem, index: number) => (
+                      <p key={`resubmitted-${index}`} className="text-muted-foreground">
                         <Trans
                           i18nKey={
-                            formatPersonName(activityLog.orderReview.resubmitted.person)
+                            formatPersonName(log?.person)
                               ? 'timeline.log.resubmittedWithBy'
                               : 'timeline.log.resubmitted'
                           }
                           values={{
-                            date: formatDateOnly(activityLog.orderReview.resubmitted.dateCreated),
-                            by: formatPersonName(activityLog.orderReview.resubmitted.person),
+                            date: formatDateOnly(log?.dateCreated),
+                            by: formatPersonName(log?.person),
                           }}
                           components={{ strong: <strong /> }}
                         />
                       </p>
-                    )}
-                    {activityLog.orderReview.approved && (
-                      <p className="text-muted-foreground">
+                    ))}
+                    {/* 显示所有批准记录 */}
+                    {activityLog.orderReview.approved.map((log: ActivityLogItem, index: number) => (
+                      <p key={`approved-${index}`} className="text-muted-foreground">
                         <Trans
                           i18nKey={
-                            formatPersonName(activityLog.orderReview.approved.person)
+                            formatPersonName(log?.person)
                               ? 'timeline.log.approvedWithBy'
                               : 'timeline.log.approved'
                           }
                           values={{
-                            date: formatDateOnly(activityLog.orderReview.approved.dateCreated),
-                            by: formatPersonName(activityLog.orderReview.approved.person),
+                            date: formatDateOnly(log?.dateCreated),
+                            by: formatPersonName(log?.person),
                           }}
                           components={{
                             strong: <strong />,
@@ -439,83 +467,59 @@ export function Timeline({
                           }}
                         />
                       </p>
-                    )}
+                    ))}
                   </div>
                 )}
 
                 {/* Order Fulfillment Stage */}
                 {item.stage === 'OrderFulfillment' && (
                   <div className="space-y-2 text-sm">
-                    {activityLog.orderFulfillment.shipped && (
-                      <p className="text-muted-foreground">
-                        <Trans
-                          i18nKey={
-                            formatPersonName(activityLog.orderFulfillment.shipped.person)
-                              ? 'timeline.log.shippedWithBy'
-                              : 'timeline.log.shipped'
-                          }
-                          values={{
-                            date: formatDateOnly(activityLog.orderFulfillment.shipped.dateCreated),
-                            by: formatPersonName(activityLog.orderFulfillment.shipped.person),
-                          }}
-                          components={{ strong: <strong /> }}
-                        />
-                      </p>
-                    )}
-                    {activityLog.orderFulfillment.unshipped && (
-                      <p className="text-muted-foreground">
-                        <Trans
-                          i18nKey={
-                            formatPersonName(activityLog.orderFulfillment.unshipped.person)
-                              ? 'timeline.log.unshippedWithBy'
-                              : 'timeline.log.unshipped'
-                          }
-                          values={{
-                            date: formatDateOnly(activityLog.orderFulfillment.unshipped.dateCreated),
-                            by: formatPersonName(activityLog.orderFulfillment.unshipped.person),
-                          }}
-                          components={{ strong: <strong /> }}
-                        />
-                      </p>
-                    )}
+                    {/* 合并 shipped 和 unshipped，按时间顺序显示 */}
+                    {[...activityLog.orderFulfillment.shipped, ...activityLog.orderFulfillment.unshipped]
+                      .sort((a, b) => new Date(a?.dateCreated || 0).getTime() - new Date(b?.dateCreated || 0).getTime())
+                      .map((log: ActivityLogItem, index: number) => (
+                        <p key={`fulfillment-${index}`} className="text-muted-foreground">
+                          <Trans
+                            i18nKey={
+                              formatPersonName(log?.person)
+                                ? log?.type === 'Shipped' ? 'timeline.log.shippedWithBy' : 'timeline.log.unshippedWithBy'
+                                : log?.type === 'Shipped' ? 'timeline.log.shipped' : 'timeline.log.unshipped'
+                            }
+                            values={{
+                              date: formatDateOnly(log?.dateCreated),
+                              by: formatPersonName(log?.person),
+                            }}
+                            components={{ strong: <strong /> }}
+                          />
+                        </p>
+                      ))
+                    }
                   </div>
                 )}
 
                 {/* Order Received Stage */}
                 {item.stage === 'OrderReceived' && (
                   <div className="space-y-2 text-sm">
-                    {activityLog.orderReceived.received && (
-                      <p className="text-muted-foreground">
-                        <Trans
-                          i18nKey={
-                            formatPersonName(activityLog.orderReceived.received.person)
-                              ? 'timeline.log.receivedWithBy'
-                              : 'timeline.log.received'
-                          }
-                          values={{
-                            date: formatDateOnly(activityLog.orderReceived.received.dateCreated),
-                            by: formatPersonName(activityLog.orderReceived.received.person),
-                          }}
-                          components={{ strong: <strong /> }}
-                        />
-                      </p>
-                    )}
-                    {activityLog.orderReceived.unreceived && (
-                      <p className="text-muted-foreground">
-                        <Trans
-                          i18nKey={
-                            formatPersonName(activityLog.orderReceived.unreceived.person)
-                              ? 'timeline.log.unreceivedWithBy'
-                              : 'timeline.log.unreceived'
-                          }
-                          values={{
-                            date: formatDateOnly(activityLog.orderReceived.unreceived.dateCreated),
-                            by: formatPersonName(activityLog.orderReceived.unreceived.person),
-                          }}
-                          components={{ strong: <strong /> }}
-                        />
-                      </p>
-                    )}
+                    {/* 合并 received 和 unreceived，按时间顺序显示 */}
+                    {[...activityLog.orderReceived.received, ...activityLog.orderReceived.unreceived]
+                      .sort((a, b) => new Date(a?.dateCreated || 0).getTime() - new Date(b?.dateCreated || 0).getTime())
+                      .map((log: ActivityLogItem, index: number) => (
+                        <p key={`received-${index}`} className="text-muted-foreground">
+                          <Trans
+                            i18nKey={
+                              formatPersonName(log?.person)
+                                ? log?.type === 'Received' ? 'timeline.log.receivedWithBy' : 'timeline.log.unreceivedWithBy'
+                                : log?.type === 'Received' ? 'timeline.log.received' : 'timeline.log.unreceived'
+                            }
+                            values={{
+                              date: formatDateOnly(log?.dateCreated),
+                              by: formatPersonName(log?.person),
+                            }}
+                            components={{ strong: <strong /> }}
+                          />
+                        </p>
+                      ))
+                    }
                   </div>
                 )}
 

@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import type RepairOrder from '@/js/models/RepairOrder';
 import { X, FileText, Paperclip, Upload, Camera, Trash2, AlertTriangle } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
-import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
