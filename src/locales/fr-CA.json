@@ -59,15 +59,18 @@
       },
       "currentPassword": {
         "label": "Mot de passe actuel",
-        "placeholder": ""
+        "placeholder": "Saisissez le mot de passe actuel",
+        "required": "Requis"
       },
       "newPassword": {
         "label": "Nouveau mot de passe",
-        "placeholder": ""
+        "placeholder": "Saisissez le nouveau mot de passe",
+        "required": "Requis"
       },
       "confirmPassword": {
         "label": "Confirmer le mot de passe",
-        "placeholder": ""
+        "placeholder": "Confirmez le nouveau mot de passe",
+        "required": "Requis"
       },
       "password": {
         "allRequired": "Tous les champs de mot de passe sont requis",
@@ -175,7 +178,7 @@
       "title": "Liste des commandes de pièces",
       "report": "Rapport",
       "searchPlaceholder": "Filtrer par n° RO, n° commande vente, NIV, atelier, concessionnaire",
-      "onlyWaitingOnMe": "Afficher uniquement les commandes de pièces <strong>En attente de ma part</strong>",
+      "onlyWaitingOnMe": "Afficher uniquement les commandes de pièces <strong>En Attente De Ma Part</strong>",
       "typePlaceholder": "Type de commande",
       "statusPlaceholder": "Statut",
       "regionPlaceholder": "Région CSR",
@@ -343,6 +346,8 @@
     "attachments": {
       "estimate": "Estimation"
     },
+    "noParts": "Aucun numéro de pièce",
+    "noAttachments": "Aucune pièce jointe",
     "dropzone": {
       "dropPdf": "Déposez vos fichiers PDF ici...",
       "instructionPdf": "Déposez vos fichiers PDF ici ou",

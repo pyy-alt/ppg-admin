@@ -362,17 +362,18 @@ export function Timeline({
                 {/* Order Review Stage */}
                 {item.stage === 'OrderReview' && (
                   <div className="space-y-2 text-sm">
-                    {activityLog.orderReview.submitted && (
+                    {/* 显示初始提交记录 */}
+                    {(activityLog.orderReview.submitted || dateSubmitted) && (
                       <p className="text-muted-foreground">
                         <Trans
                           i18nKey={
-                            formatPersonName(activityLog.orderReview.submitted.person)
+                            formatPersonName(activityLog.orderReview.submitted?.person || submittedByPerson)
                               ? 'timeline.log.submittedWithBy'
                               : 'timeline.log.submitted'
                           }
                           values={{
-                            date: formatDateOnly(activityLog.orderReview.submitted.dateCreated),
-                            by: formatPersonName(activityLog.orderReview.submitted.person),
+                            date: formatDateOnly(activityLog.orderReview.submitted?.dateCreated || dateSubmitted),
+                            by: formatPersonName(activityLog.orderReview.submitted?.person || submittedByPerson),
                           }}
                           components={{ strong: <strong /> }}
                         />

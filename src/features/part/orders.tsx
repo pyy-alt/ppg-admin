@@ -7,7 +7,7 @@ import { Search, Download, AlertCircle, TableIcon, AlertTriangle } from 'lucide-
 import { DateRange } from 'react-day-picker';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/auth-store';
-import { calculateDateRange, exportCurrentPageToCSV, formatDateOnly } from '@/lib/utils';
+import { calculateDateRange, formatDateOnly } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -43,129 +43,77 @@ export function PartOrders() {
   const [sortAscending, setSortAscending] = useState(false); // false 为降序（最新在前）
 
   const navigate = useNavigate();
-
   const partsOrderRef = useRef<HTMLTableElement>(null);
-  const [headers, setHeaders] = useState<string[]>([]);
   const { t } = useTranslation();
-
   const [range, setRange] = useState<DateRange>();
-
-  // 获取所有数据用于导出（不分页）
-  const fetchAllDataForExport = async (): Promise<any[]> => {
-    if (!user) return [];
-
-    try {
-      const api = new OrderApi();
-
-      const dateFrom = dateSubmittedFrom ? formatDateOnly(dateSubmittedFrom) : undefined;
-      const dateTo = dateSubmittedTo ? formatDateOnly(dateSubmittedTo) : undefined;
-
-      // 构建请求参数（与 fetchPartsOrders 相同，但不分页）
-      const requestParams: any = {
-        smartFilter,
-        filterByWaitingOnMe,
-        filterByDealershipId: user?.person?.type === 'Dealership' ? user?.person?.dealership.id : undefined,
-      };
-
-      if (filterByPartsOrderNumber !== 'all') {
-        requestParams.filterByPartsOrderNumber = parseInt(filterByPartsOrderNumber);
-      }
-
-      if (filterByStatus !== 'all') {
-        requestParams.filterByStatus = filterByStatus;
-      }
-      
-      if (filterByRegionId !== 'all') {
-        requestParams.filterByRegionId = parseInt(filterByRegionId);
-      }
-
-      // 不添加分页参数，获取所有数据
-      const resultParameter = ResultParameter.create({
-        resultsLimitOffset: 0,
-        resultsLimitCount: 999999, // 获取所有数据
-        resultsOrderBy: sortBy || 'dateCreated',
-        resultsOrderAscending: sortAscending,
-      });
-      requestParams.resultParameter = resultParameter;
-
-      const request = PartsOrderSearchRequest.create(requestParams);
-      
-      if (dateFrom) {
-        (request as any).dateSubmittedFrom = dateFrom;
-      }
-      if (dateTo) {
-        (request as any).dateSubmittedTo = dateTo;
-      }
-
-      return new Promise((resolve, reject) => {
-        api.partsOrderSearch(request, {
-          status200: (response: any) => {
-            resolve(response.partOrders || []);
-          },
-          error: (error: any) => {
-            reject(error);
-          },
-          else: () => {
-            resolve([]);
-          },
-        });
-      });
-    } catch (error) {
-      console.error('获取导出数据失败:', error);
-      return [];
-    }
-  };
-
-  // 格式化数据用于导出
-  const getFlattenedAllData = (allOrders: any[]) => {
-    return allOrders.map((order: any) => {
-      const ro = order.repairOrder || {};
-      const shop = ro.shop || {};
-      const dealer = ro.dealership || {};
-
-      return {
-        [t('partsOrder.list.columns.ro')]: ro.roNumber || '--',
-        [t('partsOrder.list.columns.sales')]: order.salesOrderNumber || '--',
-        [t('partsOrder.list.columns.type')]: getOrderTypeText(order.partsOrderNumber || 0),
-        [t('partsOrder.list.columns.vin')]: ro.vin || '--',
-        [t('partsOrder.list.columns.ymm')]: [ro.year, ro.make, ro.model].filter(Boolean).join(' ') || '--',
-        [t('partsOrder.list.columns.status')]: order.status || '--',
-        [t('partsOrder.list.columns.shop')]: shop.name ? `${shop.name} (${shop.id})` : '--',
-        [t('partsOrder.list.columns.dealer')]: dealer.name ? `${dealer.name} (${dealer.id})` : '--',
-        [t('partsOrder.list.columns.csrRegion')]: ro.region || '--',
-        [t('partsOrder.list.columns.dateSubmitted')]: formatDate(order.dateSubmitted),
-        [t('partsOrder.list.columns.dateClosed')]: formatDate(ro.dateClosed) || '--',
-      };
-    });
-  };
 
   const exportCSV = async () => {
     try {
-      toast.loading(t('partsOrder.list.exportLoading'));
-      const allOrders = await fetchAllDataForExport(); // 获取所有数据
-      const flattenedData = getFlattenedAllData(allOrders); // 格式化数据
-      const result = await exportCurrentPageToCSV(flattenedData, headers);
-      toast.dismiss();
-      result ? toast.success(t('partsOrder.list.exportSuccess')) : null;
+      // 构建日期范围
+      const dateFrom = dateSubmittedFrom ? formatDateOnly(dateSubmittedFrom) : '1900-01-01';
+      const dateTo = dateSubmittedTo ? formatDateOnly(dateSubmittedTo) : '2099-12-31';
+      
+      // 构建文件名
+      const filename = 'PartsOrderReport.csv';
+      
+      // 构建查询参数
+      const queryParams = new URLSearchParams();
+      
+      // 添加筛选条件到查询参数（不包括分页、排序和 smartFilter）
+      if (filterByPartsOrderNumber !== 'all') {
+        queryParams.append('filterByPartsOrderNumber', filterByPartsOrderNumber);
+      }
+      if (filterByStatus !== 'all') {
+        queryParams.append('filterByStatus', filterByStatus);
+      }
+      if (filterByRegionId !== 'all') {
+        queryParams.append('filterByRegionId', filterByRegionId);
+      }
+      if (filterByWaitingOnMe) {
+        queryParams.append('filterByWaitingOnMe', 'true');
+      }
+      if (user?.person?.type === 'Dealership' && user?.person?.dealership?.id) {
+        queryParams.append('filterByDealershipId', user.person.dealership.id.toString());
+      }
+      
+      // 构建完整的 URL
+      const baseUrl = import.meta.env.VITE_API_URL;
+      const reportUrl = `${baseUrl}/file_asset/report/parts_orders/${dateFrom}/${dateTo}/${filename}`;
+      const finalUrl = queryParams.toString() ? `${reportUrl}?${queryParams.toString()}` : reportUrl;
+      
+      // 使用 fetch 下载文件，自动携带 cookies
+      const response = await fetch(finalUrl, {
+        method: 'GET',
+        credentials: 'include', // 携带 cookies
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      // 获取 blob 数据
+      const blob = await response.blob();
+      
+      // 创建下载链接
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      
+      // 清理
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      // 只在下载成功后才显示成功提示
+      toast.success(t('partsOrder.list.exportSuccess'));
     } catch (error) {
-      toast.dismiss();
       toast.error(t('partsOrder.list.exportFailed'));
+      console.error('Export error:', error);
     }
   };
 
-  useEffect(() => {
-    // Ensure the component is mounted and ref Connected to DOM
-    if (partsOrderRef.current) {
-      // 2. Use native DOM API Find all <th> Element
-      const thElements = partsOrderRef.current.querySelectorAll('thead th');
-
-      // 3. Extract text content.
-      const headerTexts = Array.from(thElements)
-        .map((th) => th?.textContent?.trim() || '')
-        .filter((text) => text !== '');
-      setHeaders(headerTexts);
-    }
-  }, [orders]);
   // const getStatusVariant = (
   //   status: string
   // ): 'default' | 'secondary' | 'destructive' | 'outline' => {
@@ -220,9 +168,18 @@ export function PartOrders() {
       if (filterByStatus !== 'all') {
         requestParams.filterByStatus = filterByStatus;
       }
+      
+      // Handle region filtering
       if (filterByRegionId !== 'all') {
         requestParams.filterByRegionId = parseInt(filterByRegionId);
+      } else if (user?.person?.type === 'FieldStaff' && user?.person?.fieldStaffRegions) {
+        // Field Staff 用户：使用他们的区域进行过滤
+        const regionIds = user.person.fieldStaffRegions.map((r: any) => r.id);
+        if (regionIds.length > 0) {
+          requestParams.filterByRegionId = regionIds[0];
+        }
       }
+      
       // // Add pagination parameters.
       const resultParameter = ResultParameter.create({
         resultsLimitOffset: (currentPage - 1) * itemsPerPage,
@@ -460,7 +417,10 @@ export function PartOrders() {
                 </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t('partsOrder.list.region.all')}</SelectItem>
-                {user?.regions?.map((region) => (
+                {(user?.person?.type === 'FieldStaff' 
+                  ? user?.person?.fieldStaffRegions 
+                  : user?.regions
+                )?.map((region: any) => (
                   <SelectItem key={region.id} value={region.id?.toString() || ''}>
                     {region.name}
                   </SelectItem>

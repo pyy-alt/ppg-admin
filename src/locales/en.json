@@ -59,15 +59,18 @@
       },
       "currentPassword": {
         "label": "Current Password",
-        "placeholder": ""
+        "placeholder": "Enter current password",
+        "required": "Required"
       },
       "newPassword": {
         "label": "New Password",
-        "placeholder": ""
+        "placeholder": "Enter new password",
+        "required": "Required"
       },
       "confirmPassword": {
         "label": "Confirm Password",
-        "placeholder": ""
+        "placeholder": "Confirm new password",
+        "required": "Required"
       },
       "password": {
         "allRequired": "All password fields are required",
@@ -175,7 +178,7 @@
       "title": "Parts Order List",
       "report": "Report",
       "searchPlaceholder": "Filter by RO#, Sales Order #, VIN, Shop, Dealer",
-      "onlyWaitingOnMe": "Only view parts orders that are <strong>Waiting on me</strong>",
+      "onlyWaitingOnMe": "Only view parts orders that are <strong>Waiting On Me</strong>",
       "typePlaceholder": "Type of Order",
       "statusPlaceholder": "Status",
       "regionPlaceholder": "CSR Region",
@@ -343,6 +346,8 @@
     "attachments": {
       "estimate": "Estimate"
     },
+    "noParts": "No part numbers",
+    "noAttachments": "No attachments",
     "dropzone": {
       "dropPdf": "Drop your PDF files here...",
       "instructionPdf": "Drop your PDF files here or",

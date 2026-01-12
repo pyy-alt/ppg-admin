@@ -83,6 +83,7 @@ export function PartsOrderDialog({
   const user = useAuthStore((state) => state.auth.user);
   const userType = user?.person?.type;
   const isCsr = userType === 'Csr';
+  const isReadOnlyUser = userType === 'Csr' || userType === 'FieldStaff'; // CSR 和 Field Staff 只读
   
   const [estimateFiles, setEstimateFiles] = useState<File[]>([]);
   const [attachmentError, setAttachmentError] = useState<string>('');
@@ -189,7 +190,11 @@ export function PartsOrderDialog({
       // }, 0)
       const pdfList = (initialData.estimateFileAssets || []).map((item: any) => {
         item.name = item.filename;
-        item.viewUrl = import.meta.env.VITE_API_URL + item.viewUrl;
+        // 如果 viewUrl 不是完整 URL，添加 API 域名
+        if (item.viewUrl && !item.viewUrl.startsWith('http')) {
+          const apiUrl = import.meta.env.VITE_API_URL || '';
+          item.viewUrl = apiUrl + item.viewUrl;
+        }
         return item;
       });
       setEstimateFiles(pdfList || []);
@@ -304,10 +309,26 @@ export function PartsOrderDialog({
       previewUrl = URL.createObjectURL(file);
       createdUrls.current.add(previewUrl);
     } else {
-      previewUrl = file.viewUrl || file.relativePath;
+      // 已存在的文件
+      if (file.viewUrl) {
+        // 如果 viewUrl 已经是完整 URL，直接使用
+        if (file.viewUrl.startsWith('http')) {
+          previewUrl = file.viewUrl;
+        } else {
+          // 否则添加 API 域名
+          const apiUrl = import.meta.env.VITE_API_URL || '';
+          previewUrl = apiUrl + file.viewUrl;
+        }
+      } else {
+        previewUrl = file.relativePath || '';
+      }
     }
 
-    window.open(previewUrl, '_blank');
+    if (previewUrl) {
+      window.open(previewUrl, '_blank');
+    } else {
+      toast.error(t('common.error'));
+    }
   };
 
   const removeFile = (index: number) => {
@@ -495,16 +516,38 @@ export function PartsOrderDialog({
                 <Separator className="my-8" />
                 {/* 3. Requested Part Numbers + Attachments Side by side */}
                 <div className="grid grid-cols-1 gap-12 md:grid-cols-2">
-                  {/* Left：Parts input */}
+                  {/* Left：Parts input or read-only display */}
                   <section data-parts-section>
                     <div className="flex items-center gap-3 mb-5">
                       <Package className="w-5 h-5 text-foreground" />
                       <h3 className="text-lg font-semibold text-foreground">
                         {t('partsOrder.section.requestedParts')}
-                        <span className="text-destructive ml-1">*</span>
+                        {!isReadOnlyUser && <span className="text-destructive ml-1">*</span>}
                       </h3>
                     </div>
-                    <div className="space-y-4">
+                    {isReadOnlyUser ? (
+                      /* CSR 用户：只读显示 */
+                      <div className="space-y-3 p-4 rounded-lg bg-muted/30">
+                        {initialData?.parts && initialData.parts.length > 0 ? (
+                          initialData.parts.map((partNumber: string, index: number) => (
+                            <div key={index} className="flex items-center gap-3">
+                              <span className="w-12 text-sm text-muted-foreground">
+                                {t('partsOrder.form.partNumber.label', { num: index + 1 })}
+                              </span>
+                              <p className="flex-1 px-3 py-2 text-sm font-medium bg-muted rounded-md">
+                                {partNumber || '--'}
+                              </p>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-sm text-muted-foreground text-center py-4">
+                            {t('partsOrder.noParts')}
+                          </p>
+                        )}
+                      </div>
+                    ) : (
+                      /* 非 CSR 用户：可编辑表单 */
+                      <div className="space-y-4">
                       {fields.map((field, i) => (
                         <div key={field.id} className="flex items-center gap-3">
                           <span className="w-12 text-sm text-muted-foreground">
@@ -567,40 +610,72 @@ export function PartsOrderDialog({
                         </div>
                       )}
                     </div>
+                    )}
                   </section>
-                  {/* Right：Estimate PDF Upload */}
+                  {/* Right：Estimate PDF Upload or read-only display */}
                   <section data-attachments-section>
                     <div className="flex items-center gap-3 mb-5">
                       <Paperclip className="w-5 h-5 text-foreground" />
                       <h3 className="text-lg font-semibold text-foreground">{t('repairOrder.section.attachments')}</h3>
                     </div>
-                    <div className="space-y-3">
-                      <Label className="text-sm font-medium text-foreground">
-                        {t('partsOrder.attachments.estimate')}
-                        {/* Required only when in add mode or edit mode and there are no files yet */}
-                        {(mode === 'create' || !initialData?.estimateFileAssets?.length) && (
-                          <span className="text-destructive">*</span>
+                    {isReadOnlyUser ? (
+                      /* CSR 用户：只读显示附件列表 */
+                      <div className="space-y-3 p-4 rounded-lg bg-muted/30">
+                        <Label className="text-sm font-medium text-foreground">
+                          {t('partsOrder.attachments.estimate')}
+                        </Label>
+                        {estimateFiles && estimateFiles.length > 0 ? (
+                          <div className="space-y-2">
+                            {estimateFiles.map((file: any, index) => {
+                              const key = file.viewUrl ? file.viewUrl : `${file.name}-${index}`;
+                              return (
+                                <div key={key} className="flex items-center gap-2 p-2 rounded-md bg-muted">
+                                  <button
+                                    type="button"
+                                    onClick={() => handlePreview(file)}
+                                    className="text-sm font-medium text-blue-500 hover:underline truncate cursor-pointer"
+                                  >
+                                    {file.name || file.filename}
+                                  </button>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-muted-foreground text-center py-4">
+                            {t('partsOrder.noAttachments')}
+                          </p>
                         )}
-                      </Label>
-                      <div
-                        {...getRootProps()}
-                        className={`flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-10 text-center transition-all ${isDragActive ? 'border-primary bg-muted' : 'border-border hover:border-primary'}`}
-                      >
-                        <input {...getInputProps()} disabled={initialData?.status === 'DealershipProcessing' || isCsr} />
-                        <Upload className="w-12 h-12 mb-3 text-muted-foreground" />
-                        <p className="text-sm text-muted-foreground">
-                          {isDragActive ? (
-                            t('partsOrder.dropzone.dropPdf')
-                          ) : (
-                            <>
-                              {t('partsOrder.dropzone.instructionPdf')}{' '}
-                              <span className="text-primary hover:underline">
-                                {t('partsOrder.dropzone.clickToBrowse')}
-                              </span>
-                            </>
-                          )}
-                        </p>
                       </div>
+                    ) : (
+                      /* 非 CSR 用户：可上传附件 */
+                      <div className="space-y-3">
+                        <Label className="text-sm font-medium text-foreground">
+                          {t('partsOrder.attachments.estimate')}
+                          {/* Required only when in add mode or edit mode and there are no files yet */}
+                          {!isReadOnlyUser && (mode === 'create' || !initialData?.estimateFileAssets?.length) && (
+                            <span className="text-destructive">*</span>
+                          )}
+                        </Label>
+                        <div
+                          {...getRootProps()}
+                          className={`flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-10 text-center transition-all ${isDragActive ? 'border-primary bg-muted' : 'border-border hover:border-primary'}`}
+                        >
+                          <input {...getInputProps()} disabled={initialData?.status === 'DealershipProcessing'} />
+                          <Upload className="w-12 h-12 mb-3 text-muted-foreground" />
+                          <p className="text-sm text-muted-foreground">
+                            {isDragActive ? (
+                              t('partsOrder.dropzone.dropPdf')
+                            ) : (
+                              <>
+                                {t('partsOrder.dropzone.instructionPdf')}{' '}
+                                <span className="text-primary hover:underline">
+                                  {t('partsOrder.dropzone.clickToBrowse')}
+                                </span>
+                              </>
+                            )}
+                          </p>
+                        </div>
                       <div>
                         {estimateFiles && estimateFiles.length > 0 && (
                           <div className="w-full space-y-2">
@@ -656,6 +731,7 @@ export function PartsOrderDialog({
                         <p className="text-sm text-destructive">{form.formState.errors._estimateFile.message}</p>
                       )}
                     </div>
+                    )}
                   </section>
                 </div>
                 <div>

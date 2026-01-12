@@ -7,7 +7,7 @@ import { Search, Download, AlertCircle, TableIcon } from 'lucide-react';
 import { DateRange } from 'react-day-picker';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/auth-store';
-import { calculateDateRange, exportCurrentPageToCSV, formatDateOnly } from '@/lib/utils';
+import { calculateDateRange, formatDateOnly } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -48,125 +48,76 @@ export function PartOrders() {
   const [range, setRange] = useState<DateRange>();
 
   const partsOrderRef = useRef<HTMLTableElement>(null);
-  const [headers, setHeaders] = useState<string[]>([]);
   const { t } = useTranslation();
-
-  // 获取所有数据用于导出（不分页）
-  const fetchAllDataForExport = async (): Promise<any[]> => {
-    if (!user) return [];
-
-    try {
-      const api = new OrderApi();
-
-      const dateFrom = dateSubmittedFrom ? formatDateOnly(dateSubmittedFrom) : undefined;
-      const dateTo = dateSubmittedTo ? formatDateOnly(dateSubmittedTo) : undefined;
-
-      // 构建请求参数（与 fetchPartsOrders 相同，但不分页）
-      const requestParams: any = {
-        smartFilter,
-        filterByWaitingOnMe,
-        filterByDealershipId: dealershipId || (user?.person?.type === 'Dealership' ? user?.person?.dealership.id : undefined),
-      };
-
-      if (filterByPartsOrderNumber !== 'all') {
-        requestParams.filterByPartsOrderNumber = parseInt(filterByPartsOrderNumber);
-      }
-
-      if (filterByStatus !== 'all') {
-        requestParams.filterByStatus = filterByStatus;
-      }
-      
-      if (filterByRegionId !== 'all') {
-        requestParams.filterByRegionId = parseInt(filterByRegionId);
-      }
-
-      // 不分页，获取所有数据
-      const resultParameter = ResultParameter.create({
-        resultsLimitOffset: 0,
-        resultsLimitCount: 999999,
-        resultsOrderBy: sortBy || 'dateCreated',
-        resultsOrderAscending: sortAscending,
-      });
-      requestParams.resultParameter = resultParameter;
-
-      const request = PartsOrderSearchRequest.create(requestParams);
-      
-      if (dateFrom) {
-        (request as any).dateSubmittedFrom = dateFrom;
-      }
-      if (dateTo) {
-        (request as any).dateSubmittedTo = dateTo;
-      }
-
-      return new Promise((resolve, reject) => {
-        api.partsOrderSearch(request, {
-          status200: (response: any) => {
-            resolve(response.partOrders || []);
-          },
-          error: (error: any) => {
-            reject(error);
-          },
-          else: () => {
-            resolve([]);
-          },
-        });
-      });
-    } catch (error) {
-      console.error('获取导出数据失败:', error);
-      return [];
-    }
-  };
-
-  // 格式化数据用于导出
-  const getFlattenedAllData = (allOrders: any[]) => {
-    return allOrders.map((order: any) => {
-      const ro = order.repairOrder || {};
-      const shop = ro.shop || {};
-      const dealer = ro.dealership || {};
-
-      return {
-        'RO#': ro.roNumber || '--',
-        'Sales#': order.salesOrderNumber || '--',
-        Type: getOrderTypeText(order.partsOrderNumber || 0),
-        VIN: ro.vin || '--',
-        'Year/Make/Model': [ro.year, ro.make, ro.model].filter(Boolean).join(' ') || '--',
-        Status: order.status || '--',
-        Shop: shop.name ? `${shop.name} (${shop.id})` : '--',
-        Dealer: dealer.name ? `${dealer.name} (${dealer.id})` : '--',
-        'CSR Region': dealer.region.name || '--',
-        'Date Submitted': formatDate(order.dateSubmitted),
-        'Date Closed': formatDate(ro.dateClosed) || '--',
-      };
-    });
-  };
 
   const exportCSV = async () => {
     try {
-      toast.loading(t('partsOrder.messages.exportLoading'));
-      const allOrders = await fetchAllDataForExport();
-      const flattenedData = getFlattenedAllData(allOrders);
-      const result = await exportCurrentPageToCSV(flattenedData, headers);
-      toast.dismiss();
-      result ? toast.success(t('partsOrder.messages.exportSuccess')) : null;
+      // 构建日期范围
+      const dateFrom = dateSubmittedFrom ? formatDateOnly(dateSubmittedFrom) : '1900-01-01';
+      const dateTo = dateSubmittedTo ? formatDateOnly(dateSubmittedTo) : '2099-12-31';
+      
+      // 构建文件名
+      const filename = 'PartsOrderReport.csv';
+      
+      // 构建查询参数（不包括分页、排序和 smartFilter）
+      const queryParams = new URLSearchParams();
+      
+      if (filterByPartsOrderNumber !== 'all') {
+        queryParams.append('filterByPartsOrderNumber', filterByPartsOrderNumber);
+      }
+      if (filterByStatus !== 'all') {
+        queryParams.append('filterByStatus', filterByStatus);
+      }
+      if (filterByRegionId !== 'all') {
+        queryParams.append('filterByRegionId', filterByRegionId);
+      }
+      if (filterByWaitingOnMe) {
+        queryParams.append('filterByWaitingOnMe', 'true');
+      }
+      if (dealershipId) {
+        queryParams.append('filterByDealershipId', dealershipId.toString());
+      } else if (user?.person?.type === 'Dealership' && user?.person?.dealership?.id) {
+        queryParams.append('filterByDealershipId', user.person.dealership.id.toString());
+      }
+      
+      // 构建完整的 URL
+      const baseUrl = import.meta.env.VITE_API_URL;
+      const reportUrl = `${baseUrl}/file_asset/report/parts_orders/${dateFrom}/${dateTo}/${filename}`;
+      const finalUrl = queryParams.toString() ? `${reportUrl}?${queryParams.toString()}` : reportUrl;
+      
+      // 使用 fetch 下载文件，自动携带 cookies
+      const response = await fetch(finalUrl, {
+        method: 'GET',
+        credentials: 'include', // 携带 cookies
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      // 获取 blob 数据
+      const blob = await response.blob();
+      
+      // 创建下载链接
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      
+      // 清理
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      // 只在下载成功后才显示成功提示
+      toast.success(t('partsOrder.messages.exportSuccess'));
     } catch (error) {
-      toast.dismiss();
       toast.error(t('partsOrder.messages.exportFailed'));
+      console.error('Export error:', error);
     }
   };
 
-  useEffect(() => {
-    // Ensure component is mounted and ref is connected to DOM
-    if (partsOrderRef.current) {
-      // 2. Use native DOM API to find all <th> elements
-      const thElements = partsOrderRef.current.querySelectorAll('thead th');
-
-      // 3. Extract text content
-      const headerTexts = Array.from(thElements)
-        .map((th) => th?.textContent?.trim() || '')
-        .filter((text) => text !== '');
-      setHeaders(headerTexts);
-    }
-  }, [orders]);
   const getStatusTxt = (status: string) => {
     switch (status) {
       case 'CsrReview':
@@ -212,8 +163,18 @@ export function PartOrders() {
       if (filterByStatus !== 'all') {
         requestParams.filterByStatus = filterByStatus;
       }
+      
+      // Handle region filtering
       if (filterByRegionId !== 'all') {
         requestParams.filterByRegionId = parseInt(filterByRegionId);
+      } else if (user?.person?.type === 'FieldStaff' && user?.person?.fieldStaffRegions) {
+        // Field Staff 用户：如果没有选择特定区域，使用他们的所有区域进行过滤
+        const regionIds = user.person.fieldStaffRegions.map((r: any) => r.id);
+        if (regionIds.length > 0) {
+          // 注意：这里假设 API 支持 filterByRegionIds 数组，如果不支持，需要后端修改
+          // 临时解决方案：只使用第一个区域
+          requestParams.filterByRegionId = regionIds[0];
+        }
       }
       // // Add pagination parameters
       const resultParameter = ResultParameter.create({
@@ -415,7 +376,10 @@ export function PartOrders() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t('partsOrder.list.region.all')}</SelectItem>
-                {user?.regions?.map((region) => (
+                {(user?.person?.type === 'FieldStaff' 
+                  ? user?.person?.fieldStaffRegions 
+                  : user?.regions
+                )?.map((region: any) => (
                   <SelectItem key={region.id} value={region.id?.toString() || ''}>
                     {region.name}
                   </SelectItem>

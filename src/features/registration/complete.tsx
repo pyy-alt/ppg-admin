@@ -3,7 +3,7 @@ import { useNavigate, useParams } from '@tanstack/react-router'
 import AuthenticationApi from '@/js/clients/base/AuthenticationApi'
 import CompleteRegistrationRequest from '@/js/models/CompleteRegistrationRequest'
 import type Session from '@/js/models/Session'
-import { User, Store, Lock, MapPin, EyeOff, Eye } from 'lucide-react'
+import { User, Store, Lock, MapPin, EyeOff, Eye, IdCard, Warehouse } from 'lucide-react'
 import { toast } from 'sonner'
 import bannerImg from '@/assets/img/registration/banner2.png'
 import { useAuthStore } from '@/stores/auth-store'
@@ -73,6 +73,22 @@ export function RegistrationComplete() {
         return t('registration.complete.sections.roleInfo')
       default:
         return t('registration.complete.sections.organizationInfo')
+    }
+  }
+
+  // 根据用户类型获取图标
+  const getOrganizationIcon = () => {
+    switch (userType) {
+      case 'Shop':
+        return <Store className='text-foreground h-6 w-6' />
+      case 'Dealership':
+        return <Warehouse className='text-foreground h-6 w-6' />
+      case 'Csr':
+      case 'ProgramAdministrator':
+      case 'FieldStaff':
+        return <IdCard className='text-foreground h-6 w-6' />
+      default:
+        return <Store className='text-foreground h-6 w-6' />
     }
   }
 
@@ -318,7 +334,7 @@ export function RegistrationComplete() {
           {/* Shop/Organization/Role Information */}
           <section className='space-y-6'>
             <div className='flex items-center gap-3'>
-              <Store className='text-foreground h-6 w-6' />
+              {getOrganizationIcon()}
               <h2 className='text-foreground text-xl font-semibold'>
                 {getOrganizationSectionTitle()}
               </h2>

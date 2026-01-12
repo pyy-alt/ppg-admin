@@ -9,35 +9,73 @@ import UpdatePasswordRequest from '@/js/models/UpdatePasswordRequest';
 import { X, User, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, useFormField } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { refreshUserData } from '@/lib/auth';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
+// 翻译错误消息的组件
+function TranslatedFormMessage() {
+  const { error } = useFormField();
+  const { t } = useTranslation();
+  
+  if (!error?.message) return null;
+  
+  return (
+    <p className="text-sm font-medium text-destructive">
+      {t(error.message)}
+    </p>
+  );
+}
+
 const formSchema = z
   .object({
     firstName: z.string().min(1, 'profile.form.firstName.required'),
     lastName: z.string().min(1, 'profile.form.lastName.required'),
     email: z.string().email('profile.form.email.invalid'),
-    currentPassword: z.string().optional(),
-    newPassword: z.string().optional(),
-    confirmPassword: z.string().optional(),
+    currentPassword: z.string(),
+    newPassword: z.string(),
+    confirmPassword: z.string(),
   })
   .refine(
     (data) => {
-      // Validation only occurs when the user fills in the password-related fields
-      if (data.currentPassword || data.newPassword || data.confirmPassword) {
-        return data.currentPassword && data.newPassword && data.confirmPassword;
-      }
-      return true;
+      // 如果任何密码字段被填写，则所有密码字段都必需
+      const hasAnyPassword = data.currentPassword || data.newPassword || data.confirmPassword;
+      if (!hasAnyPassword) return true; // 不修改密码时跳过验证
+      return !!data.currentPassword;
     },
-    { message: 'profile.form.password.allRequired', path: ['currentPassword'] }
+    {
+      message: 'profile.form.currentPassword.required',
+      path: ['currentPassword']
+    }
   )
   .refine(
     (data) => {
-      if (data.newPassword) {
+      const hasAnyPassword = data.currentPassword || data.newPassword || data.confirmPassword;
+      if (!hasAnyPassword) return true;
+      return !!data.newPassword;
+    },
+    {
+      message: 'profile.form.newPassword.required',
+      path: ['newPassword']
+    }
+  )
+  .refine(
+    (data) => {
+      const hasAnyPassword = data.currentPassword || data.newPassword || data.confirmPassword;
+      if (!hasAnyPassword) return true;
+      return !!data.confirmPassword;
+    },
+    {
+      message: 'profile.form.confirmPassword.required',
+      path: ['confirmPassword']
+    }
+  )
+  .refine(
+    (data) => {
+      if (data.newPassword && data.newPassword.length > 0) {
         return data.newPassword.length >= 8;
       }
       return true;
@@ -217,7 +255,7 @@ export default function EditProfileDialog({ open, onOpenChange, initialData }: E
                       <FormControl>
                         <Input placeholder={t('profile.form.firstName.placeholder')} {...field} />
                       </FormControl>
-                      <FormMessage />
+                      <TranslatedFormMessage />
                     </FormItem>
                   )}
                 />
@@ -230,7 +268,7 @@ export default function EditProfileDialog({ open, onOpenChange, initialData }: E
                       <FormControl>
                         <Input placeholder={t('profile.form.lastName.placeholder')} {...field} />
                       </FormControl>
-                      <FormMessage />
+                      <TranslatedFormMessage />
                     </FormItem>
                   )}
                 />
@@ -284,7 +322,7 @@ export default function EditProfileDialog({ open, onOpenChange, initialData }: E
                             {...field}
                           />
                         </FormControl>
-                        <FormMessage />
+                        <TranslatedFormMessage />
                       </FormItem>
                     )}
                   />
@@ -297,7 +335,7 @@ export default function EditProfileDialog({ open, onOpenChange, initialData }: E
                         <FormControl>
                           <Input type="password" placeholder={t('profile.form.newPassword.placeholder')} {...field} />
                         </FormControl>
-                        <FormMessage />
+                        <TranslatedFormMessage />
                       </FormItem>
                     )}
                   />
@@ -314,7 +352,7 @@ export default function EditProfileDialog({ open, onOpenChange, initialData }: E
                             {...field}
                           />
                         </FormControl>
-                        <FormMessage />
+                        <TranslatedFormMessage />
                       </FormItem>
                     )}
                   />
