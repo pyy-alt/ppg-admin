@@ -50,11 +50,21 @@ export function PartOrders() {
   const partsOrderRef = useRef<HTMLTableElement>(null);
   const { t } = useTranslation();
 
+  // 专门用于导出 API 的日期格式化函数 (YYYY-MM-DD)
+  const formatDateForAPI = (date: Date | undefined): string => {
+    if (!date) return '';
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const exportCSV = async () => {
     try {
-      // 构建日期范围
-      const dateFrom = dateSubmittedFrom ? formatDateOnly(dateSubmittedFrom) : '1900-01-01';
-      const dateTo = dateSubmittedTo ? formatDateOnly(dateSubmittedTo) : '2099-12-31';
+      // 构建日期范围 (YYYY-MM-DD 格式)
+      const dateFrom = formatDateForAPI(dateSubmittedFrom) || '1900-01-01';
+      const dateTo = formatDateForAPI(dateSubmittedTo) || '2099-12-31';
       
       // 构建文件名
       const filename = 'PartsOrderReport.csv';
