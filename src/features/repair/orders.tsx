@@ -137,7 +137,7 @@ export function RepairOrderList() {
       personApi.search(request, {
         status200: (response) => {
           const users = response.persons.filter(
-            (val: any) => val.status === 'Active'
+            (val: any) => val.status === 'Active' && val.type !== 'ProgramAdministrator'
           );
           const userNames = users
             .map((val: any) => `${val.firstName} ${val.lastName}`)

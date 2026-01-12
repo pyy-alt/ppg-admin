@@ -73,7 +73,7 @@ export function RepairOrderDetail() {
         api.repairOrderGet(repairId, {
           status200: (response) => {
             setInitRepaitOrderData(response);
-            getOrderDetailTopInfo();
+            getOrderDetailTopInfo(response.shop?.region?.id);
             resolve(response);
           },
           error: (error) => {
@@ -87,8 +87,10 @@ export function RepairOrderDetail() {
     }
   };
 
-  const getOrderDetailTopInfo = async () => {
-    const filterByRegionId = initRepaitOrderData?.shop?.region.id;
+  const getOrderDetailTopInfo = async (regionId?: number) => {
+    const filterByRegionId = regionId || initRepaitOrderData?.shop?.region?.id;
+    if (!filterByRegionId) return;
+    
     try {
       const request = PersonSearchRequest.create({
         type: 'Network',
@@ -99,11 +101,11 @@ export function RepairOrderDetail() {
       personApi.search(request, {
         status200: (response) => {
           const users = response.persons.filter(
-            (val: any) => val.status === 'Active'
+            (val: any) => val.status === 'Active' && val.type !== 'ProgramAdministrator'
           );
           const userNames = users
             .map((val: any) => `${val.firstName} ${val.lastName}`)
-            .join(',');
+            .join(', ');
           setUserName(userNames);
         },
         error: (error) => {
