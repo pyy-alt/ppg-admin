@@ -2,7 +2,7 @@ import { useEffect,  useState } from 'react';
 import PersonApi from '@/js/clients/base/PersonApi';
 import PersonEditStatusRequest from '@/js/models/PersonEditStatusRequest';
 import type { PersonStatus } from '@/js/models/enum/PersonStatusEnum';
-import { Users, Check, XCircle, Pause, Play, ChevronUp, ChevronDown } from 'lucide-react';
+import { Users, Check, XCircle, ChevronUp, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -229,28 +229,7 @@ export default function AdminViewTeamDialog({
     }
   };
 
-  const renderActionButtons = (member: TeamMember) => {
-    switch (member.status) {
-      case 'Active':
-        return (
-          <Button size="sm" variant="outline" onClick={() => handleDeactivate(member.id)}>
-            <Pause className="mr-1 h-3.5 w-3.5" /> {t('team.button.deactivate')}
-          </Button>
-        );
-      case 'Inactive':
-        return (
-          <Button size="sm" variant="outline" onClick={() => handleReactivate(member.id)}>
-            <Play className="mr-1 h-3.5 w-3.5" /> {t('team.button.reactivate')}
-          </Button>
-        );
-      default:
-        return null;
-    }
-  };
-
   const renderDateLastAccessedContent = (member: TeamMember) => {
-    // 调试：打印状态值
-    
     switch (member.status) {
       case 'Pending':
         return <span className="text-sm text-muted-foreground">{t('team.view.status.pendingCompletion')}</span>;
@@ -336,7 +315,6 @@ export default function AdminViewTeamDialog({
                     {t('team.table.dateLastAccessed')}
                     {renderSortIcon('dateLastAccessed')}
                   </th>
-                  <th className="px-6 py-4 text-sm font-medium text-left"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -361,15 +339,12 @@ export default function AdminViewTeamDialog({
                       <td className={`px-6 py-4 text-sm ${textColorClass}`}>
                         {renderDateLastAccessedContent(member)}
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">{renderActionButtons(member)}</div>
-                      </td>
                     </tr>
                   );
                 })}
                 {sortedMembers.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="px-6 py-6 text-sm text-center text-muted-foreground">
+                    <td colSpan={5} className="px-6 py-6 text-sm text-center text-muted-foreground">
                       {t('team.table.noMembers')}
                     </td>
                   </tr>

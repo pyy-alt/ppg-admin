@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import PersonStatusEnum from '@/js/models/enum/PersonStatusEnum';
 import PersonTypeEnum, { type PersonType } from '@/js/models/enum/PersonTypeEnum';
-import { X, Store, Users, Pause, Play, ChevronUp, ChevronDown } from 'lucide-react';
+import { X, Store, Users, ChevronUp, ChevronDown, Check, XCircle } from 'lucide-react';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { Button } from './ui/button';
@@ -8,6 +9,8 @@ import PersonEditStatusRequest from '@/js/models/PersonEditStatusRequest';
 import PersonApi from '@/js/clients/base/PersonApi';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { useAuthStore } from '@/stores/auth-store';
+import ConfirmDialog from '@/components/ConfirmDialog';
 
 type PersonStatus = (typeof PersonStatusEnum)[keyof typeof PersonStatusEnum];
 
@@ -59,6 +62,12 @@ export default function ViewTeamDialog({
   currentSortAscending = true
 }: ViewDealerTeamDialogProps) {
   const { t } = useTranslation();
+  const { auth } = useAuthStore();
+  const userType = auth.user?.person?.type as PersonType | undefined;
+  const isAdmin = userType === 'ProgramAdministrator';
+  
+  const [isConfirmRejectOpen, setIsConfirmRejectOpen] = useState(false);
+  const [selectedMemberId, setSelectedMemberId] = useState<number | null>(null);
   
   // 使用父组件传递的排序状态，如果没有则使用本地状态
   const sortBy = currentSortBy;
@@ -159,22 +168,78 @@ export default function ViewTeamDialog({
     }
   };
 
-  const renderActionButtons = (member: TeamMember) => {
-    switch (member.status) {
-      case 'Active':
-        return (
-          <Button size="sm" variant="outline" onClick={() => handleDeactivate(member)}>
-            <Pause className="mr-1 h-3.5 w-3.5" /> {t('team.view.deactivate')}
-          </Button>
-        );
-      case 'Inactive':
-        return (
-          <Button size="sm" variant="outline" onClick={() => handleReactivate(member)}>
-            <Play className="mr-1 h-3.5 w-3.5" /> {t('team.view.reactivate')}
-          </Button>
-        );
-      default:
-        return null;
+  const handleApprove = async (member: TeamMember) => {
+    try {
+      await new Promise((resolve, reject) => {
+        const request = PersonEditStatusRequest.create({
+          personId: member.id,
+          action: 'ApproveRegistrationRequest',
+        });
+        const personApi = new PersonApi();
+        personApi.editStatus(request, {
+          status200: () => {
+            const userType = member.type === PersonTypeEnum.DEALERSHIP ? 'Dealership' : 'Shop';
+            const organizationId = member.type === PersonTypeEnum.DEALERSHIP ? member.dealership?.id : member.shop?.id;
+            toast.success(t('team.dialog.approveSuccess'));
+            onSuccess?.(userType, organizationId);
+            resolve(true);
+          },
+          error: (error) => {
+            reject(error);
+          },
+          else: (_statusCode, message) => {
+            reject(new Error(message));
+          },
+        });
+      });
+    } catch (error) {
+      toast.error(t('team.dialog.approveFailed'));
+      console.error(error);
+    }
+  };
+
+  const handleReject = async (member: TeamMember) => {
+    try {
+      await new Promise((resolve, reject) => {
+        const request = PersonEditStatusRequest.create({
+          personId: member.id,
+          action: 'DeclineRegistrationRequest',
+        });
+        const personApi = new PersonApi();
+        personApi.editStatus(request, {
+          status200: () => {
+            const userType = member.type === PersonTypeEnum.DEALERSHIP ? 'Dealership' : 'Shop';
+            const organizationId = member.type === PersonTypeEnum.DEALERSHIP ? member.dealership?.id : member.shop?.id;
+            toast.success(t('team.dialog.rejectSuccess'));
+            onSuccess?.(userType, organizationId);
+            resolve(true);
+          },
+          error: (error) => {
+            reject(error);
+          },
+          else: (_statusCode, message) => {
+            reject(new Error(message));
+          },
+        });
+      });
+    } catch (error) {
+      toast.error(t('team.dialog.rejectFailed'));
+      console.error(error);
+    }
+  };
+
+  const handleRejectClick = (member: TeamMember) => {
+    setSelectedMemberId(member.id);
+    setIsConfirmRejectOpen(true);
+  };
+
+  const handleConfirmReject = async () => {
+    if (selectedMemberId !== null) {
+      const member = teamMembers?.find(m => m.id === selectedMemberId);
+      if (member) {
+        await handleReject(member);
+        setSelectedMemberId(null);
+      }
     }
   };
 
@@ -295,7 +360,6 @@ export default function ViewTeamDialog({
                       {t('team.view.table.dateLastAccessed')}
                       {renderSortIcon('dateLastAccess')}
                     </th>
-                    <th className="px-4 py-3 text-sm font-medium text-left">{/* Actions */}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -315,13 +379,21 @@ export default function ViewTeamDialog({
                         <td className="px-4 py-4 text-sm">
                           {member.status === 'Pending' ? (
                             <span className="text-muted-foreground">{t('team.view.status.pendingCompletion')}</span>
+                          ) : member.status === 'RegistrationRequested' && isAdmin ? (
+                            <div className="flex gap-2">
+                              <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => handleApprove(member)}>
+                                <Check className="mr-1 h-3.5 w-3.5" /> {t('team.button.approve')}
+                              </Button>
+                              <Button size="sm" variant="destructive" onClick={() => handleRejectClick(member)}>
+                                <XCircle className="mr-1 h-3.5 w-3.5" /> {t('team.button.reject')}
+                              </Button>
+                            </div>
                           ) : member.status === 'RegistrationRequested' ? (
                             <span className="text-muted-foreground">{t('team.view.status.pendingApproval')}</span>
                           ) : (
                             (member.dateLastAccess && new Date(member.dateLastAccess).toLocaleDateString()) || '--'
                           )}
                         </td>
-                        <td className="px-4 py-4 text-sm">{renderActionButtons(member)}</td>
                       </tr>
                     ))}
                 </tbody>
@@ -333,6 +405,18 @@ export default function ViewTeamDialog({
           <Button onClick={handleClose}>{t('common.close')}</Button>
         </DialogFooter>
       </DialogContent>
+
+      {/* Confirm Reject Dialog */}
+      <ConfirmDialog
+        open={isConfirmRejectOpen}
+        onOpenChange={setIsConfirmRejectOpen}
+        onConfirm={handleConfirmReject}
+        title={t('common.confirmAction')}
+        description={t('common.confirmDescription')}
+        confirmText={t('common.confirm')}
+        cancelText={t('common.cancel')}
+        variant="danger"
+      />
     </Dialog>
   );
 }
