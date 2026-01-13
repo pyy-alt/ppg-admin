@@ -640,7 +640,7 @@ export function RepairOrderDetail() {
                     ? initRepaitOrderData.preRepairPhotoFileAssets.map((f) => (
                         <a
                           key={f.id}
-                          href={`${import.meta.env.VITE_API_URL}${f.viewUrl}`}
+                          href={`${import.meta.env.VITE_API_URL}${f.downloadUrl}`}
                           className="text-blue-700 underline hover:underline"
                           target="_blank"
                           rel="noreferrer"
@@ -664,7 +664,7 @@ export function RepairOrderDetail() {
                         (f) => (
                           <a
                             key={f.id}
-                            href={`${import.meta.env.VITE_API_URL}${f.viewUrl}`}
+                            href={`${import.meta.env.VITE_API_URL}${f.downloadUrl}`}
                             className="text-blue-700 underline hover:underline"
                             target="_blank"
                             rel="noreferrer"
@@ -686,7 +686,7 @@ export function RepairOrderDetail() {
                     ? initRepaitOrderData.postRepairPhotoFileAssets.map((f) => (
                         <a
                           key={f.id}
-                          href={`${import.meta.env.VITE_API_URL}${f.viewUrl}`}
+                          href={`${import.meta.env.VITE_API_URL}${f.downloadUrl}`}
                           className="text-blue-700 underline hover:underline"
                           target="_blank"
                           rel="noreferrer"

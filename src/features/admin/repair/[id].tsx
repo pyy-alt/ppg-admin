@@ -493,7 +493,12 @@ export function RepairOrderDetail() {
                   {initRepaitOrderData?.postRepairPhotoFileAssets &&
                   initRepaitOrderData?.postRepairPhotoFileAssets.length > 0
                     ? initRepaitOrderData?.postRepairPhotoFileAssets?.map((f) => (
-                        <a key={f.id} href={f.downloadUrl} className="text-blue-700 underline hover:underline">
+                        <a
+                          key={f.id}
+                          href={`${import.meta.env.VITE_API_URL}${f.downloadUrl}`}
+                          className="text-blue-700 underline hover:underline"
+                          target="_blank"
+                        >
                           {f.filename}
                         </a>
                       ))
