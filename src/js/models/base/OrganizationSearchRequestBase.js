@@ -12,7 +12,7 @@ import ResultParameter from "../ResultParameter";
  * @property {string} filterByShopCertification should only be for Shop
  * @property {number} filterByRegionId (int64) should only be for Shop
  * @property {string} smartFilter
- * @property {ResultParameter} resultParameter [Name,Number,CountPendingOrders,Status,Certification,DealershipName]
+ * @property {ResultParameter} resultParameter [Name,Number,CountPendingOrders,CountPendingUsers,CountActiveUsers,Status,Certification,DealershipName,RegionName]
  */
 class OrganizationSearchRequestBase extends ModelBaseClass {
 	/**
@@ -40,7 +40,7 @@ class OrganizationSearchRequestBase extends ModelBaseClass {
 	 */
 	'smartFilter';
 	/**
-	 * [Name,Number,CountPendingOrders,Status,Certification,DealershipName]
+	 * [Name,Number,CountPendingOrders,CountPendingUsers,CountActiveUsers,Status,Certification,DealershipName,RegionName]
 	 * @type {ResultParameter} resultParameter
 	 */
 	'resultParameter';
@@ -90,6 +90,16 @@ OrganizationSearchRequestBase.OrderByNumber = 'number';
 OrganizationSearchRequestBase.OrderByCountPendingOrders = 'countpendingorders';
 
 /**
+ * @type {string} OrderByCountPendingUsers
+ */
+OrganizationSearchRequestBase.OrderByCountPendingUsers = 'countpendingusers';
+
+/**
+ * @type {string} OrderByCountActiveUsers
+ */
+OrganizationSearchRequestBase.OrderByCountActiveUsers = 'countactiveusers';
+
+/**
  * @type {string} OrderByStatus
  */
 OrganizationSearchRequestBase.OrderByStatus = 'status';
@@ -103,6 +113,11 @@ OrganizationSearchRequestBase.OrderByCertification = 'certification';
  * @type {string} OrderByDealershipName
  */
 OrganizationSearchRequestBase.OrderByDealershipName = 'dealershipname';
+
+/**
+ * @type {string} OrderByRegionName
+ */
+OrganizationSearchRequestBase.OrderByRegionName = 'regionname';
 
 const _modelDefinition = [
 	ModelBaseClass.createModelProperty('type', 'string'),

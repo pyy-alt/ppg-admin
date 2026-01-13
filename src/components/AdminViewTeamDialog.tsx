@@ -2,7 +2,7 @@ import { useEffect,  useState } from 'react';
 import PersonApi from '@/js/clients/base/PersonApi';
 import PersonEditStatusRequest from '@/js/models/PersonEditStatusRequest';
 import type { PersonStatus } from '@/js/models/enum/PersonStatusEnum';
-import { Users, Check, XCircle, ChevronUp, ChevronDown } from 'lucide-react';
+import { Users, Check, XCircle, Pause, Play, ChevronUp, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -243,6 +243,18 @@ export default function AdminViewTeamDialog({
               <XCircle className="mr-1 h-3.5 w-3.5" /> {t('team.button.reject')}
             </Button>
           </div>
+        );
+      case 'Active':
+        return (
+          <Button size="sm" variant="outline" onClick={() => handleDeactivate(member.id)}>
+            <Pause className="mr-1 h-3.5 w-3.5" /> {t('team.button.deactivate')}
+          </Button>
+        );
+      case 'Inactive':
+        return (
+          <Button size="sm" variant="outline" onClick={() => handleReactivate(member.id)}>
+            <Play className="mr-1 h-3.5 w-3.5" /> {t('team.button.reactivate')}
+          </Button>
         );
       default:
         return (member.dateLastAccess && new Date(member.dateLastAccess).toLocaleDateString()) || '--';

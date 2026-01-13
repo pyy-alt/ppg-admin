@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import PersonStatusEnum from '@/js/models/enum/PersonStatusEnum';
 import PersonTypeEnum, { type PersonType } from '@/js/models/enum/PersonTypeEnum';
-import { X, Store, Users, ChevronUp, ChevronDown, Check, XCircle } from 'lucide-react';
+import { X, Store, Users, Pause, Play, ChevronUp, ChevronDown, Check, XCircle } from 'lucide-react';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { Button } from './ui/button';
@@ -65,7 +65,7 @@ export default function ViewTeamDialog({
   const { auth } = useAuthStore();
   const userType = auth.user?.person?.type as PersonType | undefined;
   const isAdmin = userType === 'ProgramAdministrator';
-  
+
   const [isConfirmRejectOpen, setIsConfirmRejectOpen] = useState(false);
   const [selectedMemberId, setSelectedMemberId] = useState<number | null>(null);
   
@@ -390,6 +390,14 @@ export default function ViewTeamDialog({
                             </div>
                           ) : member.status === 'RegistrationRequested' ? (
                             <span className="text-muted-foreground">{t('team.view.status.pendingApproval')}</span>
+                          ) : member.status === 'Active' ? (
+                            <Button size="sm" variant="outline" onClick={() => handleDeactivate(member)}>
+                              <Pause className="mr-1 h-3.5 w-3.5" /> {t('team.view.deactivate')}
+                            </Button>
+                          ) : member.status === 'Inactive' ? (
+                            <Button size="sm" variant="outline" onClick={() => handleReactivate(member)}>
+                              <Play className="mr-1 h-3.5 w-3.5" /> {t('team.view.reactivate')}
+                            </Button>
                           ) : (
                             (member.dateLastAccess && new Date(member.dateLastAccess).toLocaleDateString()) || '--'
                           )}

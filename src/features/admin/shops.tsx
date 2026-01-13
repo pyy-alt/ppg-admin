@@ -519,7 +519,7 @@ export function Shops() {
                       Dealer #
                     </TableHead>
                     <SortableTableHead
-                      field="Region"
+                      field="RegionName"
                       currentSortBy={sortBy}
                       currentAscending={sortAscending}
                       onSort={handleSort}

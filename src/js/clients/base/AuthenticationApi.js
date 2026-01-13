@@ -474,4 +474,45 @@ export default class AuthenticationApi extends ClientBaseClass {
 			});
 	}
 
+	/**
+	 * Gets general info about the app installation
+	 * @param {{status200: function(string), error: function(error), else: function(integer, string)}} responseHandler
+	 * @param {ClientOptions|null} options optional overrides on the DefaultClientOptions
+	 */
+	getInfo(responseHandler, options) {
+		responseHandler = this.generateResponseHandler(responseHandler, options);
+
+		const url = '/authentication/get_info';
+
+		// noinspection Duplicates
+		this.executeApiCall(url, 'get', null, null, options)
+			.then(response => {
+				if (options) {
+					if (options.onApiProcessResponse) options.onApiProcessResponse(url, 'get', response);
+				} else if (DefaultClientOptions.onApiProcessResponse) {
+					DefaultClientOptions.onApiProcessResponse(url, 'get', response);
+				}
+
+				switch (response.status) {
+				case 200:
+					if (responseHandler.status200) {
+						response.text()
+							.then(responseText => {
+								responseHandler.status200(responseText);
+							})
+							.catch(responseHandler.error);
+						return;
+					}
+					break;
+				}
+
+				// If we are here, we basically have a response statusCode that we were npt expecting or are not set to handle
+				// Go ahead and fall back to the catch-all
+				this.handleUnhandledResponse(response, responseHandler);
+			})
+			.catch(error => {
+				responseHandler.error(error);
+			});
+	}
+
 }

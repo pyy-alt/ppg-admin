@@ -338,7 +338,7 @@ export default class OrderApi extends ClientBaseClass {
 	}
 
 	/**
-	 * Searches for parts orders.  For Shop users, only returns parts orders for their shop.  For Dealership users, only returns parts orders for their dealership.  For CSR/Field Staff/Program Administrator, can search across all.
+	 * Searches for parts orders.  For Shop users, only returns parts orders for their shop.  For Dealership users, only returns parts orders for their dealership.  For Program Administrator, can search across all.  For CSR/Field Staff, it will be filtered to just region(s) they have access to.
 	 * @param {PartsOrderSearchRequest} request
 	 * @param {{status200: function(PartsOrderSearchResponse), status403: function(string), error: function(error), else: function(integer, string)}} responseHandler
 	 * @param {ClientOptions|null} options optional overrides on the DefaultClientOptions
