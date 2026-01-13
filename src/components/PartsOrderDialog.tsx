@@ -7,7 +7,7 @@ import RequestApi from '@/js/clients/base/OrderApi';
 import PartsOrder from '@/js/models/PartsOrder';
 import type RepairOrder from '@/js/models/RepairOrder';
 import FileAssetFileAssetTypeEnum from '@/js/models/enum/FileAssetFileAssetTypeEnum';
-import { X, Trash2, Loader2, NotebookPen, Package, Paperclip, Upload, Plus } from 'lucide-react';
+import { X, Trash2, Loader2, NotebookPen, Package, Paperclip, Upload, Plus, AlertCircle } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 import { toast } from 'sonner';
 import { convertFilesToFileAssets, formatDateOnly } from '@/lib/utils';
@@ -19,6 +19,7 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from '@/component
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useTranslation } from 'react-i18next'; // 新增导入
 import { useLocation } from '@tanstack/react-router';
 
@@ -143,15 +144,24 @@ export function PartsOrderDialog({
   });
 
   // Determine if it is a supplemental order
+  // If isSupplementMode is explicitly set, use it; otherwise check partsOrderNumber
   const isSupplement =
-    isSupplementMode ?? (initialData?.partsOrderNumber !== undefined && initialData.partsOrderNumber > 0);
-  const supplementNum = supplementNumber ?? (initialData?.partsOrderNumber ?? 0) + 1;
+    isSupplementMode !== undefined 
+      ? isSupplementMode 
+      : (initialData?.partsOrderNumber !== undefined && initialData.partsOrderNumber > 0);
+  // For resubmit or edit mode, use the actual partsOrderNumber
+  // For new supplement mode, use supplementNumber
+  const supplementNum = isSupplementMode ? supplementNumber : initialData?.partsOrderNumber;
+  
   const getDialogTitle = () => {
     if (isReject) {
+      if (isSupplement && supplementNum !== undefined && supplementNum > 0) {
+        return t('partsOrder.dialog.resubmitSupplement', { num: supplementNum });
+      }
       return t('partsOrder.dialog.resubmitTitle');
     }
 
-    if (isSupplement) {
+    if (isSupplement && supplementNum !== undefined && supplementNum > 0) {
       const isEditMode = !!initialData?.id;
       return isEditMode
         ? t('partsOrder.dialog.editSupplement', { num: supplementNum })
@@ -162,7 +172,7 @@ export function PartsOrderDialog({
   };
 
   const getPartsOrderSectionTitle = () => {
-    if (isSupplement) {
+    if (isSupplement && supplementNum !== undefined && supplementNum > 0) {
       return t('partsOrder.section.supplementInfo', { num: supplementNum });
     }
     return t('partsOrder.section.info');
@@ -360,7 +370,9 @@ export function PartsOrderDialog({
       <Dialog open={open} onOpenChange={(newOpen) => handleDialogOpenChange(newOpen)}>
         <DialogContent className="flex max-h-[90vh] flex-col p-0 sm:max-w-4xl">
           <DialogHeader className="flex justify-center shrink-0">
-            <DialogTitle className="px-6 py-3 text-2xl font-semibold">{getDialogTitle()}</DialogTitle>
+            <DialogTitle className="px-6 py-3 text-2xl font-semibold">
+              {getDialogTitle()}
+            </DialogTitle>
             <button
               onClick={handleClose}
               className="absolute transition-opacity rounded-sm ring-offset-background focus:ring-ring top-4 right-4 opacity-70 hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-none"
@@ -413,7 +425,22 @@ export function PartsOrderDialog({
                     </div>
                     <div>
                       <Label className="text-xs text-muted-foreground">{t('repairOrder.form.dealership.label')}</Label>
-                      <p className="font-medium">{initRepaitOrderData?.dealership.name || '---'}</p>
+                      <p className="font-medium flex items-center gap-2">
+                        {initRepaitOrderData?.dealership?.id !== 
+                          initRepaitOrderData?.shop?.sponsorDealership?.id && (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <AlertCircle className="w-4 h-4 text-yellow-500" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>{t('partsOrder.dialog.orderedFromAlternateDealer')}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        )}
+                        <span>{initRepaitOrderData?.dealership.name || '---'}</span>
+                      </p>
                     </div>
                     <div>
                       <Label className="text-xs text-muted-foreground">{t('repairOrder.form.customer.label')}</Label>
@@ -460,7 +487,7 @@ export function PartsOrderDialog({
                     </div>
                     <div>
                       <Label className="text-muted-foreground">{t('partsOrder.section.approved')}</Label>
-                      {!isNewOrder && initialData?.dateReviewed ? (
+                      {!isNewOrder && initialData?.dateReviewed && initialData?.approvalFlag === true ? (
                         <p className="mt-1 font-medium">
                           {formatDateOnly(initialData.dateReviewed)}
                           {initialData.reviewedByPerson && (

@@ -257,6 +257,8 @@ export function RepairOrderDetail() {
   };
 
   const onResubmit = () => {
+    // Reset isSupplementMode to undefined so the dialog can determine it from initialData
+    setIsSupplementMode(undefined as any);
     setOpenPartsOrderDialog(true);
     setIsReject(true);
   };
@@ -516,8 +518,7 @@ export function RepairOrderDetail() {
         <div className="flex flex-col w-full border rounded-sm">
           <div className="flex items-center justify-between w-full p-5 bg-muted text-foreground">
             <h1 className="text-2xl font-bold tracking-tight">
-              {t('repairOrder.detail.title')}: &nbsp;
-              {initRepaitOrderData?.roNumber || '--'}
+              {t('repairOrder.detail.title')} {initRepaitOrderData?.roNumber || '--'}
             </h1>
             <div className="flex gap-3">
               {initPartsOrderData?.every(
@@ -527,7 +528,7 @@ export function RepairOrderDetail() {
               ) && userType === 'Shop' ? (
                 <Button
                   onClick={() => setIsMarkRepairAsCompleteDialogOpen(true)}
-                  className="font-medium bg-green-600 h-9 rounded-lg w-64"
+                  className="font-medium bg-green-600 h-9 rounded-lg px-4"
                 >
                   <Check className="mr-1.5 h-3.5 w-3.5" />
                   {t('repairOrder.detail.markComplete')}
@@ -539,7 +540,7 @@ export function RepairOrderDetail() {
               ) ? (
                 <Button
                   variant="outline"
-                  className="font-medium rounded-lg h-9 w-64"
+                  className="font-medium rounded-lg h-9 px-4"
                   onClick={() => setOpen(true)}
                 >
                   <Pencil className="mr-1.5 h-3.5 w-3.5" />
@@ -629,7 +630,7 @@ export function RepairOrderDetail() {
                 </p>
               </div>
             </div>
-            <div className="space-y-3 text-sm">
+            <div className="space-y-3">
               <div>
                 <span className="text-muted-foreground">
                   {t('repairOrder.detail.preRepairPhotos')}
@@ -641,22 +642,21 @@ export function RepairOrderDetail() {
                         <a
                           key={f.id}
                           href={`${import.meta.env.VITE_API_URL}${f.downloadUrl}`}
-                          className="text-blue-700 underline hover:underline"
+                          className="font-medium text-blue-700 underline hover:underline"
                           target="_blank"
                           rel="noreferrer"
                         >
                           {f.filename}
                         </a>
                       ))
-                    : '--'}
+                    : <p className="font-medium">--</p>}
                 </div>
               </div>
               <div>
                 <span className="text-muted-foreground">
                   {t('repairOrder.detail.structuralMeasurements')}
                 </span>
-                <br />
-                <div className="text-primary hover:underline">
+                <div className="flex flex-wrap gap-2 mt-1">
                   {initRepaitOrderData?.structuralMeasurementFileAssets &&
                   initRepaitOrderData?.structuralMeasurementFileAssets.length >
                     0
@@ -665,7 +665,7 @@ export function RepairOrderDetail() {
                           <a
                             key={f.id}
                             href={`${import.meta.env.VITE_API_URL}${f.downloadUrl}`}
-                            className="text-blue-700 underline hover:underline"
+                            className="font-medium text-blue-700 underline hover:underline"
                             target="_blank"
                             rel="noreferrer"
                           >
@@ -673,7 +673,7 @@ export function RepairOrderDetail() {
                           </a>
                         )
                       )
-                    : '--'}
+                    : <p className="font-medium">--</p>}
                 </div>
               </div>
               <div>
@@ -687,14 +687,14 @@ export function RepairOrderDetail() {
                         <a
                           key={f.id}
                           href={`${import.meta.env.VITE_API_URL}${f.downloadUrl}`}
-                          className="text-blue-700 underline hover:underline"
+                          className="font-medium text-blue-700 underline hover:underline"
                           target="_blank"
                           rel="noreferrer"
                         >
                           {f.filename}
                         </a>
                       ))
-                    : '--'}
+                    : <p className="font-medium">--</p>}
                 </div>
               </div>
             </div>
@@ -758,7 +758,7 @@ export function RepairOrderDetail() {
                 <Button
                   onClick={() => handleOpenDialog('newSupplement')}
                   variant="outline"
-                  className="font-medium rounded-lg h-9 w-64"
+                  className="font-medium rounded-lg h-9 px-4"
                 >
                   <Plus className="mr-1.5 h-3.5 w-3.5" />
                   {t('repairOrder.detail.supplementalPartsOrder')}
@@ -783,7 +783,9 @@ export function RepairOrderDetail() {
                         (selectedPartsOrderData as any)?.stage ==
                           'OrderReview' &&
                         (selectedPartsOrderData as any)?.status !==
-                          'DealershipProcessing') ||
+                          'DealershipProcessing' &&
+                        (selectedPartsOrderData as any)?.status !==
+                          'CsrRejected') ||
                       (userType === 'Csr' &&
                         (selectedPartsOrderData as any)?.status !==
                           'CsrReview' &&
@@ -798,7 +800,7 @@ export function RepairOrderDetail() {
                             handleOpenDialog('edit', selectedPartsOrderData)
                           }
                           variant="outline"
-                          className="font-medium rounded-lg h-9 w-64"
+                          className="font-medium rounded-lg h-9 px-4"
                         >
                           <Pencil className="mr-1.5 h-3.5 w-3.5" />
                           {(selectedPartsOrderData as any)?.partsOrderNumber > 0

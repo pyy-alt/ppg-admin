@@ -5,6 +5,7 @@ import RequestApi from '@/js/clients/base/OrderApi';
 import OrganizationApi from '@/js/clients/base/OrganizationApi';
 import OrganizationSearchRequest from '@/js/models/OrganizationSearchRequest';
 import type OrganizationSearchResponse from '@/js/models/OrganizationSearchResponse';
+import ResultParameter from '@/js/models/ResultParameter';
 import RepairOrder from '@/js/models/RepairOrder';
 import RepairOrderCreateModel from '@/js/models/RepairOrderCreateRequest';
 import FileAssetFileAssetTypeEnum from '@/js/models/enum/FileAssetFileAssetTypeEnum';
@@ -184,8 +185,13 @@ export default function RepairOrderDialog({
   const getOrderFromDealership = async () => {
     try {
       const api = new OrganizationApi();
+      const resultParameter = ResultParameter.create({
+        resultsOrderBy: 'name', // Sort by name A-Z
+        resultsOrderAscending: true,
+      });
       const request = OrganizationSearchRequest.create({
         type: 'Dealership',
+        resultParameter: resultParameter,
       });
       api.search(request, {
         status200: (response: OrganizationSearchResponse) => {

@@ -14,6 +14,7 @@
     "loading": "Loading...",
     "error": "Error",
     "success": "Success",
+    "by": "by",
     "messages": {
       "exportLoading": "Loading export data...",
       "exportSuccess": "Exported successfully",
@@ -296,10 +297,12 @@
     },
     "dialog": {
       "resubmitTitle": "Resubmit Parts Order",
+      "resubmitSupplement": "Resubmit Supplement #{{num}}",
       "editSupplement": "Edit Supplement #{{num}}",
       "newSupplement": "New Supplement #{{num}}",
       "editTitle": "Edit Parts Order",
-      "newTitle": "New Parts Order"
+      "newTitle": "New Parts Order",
+      "orderedFromAlternateDealer": "Ordered from an alternate dealer"
     },
     "section": {
       "supplementInfo": "Supplement #{{num}} Information",
@@ -390,6 +393,18 @@
       "regionPlaceholder": "CSR Region",
       "region": {
         "all": "All Regions"
+      },
+      "tableHeaders": {
+        "name": "Name",
+        "number": "Number",
+        "pendingOrders": "# of Pending Orders",
+        "activeUsers": "# of Active Users",
+        "pendingUsers": "# of Pending Users",
+        "status": "Status",
+        "address": "Address",
+        "city": "City",
+        "state": "State",
+        "dealer": "Dealer"
       }
     }
   },
@@ -567,7 +582,7 @@
       "RepairCompleted": "Repair Completed"
     },
     "detail": {
-      "title": "Repair Order #",
+      "title": "Repair Order",
       "markComplete": "Mark Repair as Complete",
       "editRepairOrder": "Edit Repair Order",
       "customer": "Customer",

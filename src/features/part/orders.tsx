@@ -181,12 +181,21 @@ export function PartOrders() {
       
       // Handle region filtering
       if (filterByRegionId !== 'all') {
+        // User manually selected a specific region
         requestParams.filterByRegionId = parseInt(filterByRegionId);
-      } else if (user?.person?.type === 'FieldStaff' && user?.person?.fieldStaffRegions) {
-        // Field Staff 用户：使用他们的区域进行过滤
-        const regionIds = user.person.fieldStaffRegions.map((r: any) => r.id);
-        if (regionIds.length > 0) {
-          requestParams.filterByRegionId = regionIds[0];
+      } else {
+        // No manual region selection - apply automatic filtering based on user type
+        if (user?.person?.type === 'Csr' && user?.person?.csrRegion) {
+          // CSR user: filter by their assigned region
+          requestParams.filterByRegionId = user.person.csrRegion.id;
+        } else if (user?.person?.type === 'FieldStaff' && user?.person?.fieldStaffRegions) {
+          // Field Staff user: filter by their assigned regions
+          // Since API only supports single filterByRegionId, we use the first region as default
+          // User can manually select from dropdown if they have multiple regions
+          const regionIds = user.person.fieldStaffRegions.map((r: any) => r.id);
+          if (regionIds.length > 0) {
+            requestParams.filterByRegionId = regionIds[0];
+          }
         }
       }
       

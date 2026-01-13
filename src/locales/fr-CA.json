@@ -14,6 +14,7 @@
     "loading": "Chargement...",
     "error": "Erreur",
     "success": "Succès",
+    "by": "par",
     "messages": {
       "exportLoading": "Chargement des données d'export...",
       "exportSuccess": "Exporté avec succès",
@@ -296,10 +297,12 @@
     },
     "dialog": {
       "resubmitTitle": "Resoumettre la commande de pièces",
+      "resubmitSupplement": "Resoumettre le supplément n°{{num}}",
       "editSupplement": "Modifier le supplément n°{{num}}",
       "newSupplement": "Nouveau supplément n°{{num}}",
       "editTitle": "Modifier la commande de pièces",
-      "newTitle": "Nouvelle commande de pièces"
+      "newTitle": "Nouvelle commande de pièces",
+      "orderedFromAlternateDealer": "Commandé auprès d'un concessionnaire alternatif"
     },
     "section": {
       "supplementInfo": "Informations sur le supplément n°{{num}}",
@@ -390,6 +393,18 @@
       "regionPlaceholder": "Région CSR",
       "region": {
         "all": "Toutes les régions"
+      },
+      "tableHeaders": {
+        "name": "Nom",
+        "number": "Nombre",
+        "pendingOrders": "N° de commandes en attente",
+        "activeUsers": "N° d'utilisateurs actifs",
+        "pendingUsers": "N° d'utilisateurs en attente",
+        "status": "Statut",
+        "address": "Adresse",
+        "city": "Ville",
+        "state": "État/Province",
+        "dealer": "Concessionnaire"
       }
     }
   },
@@ -400,7 +415,7 @@
       "searchPlaceholder": "Filtrer par nom, n°, ville",
       "tableHeaders": {
         "name": "Nom",
-        "number": "Numéro",
+        "number": "Nombre",
         "pendingOrders": "N° de commandes en attente",
         "city": "Ville",
         "state": "État/Province",
@@ -567,7 +582,7 @@
       "RepairCompleted": "Réparation terminée"
     },
     "detail": {
-      "title": "Bon de réparation n°",
+      "title": "Bon de réparation",
       "markComplete": "Marquer la réparation comme terminée",
       "editRepairOrder": "Modifier le bon de réparation",
       "customer": "Client",
@@ -775,7 +790,7 @@
         "firstName": "Prénom",
         "lastName": "Nom",
         "shopName": "Nom",
-        "shopNumber": "Numéro",
+        "shopNumber": "Nombre",
         "address": "Adresse",
         "role": "Rôle",
         "region": "Région",

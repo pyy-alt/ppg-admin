@@ -563,8 +563,7 @@ export function RepairOrderDetail() {
                     setIsReject(false);
                   }}
                   variant="outline"
-                  size="sm"
-                  className="font-medium rounded-lg h-9"
+                  className="font-medium rounded-lg h-9 px-4"
                 >
                   <Plus className="mr-1.5 h-3.5 w-3.5" />
                   {t('repairOrder.detail.supplementalPartsOrder')}
@@ -595,11 +594,10 @@ export function RepairOrderDetail() {
                             setSelectedPartsOrderData(selectedPartsOrderData);
                             setOpenPartsOrderDialog(true);
                           }}
-                          size="sm"
                           variant="outline"
-                          className="px-4 text-xs h-9"
+                          className="font-medium rounded-lg h-9 px-4"
                         >
-                          <Pencil className="h-3.5 w-3.5" />
+                          <Pencil className="mr-1.5 h-3.5 w-3.5" />
                           {t('repairOrder.detail.editPartsOrder')}
                         </Button>
                       ) : null}

@@ -152,20 +152,8 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
                         auth.user.person?.email
                         : t('header.user')}
                     </p>
-                    {/* Shop/Dealership Name */}
+                    {/* Role */}
                     <p className="text-xs text-white mb-1 text-right">
-                      {auth.user
-                        ? auth.user.person?.shop?.name && auth.user.person?.shop?.shopNumber
-                          ? `${auth.user.person?.shop?.name} (${auth.user.person?.shop?.shopNumber})`
-                          : auth.user.person?.dealership?.name && auth.user.person?.dealership?.dealershipNumber
-                            ? `${auth.user.person?.dealership?.name} (${auth.user.person?.dealership?.dealershipNumber})`
-                            : auth.user.person?.csrRegion
-                              ? auth.user.person?.csrRegion?.name
-                              : ''
-                        : t('header.notLoggedIn')}
-                    </p>
-                    {/* Role - On its own line */}
-                    <p className="text-xs text-white text-right">
                       {auth.user
                         ? auth.user.person?.type === 'Shop'
                           ? t('header.shopStaff')
@@ -179,6 +167,20 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
                                   ? t('header.fieldStaff')
                                   : auth.user.person?.type
                         : ''}
+                    </p>
+                    {/* Shop/Dealership/Region */}
+                    <p className="text-xs text-white text-right">
+                      {auth.user
+                        ? auth.user.person?.shop?.name && auth.user.person?.shop?.shopNumber
+                          ? `${auth.user.person?.shop?.name} (${auth.user.person?.shop?.shopNumber})`
+                          : auth.user.person?.dealership?.name && auth.user.person?.dealership?.dealershipNumber
+                            ? `${auth.user.person?.dealership?.name} (${auth.user.person?.dealership?.dealershipNumber})`
+                            : auth.user.person?.type === 'Csr' && auth.user.person?.csrRegion
+                              ? auth.user.person?.csrRegion?.name
+                              : auth.user.person?.type === 'FieldStaff' && auth.user.person?.fieldStaffRegions
+                                ? auth.user.person?.fieldStaffRegions.map((r: any) => r.name).join(', ')
+                                : ''
+                        : t('header.notLoggedIn')}
                     </p>
                   </div>
                   <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -7,6 +7,7 @@ import {
   Package,
   NotebookPen,
   Loader2,
+  AlertCircle,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDateOnly } from '@/lib/utils';
@@ -20,6 +21,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Textarea } from './ui/textarea';
 import { useTranslation } from 'react-i18next'; // 新增导入
 
@@ -128,8 +130,21 @@ export default function PartsOrderApprovedDialog({
                 <Label className="text-muted-foreground">
                   {t('repairOrder.form.dealership.label')}
                 </Label>
-                <p className="text-foreground mt-1.5 font-medium">
-                  {initRepaitOrderData?.dealership?.name || '--'}
+                <p className="text-foreground mt-1.5 font-medium flex items-center gap-2">
+                  {initRepaitOrderData?.dealership?.id !== 
+                    initRepaitOrderData?.shop?.sponsorDealership?.id && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <AlertCircle className="w-4 h-4 text-yellow-500" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{t('partsOrder.dialog.orderedFromAlternateDealer')}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                  <span>{initRepaitOrderData?.dealership?.name || '--'}</span>
                 </p>
               </div>
               <div className="hidden sm:block"></div>

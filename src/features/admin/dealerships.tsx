@@ -390,10 +390,10 @@ export function Dealerships() {
                       >
                         {t('dealership.list.tableHeaders.pendingOrders')}
                       </SortableTableHead>
-                      <TableHead>
+                      <TableHead className='cursor-pointer select-none text-foreground font-semibold'>
                         {t('dealership.list.tableHeaders.city')}
                       </TableHead>
-                      <TableHead>
+                      <TableHead className='cursor-pointer select-none text-foreground font-semibold'>
                         {t('dealership.list.tableHeaders.state')}
                       </TableHead>
                       <SortableTableHead

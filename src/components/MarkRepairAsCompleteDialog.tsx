@@ -25,14 +25,33 @@ export function MarkRepairAsCompleteDialog({
 
   const [photos, setPhotos] = useState<File[]>([]);
   const [photoError, setPhotoError] = useState<string>('');
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
 
   // 当对话框打开/关闭时清空数据
   useEffect(() => {
     if (!open) {
       setPhotos([]);
       setPhotoError('');
+      // Clean up preview URLs
+      previewUrls.forEach(url => URL.revokeObjectURL(url));
+      setPreviewUrls([]);
     }
   }, [open]);
+
+  // Create preview URLs when photos change
+  useEffect(() => {
+    // Revoke old URLs
+    previewUrls.forEach(url => URL.revokeObjectURL(url));
+    
+    // Create new URLs
+    const newUrls = photos.map(file => URL.createObjectURL(file));
+    setPreviewUrls(newUrls);
+    
+    // Cleanup function
+    return () => {
+      newUrls.forEach(url => URL.revokeObjectURL(url));
+    };
+  }, [photos]);
 
   const { getRootProps, getInputProps, isDragActive,open: openCamera } = useDropzone({
     accept: { 'image/*': [] },
@@ -170,9 +189,14 @@ export function MarkRepairAsCompleteDialog({
                     <div key={index} className="flex items-center justify-between rounded-md p-1.5">
                       <div className="flex items-center gap-3">
                         <div className="text-left">
-                          <p className="max-w-xs text-sm font-medium text-blue-500 truncate hover:underline">
+                          <a
+                            href={previewUrls[index]}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="block max-w-xs text-sm font-medium text-blue-700 truncate underline hover:underline"
+                          >
                             {file.name}
-                          </p>
+                          </a>
                           {/* <p className="text-xs text-muted-foreground">
                               {(file.size / 1024).toFixed(0)} KB
                             </p> */}

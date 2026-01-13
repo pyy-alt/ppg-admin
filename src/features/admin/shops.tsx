@@ -464,7 +464,7 @@ export function Shops() {
                       currentAscending={sortAscending}
                       onSort={handleSort}
                     >
-                      Name
+                      {t('shop.list.tableHeaders.name')}
                     </SortableTableHead>
                     <SortableTableHead
                       field="shopNumber"
@@ -472,7 +472,7 @@ export function Shops() {
                       currentAscending={sortAscending}
                       onSort={handleSort}
                     >
-                      Number
+                      {t('shop.list.tableHeaders.number')}
                     </SortableTableHead>
                     <SortableTableHead
                       field="countPendingOrders"
@@ -480,15 +480,15 @@ export function Shops() {
                       currentAscending={sortAscending}
                       onSort={handleSort}
                     >
-                      # of Pending Orders
+                      {t('shop.list.tableHeaders.pendingOrders')}
                     </SortableTableHead>
                   
                     <TableHead className="font-semibold text-foreground">
-                      # of Active Users
+                      {t('shop.list.tableHeaders.activeUsers')}
                     </TableHead>
 
                     <TableHead className="font-semibold text-foreground">
-                      # of Pending Users
+                      {t('shop.list.tableHeaders.pendingUsers')}
                     </TableHead>
                     <SortableTableHead
                       field="status"
@@ -496,16 +496,16 @@ export function Shops() {
                       currentAscending={sortAscending}
                       onSort={handleSort}
                     >
-                      Status
+                      {t('shop.list.tableHeaders.status')}
                     </SortableTableHead>
                     <TableHead className="font-semibold text-foreground">
-                      Address
+                      {t('shop.list.tableHeaders.address')}
                     </TableHead>
                     <TableHead className="font-semibold text-foreground">
-                      City
+                      {t('shop.list.tableHeaders.city')}
                     </TableHead>
                     <TableHead className="font-semibold text-foreground">
-                      State
+                      {t('shop.list.tableHeaders.state')}
                     </TableHead>
                     <SortableTableHead
                       field="DealershipName"
@@ -513,7 +513,7 @@ export function Shops() {
                       currentAscending={sortAscending}
                       onSort={handleSort}
                     >
-                      Dealer
+                      {t('shop.list.tableHeaders.dealer')}
                     </SortableTableHead>
                     <TableHead className="font-semibold text-foreground">
                       Dealer #
