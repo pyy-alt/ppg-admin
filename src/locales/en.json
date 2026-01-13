@@ -829,7 +829,9 @@
       "deactivate": "Deactivate",
       "reactivate": "Reactivate",
       "status": {
-        "pending": "Pending Completion"
+        "pending": "Pending Completion",
+        "pendingCompletion": "Pending Completion",
+        "pendingApproval": "Pending Approval"
       },
       "approve": "Approve",
       "reject": "Reject",

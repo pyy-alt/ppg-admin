@@ -24,11 +24,13 @@ export interface TeamMember {
   dateLastAccess: string | null;
   status?: PersonStatus;
   shop?: {
+    name?: string;
     shopNumber: string;
     address: string;
     id: number;
   };
   dealership?: {
+    name?: string;
     dealershipNumber: string;
     address: string;
     id: number;
@@ -252,18 +254,9 @@ export default function ViewTeamDialog({
           </Button>
         );
       case 'Pending':
-        return <p className="text-red-400">{t('team.view.status.pending')}</p>;
+        return <p className="text-muted-foreground text-sm">{t('team.view.status.pendingCompletion')}</p>;
       case 'RegistrationRequested':
-        return (
-          <div className="flex gap-2">
-            <Button size="sm" className="bg-[#E9FBEC] text-[#3DAF14] hover:bg-[#d4f5d7] border-0" onClick={() => handleApprove(member)}>
-              <Check className="mr-1 h-3.5 w-3.5" /> {t('team.view.approve')}
-            </Button>
-            <Button size="sm" className="bg-[#FFE6E6] text-[#DC2626] hover:bg-[#ffd4d4] border-0" onClick={() => handleRejectClick(member)}>
-              <XCircle className="mr-1 h-3.5 w-3.5" /> {t('team.view.reject')}
-            </Button>
-          </div>
-        );
+        return <p className="text-muted-foreground text-sm">{t('team.view.status.pendingApproval')}</p>;
       default:
         return null;
     }
@@ -323,16 +316,20 @@ export default function ViewTeamDialog({
               <div>
                 <p className="text-sm font-medium text-muted-foreground">{t('team.view.name')}</p>
                 <p className="mt-1 text-base font-semibold">
-                  {teamMembers?.[0]?.firstName} {teamMembers?.[0]?.lastName}
+                  {teamMembers?.[0]?.shop?.name || teamMembers?.[0]?.dealership?.name || '--'}
                 </p>
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">{t('team.view.shopNumber')}</p>
-                <p className="mt-1 text-base font-semibold">{teamMembers?.[0]?.shop?.shopNumber}</p>
+                <p className="mt-1 text-base font-semibold">
+                  {teamMembers?.[0]?.shop?.shopNumber || teamMembers?.[0]?.dealership?.dealershipNumber || '--'}
+                </p>
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">{t('team.view.location')}</p>
-                <p className="mt-1 text-base font-semibold">{teamMembers?.[0]?.shop?.address}</p>
+                <p className="mt-1 text-base font-semibold">
+                  {teamMembers?.[0]?.shop?.address || teamMembers?.[0]?.dealership?.address || '--'}
+                </p>
               </div>
             </div>
           </section>
@@ -389,7 +386,10 @@ export default function ViewTeamDialog({
                   {sortedMembers &&
                     sortedMembers.length > 0 &&
                     sortedMembers.map((member, idx) => (
-                      <tr key={idx} className="transition-colors hover:bg-muted/30">
+                      <tr 
+                        key={idx} 
+                        className={`transition-colors hover:bg-muted/30 ${member.status === 'Inactive' ? 'text-gray-400' : ''}`}
+                      >
                         <td className="px-4 py-4 text-sm">{member.firstName}</td>
                         <td className="px-4 py-4 text-sm">{member.lastName}</td>
                         <td className="px-4 py-4 text-sm">{member.email}</td>
@@ -397,7 +397,13 @@ export default function ViewTeamDialog({
                           {(member.dateCreated && new Date(member.dateCreated).toLocaleDateString()) || '--'}
                         </td>
                         <td className="px-4 py-4 text-sm">
-                          {(member.dateLastAccess && new Date(member.dateLastAccess).toLocaleDateString()) || '--'}
+                          {member.status === 'Pending' ? (
+                            <span className="text-muted-foreground">{t('team.view.status.pendingCompletion')}</span>
+                          ) : member.status === 'RegistrationRequested' ? (
+                            <span className="text-muted-foreground">{t('team.view.status.pendingApproval')}</span>
+                          ) : (
+                            (member.dateLastAccess && new Date(member.dateLastAccess).toLocaleDateString()) || '--'
+                          )}
                         </td>
                         <td className="px-4 py-4 text-sm">{renderActionButtons(member)}</td>
                       </tr>

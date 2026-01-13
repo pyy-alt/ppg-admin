@@ -825,7 +825,9 @@
       "deactivate": "Désactiver",
       "reactivate": "Réactiver",
       "status": {
-        "pending": "En attente de finalisation"
+        "pending": "En attente de finalisation",
+        "pendingCompletion": "En attente de finalisation",
+        "pendingApproval": "En attente d'approbation"
       },
       "approve": "Approuver",
       "reject": "Rejeter",
