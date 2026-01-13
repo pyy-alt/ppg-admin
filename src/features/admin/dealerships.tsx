@@ -119,6 +119,25 @@ export function Dealerships() {
     }
   };
 
+  // 处理团队成员操作成功后的回调
+  const handleTeamMembersSuccess = (
+    _userType: 'Shop' | 'Dealership',
+    _organizationId: number | undefined
+  ) => {
+    // 刷新团队成员列表
+    if (currentTeamParams) {
+      getTeamMembers(
+        currentTeamParams.userType,
+        currentTeamParams.organizationId,
+        currentTeamParams.useActive,
+        teamSortBy,
+        teamSortAscending
+      );
+    }
+    // 刷新主表格数据以更新 countActiveUsers 和 countPendingUsers
+    fetchDealerships();
+  };
+
   // Get dealer data
   const fetchDealerships = async () => {
     if (!user) return;
@@ -453,7 +472,7 @@ export function Dealerships() {
         teamMembers={teamMembers}
         open={isShowAdminTeam}
         onOpenChange={setIsShowAdminTeam}
-        onSuccess={getTeamMembers}
+        onSuccess={handleTeamMembersSuccess}
         currentSortBy={teamSortBy}
         currentSortAscending={teamSortAscending}
         onSortChange={(newSortBy, newSortAscending) => {

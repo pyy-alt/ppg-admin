@@ -10,9 +10,28 @@ import { useAuthStore } from '@/stores/auth-store';
 import { exportCurrentPageToCSV } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/components/ui/empty';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { DataTablePagination } from '@/components/data-table-pagination';
 import ViewTeamDialog, { TeamMember } from '@/components/ViewTeamDialog';
 import { ClearableInput } from '@/components/clearable-input';
@@ -25,7 +44,8 @@ export function Shops() {
   const { user } = useAuthStore((state) => state.auth);
   const [currentPage, setCurrentPage] = useState(1);
   const [smartFilter, setSmartFilter] = useState('');
-  const [filterByShopStatus, setFilterByShopStatus] = useState<string>('Certified');
+  const [filterByShopStatus, setFilterByShopStatus] =
+    useState<string>('Certified');
   const [filterByRegionId, setFilterByRegionId] = useState<string>('all');
   const [shops, setShops] = useState<any[]>([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -57,7 +77,7 @@ export function Shops() {
 
   const [sortAscending, setSortAscending] = useState(true); // true 为升序（A-Z）
 
-  const navigate= useNavigate()
+  const navigate = useNavigate();
 
   const getTeamMembers = async (
     userType: 'Shop' | 'Dealership',
@@ -69,12 +89,12 @@ export function Shops() {
     try {
       // 保存当前查询参数，供排序时使用
       setCurrentTeamParams({ userType, organizationId, useActive });
-      
+
       const personApi = new PersonApi();
       const request: any = PersonSearchRequest.create({
         type: userType,
         organizationId,
-        includeInactiveFlag:true
+        includeInactiveFlag: true,
       });
       const resultParameter = ResultParameter.create({
         resultsOrderBy: sortBy,
@@ -85,10 +105,16 @@ export function Shops() {
       personApi.search(request, {
         status200: (data) => {
           if (useActive === 'Active') {
-            const users = data.persons.filter((item: any) => item.status === 'Active');
+            const users = data.persons.filter(
+              (item: any) => item.status === 'Active'
+            );
             setTeamMembers(users);
           } else if (useActive === 'Pending') {
-            const users = data.persons.filter((item: any) => item.status === 'Pending' || item.status ==='RegistrationRequested');
+            const users = data.persons.filter(
+              (item: any) =>
+                item.status === 'Pending' ||
+                item.status === 'RegistrationRequested'
+            );
             setTeamMembers(users);
           } else {
             setTeamMembers(data.persons);
@@ -105,6 +131,25 @@ export function Shops() {
     } catch (error) {
       console.error(error);
     }
+  };
+
+  // 处理团队成员操作成功后的回调
+  const handleTeamMembersSuccess = (
+    _userType: 'Shop' | 'Dealership',
+    _organizationId: number | undefined
+  ) => {
+    // 刷新团队成员列表
+    if (currentTeamParams) {
+      getTeamMembers(
+        currentTeamParams.userType,
+        currentTeamParams.organizationId,
+        currentTeamParams.useActive,
+        teamSortBy,
+        teamSortAscending
+      );
+    }
+    // 刷新主表格数据以更新 countActiveUsers 和 countPendingUsers
+    fetchShops();
   };
 
   // Get store data
@@ -175,7 +220,14 @@ export function Shops() {
     );
 
     return () => clearTimeout(timeoutId);
-  }, [smartFilter, filterByShopStatus, filterByRegionId, user, sortBy, sortAscending]);
+  }, [
+    smartFilter,
+    filterByShopStatus,
+    filterByRegionId,
+    user,
+    sortBy,
+    sortAscending,
+  ]);
 
   // ✅ Individually call when page number changes（Do not reset page number）
   useEffect(() => {
@@ -257,7 +309,11 @@ export function Shops() {
       toast.loading(t('common.messages.exportLoading'));
       const allShops = await fetchAllDataForExport();
       const flattenedData = getFlattenedAllData(allShops);
-      const result = await exportCurrentPageToCSV(flattenedData, headers, 'Manage_Shops');
+      const result = await exportCurrentPageToCSV(
+        flattenedData,
+        headers,
+        'Manage_Shops'
+      );
       toast.dismiss();
       result ? toast.success(t('common.messages.exportSuccess')) : null;
     } catch (error) {
@@ -302,7 +358,9 @@ export function Shops() {
       {/* Header */}
       <div className="bg-background">
         <div className="flex items-center justify-between px-6 py-4">
-          <h1 className="text-2xl font-bold text-foreground">{t('shop.list.title')}</h1>
+          <h1 className="text-2xl font-bold text-foreground">
+            {t('shop.list.title')}
+          </h1>
           <Button onClick={exportCSV}>
             <Download className="w-4 h-4 mr-2" />
             {t('shop.list.report')}
@@ -318,34 +376,53 @@ export function Shops() {
             <ClearableInput
               value={smartFilter}
               onChange={(e) => setSmartFilter(e.target.value)}
-                placeholder={t('shop.list.searchPlaceholder')}
+              placeholder={t('shop.list.searchPlaceholder')}
               className="pl-10"
             />
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <Select value={filterByShopStatus} onValueChange={(value) => setFilterByShopStatus(value)}>
+            <Select
+              value={filterByShopStatus}
+              onValueChange={(value) => setFilterByShopStatus(value)}
+            >
               <SelectTrigger className="w-48 bg-muted">
                 <SelectValue placeholder={t('shop.list.statusPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t('shop.list.status.all')}</SelectItem>
-                <SelectItem value="Certified">{t('shop.list.status.certified')}</SelectItem>
-                <SelectItem value="Closed">{t('shop.list.status.closed')}</SelectItem>
-                <SelectItem value="InProcess">{t('shop.list.status.inProcess')}</SelectItem>
-                <SelectItem value="Suspended">{t('shop.list.status.suspended')}</SelectItem>
-                <SelectItem value="Terminated">{t('shop.list.status.terminated')}</SelectItem>
+                <SelectItem value="Certified">
+                  {t('shop.list.status.certified')}
+                </SelectItem>
+                <SelectItem value="Closed">
+                  {t('shop.list.status.closed')}
+                </SelectItem>
+                <SelectItem value="InProcess">
+                  {t('shop.list.status.inProcess')}
+                </SelectItem>
+                <SelectItem value="Suspended">
+                  {t('shop.list.status.suspended')}
+                </SelectItem>
+                <SelectItem value="Terminated">
+                  {t('shop.list.status.terminated')}
+                </SelectItem>
               </SelectContent>
             </Select>
 
-            <Select value={filterByRegionId} onValueChange={(value) => setFilterByRegionId(value)}>
+            <Select
+              value={filterByRegionId}
+              onValueChange={(value) => setFilterByRegionId(value)}
+            >
               <SelectTrigger className="w-48 bg-muted">
                 <SelectValue placeholder={t('shop.list.regionPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t('shop.list.region.all')}</SelectItem>
                 {user?.regions?.map((region) => (
-                  <SelectItem key={region.id} value={region.id?.toString() || ''}>
+                  <SelectItem
+                    key={region.id}
+                    value={region.id?.toString() || ''}
+                  >
                     {region.name}
                   </SelectItem>
                 ))}
@@ -369,7 +446,9 @@ export function Shops() {
                   <TableIcon className="w-4 h-4" />
                 </EmptyMedia>
                 <EmptyTitle>{t('common.empty.title')}</EmptyTitle>
-                <EmptyDescription>{t('common.empty.description')}</EmptyDescription>
+                <EmptyDescription>
+                  {t('common.empty.description')}
+                </EmptyDescription>
               </EmptyHeader>
             </Empty>
           </div>
@@ -403,22 +482,14 @@ export function Shops() {
                     >
                       # of Pending Orders
                     </SortableTableHead>
-                    <SortableTableHead
-                      field="countActiveUsers"
-                      currentSortBy={sortBy}
-                      currentAscending={sortAscending}
-                      onSort={handleSort}
-                    >
+                  
+                    <TableHead className="font-semibold text-foreground">
                       # of Active Users
-                    </SortableTableHead>
-                    <SortableTableHead
-                      field="countPendingUsers"
-                      currentSortBy={sortBy}
-                      currentAscending={sortAscending}
-                      onSort={handleSort}
-                    >
+                    </TableHead>
+
+                    <TableHead className="font-semibold text-foreground">
                       # of Pending Users
-                    </SortableTableHead>
+                    </TableHead>
                     <SortableTableHead
                       field="status"
                       currentSortBy={sortBy}
@@ -427,9 +498,15 @@ export function Shops() {
                     >
                       Status
                     </SortableTableHead>
-                    <TableHead className="font-semibold text-foreground">Address</TableHead>
-                    <TableHead className="font-semibold text-foreground">City</TableHead>
-                    <TableHead className="font-semibold text-foreground">State</TableHead>
+                    <TableHead className="font-semibold text-foreground">
+                      Address
+                    </TableHead>
+                    <TableHead className="font-semibold text-foreground">
+                      City
+                    </TableHead>
+                    <TableHead className="font-semibold text-foreground">
+                      State
+                    </TableHead>
                     <SortableTableHead
                       field="dealer"
                       currentSortBy={sortBy}
@@ -438,14 +515,9 @@ export function Shops() {
                     >
                       Dealer
                     </SortableTableHead>
-                    <SortableTableHead
-                      field="dealerNumber"
-                      currentSortBy={sortBy}
-                      currentAscending={sortAscending}
-                      onSort={handleSort}
-                    >
+                    <TableHead className="font-semibold text-foreground">
                       Dealer #
-                    </SortableTableHead>
+                    </TableHead>
                     <SortableTableHead
                       field="region"
                       currentSortBy={sortBy}
@@ -509,15 +581,23 @@ export function Shops() {
                         </TableCell>
                         <TableCell>
                           <Badge
-                            variant={statusValue === 'certified' ? 'default' : 'secondary'}
+                            variant={
+                              statusValue === 'certified'
+                                ? 'default'
+                                : 'secondary'
+                            }
                             className={
-                              statusValue === 'certified' ? 'bg-green-100 text-green-800 hover:bg-green-200' : ''
+                              statusValue === 'certified'
+                                ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                                : ''
                             }
                           >
                             {statusValue}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">{shop.address || '--'}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {shop.address || '--'}
+                        </TableCell>
                         <TableCell>{shop.city || '--'}</TableCell>
                         <TableCell>{shop.state || '--'}</TableCell>
                         <TableCell>{dealerName}</TableCell>
@@ -545,7 +625,7 @@ export function Shops() {
         teamMembers={teamMembers}
         open={isShowAdminTeam}
         onOpenChange={setIsShowAdminTeam}
-        onSuccess={getTeamMembers}
+        onSuccess={handleTeamMembersSuccess}
         currentSortBy={teamSortBy}
         currentSortAscending={teamSortAscending}
         onSortChange={(newSortBy, newSortAscending) => {
