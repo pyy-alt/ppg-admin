@@ -501,7 +501,7 @@ export function PartOrders() {
                   <TableHead className="font-semibold text-foreground">{t('partsOrder.list.columns.dealer')}</TableHead>
                   <TableHead className="font-semibold text-foreground">{t('partsOrder.list.columns.csrRegion')}</TableHead>
                   <SortableTableHead
-                    field="dateCreated"
+                    field="dateSubmitted"
                     currentSortBy={sortBy}
                     currentAscending={sortAscending}
                     onSort={handleSort}

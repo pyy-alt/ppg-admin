@@ -15,7 +15,20 @@ export function SortableTableHead({
   onSort: (field: string) => void
 }) {
   const isActive = currentSortBy === field
-  const direction = isActive ? (currentAscending ? <ChevronUp size={16}/> : <ChevronDown size={16} />) : ''
+  
+  // 始终显示排序图标，只改变图标类型
+  const getSortIcon = () => {
+    if (isActive) {
+      return currentAscending ? <ChevronUp size={16} /> : <ChevronDown size={16} />
+    }
+    // 未激活状态显示上下排列的双向箭头（使用灰色）
+    return (
+      <svg width="10" height="16" viewBox="0 0 10 16" className="inline ml-1 opacity-50">
+        <path d="M5 3 L8 6 L2 6 Z" fill="currentColor" />
+        <path d="M5 13 L8 10 L2 10 Z" fill="currentColor" />
+      </svg>
+    )
+  }
 
   return (
     <TableHead
@@ -24,7 +37,7 @@ export function SortableTableHead({
     >
       <div className="flex items-center gap-1">
         {children}
-        {isActive && <span className="text-xs">{direction}</span>}
+        <span className="text-xs">{getSortIcon()}</span>
       </div>
     </TableHead>
   )

@@ -38,11 +38,13 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
   const [isShowTeam, setIsShowTeam] = useState(false);
   const [isShowAdminTeam, setIsShowAdminTeam] = useState(false);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [teamSortBy, setTeamSortBy] = useState<string>('firstName');
+  const [teamSortAscending, setTeamSortAscending] = useState(true);
   const { brand } = useBrand();
 
   const logo = brand === 'vw' ? vwLogo : audiLogo;
 
-  const getTeamMembers = async () => {
+  const getTeamMembers = async (sortBy: string = 'firstName', sortAscending: boolean = true) => {
     const isAdmin = auth.user?.person?.type === PersonTypeEnum.PROGRAM_ADMINISTRATOR;
     try {
       const personApi = new PersonApi();
@@ -58,8 +60,8 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
         includeInactiveFlag: true,
       });
       const resultParameter = ResultParameter.create({
-        resultsOrderBy: 'firstName',
-        resultsOrderAscending: false,
+        resultsOrderBy: sortBy,
+        resultsOrderAscending: sortAscending,
       });
       request.resultParameter = resultParameter;
       personApi.search(request, {
@@ -227,7 +229,18 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
         teamMembers={teamMembers}
         open={isShowTeam}
         onOpenChange={setIsShowTeam}
-        onSuccess={getTeamMembers}
+        onSuccess={() => {
+          // 成员状态改变后刷新列表，保持当前排序
+          getTeamMembers(teamSortBy, teamSortAscending);
+        }}
+        currentSortBy={teamSortBy}
+        currentSortAscending={teamSortAscending}
+        onSortChange={(newSortBy, newSortAscending) => {
+          setTeamSortBy(newSortBy);
+          setTeamSortAscending(newSortAscending);
+          // 重新调用 API 获取排序后的数据
+          getTeamMembers(newSortBy, newSortAscending);
+        }}
       />
       <ViewAdminTeamDialog
         teamMembers={teamMembers}
@@ -236,6 +249,14 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
         onSuccess={getTeamMembers}
         onError={(error) => {
           console.error('Failed to get team members:', error);
+        }}
+        currentSortBy={teamSortBy}
+        currentSortAscending={teamSortAscending}
+        onSortChange={(newSortBy, newSortAscending) => {
+          setTeamSortBy(newSortBy);
+          setTeamSortAscending(newSortAscending);
+          // 重新调用 API 获取排序后的数据
+          getTeamMembers(newSortBy, newSortAscending);
         }}
       />
     </>

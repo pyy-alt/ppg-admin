@@ -9,7 +9,7 @@ import PersonApi from '@/js/clients/base/PersonApi';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import ConfirmDialog from '@/components/ConfirmDialog';
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 
 type PersonStatus = (typeof PersonStatusEnum)[keyof typeof PersonStatusEnum];
 
@@ -44,49 +44,58 @@ interface ViewDealerTeamDialogProps {
   location?: string;
   teamMembers?: TeamMember[];
   onSuccess?: (userType: 'Shop' | 'Dealership', organizationId: number | undefined) => void;
+  onSortChange?: (sortBy: string, sortAscending: boolean) => void;
+  currentSortBy?: string;
+  currentSortAscending?: boolean;
 }
 
-export default function ViewTeamDialog({ open, onOpenChange, teamMembers, onSuccess }: ViewDealerTeamDialogProps) {
+export default function ViewTeamDialog({ 
+  open, 
+  onOpenChange, 
+  teamMembers, 
+  onSuccess,
+  onSortChange,
+  currentSortBy = 'firstName',
+  currentSortAscending = true
+}: ViewDealerTeamDialogProps) {
   const { t } = useTranslation();
 
   const [isConfirmRejectOpen, setIsConfirmRejectOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
-  const [sortBy, setSortBy] = useState<keyof TeamMember>('firstName');
-  const [sortAscending, setSortAscending] = useState(true);
-
-  // 排序逻辑
-  const sortedMembers = useMemo(() => {
-    if (!teamMembers || !sortBy) return teamMembers || [];
-
-    return [...teamMembers].sort((a, b) => {
-      let aValue = a[sortBy];
-      let bValue = b[sortBy];
-
-      // 处理 null 或 undefined 值
-      if (aValue == null) aValue = '';
-      if (bValue == null) bValue = '';
-
-      // 字符串比较
-      if (typeof aValue === 'string' && typeof bValue === 'string') {
-        const comparison = aValue.localeCompare(bValue);
-        return sortAscending ? comparison : -comparison;
-      }
-
-      // 数字比较
-      if (typeof aValue === 'number' && typeof bValue === 'number') {
-        return sortAscending ? aValue - bValue : bValue - aValue;
-      }
-
-      return 0;
-    });
-  }, [teamMembers, sortBy, sortAscending]);
+  
+  // 使用父组件传递的排序状态，如果没有则使用本地状态
+  const sortBy = currentSortBy;
+  const sortAscending = currentSortAscending;
 
   const handleSort = (field: keyof TeamMember) => {
+    let newSortBy = field as string;
+    let newSortAscending = true;
+    
+    console.log('handleSort called:', { field, currentSortBy: sortBy, currentAscending: sortAscending });
+    
     if (sortBy === field) {
-      setSortAscending(!sortAscending);
+      if (sortAscending) {
+        // 当前是升序 → 第二次点击：切换为降序
+        newSortAscending = false;
+      } else {
+        // 当前是降序 → 第三次点击：恢复默认排序
+        newSortBy = 'firstName';
+        newSortAscending = true;
+      }
     } else {
-      setSortBy(field);
-      setSortAscending(true);
+      // 点击新字段 → 第一次点击：按该字段升序排序
+      newSortBy = field as string;
+      newSortAscending = true;
+    }
+    
+    console.log('New sort:', { newSortBy, newSortAscending });
+    
+    // 如果有排序回调，调用它（触发父组件重新获取数据）
+    if (onSortChange) {
+      console.log('Calling onSortChange');
+      onSortChange(newSortBy, newSortAscending);
+    } else {
+      console.warn('onSortChange callback not provided!');
     }
   };
 
@@ -270,9 +279,23 @@ export default function ViewTeamDialog({ open, onOpenChange, teamMembers, onSucc
     return t('team.view.title.default');
   };
 
+  // 直接显示传入的数据，不再前端排序
+  const sortedMembers = teamMembers || [];
+
   const renderSortIcon = (field: keyof TeamMember) => {
-    if (sortBy !== field) return null;
-    return sortAscending ? <ChevronUp className="inline w-4 h-4 ml-1" /> : <ChevronDown className="inline w-4 h-4 ml-1" />;
+    const isActive = sortBy === field;
+    
+    if (isActive) {
+      return sortAscending ? <ChevronUp className="inline w-4 h-4 ml-1" /> : <ChevronDown className="inline w-4 h-4 ml-1" />;
+    }
+    
+    // 未激活状态显示上下排列的双向箭头（使用灰色）
+    return (
+      <svg width="10" height="16" viewBox="0 0 10 16" className="inline ml-1 opacity-50">
+        <path d="M5 3 L8 6 L2 6 Z" fill="currentColor" />
+        <path d="M5 13 L8 10 L2 10 Z" fill="currentColor" />
+      </svg>
+    );
   };
 
   return (

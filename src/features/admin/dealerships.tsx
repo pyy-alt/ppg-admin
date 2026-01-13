@@ -47,6 +47,13 @@ export function Dealerships() {
 
   const [isShowAdminTeam, setIsShowAdminTeam] = useState(false);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [teamSortBy, setTeamSortBy] = useState<string>('firstName');
+  const [teamSortAscending, setTeamSortAscending] = useState(true);
+  const [currentTeamParams, setCurrentTeamParams] = useState<{
+    userType: 'Shop' | 'Dealership' | 'Network';
+    organizationId: number | undefined;
+    useActive: string | undefined;
+  } | null>(null);
 
   const [sortBy, setSortBy] = useState<
     | 'name'
@@ -61,9 +68,14 @@ export function Dealerships() {
   const getTeamMembers = async (
     userType: 'Shop' | 'Dealership' | 'Network',
     organizationId: number | undefined,
-    useActive: string | undefined = undefined
+    useActive: string | undefined = undefined,
+    sortBy: string = 'firstName',
+    sortAscending: boolean = true
   ) => {
     try {
+      // 保存当前查询参数，供排序时使用
+      setCurrentTeamParams({ userType, organizationId, useActive });
+      
       const personApi = new PersonApi();
       const request: any = PersonSearchRequest.create({
         type: userType,
@@ -71,8 +83,8 @@ export function Dealerships() {
         includeInactiveFlag: true,
       });
       const resultParameter = ResultParameter.create({
-        resultsOrderBy: 'firstName',
-        resultsOrderAscending: false,
+        resultsOrderBy: sortBy,
+        resultsOrderAscending: sortAscending,
       });
       request.resultParameter = resultParameter;
 
@@ -442,6 +454,22 @@ export function Dealerships() {
         open={isShowAdminTeam}
         onOpenChange={setIsShowAdminTeam}
         onSuccess={getTeamMembers}
+        currentSortBy={teamSortBy}
+        currentSortAscending={teamSortAscending}
+        onSortChange={(newSortBy, newSortAscending) => {
+          setTeamSortBy(newSortBy);
+          setTeamSortAscending(newSortAscending);
+          // 重新调用 API 获取排序后的数据
+          if (currentTeamParams) {
+            getTeamMembers(
+              currentTeamParams.userType,
+              currentTeamParams.organizationId,
+              currentTeamParams.useActive,
+              newSortBy,
+              newSortAscending
+            );
+          }
+        }}
       />
     </div>
   );

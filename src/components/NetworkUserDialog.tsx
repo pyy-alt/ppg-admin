@@ -264,10 +264,10 @@ export default function NetworkUserDialog({
     // Only clear when role actually changes to a different value
     if (selectedRole && selectedRole !== previousRole) {
       if (selectedRole !== 'Csr') {
-        form.setValue('csrRegion', undefined);
+      form.setValue('csrRegion', undefined);
       }
       if (selectedRole !== 'FieldStaff') {
-        form.setValue('fieldStaffRegions', []);
+      form.setValue('fieldStaffRegions', []);
       }
       setPreviousRole(selectedRole);
     }
