@@ -50,7 +50,7 @@ const useBrandLogo = (directory: string, suffix: string): string | null => {
       }
     }
     const BRAND_PREFIX =
-      brandFromUrl || import.meta.env.VITE_BRAND_PREFIX || 'audi'
+      brandFromUrl || import.meta.env.VITE_BRAND || 'audi'
 
     // 3. Construct target file name：For example audi_a.png or vw_c.png（without path prefix）
     const TARGET_FILENAME = `${BRAND_PREFIX}${suffix}`

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 type Brand = 'audi' | 'vw';
 type Region = 'america' | 'canada';
+type BrandConfig = 'audi' | 'audica' | 'vw' | 'vwca';
 
 interface BrandContextType {
   brand: Brand;
@@ -12,14 +13,44 @@ interface BrandContextType {
   setBrand: (brand: Brand, region: Region) => void;
 }
 
+// Parse brand config from environment variable
+function parseBrandConfig(config: BrandConfig): { brand: Brand; region: Region } {
+  switch (config) {
+    case 'audi':
+      return { brand: 'audi', region: 'america' };
+    case 'audica':
+      return { brand: 'audi', region: 'canada' };
+    case 'vw':
+      return { brand: 'vw', region: 'america' };
+    case 'vwca':
+      return { brand: 'vw', region: 'canada' };
+    default:
+      console.warn(`Unknown brand config: ${config}, defaulting to audi`);
+      return { brand: 'audi', region: 'america' };
+  }
+}
+
+// Get brand configuration from environment variable
+function getBrandFromEnv(): { brand: Brand; region: Region } {
+  const envBrand = import.meta.env.VITE_BRAND as BrandConfig | undefined;
+  
+  if (envBrand && ['audi', 'audica', 'vw', 'vwca'].includes(envBrand)) {
+    return parseBrandConfig(envBrand);
+  }
+  
+  // Default to audi if not set
+  return { brand: 'audi', region: 'america' };
+}
+
 // Persist to localStorage！
 const STORAGE_KEY = 'ppg-selected-brand';
 const BrandContext = createContext<BrandContextType | undefined>(undefined);
 
 export function BrandProvider({ children }: { children: ReactNode }) {
   const location = useLocation();
-  const [brand, setBrandState] = useState<Brand>('audi');
-  const [region, setRegionState] = useState<Region>('america');
+  const envConfig = getBrandFromEnv();
+  const [brand, setBrandState] = useState<Brand>(envConfig.brand);
+  const [region, setRegionState] = useState<Region>(envConfig.region);
   const { i18n } = useTranslation();
 
   // Key！Restore after refresh
@@ -33,6 +64,7 @@ export function BrandProvider({ children }: { children: ReactNode }) {
       i18n.changeLanguage(code);
     }
 
+    // Priority 1: URL parameters (for testing/preview)
     if (urlBrand && urlRegion && ['audi', 'vw'].includes(urlBrand) && ['america', 'canada'].includes(urlRegion)) {
       setBrandState(urlBrand);
       setRegionState(urlRegion);
@@ -40,6 +72,17 @@ export function BrandProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    // Priority 2: Environment variable (production configuration)
+    const envBrandConfig = import.meta.env.VITE_BRAND as BrandConfig | undefined;
+    if (envBrandConfig && ['audi', 'audica', 'vw', 'vwca'].includes(envBrandConfig)) {
+      const { brand: envBrand, region: envRegion } = parseBrandConfig(envBrandConfig);
+      setBrandState(envBrand);
+      setRegionState(envRegion);
+      // Don't save to localStorage if using env config (so it remains consistent)
+      return;
+    }
+
+    // Priority 3: localStorage (for user preference if no env config)
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       try {
@@ -52,6 +95,7 @@ export function BrandProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    // Priority 4: Default fallback
     setBrandState('audi');
     setRegionState('america');
   }, [location.search]);

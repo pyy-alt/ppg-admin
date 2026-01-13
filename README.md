@@ -94,11 +94,61 @@ Install dependencies
   pnpm install
 ```
 
+### Environment Configuration
+
+Create a `.env` file in the root directory based on `.env.example`:
+
+```bash
+  cp .env.example .env
+```
+
+Configure the following environment variables:
+
+**VITE_API_URL** - The API endpoint URL for the backend
+```env
+VITE_API_URL=https://audi-api.ppg.dev.quasidea.com
+```
+
+**VITE_BRAND** - The brand configuration (affects colors, logos, banners, and branding text)
+
+Valid values:
+- `audi` - Audi America
+- `audica` - Audi Canada  
+- `vw` - Volkswagen America
+- `vwca` - Volkswagen Canada
+
+```env
+VITE_BRAND=audi
+```
+
 Start the server
 
 ```bash
   pnpm run dev
 ```
+
+## Building for Production
+
+When building for different brands or environments, make sure to:
+
+1. Update your `.env` file with the correct `VITE_API_URL` and `VITE_BRAND` values
+2. Build the application: `pnpm run build`
+3. The build will use the environment variables from your `.env` file
+
+Example for building different brand versions:
+
+```bash
+# Build for Audi America
+echo "VITE_API_URL=https://audi-api.ppg.dev.quasidea.com" > .env
+echo "VITE_BRAND=audi" >> .env
+pnpm run build
+
+# Build for VW Canada
+echo "VITE_API_URL=https://vw-api.ppg.dev.quasidea.com" > .env
+echo "VITE_BRAND=vwca" >> .env
+pnpm run build
+```
+
 
 ## Sponsoring this project ❤️
 
