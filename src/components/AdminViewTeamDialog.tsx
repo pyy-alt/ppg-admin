@@ -2,14 +2,14 @@ import { useEffect,  useState } from 'react';
 import PersonApi from '@/js/clients/base/PersonApi';
 import PersonEditStatusRequest from '@/js/models/PersonEditStatusRequest';
 import type { PersonStatus } from '@/js/models/enum/PersonStatusEnum';
-import { X, Users, Check, XCircle, Pause, Play, ChevronUp, ChevronDown } from 'lucide-react';
+import { Users, Check, XCircle, Pause, Play, ChevronUp, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useTranslation } from 'react-i18next';
 import ConfirmDialog from '@/components/ConfirmDialog';
 
-interface TeamMember {
+export interface TeamMember {
   id: number;
   firstName: string;
   lastName: string;
@@ -20,20 +20,23 @@ interface TeamMember {
   dateLastAccess: string | null;
   status?: PersonStatus;
   shop?: {
+    name?: string;
     shopNumber: string;
     address: string;
   };
   dealership?: {
+    name?: string;
     dealershipNumber: string;
     address: string;
   };
+  type?: string;
 }
 
 interface AdminViewTeamDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   teamMembers?: TeamMember[];
-  onSuccess?: () => void;
+  onSuccess?: (userType?: 'Shop' | 'Dealership', organizationId?: number) => void;
   onError?: (error: Error) => void;
   onSortChange?: (sortBy: string, sortAscending: boolean) => void;
   currentSortBy?: string;
@@ -240,21 +243,31 @@ export default function AdminViewTeamDialog({
             <Play className="mr-1 h-3.5 w-3.5" /> {t('team.button.reactivate')}
           </Button>
         );
+      default:
+        return null;
+    }
+  };
+
+  const renderDateLastAccessedContent = (member: TeamMember) => {
+    switch (member.status) {
       case 'Pending':
-        return <p className="text-red-400">{t('team.status.pending')}</p>;
+        return <span className="text-sm text-muted-foreground">{t('team.view.status.pendingCompletion')}</span>;
       case 'RegistrationRequested':
         return (
-          <div className="flex gap-2">
-            <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => handleApprove(member.id)}>
-              <Check className="mr-1 h-3.5 w-3.5" /> {t('team.button.approve')}
-            </Button>
-            <Button size="sm" variant="destructive" onClick={() => handleRejectClick(member.id)}>
-              <XCircle className="mr-1 h-3.5 w-3.5" /> {t('team.button.reject')}
-            </Button>
+          <div className="flex flex-col gap-2">
+            <span className="text-sm text-muted-foreground mb-1">{t('team.view.status.pendingApproval')}</span>
+            <div className="flex flex-col gap-2">
+              <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => handleApprove(member.id)}>
+                <Check className="mr-1 h-3.5 w-3.5" /> {t('team.button.approve')}
+              </Button>
+              <Button size="sm" variant="destructive" onClick={() => handleRejectClick(member.id)}>
+                <XCircle className="mr-1 h-3.5 w-3.5" /> {t('team.button.reject')}
+              </Button>
+            </div>
           </div>
         );
       default:
-        return null;
+        return (member.dateLastAccess && new Date(member.dateLastAccess).toLocaleDateString()) || '--';
     }
   };
 
@@ -282,13 +295,6 @@ export default function AdminViewTeamDialog({
             <Users className="h-7 w-7" />
             {t('team.dialog.title')}
           </DialogTitle>
-          <button
-            onClick={handleClose}
-            className="absolute transition-opacity rounded-sm focus:ring-ring top-4 right-4 opacity-70 hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-none"
-          >
-            <X className="w-4 h-4" />
-            <span className="sr-only">{t('common.close')}</span>
-          </button>
         </DialogHeader>
         <div className="flex-1 py-6 space-y-8 overflow-y-auto scroll-smooth">
           <p className="mb-6 text-sm text-muted-foreground">{t('team.dialog.description')}</p>
@@ -331,24 +337,37 @@ export default function AdminViewTeamDialog({
                     {t('team.table.dateLastAccessed')}
                     {renderSortIcon('dateLastAccessed')}
                   </th>
-                  <th className="px-6 py-4 text-sm font-medium text-left">{/* Status / Actions */}</th>
+                  <th className="px-6 py-4 text-sm font-medium text-left">{t('team.table.actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {sortedMembers.map((member) => (
-                  <tr key={member.id} className="transition-colors hover:bg-muted/30">
-                    <td className={member.status === 'Inactive' ? 'text-gray-400' : 'px-6 py-4 font-medium'}>
-                      {member.firstName}
-                    </td>
-                    <td className="px-6 py-4">{member.lastName}</td>
-                    <td className="px-6 py-4 text-sm">{member.email}</td>
-                    <td className="px-6 py-4 text-sm">{member.dateAdded}</td>
-                    <td className="px-6 py-4 text-sm">{member.dateLastAccessed || '—'}</td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">{renderActionButtons(member)}</div>
-                    </td>
-                  </tr>
-                ))}
+                {sortedMembers.map((member) => {
+                  const isInactive = member.status === 'Inactive';
+                  const textColorClass = isInactive ? 'text-gray-400' : '';
+                  
+                  return (
+                    <tr key={member.id} className="transition-colors hover:bg-muted/30">
+                      <td className={`px-6 py-4 font-medium ${textColorClass}`}>
+                        {member.firstName}
+                      </td>
+                      <td className={`px-6 py-4 ${textColorClass}`}>
+                        {member.lastName}
+                      </td>
+                      <td className={`px-6 py-4 text-sm ${textColorClass}`}>
+                        {member.email}
+                      </td>
+                      <td className={`px-6 py-4 text-sm ${textColorClass}`}>
+                        {member.dateCreated && new Date(member.dateCreated).toLocaleDateString()}
+                      </td>
+                      <td className={`px-6 py-4 text-sm ${textColorClass}`}>
+                        {renderDateLastAccessedContent(member)}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">{renderActionButtons(member)}</div>
+                      </td>
+                    </tr>
+                  );
+                })}
                 {sortedMembers.length === 0 && (
                   <tr>
                     <td colSpan={6} className="px-6 py-6 text-sm text-center text-muted-foreground">

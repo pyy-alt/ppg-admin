@@ -25,7 +25,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import ViewTeamDialog, { TeamMember } from '@/components/ViewTeamDialog';
+import AdminViewTeamDialog from '@/components/AdminViewTeamDialog';
 import { DataTablePagination } from '@/components/data-table-pagination';
 import { ClearableInput } from '@/components/clearable-input';
 import { SortableTableHead } from '@/components/SortableTableHead';
@@ -46,7 +46,7 @@ export function Dealerships() {
   const [headers, setHeaders] = useState<string[]>([]);
 
   const [isShowAdminTeam, setIsShowAdminTeam] = useState(false);
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [teamMembers, setTeamMembers] = useState<any[]>([]);
   const [teamSortBy, setTeamSortBy] = useState<string>('firstName');
   const [teamSortAscending, setTeamSortAscending] = useState(true);
   const [currentTeamParams, setCurrentTeamParams] = useState<{
@@ -121,8 +121,8 @@ export function Dealerships() {
 
   // 处理团队成员操作成功后的回调
   const handleTeamMembersSuccess = (
-    _userType: 'Shop' | 'Dealership',
-    _organizationId: number | undefined
+    _userType?: 'Shop' | 'Dealership',
+    _organizationId?: number
   ) => {
     // 刷新团队成员列表
     if (currentTeamParams) {
@@ -468,7 +468,7 @@ export function Dealerships() {
           )}
         </div>
       </div>
-      <ViewTeamDialog
+      <AdminViewTeamDialog
         teamMembers={teamMembers}
         open={isShowAdminTeam}
         onOpenChange={setIsShowAdminTeam}

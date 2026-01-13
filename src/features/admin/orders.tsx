@@ -183,13 +183,13 @@ export function PartOrders() {
         if (user?.person?.type === 'Csr' && user?.person?.csrRegion) {
           // CSR user: filter by their assigned region
           requestParams.filterByRegionId = user.person.csrRegion.id;
-        } else if (user?.person?.type === 'FieldStaff' && user?.person?.fieldStaffRegions) {
+      } else if (user?.person?.type === 'FieldStaff' && user?.person?.fieldStaffRegions) {
           // Field Staff user: filter by their assigned regions
           // Since API only supports single filterByRegionId, we use the first region as default
           // User can manually select from dropdown if they have multiple regions
-          const regionIds = user.person.fieldStaffRegions.map((r: any) => r.id);
-          if (regionIds.length > 0) {
-            requestParams.filterByRegionId = regionIds[0];
+        const regionIds = user.person.fieldStaffRegions.map((r: any) => r.id);
+        if (regionIds.length > 0) {
+          requestParams.filterByRegionId = regionIds[0];
           }
         }
       }

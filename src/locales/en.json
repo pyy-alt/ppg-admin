@@ -873,6 +873,7 @@
       "email": "Email",
       "dateAdded": "Date Added",
       "dateLastAccessed": "Date Last Accessed",
+      "actions": "Actions",
       "noMembers": "No team members found."
     },
     "button": {
