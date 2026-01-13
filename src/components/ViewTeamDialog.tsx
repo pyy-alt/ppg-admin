@@ -174,10 +174,6 @@ export default function ViewTeamDialog({
             <Play className="mr-1 h-3.5 w-3.5" /> {t('team.view.reactivate')}
           </Button>
         );
-      case 'Pending':
-        return <p className="text-muted-foreground text-sm">{t('team.view.status.pendingCompletion')}</p>;
-      case 'RegistrationRequested':
-        return <p className="text-muted-foreground text-sm">{t('team.view.status.pendingApproval')}</p>;
       default:
         return null;
     }

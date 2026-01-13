@@ -79,6 +79,21 @@ export function ResetPassword() {
     );
   }, [id, guid, hash]); // Execute only once when the component is mounted
 
+  const handleBackToLogin = () => {
+    // Call logout API first, then redirect to login
+    authApi.logout({
+      status200: () => {
+        auth.reset();
+        window.location.href = '/login';
+      },
+      error: () => {
+        // Even if logout API fails, still clear session and redirect
+        auth.reset();
+        window.location.href = '/login';
+      },
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -130,12 +145,13 @@ export function ResetPassword() {
               <Link to="/password/forgot" className="px-4 py-2 transition-colors rounded-full">
                 {t('auth.resetPassword.invalidLink.requestNew')}
               </Link>
-              <Link
-                to="/login"
+              <button
+                type="button"
+                onClick={handleBackToLogin}
                 className="px-4 py-2 transition-colors border rounded-full text-foreground hover:bg-muted/50"
               >
                 {t('auth.resetPassword.invalidLink.backToLogin')}
-              </Link>
+              </button>
             </div>
           </div>
         </div>
@@ -216,9 +232,13 @@ export function ResetPassword() {
               </div>
               {/* Return to login */}
               <div className="text-right">
-                <Link to="/login" className="text-sm font-medium transition-colors text-cyan-600 hover:text-cyan-700">
+                <button
+                  type="button"
+                  onClick={handleBackToLogin}
+                  className="text-sm font-medium transition-colors text-cyan-600 hover:text-cyan-700"
+                >
                   {t('auth.resetPassword.backToLogin')}
-                </Link>
+                </button>
               </div>
 
               {/* Submit button */}

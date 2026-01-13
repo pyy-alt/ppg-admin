@@ -249,21 +249,20 @@ export default function AdminViewTeamDialog({
   };
 
   const renderDateLastAccessedContent = (member: TeamMember) => {
+    // 调试：打印状态值
+    
     switch (member.status) {
       case 'Pending':
         return <span className="text-sm text-muted-foreground">{t('team.view.status.pendingCompletion')}</span>;
       case 'RegistrationRequested':
         return (
-          <div className="flex flex-col gap-2">
-            <span className="text-sm text-muted-foreground mb-1">{t('team.view.status.pendingApproval')}</span>
-            <div className="flex flex-col gap-2">
-              <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => handleApprove(member.id)}>
-                <Check className="mr-1 h-3.5 w-3.5" /> {t('team.button.approve')}
-              </Button>
-              <Button size="sm" variant="destructive" onClick={() => handleRejectClick(member.id)}>
-                <XCircle className="mr-1 h-3.5 w-3.5" /> {t('team.button.reject')}
-              </Button>
-            </div>
+          <div className="flex gap-2">
+            <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => handleApprove(member.id)}>
+              <Check className="mr-1 h-3.5 w-3.5" /> {t('team.button.approve')}
+            </Button>
+            <Button size="sm" variant="destructive" onClick={() => handleRejectClick(member.id)}>
+              <XCircle className="mr-1 h-3.5 w-3.5" /> {t('team.button.reject')}
+            </Button>
           </div>
         );
       default:
