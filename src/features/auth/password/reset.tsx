@@ -15,6 +15,7 @@ import { Label } from '@/components/ui/label';
 import { Loading } from '@/components/Loading';
 import { Header } from '@/components/layout/header';
 import { useTranslation } from 'react-i18next';
+import { useBrand } from '@/context/brand-context';
 
 const authApi = new AuthenticationApi();
 
@@ -22,6 +23,7 @@ export function ResetPassword() {
   const logoSrc = useBrandLogo('login', '_a.png');
   const navigate = useNavigate();
   const { auth } = useAuthStore();
+  const { brand, region } = useBrand();
 
   const { id, guid, hash } = useParams({
     from: '/password/reset/$id/$guid/$hash',
@@ -80,16 +82,17 @@ export function ResetPassword() {
   }, [id, guid, hash]); // Execute only once when the component is mounted
 
   const handleBackToLogin = () => {
-    // Call logout API first, then redirect to login
+    // Call logout API first, then redirect to login with brand/region preserved
     authApi.logout({
       status200: () => {
         auth.reset();
-        window.location.href = '/login';
+        // Preserve brand and region when redirecting to login
+        window.location.href = `/login?brand=${brand}&region=${region}`;
       },
       error: () => {
-        // Even if logout API fails, still clear session and redirect
+        // Even if logout API fails, still clear session and redirect with brand/region
         auth.reset();
-        window.location.href = '/login';
+        window.location.href = `/login?brand=${brand}&region=${region}`;
       },
     });
   };
@@ -115,9 +118,15 @@ export function ResetPassword() {
       authApi.updatePassword(request, {
         status200: () => {
           toast.success(t('auth.resetPassword.success'));
-          // After password update is successful，Clear session and redirect to login page
+          // After password update is successful，Clear session and redirect to login page with brand/region preserved
           auth.reset();
-          navigate({ to: '/login' });
+          navigate({ 
+            to: '/login',
+            search: {
+              brand: brand,
+              region: region,
+            }
+          });
           setIsLoading(false);
         },
       });
