@@ -1,6 +1,6 @@
 import PersonStatusEnum from '@/js/models/enum/PersonStatusEnum';
 import PersonTypeEnum, { type PersonType } from '@/js/models/enum/PersonTypeEnum';
-import { X, Store, Users, Pause, Play, Check, XCircle, ChevronUp, ChevronDown } from 'lucide-react';
+import { X, Store, Users, Pause, Play, ChevronUp, ChevronDown } from 'lucide-react';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { Button } from './ui/button';
@@ -8,8 +8,6 @@ import PersonEditStatusRequest from '@/js/models/PersonEditStatusRequest';
 import PersonApi from '@/js/clients/base/PersonApi';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import ConfirmDialog from '@/components/ConfirmDialog';
-import { useState } from 'react';
 
 type PersonStatus = (typeof PersonStatusEnum)[keyof typeof PersonStatusEnum];
 
@@ -61,9 +59,6 @@ export default function ViewTeamDialog({
   currentSortAscending = true
 }: ViewDealerTeamDialogProps) {
   const { t } = useTranslation();
-
-  const [isConfirmRejectOpen, setIsConfirmRejectOpen] = useState(false);
-  const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
   
   // 使用父组件传递的排序状态，如果没有则使用本地状态
   const sortBy = currentSortBy;
@@ -162,80 +157,6 @@ export default function ViewTeamDialog({
     } catch (error) {
       toast.error(t('team.view.reactivateFailed'));
       console.error(error);
-    }
-  };
-
-  const handleApprove = async (member: TeamMember) => {
-    try {
-      await new Promise((resolve, reject) => {
-        const request = PersonEditStatusRequest.create({
-          personId: member.id,
-          action: 'ApproveRegistrationRequest',
-        });
-        const personApi = new PersonApi();
-        personApi.editStatus(request, {
-          status200: () => {
-            toast.success(t('team.view.approveSuccess'));
-            const userType = member.type === PersonTypeEnum.DEALERSHIP ? 'Dealership' : 'Shop';
-            const organizationId = member.type === PersonTypeEnum.DEALERSHIP ? member.dealership?.id : member.shop?.id;
-            onSuccess?.(userType, organizationId);
-            resolve(true);
-          },
-          error: (error) => {
-            reject(error);
-          },
-          else: (_statusCode, message) => {
-            reject(new Error(message));
-          },
-        });
-      });
-    } catch (error) {
-      toast.error(t('team.view.approveFailed'));
-      console.error(error);
-      return false;
-    }
-  };
-
-  const handleReject = async (member: TeamMember) => {
-    try {
-      await new Promise((resolve, reject) => {
-        const request = PersonEditStatusRequest.create({
-          personId: member.id,
-          action: 'DeclineRegistrationRequest',
-        });
-        const personApi = new PersonApi();
-        personApi.editStatus(request, {
-          status200: () => {
-            toast.success(t('team.view.rejectSuccess'));
-            const userType = member.type === PersonTypeEnum.DEALERSHIP ? 'Dealership' : 'Shop';
-            const organizationId = member.type === PersonTypeEnum.DEALERSHIP ? member.dealership?.id : member.shop?.id;
-            onSuccess?.(userType, organizationId);
-            resolve(true);
-          },
-          error: (error) => {
-            reject(error);
-          },
-          else: (_statusCode, message) => {
-            reject(new Error(message));
-          },
-        });
-      });
-    } catch (error) {
-      toast.error(t('team.view.rejectFailed'));
-      console.error(error);
-      return false;
-    }
-  };
-
-  const handleRejectClick = (member: TeamMember) => {
-    setSelectedMember(member);
-    setIsConfirmRejectOpen(true);
-  };
-
-  const handleConfirmReject = async () => {
-    if (selectedMember) {
-      await handleReject(selectedMember);
-      setSelectedMember(null);
     }
   };
 
@@ -417,18 +338,6 @@ export default function ViewTeamDialog({
           <Button onClick={handleClose}>{t('common.close')}</Button>
         </DialogFooter>
       </DialogContent>
-
-      {/* Confirm Reject Dialog */}
-      <ConfirmDialog
-        open={isConfirmRejectOpen}
-        onOpenChange={setIsConfirmRejectOpen}
-        onConfirm={handleConfirmReject}
-        title={t('common.confirmAction')}
-        description={t('common.confirmDescription')}
-        confirmText={t('common.confirm')}
-        cancelText={t('common.cancel')}
-        variant="danger"
-      />
     </Dialog>
   );
 }

@@ -248,7 +248,10 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
         teamMembers={teamMembers}
         open={isShowAdminTeam}
         onOpenChange={setIsShowAdminTeam}
-        onSuccess={getTeamMembers}
+        onSuccess={() => {
+          // 成员状态改变后刷新列表，保持当前排序
+          getTeamMembers(teamSortBy, teamSortAscending);
+        }}
         onError={(error) => {
           console.error('Failed to get team members:', error);
         }}
