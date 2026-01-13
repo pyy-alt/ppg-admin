@@ -20,9 +20,9 @@ import {
 import EditProfileDialog from '@/components/EditProfileDialog';
 import ViewAdminTeamDialog from '../AdminViewTeamDialog';
 import { LanguageDropdown } from '../LanguageDropdown';
-import ViewTeamDialog, { type TeamMember } from '../ViewTeamDialog';
 import ResultParameter from '@/js/models/ResultParameter';
 import { useTranslation } from 'react-i18next'; // 新增导入
+import ViewTeamDialog, { TeamMember } from '../ViewTeamDialog';
 
 type HeaderProps = React.HTMLAttributes<HTMLElement> & {
   fixed?: boolean;
@@ -228,7 +228,7 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
         }}
       />
       <ViewTeamDialog
-        teamMembers={teamMembers}
+        teamMembers={teamMembers as TeamMember[]}
         open={isShowTeam}
         onOpenChange={setIsShowTeam}
         onSuccess={() => {

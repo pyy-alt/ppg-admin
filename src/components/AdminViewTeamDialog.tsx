@@ -336,7 +336,7 @@ export default function AdminViewTeamDialog({
                     {t('team.table.dateLastAccessed')}
                     {renderSortIcon('dateLastAccessed')}
                   </th>
-                  <th className="px-6 py-4 text-sm font-medium text-left">{t('team.table.actions')}</th>
+                  <th className="px-6 py-4 text-sm font-medium text-left"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">

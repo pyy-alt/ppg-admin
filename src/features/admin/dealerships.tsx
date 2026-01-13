@@ -25,7 +25,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import AdminViewTeamDialog from '@/components/AdminViewTeamDialog';
+import ViewTeamDialog from '@/components/ViewTeamDialog';
 import { DataTablePagination } from '@/components/data-table-pagination';
 import { ClearableInput } from '@/components/clearable-input';
 import { SortableTableHead } from '@/components/SortableTableHead';
@@ -468,7 +468,7 @@ export function Dealerships() {
           )}
         </div>
       </div>
-      <AdminViewTeamDialog
+      <ViewTeamDialog
         teamMembers={teamMembers}
         open={isShowAdminTeam}
         onOpenChange={setIsShowAdminTeam}

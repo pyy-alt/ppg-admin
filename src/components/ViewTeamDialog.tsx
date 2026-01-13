@@ -68,7 +68,6 @@ export default function ViewTeamDialog({
     let newSortBy = field as string;
     let newSortAscending = true;
     
-    console.log('handleSort called:', { field, currentSortBy: sortBy, currentAscending: sortAscending });
     
     if (sortBy === field) {
       if (sortAscending) {
@@ -337,3 +336,4 @@ export default function ViewTeamDialog({
     </Dialog>
   );
 }
+

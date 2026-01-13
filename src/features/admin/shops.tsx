@@ -33,7 +33,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { DataTablePagination } from '@/components/data-table-pagination';
-import AdminViewTeamDialog from '@/components/AdminViewTeamDialog';
+import ViewTeamDialog from '@/components/ViewTeamDialog';
 import { ClearableInput } from '@/components/clearable-input';
 import { SortableTableHead } from '@/components/SortableTableHead';
 import { useTranslation } from 'react-i18next';
@@ -621,7 +621,7 @@ export function Shops() {
           </>
         )}
       </div>
-      <AdminViewTeamDialog
+      <ViewTeamDialog
         teamMembers={teamMembers}
         open={isShowAdminTeam}
         onOpenChange={setIsShowAdminTeam}
