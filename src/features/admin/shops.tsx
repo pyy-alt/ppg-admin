@@ -467,7 +467,7 @@ export function Shops() {
                       {t('shop.list.tableHeaders.name')}
                     </SortableTableHead>
                     <SortableTableHead
-                      field="shopNumber"
+                      field="Number"
                       currentSortBy={sortBy}
                       currentAscending={sortAscending}
                       onSort={handleSort}
@@ -475,7 +475,7 @@ export function Shops() {
                       {t('shop.list.tableHeaders.number')}
                     </SortableTableHead>
                     <SortableTableHead
-                      field="countPendingOrders"
+                      field="CountPendingOrders"
                       currentSortBy={sortBy}
                       currentAscending={sortAscending}
                       onSort={handleSort}
