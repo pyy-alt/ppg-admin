@@ -508,7 +508,7 @@ export function Shops() {
                       State
                     </TableHead>
                     <SortableTableHead
-                      field="dealer"
+                      field="DealershipName"
                       currentSortBy={sortBy}
                       currentAscending={sortAscending}
                       onSort={handleSort}
@@ -519,7 +519,7 @@ export function Shops() {
                       Dealer #
                     </TableHead>
                     <SortableTableHead
-                      field="region"
+                      field="Region"
                       currentSortBy={sortBy}
                       currentAscending={sortAscending}
                       onSort={handleSort}
