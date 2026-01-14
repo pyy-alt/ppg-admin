@@ -90,21 +90,7 @@ export function Dealerships() {
 
       personApi.search(request, {
         status200: (data) => {
-          if (useActive === 'Active') {
-            const users = data.persons.filter(
-              (item: any) => item.status === 'Active'
-            );
-            setTeamMembers(users);
-          } else if (useActive === 'Pending') {
-            const users = data.persons.filter(
-              (item: any) =>
-                item.status === 'Pending' ||
-                item.status === 'RegistrationRequested'
-            );
-            setTeamMembers(users);
-          } else {
-            setTeamMembers(data.persons);
-          }
+          setTeamMembers(data.persons);
           setIsShowAdminTeam(true);
         },
         error: (error) => {

@@ -93,7 +93,6 @@ export default function ViewTeamDialog({
       newSortAscending = true;
     }
     
-    console.log('New sort:', { newSortBy, newSortAscending });
     
     // 如果有排序回调，调用它（触发父组件重新获取数据）
     if (onSortChange) {
@@ -384,7 +383,7 @@ export default function ViewTeamDialog({
                             <span className="text-muted-foreground">{t('team.view.status.pendingCompletion')}</span>
                           ) : member.status === 'RegistrationRequested' && isAdmin ? (
                             // 只有需要审核时，Approve/Reject 按钮显示在 Date Last Accessed 列
-                            <div className="flex flex-col gap-2">
+                            <div className="flex flex-row gap-2 ">
                               <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => handleApprove(member)}>
                                 <Check className="mr-1 h-3.5 w-3.5" /> {t('team.button.approve')}
                               </Button>
