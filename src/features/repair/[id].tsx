@@ -636,19 +636,21 @@ export function RepairOrderDetail() {
                 <span className="text-muted-foreground">
                   {t('repairOrder.detail.preRepairPhotos')}
                 </span>
-                <div className="flex flex-wrap gap-2 mt-1">
+                <div className="mt-1">
                   {initRepaitOrderData &&
                   initRepaitOrderData?.preRepairPhotoFileAssets
-                    ? initRepaitOrderData.preRepairPhotoFileAssets.map((f) => (
-                        <a
-                          key={f.id}
-                          href={`${DefaultClientOptions.getEndpointUrl()}${f.downloadUrl}`}
-                          className="font-medium text-blue-700 underline hover:underline"
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          {f.filename}
-                        </a>
+                    ? initRepaitOrderData.preRepairPhotoFileAssets.map((f, index, array) => (
+                        <span key={f.id}>
+                          <a
+                            href={`${DefaultClientOptions.getEndpointUrl()}${f.downloadUrl}`}
+                            className="font-medium text-blue-700 underline hover:underline"
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            {f.filename}
+                          </a>
+                          {index < array.length - 1 && ', '}
+                        </span>
                       ))
                     : <p className="font-medium">--</p>}
                 </div>
@@ -657,21 +659,23 @@ export function RepairOrderDetail() {
                 <span className="text-muted-foreground">
                   {t('repairOrder.detail.structuralMeasurements')}
                 </span>
-                <div className="flex flex-wrap gap-2 mt-1">
+                <div className="mt-1">
                   {initRepaitOrderData?.structuralMeasurementFileAssets &&
                   initRepaitOrderData?.structuralMeasurementFileAssets.length >
                     0
                     ? initRepaitOrderData.structuralMeasurementFileAssets.map(
-                        (f) => (
-                          <a
-                            key={f.id}
-                            href={`${DefaultClientOptions.getEndpointUrl()}${f.downloadUrl}`}
-                            className="font-medium text-blue-700 underline hover:underline"
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            {f.filename}
-                          </a>
+                        (f, index, array) => (
+                          <span key={f.id}>
+                            <a
+                              href={`${DefaultClientOptions.getEndpointUrl()}${f.downloadUrl}`}
+                              className="font-medium text-blue-700 underline hover:underline"
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              {f.filename}
+                            </a>
+                            {index < array.length - 1 && ', '}
+                          </span>
                         )
                       )
                     : <p className="font-medium">--</p>}
@@ -681,19 +685,21 @@ export function RepairOrderDetail() {
                 <span className="text-muted-foreground">
                   {t('repairOrder.detail.postRepairPhotos')}
                 </span>
-                <div className="flex flex-wrap gap-2 mt-1">
+                <div className="mt-1">
                   {initRepaitOrderData?.postRepairPhotoFileAssets &&
                   initRepaitOrderData?.postRepairPhotoFileAssets.length > 0
-                    ? initRepaitOrderData.postRepairPhotoFileAssets.map((f) => (
-                        <a
-                          key={f.id}
-                          href={`${DefaultClientOptions.getEndpointUrl()}${f.downloadUrl}`}
-                          className="font-medium text-blue-700 underline hover:underline"
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          {f.filename}
-                        </a>
+                    ? initRepaitOrderData.postRepairPhotoFileAssets.map((f, index, array) => (
+                        <span key={f.id}>
+                          <a
+                            href={`${DefaultClientOptions.getEndpointUrl()}${f.downloadUrl}`}
+                            className="font-medium text-blue-700 underline hover:underline"
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            {f.filename}
+                          </a>
+                          {index < array.length - 1 && ', '}
+                        </span>
                       ))
                     : <p className="font-medium">--</p>}
                 </div>
@@ -841,17 +847,18 @@ export function RepairOrderDetail() {
                         (selectedPartsOrderData as any).estimateFileAssets
                           .length > 0 &&
                         (selectedPartsOrderData as any).estimateFileAssets.map(
-                          (file: any) => (
-                            <a
-                              key={file.id}
-                              href={`${DefaultClientOptions.getEndpointUrl() + file.viewUrl}`}
-                              className="block my-2 text-blue-700 underline hover:underline"
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              {file.filename}
-                              <br />
-                            </a>
+                          (file: any, index: number, array: any[]) => (
+                            <span key={file.id}>
+                              <a
+                                href={`${DefaultClientOptions.getEndpointUrl() + file.viewUrl}`}
+                                className="text-blue-700 underline hover:underline"
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                {file.filename}
+                              </a>
+                              {index < array.length - 1 && ', '}
+                            </span>
                           )
                         )) ||
                         t('repairOrder.detail.noEstimateFile')}

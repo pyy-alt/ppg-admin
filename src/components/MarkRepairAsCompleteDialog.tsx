@@ -184,35 +184,30 @@ export function MarkRepairAsCompleteDialog({
             <div>
               {/* Uploaded file list */}
               {photos.length > 0 && (
-                <div className="mt-2 space-y-1">
-                  {photos.map((file, index) => (
-                    <div key={index} className="flex items-center justify-between rounded-md p-1.5">
-                      <div className="flex items-center gap-3">
-                        <div className="text-left">
-                          <a
-                            href={previewUrls[index]}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="block max-w-xs text-sm font-medium text-blue-700 truncate underline hover:underline"
-                          >
-                            {file.name}
-                          </a>
-                          {/* <p className="text-xs text-muted-foreground">
-                              {(file.size / 1024).toFixed(0)} KB
-                            </p> */}
-                        </div>
-                      </div>
+                <div className="mt-2">
+                  {photos.map((file, index, array) => (
+                    <span key={index} className="inline-flex items-center gap-1">
+                      <a
+                        href={previewUrls[index]}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-sm font-medium text-blue-700 underline hover:underline"
+                      >
+                        {file.name}
+                      </a>
                       <button
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
                           removePhoto(index);
                         }}
-                        className="p-1 rounded text-destructive hover:bg-destructive/10"
+                        className="inline-flex items-center p-0.5 rounded text-destructive hover:bg-destructive/10"
+                        title="删除"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3 h-3" />
                       </button>
-                    </div>
+                      {index < array.length - 1 && ', '}
+                    </span>
                   ))}
                 </div>
               )}

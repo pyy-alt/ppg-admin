@@ -653,19 +653,20 @@ export function PartsOrderDialog({
                           {t('partsOrder.attachments.estimate')}
                         </Label>
                         {estimateFiles && estimateFiles.length > 0 ? (
-                          <div className="space-y-2">
-                            {estimateFiles.map((file: any, index) => {
+                          <div>
+                            {estimateFiles.map((file: any, index, array) => {
                               const key = file.viewUrl ? file.viewUrl : `${file.name}-${index}`;
                               return (
-                                <div key={key} className="flex items-center gap-2 p-2 rounded-md bg-muted">
+                                <span key={key}>
                                   <button
                                     type="button"
                                     onClick={() => handlePreview(file)}
-                                    className="text-sm font-medium text-blue-500 hover:underline truncate cursor-pointer"
+                                    className="text-sm font-medium text-blue-500 hover:underline cursor-pointer"
                                   >
                                     {file.name || file.filename}
                                   </button>
-                                </div>
+                                  {index < array.length - 1 && ', '}
+                                </span>
                               );
                             })}
                           </div>
@@ -706,25 +707,21 @@ export function PartsOrderDialog({
                         </div>
                       <div>
                         {estimateFiles && estimateFiles.length > 0 && (
-                          <div className="w-full space-y-2">
-                            {estimateFiles.map((file: any, index) => {
+                          <div className="w-full">
+                            {estimateFiles.map((file: any, index, array) => {
                               const key = file.viewUrl ? file.viewUrl : `${file.name}-${index}`;
                               return (
-                                <div key={key} className="flex items-center justify-between rounded-md p-1.5">
-                                  <div className="flex-1 truncate" title={file.name}>
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        handlePreview(file);
-                                      }}
-                                      className="text-sm font-medium text-blue-500 underline truncate cursor-pointer"
-                                    >
-                                      {file.name || file.filename}
-                                    </button>
-                                    {/* <p className='text-xs text-muted-foreground'>
-                                  {(file.size / 1024).toFixed(2)} KB
-                                </p> */}
-                                  </div>
+                                <span key={key} className="inline-flex items-center gap-1">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      handlePreview(file);
+                                    }}
+                                    className="text-sm font-medium text-blue-500 underline cursor-pointer"
+                                    title={file.name || file.filename}
+                                  >
+                                    {file.name || file.filename}
+                                  </button>
                                   {!isCsr && (
                                     <button
                                       type="button"
@@ -732,12 +729,14 @@ export function PartsOrderDialog({
                                         e.stopPropagation();
                                         removeFile(index);
                                       }}
-                                      className="ml-2 text-xs text-destructive hover:underline"
+                                      className="inline-flex items-center p-0.5 rounded text-destructive hover:bg-destructive/10"
+                                      title="删除"
                                     >
-                                      <X className="w-4 h-4" />
+                                      <X className="w-3 h-3" />
                                     </button>
                                   )}
-                                </div>
+                                  {index < array.length - 1 && ', '}
+                                </span>
                               );
                             })}
                           </div>

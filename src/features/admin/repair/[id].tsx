@@ -452,56 +452,61 @@ export function RepairOrderDetail() {
             <div className="space-y-3 text-sm">
               <div>
                 <span className="text-muted-foreground">{t('repairOrder.detail.preRepairPhotos')}</span>
-                <div className="flex flex-wrap gap-2 mt-1">
+                <div className="mt-1">
                   {initRepaitOrderData &&
                   initRepaitOrderData?.preRepairPhotoFileAssets &&
                   initRepaitOrderData?.preRepairPhotoFileAssets.length > 0
-                    ? initRepaitOrderData?.preRepairPhotoFileAssets?.map((f) => (
-                        <a
-                          key={f.id}
-                          href={`${DefaultClientOptions.getEndpointUrl()}${f.downloadUrl}`}
-                          className="text-blue-700 underline hover:underline"
-                          target="_blank"
-                        >
-                          {f.filename}
-                        </a>
+                    ? initRepaitOrderData?.preRepairPhotoFileAssets?.map((f, index, array) => (
+                        <span key={f.id}>
+                          <a
+                            href={`${DefaultClientOptions.getEndpointUrl()}${f.downloadUrl}`}
+                            className="text-blue-700 underline hover:underline"
+                            target="_blank"
+                          >
+                            {f.filename}
+                          </a>
+                          {index < array.length - 1 && ', '}
+                        </span>
                       ))
                     : '--'}
                 </div>
               </div>
               <div>
                 <span className="text-muted-foreground">{t('repairOrder.detail.structuralMeasurements')}</span>
-                <br />
-                <div className="text-primary hover:underline">
+                <div className="mt-1">
                   {initRepaitOrderData?.structuralMeasurementFileAssets &&
                   initRepaitOrderData?.structuralMeasurementFileAssets.length > 0
-                    ? initRepaitOrderData?.structuralMeasurementFileAssets?.map((f) => (
-                        <a
-                          key={f.id}
-                          href={`${DefaultClientOptions.getEndpointUrl()}${f.downloadUrl}`}
-                          className="text-blue-700 underline hover:underline"
-                          target="_blank"
-                        >
-                          {f.filename}
-                        </a>
+                    ? initRepaitOrderData?.structuralMeasurementFileAssets?.map((f, index, array) => (
+                        <span key={f.id}>
+                          <a
+                            href={`${DefaultClientOptions.getEndpointUrl()}${f.downloadUrl}`}
+                            className="text-blue-700 underline hover:underline"
+                            target="_blank"
+                          >
+                            {f.filename}
+                          </a>
+                          {index < array.length - 1 && ', '}
+                        </span>
                       ))
                     : '--'}
                 </div>
               </div>
               <div>
                 <span className="text-muted-foreground">{t('repairOrder.detail.postRepairPhotos')}</span>
-                <div className="flex flex-wrap gap-2 mt-1">
+                <div className="mt-1">
                   {initRepaitOrderData?.postRepairPhotoFileAssets &&
                   initRepaitOrderData?.postRepairPhotoFileAssets.length > 0
-                    ? initRepaitOrderData?.postRepairPhotoFileAssets?.map((f) => (
-                        <a
-                          key={f.id}
-                          href={`${DefaultClientOptions.getEndpointUrl()}${f.downloadUrl}`}
-                          className="text-blue-700 underline hover:underline"
-                          target="_blank"
-                        >
-                          {f.filename}
-                        </a>
+                    ? initRepaitOrderData?.postRepairPhotoFileAssets?.map((f, index, array) => (
+                        <span key={f.id}>
+                          <a
+                            href={`${DefaultClientOptions.getEndpointUrl()}${f.downloadUrl}`}
+                            className="text-blue-700 underline hover:underline"
+                            target="_blank"
+                          >
+                            {f.filename}
+                          </a>
+                          {index < array.length - 1 && ', '}
+                        </span>
                       ))
                     : '--'}
                 </div>
@@ -625,14 +630,16 @@ export function RepairOrderDetail() {
                       {(selectedPartsOrderData &&
                         (selectedPartsOrderData as any).estimateFileAssets &&
                         (selectedPartsOrderData as any).estimateFileAssets.length > 0 &&
-                        (selectedPartsOrderData as any).estimateFileAssets.map((file: any) => (
-                          <a
-                            key={file.id}
-                            href={`${DefaultClientOptions.getEndpointUrl() + file.viewUrl}`}
-                            className="text-blue-700 underline hover:underline"
-                          >
-                            {file.filename}
-                          </a>
+                        (selectedPartsOrderData as any).estimateFileAssets.map((file: any, index: number, array: any[]) => (
+                          <span key={file.id}>
+                            <a
+                              href={`${DefaultClientOptions.getEndpointUrl() + file.viewUrl}`}
+                              className="text-blue-700 underline hover:underline"
+                            >
+                              {file.filename}
+                            </a>
+                            {index < array.length - 1 && ', '}
+                          </span>
                         ))) ||
                         t('repairOrder.detail.noEstimateFile')}
                     </div>
