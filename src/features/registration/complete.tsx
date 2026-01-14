@@ -21,7 +21,6 @@ import { Label } from '@/components/ui/label';
 import { Loading } from '@/components/Loading';
 import { Header } from '@/components/layout/header';
 import { useTranslation } from 'react-i18next';
-import CsrImg from '@/assets/img/registration/Csr.png';
 export function RegistrationComplete() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -94,13 +93,7 @@ export function RegistrationComplete() {
       case 'Csr':
       case 'ProgramAdministrator':
       case 'FieldStaff':
-        return (
-          <img
-            src={CsrImg}
-            alt="Smartphone"
-            className="h-10 w-10 object-cover"
-          />
-        );
+        return  <User className="text-foreground h-6 w-6" />
       default:
         return <Store className="text-foreground h-6 w-6" />;
     }
