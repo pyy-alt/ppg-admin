@@ -540,7 +540,8 @@ export function PartOrders() {
                     const dealer = repairOrder?.dealership
                       ? `${repairOrder.dealership.name || ''} (${repairOrder.dealership.id || ''})`
                       : '--';
-                    const region = repairOrder?.dealership.region.name || '--';
+                    const region =repairOrder?.shop.region.name || '--';
+
                     const dateCompleted = formatDate(order.dateSubmitted);
                     const dateClosed = formatDate(repairOrder?.dateClosed);
                     // Determine if there is a note (ordered from alternate dealer)
