@@ -457,18 +457,22 @@ export default function RepairOrderDialog({
   }) => {
     const getAcceptConfig = (): { [key: string]: string[] } | undefined => {
       if (!accept) return undefined;
+      
+      const config: { [key: string]: string[] } = {};
+      
+      // 检查是否包含图片类型
       if (accept.includes('image')) {
-        return { 'image/*': [] };
+        config['image/*'] = [];
       }
-      if (accept.includes('.pdf')) {
-        return {
-          'application/pdf': ['.pdf'],
-          'application/msword': ['.doc'],
-          'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-            ['.docx'],
-        };
+      
+      // 检查是否包含 PDF 或 Word 文档类型
+      if (accept.includes('.pdf') || accept.includes('.doc')) {
+        config['application/pdf'] = ['.pdf'];
+        config['application/msword'] = ['.doc'];
+        config['application/vnd.openxmlformats-officedocument.wordprocessingml.document'] = ['.docx'];
       }
-      return undefined;
+      
+      return Object.keys(config).length > 0 ? config : undefined;
     };
 
     const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
