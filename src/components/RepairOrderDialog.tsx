@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import RequestApi from '@/js/clients/base/OrderApi';
 import OrganizationApi from '@/js/clients/base/OrganizationApi';
+import DefaultClientOptions from '@/js/clients/DefaultClientOptions';
 import OrganizationSearchRequest from '@/js/models/OrganizationSearchRequest';
 import type OrganizationSearchResponse from '@/js/models/OrganizationSearchResponse';
 import ResultParameter from '@/js/models/ResultParameter';
@@ -236,7 +237,7 @@ export default function RepairOrderDialog({
       const imgList = (initialData.preRepairPhotoFileAssets || []).map(
         (item: any) => {
           item.name = item.filename;
-          item.viewUrl = import.meta.env.VITE_ENDPOINT_URL + item.viewUrl;
+          item.viewUrl = DefaultClientOptions.getEndpointUrl() + item.viewUrl;
           return item;
         }
       );
@@ -244,7 +245,7 @@ export default function RepairOrderDialog({
       const pdfList = (initialData.structuralMeasurementFileAssets || []).map(
         (item: any) => {
           item.name = item.filename;
-          item.viewUrl = import.meta.env.VITE_ENDPOINT_URL + item.viewUrl;
+          item.viewUrl = DefaultClientOptions.getEndpointUrl() + item.viewUrl;
           return item;
         }
       );

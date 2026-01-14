@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from '@tanstack/react-router';
 import RequestApi from '@/js/clients/base/OrderApi';
+import DefaultClientOptions from '@/js/clients/DefaultClientOptions';
 import type PartsOrder from '@/js/models/PartsOrder';
 import PartsOrderWorkflowActionRequest from '@/js/models/PartsOrderWorkflowActionRequest';
 import type RepairOrder from '@/js/models/RepairOrder';
@@ -641,7 +642,7 @@ export function RepairOrderDetail() {
                     ? initRepaitOrderData.preRepairPhotoFileAssets.map((f) => (
                         <a
                           key={f.id}
-                          href={`${import.meta.env.VITE_ENDPOINT_URL}${f.downloadUrl}`}
+                          href={`${DefaultClientOptions.getEndpointUrl()}${f.downloadUrl}`}
                           className="font-medium text-blue-700 underline hover:underline"
                           target="_blank"
                           rel="noreferrer"
@@ -664,7 +665,7 @@ export function RepairOrderDetail() {
                         (f) => (
                           <a
                             key={f.id}
-                            href={`${import.meta.env.VITE_ENDPOINT_URL}${f.downloadUrl}`}
+                            href={`${DefaultClientOptions.getEndpointUrl()}${f.downloadUrl}`}
                             className="font-medium text-blue-700 underline hover:underline"
                             target="_blank"
                             rel="noreferrer"
@@ -686,7 +687,7 @@ export function RepairOrderDetail() {
                     ? initRepaitOrderData.postRepairPhotoFileAssets.map((f) => (
                         <a
                           key={f.id}
-                          href={`${import.meta.env.VITE_ENDPOINT_URL}${f.downloadUrl}`}
+                          href={`${DefaultClientOptions.getEndpointUrl()}${f.downloadUrl}`}
                           className="font-medium text-blue-700 underline hover:underline"
                           target="_blank"
                           rel="noreferrer"
@@ -843,7 +844,7 @@ export function RepairOrderDetail() {
                           (file: any) => (
                             <a
                               key={file.id}
-                              href={`${import.meta.env.VITE_ENDPOINT_URL + file.viewUrl}`}
+                              href={`${DefaultClientOptions.getEndpointUrl() + file.viewUrl}`}
                               className="block my-2 text-blue-700 underline hover:underline"
                               target="_blank"
                               rel="noreferrer"

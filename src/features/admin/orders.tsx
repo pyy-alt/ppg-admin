@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from '@tanstack/react-router';
 import OrderApi from '@/js/clients/base/OrderApi';
+import DefaultClientOptions from '@/js/clients/DefaultClientOptions';
 import PartsOrderSearchRequest from '@/js/models/PartsOrderSearchRequest';
 import ResultParameter from '@/js/models/ResultParameter';
 import { Search, Download, AlertCircle, TableIcon } from 'lucide-react';
@@ -91,7 +92,7 @@ export function PartOrders() {
       }
       
       // 构建完整的 URL
-      const baseUrl = import.meta.env.VITE_ENDPOINT_URL;
+      const baseUrl = DefaultClientOptions.getEndpointUrl();
       const reportUrl = `${baseUrl}/file_asset/report/parts_orders/${dateFrom}/${dateTo}/${filename}`;
       const finalUrl = queryParams.toString() ? `${reportUrl}?${queryParams.toString()}` : reportUrl;
       

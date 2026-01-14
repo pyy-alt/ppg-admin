@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import RequestApi from '@/js/clients/base/OrderApi';
+import DefaultClientOptions from '@/js/clients/DefaultClientOptions';
 import PartsOrder from '@/js/models/PartsOrder';
 import type RepairOrder from '@/js/models/RepairOrder';
 import FileAssetFileAssetTypeEnum from '@/js/models/enum/FileAssetFileAssetTypeEnum';
@@ -202,7 +203,7 @@ export function PartsOrderDialog({
         item.name = item.filename;
         // 如果 viewUrl 不是完整 URL，添加 API 域名
         if (item.viewUrl && !item.viewUrl.startsWith('http')) {
-          const apiUrl = import.meta.env.VITE_ENDPOINT_URL || '';
+          const apiUrl = DefaultClientOptions.getEndpointUrl();
           item.viewUrl = apiUrl + item.viewUrl;
         }
         return item;
@@ -326,7 +327,7 @@ export function PartsOrderDialog({
           previewUrl = file.viewUrl;
         } else {
           // 否则添加 API 域名
-          const apiUrl = import.meta.env.VITE_ENDPOINT_URL || '';
+          const apiUrl = DefaultClientOptions.getEndpointUrl();
           previewUrl = apiUrl + file.viewUrl;
         }
       } else {
