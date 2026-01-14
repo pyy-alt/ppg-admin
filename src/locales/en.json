@@ -74,8 +74,8 @@
         "required": "Required"
       },
       "password": {
-        "allRequired": "All password fields are required",
-        "minLength": "New password must be at least 8 characters",
+        "allRequired": "Required",
+        "minLength": "password must be at least 8 characters long",
         "mismatch": "Passwords do not match"
       }
     },
