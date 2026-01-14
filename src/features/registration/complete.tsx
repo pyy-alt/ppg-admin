@@ -21,7 +21,7 @@ import { Label } from '@/components/ui/label';
 import { Loading } from '@/components/Loading';
 import { Header } from '@/components/layout/header';
 import { useTranslation } from 'react-i18next';
-import CsrImg from '@/assets/img/registration/csr.png';
+import CsrImg from '@/assets/img/registration/Csr.png';
 export function RegistrationComplete() {
   const { t } = useTranslation();
   const navigate = useNavigate();
