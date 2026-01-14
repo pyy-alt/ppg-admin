@@ -15,7 +15,7 @@ export default class DefaultClientOptions {
    * @return {string}
    */
   static getEndpointUrl() {
-    return import.meta.env.VITE_API_URL || 'VITE_API_URL NOT FOUND'
+    return import.meta.env.VITE_ENDPOINT_URL || 'VITE_ENDPOINT_URL NOT FOUND'
   }
 
   /**

@@ -641,7 +641,7 @@ export function RepairOrderDetail() {
                     ? initRepaitOrderData.preRepairPhotoFileAssets.map((f) => (
                         <a
                           key={f.id}
-                          href={`${import.meta.env.VITE_API_URL}${f.downloadUrl}`}
+                          href={`${import.meta.env.VITE_ENDPOINT_URL}${f.downloadUrl}`}
                           className="font-medium text-blue-700 underline hover:underline"
                           target="_blank"
                           rel="noreferrer"
@@ -664,7 +664,7 @@ export function RepairOrderDetail() {
                         (f) => (
                           <a
                             key={f.id}
-                            href={`${import.meta.env.VITE_API_URL}${f.downloadUrl}`}
+                            href={`${import.meta.env.VITE_ENDPOINT_URL}${f.downloadUrl}`}
                             className="font-medium text-blue-700 underline hover:underline"
                             target="_blank"
                             rel="noreferrer"
@@ -686,7 +686,7 @@ export function RepairOrderDetail() {
                     ? initRepaitOrderData.postRepairPhotoFileAssets.map((f) => (
                         <a
                           key={f.id}
-                          href={`${import.meta.env.VITE_API_URL}${f.downloadUrl}`}
+                          href={`${import.meta.env.VITE_ENDPOINT_URL}${f.downloadUrl}`}
                           className="font-medium text-blue-700 underline hover:underline"
                           target="_blank"
                           rel="noreferrer"
@@ -843,7 +843,7 @@ export function RepairOrderDetail() {
                           (file: any) => (
                             <a
                               key={file.id}
-                              href={`${import.meta.env.VITE_API_URL + file.viewUrl}`}
+                              href={`${import.meta.env.VITE_ENDPOINT_URL + file.viewUrl}`}
                               className="block my-2 text-blue-700 underline hover:underline"
                               target="_blank"
                               rel="noreferrer"

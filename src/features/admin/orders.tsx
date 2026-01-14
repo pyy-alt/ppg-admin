@@ -91,7 +91,7 @@ export function PartOrders() {
       }
       
       // 构建完整的 URL
-      const baseUrl = import.meta.env.VITE_API_URL;
+      const baseUrl = import.meta.env.VITE_ENDPOINT_URL;
       const reportUrl = `${baseUrl}/file_asset/report/parts_orders/${dateFrom}/${dateTo}/${filename}`;
       const finalUrl = queryParams.toString() ? `${reportUrl}?${queryParams.toString()}` : reportUrl;
       

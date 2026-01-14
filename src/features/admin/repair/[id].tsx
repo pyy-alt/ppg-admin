@@ -458,7 +458,7 @@ export function RepairOrderDetail() {
                     ? initRepaitOrderData?.preRepairPhotoFileAssets?.map((f) => (
                         <a
                           key={f.id}
-                          href={`${import.meta.env.VITE_API_URL}${f.downloadUrl}`}
+                          href={`${import.meta.env.VITE_ENDPOINT_URL}${f.downloadUrl}`}
                           className="text-blue-700 underline hover:underline"
                           target="_blank"
                         >
@@ -477,7 +477,7 @@ export function RepairOrderDetail() {
                     ? initRepaitOrderData?.structuralMeasurementFileAssets?.map((f) => (
                         <a
                           key={f.id}
-                          href={`${import.meta.env.VITE_API_URL}${f.downloadUrl}`}
+                          href={`${import.meta.env.VITE_ENDPOINT_URL}${f.downloadUrl}`}
                           className="text-blue-700 underline hover:underline"
                           target="_blank"
                         >
@@ -495,7 +495,7 @@ export function RepairOrderDetail() {
                     ? initRepaitOrderData?.postRepairPhotoFileAssets?.map((f) => (
                         <a
                           key={f.id}
-                          href={`${import.meta.env.VITE_API_URL}${f.downloadUrl}`}
+                          href={`${import.meta.env.VITE_ENDPOINT_URL}${f.downloadUrl}`}
                           className="text-blue-700 underline hover:underline"
                           target="_blank"
                         >
@@ -627,7 +627,7 @@ export function RepairOrderDetail() {
                         (selectedPartsOrderData as any).estimateFileAssets.map((file: any) => (
                           <a
                             key={file.id}
-                            href={`${import.meta.env.VITE_API_URL + file.viewUrl}`}
+                            href={`${import.meta.env.VITE_ENDPOINT_URL + file.viewUrl}`}
                             className="text-blue-700 underline hover:underline"
                           >
                             {file.filename}

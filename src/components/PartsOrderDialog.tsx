@@ -202,7 +202,7 @@ export function PartsOrderDialog({
         item.name = item.filename;
         // 如果 viewUrl 不是完整 URL，添加 API 域名
         if (item.viewUrl && !item.viewUrl.startsWith('http')) {
-          const apiUrl = import.meta.env.VITE_API_URL || '';
+          const apiUrl = import.meta.env.VITE_ENDPOINT_URL || '';
           item.viewUrl = apiUrl + item.viewUrl;
         }
         return item;
@@ -326,7 +326,7 @@ export function PartsOrderDialog({
           previewUrl = file.viewUrl;
         } else {
           // 否则添加 API 域名
-          const apiUrl = import.meta.env.VITE_API_URL || '';
+          const apiUrl = import.meta.env.VITE_ENDPOINT_URL || '';
           previewUrl = apiUrl + file.viewUrl;
         }
       } else {
