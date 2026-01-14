@@ -360,6 +360,9 @@ export default function ViewTeamDialog({
                       {t('team.view.table.dateLastAccessed')}
                       {renderSortIcon('dateLastAccess')}
                     </th>
+                    <th className="px-4 py-3 text-sm font-medium text-left">
+                      {/* Actions 列，不显示标题 */}
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -380,7 +383,8 @@ export default function ViewTeamDialog({
                           {member.status === 'Pending' ? (
                             <span className="text-muted-foreground">{t('team.view.status.pendingCompletion')}</span>
                           ) : member.status === 'RegistrationRequested' && isAdmin ? (
-                            <div className="flex gap-2">
+                            // 只有需要审核时，Approve/Reject 按钮显示在 Date Last Accessed 列
+                            <div className="flex flex-col gap-2">
                               <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => handleApprove(member)}>
                                 <Check className="mr-1 h-3.5 w-3.5" /> {t('team.button.approve')}
                               </Button>
@@ -390,7 +394,16 @@ export default function ViewTeamDialog({
                             </div>
                           ) : member.status === 'RegistrationRequested' ? (
                             <span className="text-muted-foreground">{t('team.view.status.pendingApproval')}</span>
-                          ) : member.status === 'Active' ? (
+                          ) : member.status === 'Active' || member.status === 'Inactive' ? (
+                            // Active 或 Inactive 状态时，显示 Date Last Accessed 日期
+                            (member.dateLastAccess && new Date(member.dateLastAccess).toLocaleDateString()) || '--'
+                          ) : (
+                            (member.dateLastAccess && new Date(member.dateLastAccess).toLocaleDateString()) || '--'
+                          )}
+                        </td>
+                        <td className="px-4 py-4 text-sm">
+                          {/* Actions 列：只有 Active 或 Inactive 状态时显示按钮 */}
+                          {member.status === 'Active' ? (
                             <Button size="sm" variant="outline" onClick={() => handleDeactivate(member)}>
                               <Pause className="mr-1 h-3.5 w-3.5" /> {t('team.view.deactivate')}
                             </Button>
@@ -398,9 +411,7 @@ export default function ViewTeamDialog({
                             <Button size="sm" variant="outline" onClick={() => handleReactivate(member)}>
                               <Play className="mr-1 h-3.5 w-3.5" /> {t('team.view.reactivate')}
                             </Button>
-                          ) : (
-                            (member.dateLastAccess && new Date(member.dateLastAccess).toLocaleDateString()) || '--'
-                          )}
+                          ) : null}
                         </td>
                       </tr>
                     ))}

@@ -234,8 +234,9 @@ export default function AdminViewTeamDialog({
       case 'Pending':
         return <span className="text-sm text-muted-foreground">{t('team.view.status.pendingCompletion')}</span>;
       case 'RegistrationRequested':
+        // 只有需要审核时，Approve/Reject 按钮显示在 Date Last Accessed 列
         return (
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2">
             <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => handleApprove(member.id)}>
               <Check className="mr-1 h-3.5 w-3.5" /> {t('team.button.approve')}
             </Button>
@@ -244,6 +245,18 @@ export default function AdminViewTeamDialog({
             </Button>
           </div>
         );
+      case 'Active':
+      case 'Inactive':
+        // Active 或 Inactive 状态时，显示 Date Last Accessed 日期
+        return (member.dateLastAccess && new Date(member.dateLastAccess).toLocaleDateString()) || '--';
+      default:
+        return (member.dateLastAccess && new Date(member.dateLastAccess).toLocaleDateString()) || '--';
+    }
+  };
+
+  const renderActionsContent = (member: TeamMember) => {
+    // 只有 Active 或 Inactive 状态时，才显示 Deactivate/Reactivate 按钮
+    switch (member.status) {
       case 'Active':
         return (
           <Button size="sm" variant="outline" onClick={() => handleDeactivate(member.id)}>
@@ -257,7 +270,7 @@ export default function AdminViewTeamDialog({
           </Button>
         );
       default:
-        return (member.dateLastAccess && new Date(member.dateLastAccess).toLocaleDateString()) || '--';
+        return null;
     }
   };
 
@@ -327,6 +340,9 @@ export default function AdminViewTeamDialog({
                     {t('team.table.dateLastAccessed')}
                     {renderSortIcon('dateLastAccessed')}
                   </th>
+                  <th className="px-6 py-4 text-sm font-medium text-left">
+                    {/* Actions 列，不显示标题 */}
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -351,12 +367,15 @@ export default function AdminViewTeamDialog({
                       <td className={`px-6 py-4 text-sm ${textColorClass}`}>
                         {renderDateLastAccessedContent(member)}
                       </td>
+                      <td className={`px-6 py-4 text-sm ${textColorClass}`}>
+                        {renderActionsContent(member)}
+                      </td>
                     </tr>
                   );
                 })}
                 {sortedMembers.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="px-6 py-6 text-sm text-center text-muted-foreground">
+                    <td colSpan={6} className="px-6 py-6 text-sm text-center text-muted-foreground">
                       {t('team.table.noMembers')}
                     </td>
                   </tr>

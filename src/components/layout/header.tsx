@@ -57,7 +57,8 @@ export function Header({ className, fixed, isShowUser = true, ...props }: Header
             : auth.user?.person?.type === 'Dealership'
               ? auth.user?.person?.dealership?.id
               : undefined,
-        includeInactiveFlag: true,
+        // 只有管理员才传递 includeInactiveFlag 字段
+        ...(isAdmin && { includeInactiveFlag: true }),
       });
       const resultParameter = ResultParameter.create({
         resultsOrderBy: sortBy,
